@@ -1,0 +1,2351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 3 · Kinematic Analysis II: Rolling Contacts &amp; Geartrains — Kinematics &amp; Dynamics of Machines</title>
+<meta name="description" content="An interactive lecture on kinematic analysis of mechanisms with rolling contacts: external and internal rolling-body equations, rolling on a flat surface, assembly configuration, and simple and planetary geartrains with their gear, torque, and speed ratios.">
+<style>
+  /* ============================================================
+     THEME TOKENS  — engineering-blueprint / technical drafting
+     (locked ENGI 216 design standard — identical to Chapter 1)
+     ============================================================ */
+  :root{
+    --ink:        #10243a;   /* deep drafting ink */
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;   /* drafting paper */
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;   /* textbook cyan */
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;   /* rust / annotation orange */
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --analogy-bg: #e2f1f5;   /* pale cyan wash */
+    --rw-bg:      #f6e7dc;   /* pale rust wash */
+    --rw-h:       #9c4416;   /* rust heading, AA on --rw-bg */
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --analogy-bg: #0f2a33;   /* deep cyan wash */
+      --rw-bg:      #33210f;   /* deep rust wash */
+      --rw-h:       #e8853f;   /* rust heading on dark */
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- layout ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+    border-bottom:3px solid var(--accent);
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:2; }
+  header.site::after{
+    content:""; position:absolute; inset:0; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-dk); background:#f3f1e7;
+    padding:5px 12px; border-radius:30px; font-weight:700; margin-bottom:14px;
+  }
+  @media (prefers-color-scheme: dark){ .chip{ background:#cfe7ef; color:#06384a; } }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; margin:.1em 0 .15em;
+    font-size:clamp(1.7rem, 4.6vw, 3rem); line-height:1.08; color:#fff;
+  }
+  header.site .sub{ font-size:clamp(1rem,2.2vw,1.2rem); color:#d6e6ee; max-width:56ch; }
+  .meta-row{ margin-top:18px; display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:.78rem; color:#bcd2dd; }
+  .meta-row span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- sticky nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50;
+    background:var(--panel); border-bottom:1px solid var(--panel-line);
+    box-shadow:0 2px 8px rgba(16,36,58,.06);
+  }
+  nav.toc .wrap{ max-width:var(--maxw); margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:8px 12px; }
+  nav.toc a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink-soft);
+    font-family:var(--mono); font-size:.76rem; font-weight:600; letter-spacing:.02em;
+    padding:8px 12px; border-radius:7px; white-space:nowrap; min-height:36px; display:inline-flex; align-items:center;
+  }
+  nav.toc a:hover{ background:var(--paper-2); color:var(--ink); }
+  nav.toc a:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  nav.toc a.active{ background:var(--accent); color:#fff; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:10px 18px 60px; }
+
+  section{ padding:40px 0 12px; scroll-margin-top:64px; border-top:1px dashed var(--panel-line); }
+  section:first-of-type{ border-top:none; }
+
+  .sec-tag{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h2{ font-family:var(--serif); font-size:clamp(1.45rem,3.4vw,2.1rem); line-height:1.12; margin:.18em 0 .5em; color:var(--ink); }
+  h3{ font-family:var(--sans); font-weight:700; font-size:1.18rem; margin:1.5em 0 .4em; color:var(--ink); letter-spacing:.005em; }
+  h4{ font-family:var(--mono); font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:1.2em 0 .4em; }
+  p{ margin:.6em 0 1em; }
+  a{ color:var(--accent-dk); }
+
+  .lead{ font-size:1.12rem; color:var(--ink); }
+
+  /* ---------- cards & panels ---------- */
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:20px 22px; margin:16px 0; box-shadow:var(--shadow);
+  }
+  .card.tool{ border-top:3px solid var(--accent); }
+  .tool-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .tool-label::before{ content:"▸ INTERACTIVE"; }
+  .tool-label span{ color:var(--ink-soft); }
+
+  .defn{
+    border-left:4px solid var(--accent); background:var(--paper-2);
+    padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0;
+  }
+  .defn strong{ color:var(--accent-dk); }
+
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* Analogy callout — cyan, "think of it like…" */
+  .analogy{
+    border-left:4px solid var(--accent); background:var(--analogy-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .analogy .h{ display:block; font-weight:700; color:var(--accent-dk); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .analogy::before{
+    content:"\01F4A1"; /* light bulb */
+    position:absolute; left:13px; top:11px; font-size:1.15rem; line-height:1;
+  }
+  .analogy p{ margin:.3em 0 0; }
+  .analogy p:first-of-type{ margin-top:0; }
+
+  /* Real-world callout — rust, "in the real world" */
+  .real-world{
+    border-left:4px solid var(--accent-2); background:var(--rw-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .real-world .h{ display:block; font-weight:700; color:var(--rw-h); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .real-world::before{
+    content:"\01F527"; /* wrench */
+    position:absolute; left:13px; top:11px; font-size:1.1rem; line-height:1;
+  }
+  .real-world p{ margin:.3em 0 0; }
+  .real-world p:first-of-type{ margin-top:0; }
+
+  .eqn{
+    font-family:var(--mono); background:var(--ink); color:#e9f6fb;
+    padding:14px 18px; border-radius:8px; font-size:1.02rem; overflow-x:auto;
+    margin:14px 0; letter-spacing:.01em;
+  }
+  .eqn .lbl{ float:right; color:#8fc6d8; font-size:.8rem; }
+  @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
+
+  /* ---------- grids ---------- */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:760px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+  /* ---------- buttons & controls ---------- */
+  button, .btn{
+    font-family:var(--sans); font-size:.92rem; font-weight:600;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:10px 16px; min-height:44px; cursor:pointer; box-shadow:var(--shadow);
+    transition:transform .08s ease, background .15s ease;
+  }
+  button:hover, .btn:hover{ background:var(--accent-dk); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  button.secondary{ background:var(--panel); color:var(--accent-dk); border:1.5px solid var(--accent); box-shadow:none; }
+  button.secondary:hover{ background:var(--paper-2); }
+  button[aria-pressed="true"]{ background:var(--ink); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:8px 0; }
+  .ctrl{ display:flex; flex-direction:column; gap:4px; min-width:150px; flex:1 1 160px; }
+  .ctrl label{ font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; text-transform:uppercase; }
+  .ctrl .val{ color:var(--accent-dk); }
+  input[type="range"]{ width:100%; accent-color:var(--accent); height:32px; }
+  input[type="range"]:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  input[type="number"]{ font-family:var(--mono); padding:8px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); width:100%; min-height:40px; font-size:.95rem; }
+  input[type="number"]:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+
+  /* ---------- svg stage ---------- */
+  .stage{
+    width:100%; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:8px; touch-action:none; display:block;
+  }
+  .stage-wrap{ position:relative; }
+  svg text{ font-family:var(--mono); }
+
+  /* ---------- readouts ---------- */
+  .readout{
+    font-family:var(--mono); display:flex; flex-wrap:wrap; gap:10px 18px;
+    background:var(--paper-2); border-radius:8px; padding:12px 14px; margin-top:10px; font-size:.9rem;
+  }
+  .readout b{ color:var(--accent-dk); }
+  .verdict{ font-family:var(--mono); font-weight:700; padding:10px 14px; border-radius:8px; margin-top:10px; }
+  .verdict.good{ background:var(--good-bg); color:var(--good); border:1px solid var(--good); }
+  .verdict.bad{ background:var(--bad-bg); color:var(--bad); border:1px solid var(--bad); }
+  .verdict.warn{ background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn); }
+
+  /* ---------- tables ---------- */
+  table{ border-collapse:collapse; width:100%; margin:14px 0; font-size:.93rem; }
+  caption{ text-align:left; font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding-bottom:6px; }
+  th,td{ border:1px solid var(--panel-line); padding:9px 11px; text-align:left; vertical-align:top; }
+  th{ background:var(--paper-2); font-family:var(--mono); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+  tbody tr:nth-child(even){ background:var(--paper-2); }
+
+  /* ---------- accordion ---------- */
+  details{ border:1px solid var(--panel-line); border-radius:8px; margin:10px 0; background:var(--panel); overflow:hidden; }
+  summary{ cursor:pointer; padding:13px 16px; font-weight:700; font-family:var(--sans); list-style:none; min-height:44px; display:flex; align-items:center; gap:10px; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::before{ content:"+"; font-family:var(--mono); color:var(--accent); font-weight:700; font-size:1.2rem; width:1ch; }
+  details[open] summary::before{ content:"–"; }
+  summary:focus-visible{ outline:3px solid var(--accent); outline-offset:-2px; }
+  details .body{ padding:2px 16px 16px; }
+
+  /* ---------- quiz ---------- */
+  .q{ margin:14px 0; padding:16px; border:1px solid var(--panel-line); border-radius:8px; background:var(--panel); }
+  .q .stem{ font-weight:600; margin-bottom:10px; }
+  .q .opts{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1.5px solid var(--panel-line); border-radius:8px; cursor:pointer; background:var(--panel); min-height:44px; }
+  .opt:hover{ border-color:var(--accent); }
+  .opt input{ margin-top:4px; accent-color:var(--accent); width:18px; height:18px; flex:0 0 auto; }
+  .opt.correct{ border-color:var(--good); background:var(--good-bg); }
+  .opt.incorrect{ border-color:var(--bad); background:var(--bad-bg); }
+  .fb{ margin-top:10px; font-size:.92rem; padding:10px 12px; border-radius:8px; display:none; }
+  .fb.show{ display:block; }
+  .fb.right{ background:var(--good-bg); color:var(--good); }
+  .fb.wrong{ background:var(--bad-bg); color:var(--bad); }
+  .q-score{ font-family:var(--mono); font-weight:700; color:var(--accent-dk); }
+
+  /* ---------- objectives list ---------- */
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:28px; margin:.5em 0; }
+  ul.clean li::before{ content:"◆"; position:absolute; left:4px; color:var(--accent); font-size:.8rem; top:.25em; }
+
+  .pill{ display:inline-block; font-family:var(--mono); font-size:.72rem; padding:2px 9px; border-radius:20px; font-weight:700; letter-spacing:.04em; }
+  .pill.p1{ background:#dceefb; color:#075a76; }
+  .pill.p2{ background:#f7e6d8; color:#9a4715; }
+  @media (prefers-color-scheme: dark){ .pill.p1{ background:#0d3647; color:#9fdcef; } .pill.p2{ background:#3a2616; color:#f0b487; } }
+
+  /* ---------- legend dots ---------- */
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; font-family:var(--mono); font-size:.8rem; margin:8px 0; }
+  .legend i{ width:14px; height:14px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-2px; }
+
+  footer.site{ max-width:var(--maxw); margin:0 auto; padding:28px 18px 50px; border-top:1px dashed var(--panel-line); color:var(--ink-soft); font-size:.85rem; }
+  footer.site .program{ color:var(--accent-dk); font-weight:700; }
+
+  .visually-hidden{ position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0; }
+
+  .kbd{ font-family:var(--mono); font-size:.8rem; background:var(--paper-2); border:1px solid var(--panel-line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; }
+
+  .figref{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+
+  /* progress dock */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  /* ---------- video embeds ---------- */
+  .video-card{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent-2); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); margin:16px 0; }
+  .video-frame{ position:relative; width:100%; aspect-ratio:16/9; background:var(--ink); }
+  .video-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-meta{ padding:14px 18px; }
+  .video-meta h3{ margin:.1em 0 .3em; font-size:1.08rem; }
+  .video-tags{ display:flex; flex-wrap:wrap; gap:8px 14px; font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+  .video-tags b{ color:var(--accent-dk); }
+  .video-supports{ display:inline-block; font-family:var(--mono); font-size:.72rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:20px; padding:3px 11px; color:var(--accent-dk); font-weight:700; margin-top:8px; }
+
+  /* ---------- glossary ---------- */
+  .glossary-search{ position:relative; margin:14px 0; }
+  .glossary-search input{ width:100%; font-family:var(--sans); font-size:1rem; padding:12px 14px 12px 40px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--panel); color:var(--ink); min-height:48px; }
+  .glossary-search input:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  .glossary-search::before{ content:"⌕"; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:1.3rem; }
+  .gloss-list{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .gloss-list{ grid-template-columns:1fr; } }
+  .gloss-item{ background:var(--panel); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 15px; }
+  .gloss-item dt{ font-weight:700; color:var(--accent-dk); font-family:var(--sans); margin-bottom:3px; }
+  .gloss-item dd{ margin:0; font-size:.93rem; color:var(--ink); }
+  .gloss-item .tag{ font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); display:block; margin-top:6px; }
+  .gloss-empty{ font-family:var(--mono); color:var(--ink-soft); padding:14px; text-align:center; }
+
+  /* ---------- resources ---------- */
+  .res-group{ margin:18px 0; }
+  .res-group h3{ display:flex; align-items:center; gap:10px; }
+  .res-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .res-grid{ grid-template-columns:1fr; } }
+  .res-link{ display:block; text-decoration:none; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:14px 16px; color:var(--ink); transition:border-color .15s ease, transform .08s ease; }
+  .res-link:hover{ border-color:var(--accent); transform:translateY(-1px); }
+  .res-link:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .res-link .name{ font-weight:700; color:var(--accent-dk); display:flex; align-items:center; gap:6px; }
+  .res-link .name .ext{ font-size:.72rem; font-family:var(--mono); color:var(--ink-soft); font-weight:600; }
+  .res-link .desc{ font-size:.88rem; color:var(--ink); margin-top:4px; }
+  .res-link .host{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin-top:6px; display:block; }
+
+  /* ---------- formula / quick-reference card ---------- */
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:var(--radius); padding:0; overflow:hidden; box-shadow:var(--shadow); }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--mono); font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:18px; }
+  .rc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:680px){ .rc-grid{ grid-template-columns:1fr; } }
+  .rc-block h4{ margin:0 0 6px; color:var(--accent-dk); }
+  .rc-eq{ font-family:var(--mono); background:var(--paper-2); border-radius:6px; padding:9px 12px; margin:6px 0; font-size:.92rem; }
+  .rc-list{ list-style:none; padding:0; margin:0; font-size:.9rem; }
+  .rc-list li{ padding:3px 0; border-bottom:1px dotted var(--panel-line); }
+  .rc-list li:last-child{ border-bottom:none; }
+  .rc-list .k{ font-family:var(--mono); color:var(--accent-dk); font-weight:700; }
+  @media print{
+    nav.toc, .progress-dock, .card.tool, .video-frame, button{ display:none !important; }
+    body{ background:#fff; color:#000; }
+  }
+
+  /* ---------- references ---------- */
+  .refs{ font-size:.88rem; color:var(--ink-soft); }
+  .refs li{ margin:.5em 0; }
+  .ext-note{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Chapter 3</span>
+    <h1>Kinematic Analysis II: Rolling Contacts &amp; Geartrains</h1>
+    <p class="sub">Rolling joints &middot; external &amp; internal rolling-body equations &middot; rolling on a flat surface &middot; assembly configuration &middot; simple &amp; planetary geartrains and their ratios.</p>
+    <div class="meta-row">
+      <span>◷ ~3 hour lecture</span>
+      <span>◆ 9 interactive tools</span>
+      <span>✎ Worked examples + self-check</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Chapter sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#foundations">0 · Foundations</a>
+    <a href="#rolling">3.0 · Rolling Joints</a>
+    <a href="#external">3.1 · External Rolling</a>
+    <a href="#internal">3.2 · Internal Rolling</a>
+    <a href="#flat">3.3 · Flat Surface</a>
+    <a href="#assembly">3.4 · Assembly Config</a>
+    <a href="#geartrains">3.5 · Geartrains</a>
+    <a href="#ratios">3.6 · Gear Ratios</a>
+    <a href="#planetary">3.7 · Planetary</a>
+    <a href="#geargeom">G · Gear Geometry</a>
+    <a href="#examples">Examples</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#videos">Videos</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START / ROADMAP ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Chapter Roadmap</span>
+  <h2 id="start-h">Where this chapter fits</h2>
+  <p class="lead">In Chapter&nbsp;2 you learned the <strong>vector loop method</strong> &mdash; draw vectors link-to-link around a closed mechanism, set their sum to zero, and solve the resulting position equations. That method handles pin joints and sliders beautifully. But it has a blind spot.</p>
+
+  <div class="callout">
+    <span class="h">The blind spot the vector loop method has</span>
+    <p style="margin:.4em 0 0">The vector loop method is <em>unaware</em> that two rolling bodies in contact must turn together in a fixed relationship. It sees two gears merely as two touching circles and writes a loop equation that closes geometrically &mdash; but that equation says nothing about <em>how fast one gear must spin when the other spins</em>. To capture that, we must <strong>supplement</strong> the loop equations with new <strong>rolling-contact equations</strong>. That is the whole job of Chapter&nbsp;3.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>What you already can do (Ch. 2)</h4>
+      <ul class="clean">
+        <li>Assign vectors to links and write a vector loop equation.</li>
+        <li>Resolve it into two scalar (x, y) position equations.</li>
+        <li>Solve in closed form or with Newton&rsquo;s method.</li>
+        <li>Track points of interest on the coupler.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>What you&rsquo;ll add here (Ch. 3)</h4>
+      <ul class="clean">
+        <li>Write the <strong>rolling-contact equation</strong> for two bodies that roll without slipping.</li>
+        <li>Handle <strong>external</strong>, <strong>internal</strong>, and <strong>flat-surface</strong> contacts.</li>
+        <li>Account for the <strong>assembly configuration</strong> (initial values).</li>
+        <li>Analyze <strong>simple</strong> and <strong>planetary geartrains</strong> and compute gear, torque, and speed ratios.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Student objectives</h3>
+  <p>By the end of this chapter you should be able to:</p>
+  <ul class="clean">
+    <li>Investigate mechanisms that contain <strong>rolling contacts</strong> (rolling joints).</li>
+    <li>Derive and apply the <strong>rolling-contact equations</strong> so they can be incorporated into the vector loop method.</li>
+    <li>Distinguish externally contacting, internally contacting, and flat-surface rolling, and write the correct equation for each.</li>
+    <li>Identify the <strong>assembly configuration</strong> of a mechanism and include its initial-value terms in a position analysis.</li>
+    <li>Define a <strong>geartrain</strong>, classify it as simple or planetary, and compute its gear ratio <em>R</em>, torque ratio <em>n<sub>t</sub></em>, and speed ratio <em>n<sub>s</sub></em>.</li>
+  </ul>
+
+  <h3>Chapter sections</h3>
+  <table>
+    <caption>Roadmap of Chapter 3</caption>
+    <thead><tr><th>§</th><th>Topic</th><th>Key idea</th></tr></thead>
+    <tbody>
+      <tr><td>3.1</td><td>Externally contacting rolling bodies</td><td>Two circles touch on their outsides; rotations are opposite-signed.</td></tr>
+      <tr><td>3.2</td><td>Internally contacting rolling bodies</td><td>One circle rolls inside another; rotations are same-signed.</td></tr>
+      <tr><td>3.3</td><td>One body with a flat surface</td><td>A circle rolls on a line; arc length becomes linear travel.</td></tr>
+      <tr><td>3.4</td><td>Assembly configuration</td><td>Initial-value terms set <em>where</em> the mechanism starts.</td></tr>
+      <tr><td>3.5&ndash;3.7</td><td>Geartrains</td><td>Mechanisms made entirely of rolling contacts; constant ratios.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; you are surrounded by this chapter</span>
+    <p>The transmission in a car, the gearbox in a wind turbine, the reduction gear in a cordless drill, the differential under your rear axle, the timing chain in an engine, even the planetary set in an automatic transmission &mdash; every one of these is a mechanism whose behavior is governed by the rolling-contact equations you are about to derive. By the end you&rsquo;ll be able to look at a gearbox spec (&ldquo;4.10:1 final drive&rdquo;) and know exactly what equation produced that number.</p>
+  </div>
+</section>
+
+<!-- ============ 0 · FOUNDATIONS ============ -->
+<section id="foundations" aria-labelledby="found-h">
+  <span class="sec-tag">Section 0</span>
+  <h2 id="found-h">Foundations &mdash; the geometry you need first</h2>
+  <p>Rolling contact is one of those ideas that feels obvious until you try to write it as an equation. Three small pieces of background make the rest of the chapter painless: <strong>arc length</strong>, <strong>rolling without slipping</strong>, and the difference between an <strong>absolute</strong> and a <strong>relative</strong> rotation.</p>
+
+  <h3>Arc length: the bridge between turning and travelling</h3>
+  <p>A point on the rim of a wheel of radius <em>&rho;</em> that turns through an angle <em>&Delta;&theta;</em> (in <strong>radians</strong>) sweeps out an arc of length</p>
+  <div class="eqn">s = &rho; &middot; &Delta;&theta; <span class="lbl">arc length</span></div>
+  <p>This single relationship is the seed of every rolling-contact equation. If two bodies roll on each other <em>without slipping</em>, the arc that rolls past the contact point on body <em>x</em> must equal the arc that rolls past on body <em>y</em> &mdash; the surfaces lay down the same length of &ldquo;tape&rdquo; against each other.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; two tank treads pressed together</span>
+    <p>Picture two tanks parked nose-to-nose with their treads touching. If neither tread slips against the other, then every inch of tread that the left tank lays down is matched by exactly one inch on the right. The treads are &ldquo;arc length.&rdquo; A big-wheeled tank turns its wheel a little to lay down a foot of tread; a small-wheeled tank must spin its wheel a lot to lay down that same foot. That is precisely why a small gear spins faster than the large gear it meshes with: equal arc length, unequal radii, so unequal rotation.</p>
+  </div>
+
+  <h3>Rolling without slipping</h3>
+  <p>&ldquo;Rolling without slipping&rdquo; means the two surfaces have <strong>zero relative velocity at the point of contact</strong>. There is no skidding. This is the idealization the whole chapter rests on, and it is an excellent approximation for gears, friction wheels, and belts under normal load.</p>
+
+  <div class="card">
+    <h4>An important subtlety about gear teeth</h4>
+    <p>Real gear teeth are <em>not</em> in pure rolling contact everywhere. The teeth actually have rolling contact <strong>only at the pitch point</strong>; at every other instant of the mesh there is some sliding. The genius of the standard <strong>involute</strong> tooth profile is that, despite this sliding, the <em>net effect</em> is exactly equivalent to two smooth imaginary circles &mdash; the <strong>pitch circles</strong> &mdash; rolling on each other without slipping. So in this chapter we model gears as their pitch circles rolling, and the equations come out clean.</p>
+  </div>
+
+  <h3>Absolute vs. relative rotation &mdash; the notation that trips people up</h3>
+  <p>The rolling-contact equations are written in terms of <strong>changes in vector direction</strong>, and they distinguish carefully between rotations measured against ground and rotations measured against another moving link. Get comfortable with this notation now:</p>
+  <table>
+    <caption>Notation used throughout Chapter 3</caption>
+    <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><em>&rho;<sub>x</sub></em></td><td>Radius of rolling body <em>x</em> (its pitch radius, for a gear).</td></tr>
+      <tr><td><em>&theta;<sub>x</sub></em></td><td>Current (absolute) direction angle of the vector attached to body <em>x</em>.</td></tr>
+      <tr><td><em>&theta;<sub>x<sub>i</sub></sub></em></td><td><strong>Initial</strong> direction angle of that vector &mdash; the assembly configuration.</td></tr>
+      <tr><td><em>&Delta;&theta;<sub>x</sub></em></td><td>Absolute change in direction of body <em>x</em>: &nbsp;<em>&theta;<sub>x</sub> &minus; &theta;<sub>x<sub>i</sub></sub></em>.</td></tr>
+      <tr><td><em>&Delta;&theta;<sub>x/z</sub></em></td><td><strong>Relative</strong> rotation of body <em>x</em> with respect to body <em>z</em> (the arm): &nbsp;<em>&Delta;&theta;<sub>x</sub> &minus; &Delta;&theta;<sub>z</sub></em>.</td></tr>
+    </tbody>
+  </table>
+  <p>The body labeled <em>z</em> is almost always the <strong>arm</strong> &mdash; the link that connects the centers of the two rolling bodies. Watch for it in every equation below.</p>
+
+  <div class="card tool" aria-labelledby="arc-tool-h">
+    <div class="tool-label"><span>Arc length &amp; rolling, hands-on</span></div>
+    <h3 id="arc-tool-h" style="margin-top:.3em">See &ldquo;equal arc, unequal turn&rdquo; for yourself</h3>
+    <p>Set the two radii, then choose how far the small wheel turns. The tool lays down the matching arc on the large wheel and reports how far <em>it</em> must turn so that no slipping occurs. Notice the rule: the ratio of rotations is the inverse of the ratio of radii.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="arcRx">Small radius &rho;<sub>x</sub> · <span class="val" id="arcRxv">40</span></label><input type="range" id="arcRx" min="25" max="70" value="40" step="1"></div>
+      <div class="ctrl"><label for="arcRy">Large radius &rho;<sub>y</sub> · <span class="val" id="arcRyv">90</span></label><input type="range" id="arcRy" min="75" max="120" value="90" step="1"></div>
+      <div class="ctrl"><label for="arcRot">Turn of small wheel &Delta;&theta;<sub>x</sub> · <span class="val" id="arcRotv">90°</span></label><input type="range" id="arcRot" min="10" max="180" value="90" step="5"></div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="arcStage" class="stage" viewBox="0 0 600 320" role="img" aria-label="Two circles touching externally. An arc is highlighted on each; the arcs have equal length, showing the smaller wheel must rotate more than the larger to lay down the same arc.">
+      </svg>
+    </div>
+    <div class="readout" id="arcReadout" aria-live="polite"></div>
+    <p class="figref">Equal arc length on both bodies &rArr; &rho;<sub>x</sub>&Delta;&theta;<sub>x</sub> = &rho;<sub>y</sub>&Delta;&theta;<sub>y</sub> (magnitudes). Direction sign is handled in &sect;3.1&ndash;3.2.</p>
+  </div>
+</section>
+
+<!-- ============ 3.0 · ROLLING JOINTS OVERVIEW ============ -->
+<section id="rolling" aria-labelledby="roll-h">
+  <span class="sec-tag">Section 3.0</span>
+  <h2 id="roll-h">Rolling contacts &mdash; the family of rolling joints</h2>
+  <p>A <strong>rolling contact</strong> &mdash; also called a <strong>rolling joint</strong> &mdash; is any place where two bodies touch and roll on one another. They are everywhere in machines, and they come in a surprisingly tidy table organized by two questions: are the centers <em>far apart</em> or <em>close</em>, and is the drive <em>positive</em> (teeth that cannot slip) or <em>friction</em> (surfaces that grip)?</p>
+
+  <table>
+    <caption>The four kinds of rolling joints (after the course text)</caption>
+    <thead><tr><th>Spacing of centers</th><th>Positive drive</th><th>Friction drive</th></tr></thead>
+    <tbody>
+      <tr><th>Wide</th><td>Chains &amp; sprockets</td><td>Belts &amp; pulleys</td></tr>
+      <tr><th>Close</th><td>Gears</td><td>Rolling wheels</td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid2">
+    <div class="analogy">
+      <span class="h">Positive vs. friction drive, in one image</span>
+      <p>A <strong>positive drive</strong> is a zipper: the teeth interlock, so one side <em>cannot</em> slip past the other. A <strong>friction drive</strong> is two rubber erasers pressed together and rolled: they grip and turn together &mdash; until you push too hard, and they skid. Gears and chains are zippers; belts and friction wheels are erasers.</p>
+    </div>
+    <div class="real-world">
+      <span class="h">In the real world&hellip; your bicycle has both</span>
+      <p>A bicycle chain on its sprockets is a <em>wide-spacing, positive</em> rolling joint &mdash; the teeth guarantee no slip, so one pedal stroke always advances the wheel a fixed amount. The rubber tire on the road is a <em>friction</em> rolling joint &mdash; great until it rains and the wheel slips. Same chapter, two joints, on one machine.</p>
+    </div>
+  </div>
+
+  <h3>Why the vector loop method needs help here</h3>
+  <p>Recall the blind spot from the roadmap. When the vector loop method looks at two meshed gears, it treats them as two circular shapes whose centers are separated by <em>&rho;<sub>x</sub> + &rho;<sub>y</sub></em>. The loop closes fine geometrically, but the loop equation never says that turning gear <em>x</em> forces gear <em>y</em> to turn in a fixed ratio. We must add that physics by hand. The statement we add is the <strong>rolling-contact equation</strong>.</p>
+
+  <h3>The arm: why we always draw a link between the centers</h3>
+  <p>Strictly speaking, two rolling bodies do not <em>need</em> a physical link joining their centers &mdash; the contact alone constrains them. But in practice something must hold the centers a fixed distance apart so the bodies stay in contact. That something is the <strong>arm</strong>. We label it body <em>z</em>, and it appears in every rolling-contact equation because rotations are most naturally measured <em>relative to the arm</em>.</p>
+
+  <div class="callout">
+    <span class="h">Key idea to carry forward</span>
+    <p style="margin:.4em 0 0">Every rolling-contact equation below relates the rotation of body <em>x</em> and body <em>y</em> <strong>as seen from the arm <em>z</em></strong>. The arm is the reference frame that makes rolling look simple. When the arm is fixed (bolted to ground), &Delta;&theta;<sub>z</sub> = 0 and the equations collapse to their simplest form &mdash; that is the case of a <em>simple</em> geartrain.</p>
+  </div>
+</section>
+
+<!-- ============ 3.1 · EXTERNALLY CONTACTING ============ -->
+<section id="external" aria-labelledby="ext-h">
+  <span class="sec-tag">Section 3.1</span>
+  <h2 id="ext-h">Externally contacting rolling bodies</h2>
+  <p>Two circles touch on their <em>outsides</em> &mdash; the everyday case of two meshing spur gears, or two friction wheels pressed rim-to-rim. As one turns clockwise, the other is dragged counter-clockwise. That opposite-sign behavior is the signature of external contact, and it shows up as a <strong>minus sign</strong> in the equation.</p>
+
+  <h3>Deriving the equation</h3>
+  <p>Equal arc length (no slipping) gives the magnitudes, and the opposite turning gives the sign. Measuring rotations relative to the arm <em>z</em>, the rolling-contact equation for external contact is:</p>
+  <div class="eqn">&rho;<sub>x</sub> &Delta;&theta;<sub>x/z</sub> = &minus;&rho;<sub>y</sub> &Delta;&theta;<sub>y/z</sub> <span class="lbl">(3.1)</span></div>
+  <p>Here <em>&Delta;&theta;<sub>x/z</sub></em> is the rotation of body <em>x</em> relative to the arm, and likewise for <em>y</em>. The minus sign encodes &ldquo;they spin in opposite directions as seen from the arm.&rdquo; Expanding the relative rotations into absolute rotations and their initial values gives the full, computation-ready form:</p>
+  <div class="eqn">&rho;<sub>x</sub>[(&theta;<sub>x</sub> &minus; &theta;<sub>x<sub>i</sub></sub>) &minus; (&theta;<sub>z</sub> &minus; &theta;<sub>z<sub>i</sub></sub>)] = &minus;&rho;<sub>y</sub>[(&theta;<sub>y</sub> &minus; &theta;<sub>y<sub>i</sub></sub>) &minus; (&theta;<sub>z</sub> &minus; &theta;<sub>z<sub>i</sub></sub>)] <span class="lbl">(3.4)</span></div>
+  <p>Read it as: &ldquo;(radius)&times;(how far this body turned past its start, minus how far the arm turned past its start).&rdquo; The terms with subscript <em>i</em> are the assembly configuration (&sect;3.4) &mdash; the initial directions of the vectors. Once those initial values are known, Equation&nbsp;(3.4) is just another scalar equation to add to your vector loop system.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; two gears as opposite-spinning dance partners</span>
+    <p>Stand two people face to face and have them each spin in place. For their right hands to stay touching as they turn, one must spin clockwise while the other spins counter-clockwise &mdash; if they both spun the same way, their hands would tear apart. External gears are exactly these face-to-face partners: contact forces them to turn <em>opposite</em> ways, which is the minus sign in Equation&nbsp;(3.1).</p>
+  </div>
+
+  <div class="card tool" aria-labelledby="ext-tool-h">
+    <div class="tool-label"><span>External rolling contact simulator</span></div>
+    <h3 id="ext-tool-h" style="margin-top:.3em">Drive one wheel, watch the other obey</h3>
+    <p>Two externally contacting circles share an arm (here the arm is fixed). Turn the input wheel <em>x</em> with the slider and watch wheel <em>y</em> rotate the opposite way, in the ratio set by the radii. The painted reference marks let you confirm the no-slip condition: equal arc, opposite spin. Try making the wheels very different sizes.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="exRx">&rho;<sub>x</sub> (input wheel) · <span class="val" id="exRxv">45</span></label><input type="range" id="exRx" min="25" max="70" value="45" step="1"></div>
+      <div class="ctrl"><label for="exRy">&rho;<sub>y</sub> (output wheel) · <span class="val" id="exRyv">80</span></label><input type="range" id="exRy" min="30" max="100" value="80" step="1"></div>
+      <div class="ctrl"><label for="exDrive">Drive input &Delta;&theta;<sub>x</sub> · <span class="val" id="exDrivev">0°</span></label><input type="range" id="exDrive" min="-360" max="360" value="0" step="3"></div>
+    </div>
+    <div class="controls">
+      <button type="button" id="exSpin">Spin continuously</button>
+      <button type="button" class="secondary" id="exReset">Reset</button>
+    </div>
+    <div class="stage-wrap">
+      <svg id="exStage" class="stage" viewBox="0 0 600 340" role="img" aria-label="Two circles touching externally with an arm joining their centers. Reference radii show that turning the input wheel turns the output wheel in the opposite direction.">
+      </svg>
+    </div>
+    <div class="readout" id="exReadout" aria-live="polite"></div>
+    <p class="figref">Recreates FIGURE 3.2. Output rotation &Delta;&theta;<sub>y</sub> = &minus;(&rho;<sub>x</sub>/&rho;<sub>y</sub>)&Delta;&theta;<sub>x</sub> with the arm fixed.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; the direction reversal is a feature, not a bug</span>
+    <p>External meshing always reverses direction, which is why a single pair of gears makes the output spin &ldquo;backwards.&rdquo; Engineers exploit this constantly: the <strong>idler gear</strong> in a manual transmission&rsquo;s reverse position is an extra external gear inserted purely to flip the output direction so the car can back up. And if you ever need the output to spin the <em>same</em> way as the input through a close-spaced pair, you reach for an internal gear instead &mdash; which is exactly &sect;3.2.</p>
+  </div>
+</section>
+
+<!-- ============ 3.2 · INTERNALLY CONTACTING ============ -->
+<section id="internal" aria-labelledby="int-h">
+  <span class="sec-tag">Section 3.2</span>
+  <h2 id="int-h">Internally contacting rolling bodies</h2>
+  <p>Now one circle rolls <em>inside</em> the other &mdash; think of a small gear running around the inside of a large ring (an <strong>internal</strong> or <strong>annular</strong> gear). Here the surprising thing happens: the two bodies turn in the <strong>same direction</strong> as seen from the arm. The minus sign of external contact becomes a plus.</p>
+
+  <div class="eqn">&rho;<sub>x</sub>(&Delta;&theta;<sub>x</sub> &minus; &Delta;&theta;<sub>z</sub>) = &rho;<sub>y</sub>(&Delta;&theta;<sub>y</sub> &minus; &Delta;&theta;<sub>z</sub>)</div>
+  <div class="eqn">&rho;<sub>x</sub>[(&theta;<sub>x</sub> &minus; &theta;<sub>x<sub>i</sub></sub>) &minus; (&theta;<sub>z</sub> &minus; &theta;<sub>z<sub>i</sub></sub>)] = &rho;<sub>y</sub>[(&theta;<sub>y</sub> &minus; &theta;<sub>y<sub>i</sub></sub>) &minus; (&theta;<sub>z</sub> &minus; &theta;<sub>z<sub>i</sub></sub>)] <span class="lbl">(3.6)</span></div>
+
+  <p>Compare Equation&nbsp;(3.6) with Equation&nbsp;(3.4): the structure is identical, but the right-hand side is now <strong>positive</strong>. That single sign change is the entire difference between internal and external contact. Everything else &mdash; equal arc length, measuring relative to the arm, the initial-value terms &mdash; carries over unchanged.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; a coin rolling inside a ring</span>
+    <p>Drop a quarter inside a large jar lid and roll it around the inner wall. Watch a mark on the quarter: as the quarter travels counter-clockwise around the inside, the mark <em>also</em> rotates counter-clockwise. Same direction. Contrast that with rolling the quarter around the <em>outside</em> of a second coin, where the mark would spin the opposite way. Inside &rArr; same sense (plus sign); outside &rArr; opposite sense (minus sign).</p>
+  </div>
+
+  <div class="card tool" aria-labelledby="int-tool-h">
+    <div class="tool-label"><span>Internal rolling contact simulator</span></div>
+    <h3 id="int-tool-h" style="margin-top:.3em">Roll a wheel inside a ring</h3>
+    <p>The small wheel <em>x</em> rolls on the inside of the large ring <em>y</em>. Drive the wheel and watch the ring respond &mdash; this time <strong>in the same direction</strong> (with the arm held fixed). Toggle between internal and external to feel the sign flip directly. Reference marks confirm no slipping.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="inRx">&rho;<sub>x</sub> (inner wheel) · <span class="val" id="inRxv">40</span></label><input type="range" id="inRx" min="20" max="65" value="40" step="1"></div>
+      <div class="ctrl"><label for="inRy">&rho;<sub>y</sub> (ring) · <span class="val" id="inRyv">110</span></label><input type="range" id="inRy" min="80" max="140" value="110" step="1"></div>
+      <div class="ctrl"><label for="inDrive">Drive inner &Delta;&theta;<sub>x</sub> · <span class="val" id="inDrivev">0°</span></label><input type="range" id="inDrive" min="-360" max="360" value="0" step="3"></div>
+    </div>
+    <div class="controls">
+      <button type="button" id="inMode" aria-pressed="true">Mode: Internal (+)</button>
+      <button type="button" id="inSpin">Spin continuously</button>
+      <button type="button" class="secondary" id="inReset">Reset</button>
+    </div>
+    <div class="stage-wrap">
+      <svg id="inStage" class="stage" viewBox="0 0 600 340" role="img" aria-label="A small circle rolling on the inside of a large ring. Reference marks show the two bodies rotate in the same direction.">
+      </svg>
+    </div>
+    <div class="readout" id="inReadout" aria-live="polite"></div>
+    <p class="figref">Recreates FIGURE 3.3. Internal contact: same-direction rotation, the plus sign in Equation (3.6).</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; the ring gear of every automatic transmission</span>
+    <p>The big internally-toothed ring (the <em>annulus</em>) in a planetary gearset is an internal contact: the planet gears roll on its inside surface and turn the same way it does. That same-direction property is what lets a planetary set achieve large reductions in a compact, coaxial package &mdash; the topic of &sect;3.7. Internal contact also shows up in cycloidal drives and in the &ldquo;hypocycloid&rdquo; engines used in some compressors.</p>
+  </div>
+</section>
+
+<!-- ============ 3.3 · FLAT SURFACE ============ -->
+<section id="flat" aria-labelledby="flat-h">
+  <span class="sec-tag">Section 3.3</span>
+  <h2 id="flat-h">One body with a flat surface</h2>
+  <p>Let the radius of one body grow without bound and its surface flattens into a straight line. A circle rolling on a flat surface is the limiting case of external (or internal) contact &mdash; a wheel on a road, a gear on a <strong>rack</strong>. Now rolling converts rotation into <em>straight-line travel</em>, so the equation relates a <strong>change in length</strong> to a rotation.</p>
+
+  <div class="eqn">r<sub>y</sub> &minus; r<sub>y<sub>i</sub></sub> = &rho;<sub>x</sub>(&Delta;&theta;<sub>x</sub> &minus; &Delta;&theta;<sub>z</sub>)</div>
+  <div class="eqn">r<sub>y</sub> &minus; r<sub>y<sub>i</sub></sub> = &rho;<sub>x</sub>[(&theta;<sub>x</sub> &minus; &theta;<sub>x<sub>i</sub></sub>) &minus; (&theta;<sub>z</sub> &minus; &theta;<sub>z<sub>i</sub></sub>)] <span class="lbl">(3.8)</span></div>
+
+  <p>The left side, <em>r<sub>y</sub> &minus; r<sub>y<sub>i</sub></sub></em>, is how far the contact point has <strong>travelled along the flat body</strong> from its start &mdash; a length, not an angle. The right side is the familiar arc length <em>&rho;<sub>x</sub>&middot;</em>(relative rotation). This is just <em>s = &rho;&middot;&Delta;&theta;</em> again, now with the &ldquo;arc&rdquo; unrolled onto a straight line.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; unrolling a roll of tape onto the floor</span>
+    <p>Take a roll of tape and roll it along the floor without letting it skid. The length of tape laid on the floor equals the circumference that has passed under the roll: turn the roll one full revolution (2&pi; radians) and you lay down exactly one circumference (2&pi;&rho;) of tape. A rack-and-pinion is this exact picture frozen into steel: the round pinion is the roll of tape, the toothed rack is the floor, and Equation&nbsp;(3.8) says &ldquo;distance the rack moved = arc the pinion rolled.&rdquo;</p>
+  </div>
+
+  <div class="card tool" aria-labelledby="flat-tool-h">
+    <div class="tool-label"><span>Rack-and-pinion (flat-surface) simulator</span></div>
+    <h3 id="flat-tool-h" style="margin-top:.3em">Turn the pinion, slide the rack</h3>
+    <p>A round pinion of radius <em>&rho;<sub>x</sub></em> rolls on a flat rack. Rotate the pinion and watch the rack translate by the matching arc length. The readout shows the no-slip bookkeeping: degrees in, millimetres out. Bigger pinion &rArr; more travel per degree.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="rkRx">Pinion radius &rho;<sub>x</sub> · <span class="val" id="rkRxv">45</span></label><input type="range" id="rkRx" min="25" max="75" value="45" step="1"></div>
+      <div class="ctrl"><label for="rkRot">Pinion rotation &Delta;&theta;<sub>x</sub> · <span class="val" id="rkRotv">0°</span></label><input type="range" id="rkRot" min="-270" max="270" value="0" step="3"></div>
+    </div>
+    <div class="controls">
+      <button type="button" id="rkRoll">Roll continuously</button>
+      <button type="button" class="secondary" id="rkReset">Reset</button>
+    </div>
+    <div class="stage-wrap">
+      <svg id="rkStage" class="stage" viewBox="0 0 600 300" role="img" aria-label="A pinion rolling on a horizontal rack. Rotating the pinion translates the rack by an equal arc length.">
+      </svg>
+    </div>
+    <div class="readout" id="rkReadout" aria-live="polite"></div>
+    <p class="figref">Recreates FIGURE 3.4. Rack travel r<sub>y</sub>&minus;r<sub>y<sub>i</sub></sub> = &rho;<sub>x</sub>&middot;&Delta;&theta;<sub>x</sub> (arm fixed).</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; the steering in your car</span>
+    <p>Most cars steer with a <strong>rack-and-pinion</strong>: the steering column turns a small pinion, which rolls along a toothed rack, sliding it left or right to swing the front wheels. Equation&nbsp;(3.8) is literally the design equation &mdash; it tells the engineer how many turns of the wheel produce how many millimetres of rack travel, which sets how &ldquo;quick&rdquo; or &ldquo;slow&rdquo; the steering feels. The same mechanism raises and lowers the platform on a scissor lift and drives the gate on many sliding driveway gates.</p>
+  </div>
+</section>
+
+<!-- ============ 3.4 · ASSEMBLY CONFIGURATION ============ -->
+<section id="assembly" aria-labelledby="asm-h">
+  <span class="sec-tag">Section 3.4</span>
+  <h2 id="asm-h">Assembly configuration &mdash; where the mechanism starts</h2>
+  <p>Look back at Equations&nbsp;(3.4), (3.6), and (3.8). Each is written in terms of <em>changes</em> &mdash; how far each body has turned <strong>past its initial direction</strong> <em>&theta;<sub>x<sub>i</sub></sub></em>, <em>&theta;<sub>y<sub>i</sub></sub></em>, <em>&theta;<sub>z<sub>i</sub></sub></em>. Those initial values are not arbitrary algebra: together they describe <strong>how the mechanism was assembled</strong>. We call them the <strong>assembly configuration</strong>.</p>
+
+  <div class="defn">
+    <strong>Assembly configuration:</strong> the set of initial-value terms (the <em>&theta;<sub>i</sub></em>&rsquo;s and any initial lengths) that appear when the rolling-contact equations are expanded. They must be known before a position analysis can be performed, because they fix the starting point from which all the &Delta;&theta;&rsquo;s are measured.
+  </div>
+
+  <h3>Why it matters: same motion, different result</h3>
+  <p>This is the subtle part. Suppose you apply <em>exactly the same set of changes</em> &mdash; the same input rotation, the same arm motion &mdash; to two copies of a mechanism that were <strong>assembled differently</strong>. Because the changes are measured from different starting directions, the two copies end in <strong>different final positions</strong>. The motion is identical; the outcome is not. The assembly configuration is what breaks the tie.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; two clocks set to different times</span>
+    <p>Take two identical clocks and advance both by exactly three hours. If one started at 12:00 and the other at 4:00, they now read 3:00 and 7:00 &mdash; same change applied, different readings, purely because they <em>started</em> differently. The clock&rsquo;s starting time is its assembly configuration. In a mechanism, the &ldquo;starting time&rdquo; is the set of initial vector directions &theta;<sub>i</sub>, and forgetting to specify them is like trying to read a clock that has no &ldquo;12&rdquo; marked.</p>
+  </div>
+
+  <div class="card tool" aria-labelledby="asm-tool-h">
+    <div class="tool-label"><span>Assembly configuration demonstrator</span></div>
+    <h3 id="asm-tool-h" style="margin-top:.3em">Same change, two starting configurations</h3>
+    <p>Two copies of a two-gear-on-an-arm mechanism are shown. They are <em>assembled differently</em> &mdash; their gears start pointing in different initial directions. Apply the <strong>same</strong> input change with the slider and watch the two copies diverge to different final positions. That divergence <em>is</em> the assembly configuration at work.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="asmStart">Difference in start &theta;<sub>i</sub> between copies · <span class="val" id="asmStartv">120°</span></label><input type="range" id="asmStart" min="0" max="180" value="120" step="5"></div>
+      <div class="ctrl"><label for="asmChange">Same applied change &Delta;&theta; · <span class="val" id="asmChangev">90°</span></label><input type="range" id="asmChange" min="0" max="200" value="90" step="5"></div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="asmStage" class="stage" viewBox="0 0 600 320" role="img" aria-label="Two copies of the same mechanism assembled with different initial vector directions. Applying the same change leaves them in different final positions.">
+      </svg>
+    </div>
+    <div class="readout" id="asmReadout" aria-live="polite"></div>
+    <p class="figref">Recreates the spirit of FIGURE 3.6: identical changes, different assembly configurations, different final positions.</p>
+  </div>
+
+  <div class="callout">
+    <span class="h">Practical takeaway</span>
+    <p style="margin:.4em 0 0">When you set up a position analysis, the radii (&rho;), link lengths, and the <strong>assembly-configuration angles</strong> (&theta;<sub>i</sub>) are all <em>known</em> inputs &mdash; they go in the &ldquo;scalar knowns&rdquo; column. The joint variables you solve for are the &ldquo;scalar unknowns.&rdquo; You will see this knowns/unknowns bookkeeping made explicit in the worked examples.</p>
+  </div>
+</section>
+
+<!-- ============ 3.5 · GEARTRAINS ============ -->
+<section id="geartrains" aria-labelledby="gt-h">
+  <span class="sec-tag">Section 3.5</span>
+  <h2 id="gt-h">Geartrains</h2>
+  <p>A <strong>geartrain</strong> is a mechanism built <em>entirely</em> of rolling contacts and the arms connecting their centers &mdash; nothing else. Because every joint is a rolling contact, every position equation of a geartrain is a rolling-contact equation. We stop writing vector loop equations for geartrains altogether; as you&rsquo;ll see in Example&nbsp;3.3, the loop equation degenerates to something meaningless like <em>r&#772;<sub>1</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</em>. The rolling-contact equations carry all the information.</p>
+
+  <div class="defn">
+    <strong>Geartrain:</strong> a mechanism consisting entirely of rolling contacts and the arms connecting their centers. Its only position equations are rolling-contact equations.
+  </div>
+
+  <h3>Why bother? The one thing geartrains do better than anything else</h3>
+  <p>A conventional linkage can transmit large torque, but the ratio between input and output speed <em>varies</em> as it moves. A geartrain&rsquo;s defining virtue is a <strong>constant speed and torque ratio</strong> &mdash; turn the input at a steady rate and the output turns at a steady, perfectly proportional rate, forever. That constancy is the whole reason geartrains exist. The price is that a gear pair transmits less torque than a beefy linkage of the same size, which is why heavy-duty machines often combine the two.</p>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; why your blender and your car both need this</span>
+    <p>You want a blender blade to spin at a <em>steady</em> high speed &mdash; a varying ratio would make the blade surge and stall. You want a car&rsquo;s wheels to turn at a fixed proportion of engine speed in each gear so the speedometer means something. Constant ratio is non-negotiable in both, so both use geartrains rather than linkages for the speed conversion.</p>
+  </div>
+
+  <h3>Geartrain terminology</h3>
+  <table>
+    <caption>Vocabulary for classifying geartrains</caption>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Stage</strong></td><td>Determined by the number of rolling contacts the geartrain contains. One contact = single-stage; more contacts = more stages.</td></tr>
+      <tr><td><strong>Simple geartrain</strong></td><td>One in which the <em>arms are fixed</em> (bolted to ground). Then &Delta;&theta;<sub>z</sub> = 0 and the rolling-contact equations simplify.</td></tr>
+      <tr><td><strong>Planetary geartrain</strong></td><td>Contains rolling elements whose <em>arms are not fixed</em> &mdash; the arm itself rotates, carrying gear centers in orbit. (Also called <em>epicyclic</em>.)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; a merry-go-round vs. a record player</span>
+    <p>In a <strong>simple</strong> geartrain the gear centers are pinned down &mdash; like records spinning on fixed turntables that happen to touch. In a <strong>planetary</strong> geartrain the arm spins, so the gear centers themselves ride around like horses on a merry-go-round <em>while also</em> spinning on their own posts. That double motion (orbit + spin) is what makes planetary trains powerful and what makes their equations richer &mdash; the arm term &Delta;&theta;<sub>z</sub> no longer vanishes.</p>
+  </div>
+
+  <div class="card tool" aria-labelledby="simple-tool-h">
+    <div class="tool-label"><span>Simple geartrain &amp; transmission demo</span></div>
+    <h3 id="simple-tool-h" style="margin-top:.3em">A single-stage simple geartrain</h3>
+    <p>Two gears on <em>fixed</em> centers (the arm is bolted to ground). Gear&nbsp;2 is the input, gear&nbsp;3 the output. Set the tooth counts and spin the input; the output turns in the opposite direction at the ratio set by the teeth. This is the basic building block of a manual automotive transmission &mdash; stack several such pairs and select among them to get multiple &ldquo;speeds.&rdquo;</p>
+    <div class="controls">
+      <div class="ctrl"><label for="sgN2">Teeth on input gear N<sub>2</sub> · <span class="val" id="sgN2v">18</span></label><input type="range" id="sgN2" min="10" max="40" value="18" step="1"></div>
+      <div class="ctrl"><label for="sgN3">Teeth on output gear N<sub>3</sub> · <span class="val" id="sgN3v">36</span></label><input type="range" id="sgN3" min="10" max="60" value="36" step="1"></div>
+    </div>
+    <div class="controls">
+      <button type="button" id="sgSpin">Spin input</button>
+      <button type="button" class="secondary" id="sgReset">Reset</button>
+    </div>
+    <div class="stage-wrap">
+      <svg id="sgStage" class="stage" viewBox="0 0 600 320" role="img" aria-label="Two meshing gears on fixed centers. The input gear drives the output gear in the opposite direction at a ratio set by their tooth counts.">
+      </svg>
+    </div>
+    <div class="readout" id="sgReadout" aria-live="polite"></div>
+    <p class="figref">Recreates FIGURE 3.13. Gear ratio R = &minus;N<sub>3</sub>/N<sub>2</sub> (external mesh).</p>
+  </div>
+</section>
+
+<!-- ============ 3.6 · GEAR RATIOS ============ -->
+<section id="ratios" aria-labelledby="rat-h">
+  <span class="sec-tag">Section 3.6</span>
+  <h2 id="rat-h">Gear, torque, and speed ratios</h2>
+  <p>A geartrain is bought and sold on its <strong>ratios</strong>. Three are defined, and &mdash; pleasingly &mdash; they all turn out to be the same number dressed up three ways.</p>
+
+  <table>
+    <caption>The three geartrain ratios</caption>
+    <thead><tr><th>Ratio</th><th>Symbol</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td>Gear ratio</td><td><em>R</em></td><td>Number of rotations of the input that cause one rotation of the output.</td></tr>
+      <tr><td>Torque ratio</td><td><em>n<sub>t</sub></em></td><td>Torque increase (or decrease) created by the transmission.</td></tr>
+      <tr><td>Speed ratio</td><td><em>n<sub>s</sub></em></td><td>Speed decrease (or increase) created by the transmission.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>The ratio equations</h3>
+  <div class="eqn">R = &Delta;&theta;<sub>in</sub> / &Delta;&theta;<sub>out</sub> <span class="lbl">(3.18)</span></div>
+  <div class="eqn">n<sub>t</sub> = T<sub>out</sub> / T<sub>in</sub> &nbsp;&rarr;&nbsp; T<sub>out</sub> = n<sub>t</sub> T<sub>in</sub> <span class="lbl">(3.19)</span></div>
+  <div class="eqn">n<sub>t</sub> = &minus;R <span class="lbl">(3.21)</span></div>
+  <div class="eqn">n<sub>s</sub> = &omega;<sub>out</sub> / &omega;<sub>in</sub> &nbsp;&rarr;&nbsp; &omega;<sub>out</sub> = n<sub>s</sub> &omega;<sub>in</sub> <span class="lbl">(3.22)</span></div>
+  <div class="eqn">n<sub>s</sub> = 1 / R <span class="lbl">(3.24)</span></div>
+  <p>Collecting them gives the single most useful line in the chapter:</p>
+  <div class="eqn" style="font-size:1.12rem">R = &minus;n<sub>t</sub> = 1 / n<sub>s</sub></div>
+
+  <p>In words: a train that makes the input turn <em>R</em> times per output turn also <strong>multiplies torque by <em>R</em></strong> (up to sign) and <strong>divides speed by <em>R</em></strong>. You cannot get something for nothing &mdash; trade speed for torque or torque for speed, in exact proportion. (This is conservation of power, <em>P = T&omega;</em>, in disguise.)</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; a low gear on a bicycle climbing a hill</span>
+    <p>Shift to a low gear and you pedal many times for each slow turn of the wheel (large <em>R</em>). In exchange the wheel pushes much harder against the hill (torque up by <em>R</em>) even though it turns slowly (speed down by <em>R</em>). Shift to a high gear for flat ground and the trade reverses: one pedal stroke spins the wheel fast but with little force. The gear ratio is the exchange rate between &ldquo;how fast&rdquo; and &ldquo;how hard.&rdquo;</p>
+  </div>
+
+  <h3>From tooth counts to ratios &mdash; the practical step</h3>
+  <p>The rolling-contact equation gives ratios in terms of <strong>pitch-circle radii</strong> &rho; &mdash; but radii are rarely marked on a real gear. What <em>is</em> always knowable is the <strong>number of teeth</strong> <em>N</em>. Because two meshing gears must have the same tooth size (same spacing along the pitch circle), their radii are proportional to their tooth counts:</p>
+  <div class="eqn">2&pi;&rho;<sub>x</sub>/N<sub>x</sub> = 2&pi;&rho;<sub>y</sub>/N<sub>y</sub> &nbsp;&rarr;&nbsp; &rho;<sub>x</sub>/&rho;<sub>y</sub> = N<sub>x</sub>/N<sub>y</sub></div>
+  <p>So wherever a derivation gives you a ratio of radii, you may swap in the ratio of tooth counts. For the single-stage simple train of Example&nbsp;3.3, <em>R = &minus;&rho;<sub>3</sub>/&rho;<sub>2</sub> = &minus;N<sub>3</sub>/N<sub>2</sub></em>.</p>
+
+  <div class="card tool" aria-labelledby="ratio-tool-h">
+    <div class="tool-label"><span>Gear-ratio &amp; tooth-count calculator</span></div>
+    <h3 id="ratio-tool-h" style="margin-top:.3em">Compute R, n<sub>t</sub>, and n<sub>s</sub> for a train</h3>
+    <p>Enter the input speed and torque, set the tooth counts for one or more stages, and choose external or internal mesh per stage. The tool computes the overall gear ratio and the resulting output speed and torque &mdash; and shows that input power equals output power (ideal, lossless).</p>
+    <div class="controls">
+      <div class="ctrl"><label for="grStages">Number of stages · <span class="val" id="grStagesv">1</span></label><input type="range" id="grStages" min="1" max="3" value="1" step="1"></div>
+      <div class="ctrl"><label for="grWin">Input speed &omega;<sub>in</sub> (rpm)</label><input type="number" id="grWin" value="1800" min="0" step="10"></div>
+      <div class="ctrl"><label for="grTin">Input torque T<sub>in</sub> (N&middot;m)</label><input type="number" id="grTin" value="10" min="0" step="0.5"></div>
+    </div>
+    <div id="grStageWrap"></div>
+    <div class="controls">
+      <button type="button" id="grCalc">Compute ratios</button>
+    </div>
+    <div class="readout" id="grReadout" aria-live="polite"></div>
+    <div class="verdict" id="grVerdict" aria-live="polite"></div>
+    <p class="figref">Each stage multiplies the running ratio. External mesh contributes a sign flip; internal mesh does not. Power check uses P = T&middot;&omega;.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; reading a gearbox spec sheet</span>
+    <p>When a catalog lists a planetary gearhead as &ldquo;100:1,&rdquo; that is the gear ratio <em>R</em>. It tells you the motor turns 100 times for each output turn, the output torque is about 100&times; the motor torque (minus friction losses), and the output speed is 1/100 of the motor speed. A &ldquo;4.10:1 final drive&rdquo; in a car axle means the driveshaft turns 4.10 times per wheel revolution &mdash; multiplying engine torque to the wheels by 4.10. You can now derive every one of those numbers from tooth counts.</p>
+  </div>
+</section>
+
+<!-- ============ 3.7 · PLANETARY ============ -->
+<section id="planetary" aria-labelledby="pl-h">
+  <span class="sec-tag">Section 3.7</span>
+  <h2 id="pl-h">Planetary (epicyclic) geartrains</h2>
+  <p>In a <strong>planetary geartrain</strong> the arm is no longer fixed &mdash; it rotates, carrying one or more <strong>planet</strong> gears in orbit around a central <strong>sun</strong> gear, while the planets also mesh with an outer internally-toothed <strong>ring</strong> (annulus). Three coaxial members &mdash; sun, carrier (arm), ring &mdash; share one axis. This is the geartrain you cannot build from fixed centers, and it is the most important geartrain in modern machinery.</p>
+
+  <div class="card">
+    <h4>The three members</h4>
+    <ul class="clean">
+      <li><strong>Sun</strong> &mdash; the central gear on the main axis.</li>
+      <li><strong>Planet(s)</strong> &mdash; gears that mesh with the sun (external contact) and the ring (internal contact), while orbiting.</li>
+      <li><strong>Ring / annulus</strong> &mdash; the outer internally-toothed gear.</li>
+      <li><strong>Carrier (arm)</strong> &mdash; the link that holds the planet centers and rotates with their orbit. This is body <em>z</em>.</li>
+    </ul>
+  </div>
+
+  <h3>Why the arm term matters now</h3>
+  <p>For a simple train we set &Delta;&theta;<sub>z</sub> = 0 and the rolling-contact equations simplified. In a planetary train the arm <em>moves</em>, so &Delta;&theta;<sub>z</sub> &ne; 0 and you must keep every arm term in Equations&nbsp;(3.4) and (3.6). The payoff is remarkable flexibility: by choosing which of the three members you <strong>hold fixed</strong>, the <em>same</em> hardware delivers three completely different ratios.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; the Moon orbiting the Earth</span>
+    <p>The Moon orbits the Earth (that orbit is the <em>arm</em>&rsquo;s rotation) while also rotating on its own axis. Because the two motions are locked together, we always see the same face of the Moon. A planet gear does the same dance: it spins on its post <em>and</em> rides around the sun, and the rolling-contact equations are simply the bookkeeping that keeps the &ldquo;spin&rdquo; and the &ldquo;orbit&rdquo; consistent. This is exactly why planetary trains are also called <em>epicyclic</em> &mdash; &ldquo;epi-cyclic&rdquo; means a circle riding on a circle.</p>
+  </div>
+
+  <div class="card tool" aria-labelledby="pl-tool-h">
+    <div class="tool-label"><span>Animated planetary gear train</span></div>
+    <h3 id="pl-tool-h" style="margin-top:.3em">Hold a member, drive another, watch the ratio change</h3>
+    <p>Set the sun and ring tooth counts (the planet count follows from N<sub>ring</sub> = N<sub>sun</sub> + 2N<sub>planet</sub>). Choose which member to <strong>hold fixed</strong>, then drive the input. The animation shows the planets spinning and orbiting; the readout reports the resulting output speed and the effective ratio. Notice how fixing the ring (the common case) makes the carrier the output with a large reduction.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="plNs">Sun teeth N<sub>sun</sub> · <span class="val" id="plNsv">24</span></label><input type="range" id="plNs" min="12" max="40" value="24" step="2"></div>
+      <div class="ctrl"><label for="plNp">Planet teeth N<sub>planet</sub> · <span class="val" id="plNpv">18</span></label><input type="range" id="plNp" min="10" max="30" value="18" step="1"></div>
+    </div>
+    <div class="controls">
+      <label for="plFixed" style="font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; text-transform:uppercase;">Hold fixed:</label>
+      <button type="button" id="plFixRing" aria-pressed="true">Ring</button>
+      <button type="button" id="plFixSun" aria-pressed="false">Sun</button>
+      <button type="button" id="plFixCarrier" aria-pressed="false">Carrier</button>
+    </div>
+    <div class="controls">
+      <button type="button" id="plSpin">Run animation</button>
+      <button type="button" class="secondary" id="plReset">Reset</button>
+    </div>
+    <div class="stage-wrap">
+      <svg id="plStage" class="stage" viewBox="0 0 600 380" role="img" aria-label="A planetary gear train with a central sun gear, three orbiting planet gears held by a carrier, and an outer ring gear. One member is held fixed while another is driven.">
+      </svg>
+    </div>
+    <div class="readout" id="plReadout" aria-live="polite"></div>
+    <p class="figref">Recreates the spirit of FIGURE 3.22. Fixed-ring reduction: &omega;<sub>carrier</sub>/&omega;<sub>sun</sub> = N<sub>sun</sub>/(N<sub>sun</sub>+N<sub>ring</sub>).</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; the Prius, your drill, and every automatic transmission</span>
+    <p>Planetary gearsets are everywhere precisely because of the &ldquo;hold one member, get a new ratio&rdquo; trick. An <strong>automatic transmission</strong> engages brakes and clutches to hold different members, producing each forward gear from one compact gearset. A <strong>cordless drill</strong> stacks two or three planetary stages to turn a fast, weak motor into a slow, strong chuck. And the <strong>Toyota Prius</strong> hybrid uses a single planetary set as a &ldquo;power-split device,&rdquo; blending engine and electric-motor inputs into one output &mdash; exploiting the planetary&rsquo;s ability to combine two inputs into one. A <strong>wind-turbine gearbox</strong> runs the trick in reverse, stepping a slow, powerful rotor up to generator speed.</p>
+  </div>
+</section>
+
+
+<!-- ============ G · GEAR-TOOTH GEOMETRY (deep dive) ============ -->
+<section id="geargeom" aria-labelledby="gg-h">
+  <span class="sec-tag">Going Deeper</span>
+  <h2 id="gg-h">Gear-tooth geometry &mdash; why the equations work</h2>
+  <p>Everything above modeled gears as smooth <strong>pitch circles</strong> rolling without slipping. Real gears have <em>teeth</em>, and teeth obviously do not roll smoothly &mdash; they push on each other. This section answers the question that should be nagging you: <em>how can toothed gears behave exactly like rolling pitch circles?</em> The answer is a beautiful piece of geometry called the <strong>involute</strong>, and understanding it tells you how real gears are specified, meshed, and kept from destroying themselves.</p>
+
+  <h3>The fundamental law of gearing</h3>
+  <p>For two gears to deliver a perfectly <strong>constant</strong> speed ratio (the whole reason geartrains exist), their tooth profiles must satisfy one rule:</p>
+  <div class="defn">
+    <strong>Fundamental law of gearing:</strong> the common normal to the two tooth surfaces at their point of contact must pass through a fixed point on the line of centers, called the <strong>pitch point</strong>, in <em>every</em> position of the mesh.
+  </div>
+  <p>If that holds, the two profiles are called <strong>conjugate</strong> and the angular-velocity ratio stays constant throughout the mesh. Many curves can be conjugate, but one is so convenient that it dominates all modern gearing: the involute of a circle.</p>
+
+  <div class="callout">
+    <span class="h">Rolling at one point, sliding everywhere else</span>
+    <p style="margin:.4em 0 0">Here is the subtlety from &sect;0 made precise: meshing teeth are in <strong>pure rolling only at the pitch point</strong>. At every other instant of the engagement there is some <em>sliding</em> between the surfaces. The involute&rsquo;s genius is that despite this sliding, the <em>net kinematic effect</em> is identical to two pitch circles rolling without slip &mdash; so all of &sect;3.1&ndash;3.7 holds exactly. (This is also why gears need lubrication: that sliding generates friction and heat.)</p>
+  </div>
+
+  <h3>The involute, built from a string</h3>
+  <p>Take a circle &mdash; the <strong>base circle</strong> of radius <em>r<sub>b</sub></em> &mdash; and wrap a taut string around it. Hold a pencil at the end of the string and unwind it, keeping it tight. The curve the pencil traces is the <strong>involute</strong>. That is the working face of a standard gear tooth.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; unspooling a yo-yo against a wall</span>
+    <p>Imagine the string of a yo-yo wrapped around its axle, and you unspool it while keeping it taut. The tip of the string sweeps a curve that is always perpendicular to the string &mdash; and the string is always tangent to the axle. That &ldquo;always tangent to the base circle, always perpendicular to the path&rdquo; property is exactly what makes the involute satisfy the law of gearing: the line of contact (the taut string) keeps a fixed direction, so the contact normal always passes through the same pitch point.</p>
+  </div>
+
+  <h3>Pressure angle &mdash; the tilt of the push</h3>
+  <p>Because contact happens along that taut-string direction (the <strong>line of action</strong>), the force one tooth exerts on another is not aimed straight along the motion &mdash; it is tilted. The angle between the line of action and the common tangent to the pitch circles is the <strong>pressure angle</strong> <em>&phi;</em>. It connects the base and pitch circles by a wonderfully simple relation:</p>
+  <div class="eqn">r<sub>b</sub> = r &middot; cos&phi; <span class="lbl">base circle</span></div>
+  <p>Standard gears use <em>&phi;</em> = 20&deg; (older systems used 14.5&deg;; some heavy-duty gears use 25&deg;). A larger pressure angle makes teeth stubbier and stronger but increases the separating force that tries to push the gears apart.</p>
+
+  <div class="card tool" aria-labelledby="inv-tool-h">
+    <div class="tool-label"><span>Involute &amp; pressure-angle explorer</span></div>
+    <h3 id="inv-tool-h" style="margin-top:.3em">Build an involute tooth and tilt the line of action</h3>
+    <p>Adjust the pressure angle and base radius. The tool draws the base circle, the pitch circle (r = r<sub>b</sub>/cos&phi;), the involute profile generated from the base circle, and the line of action tilted at &phi; through the pitch point. Watch how raising &phi; tilts the line of action and fattens the tooth.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="invPhi">Pressure angle &phi; · <span class="val" id="invPhiv">20°</span></label><input type="range" id="invPhi" min="10" max="30" value="20" step="1"></div>
+      <div class="ctrl"><label for="invRb">Base radius r<sub>b</sub> · <span class="val" id="invRbv">90</span></label><input type="range" id="invRb" min="60" max="120" value="90" step="2"></div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="invStage" class="stage" viewBox="0 0 600 360" role="img" aria-label="A base circle with an involute curve unwound from it, the larger pitch circle, and the line of action tilted at the pressure angle through the pitch point.">
+      </svg>
+    </div>
+    <div class="readout" id="invReadout" aria-live="polite"></div>
+    <p class="figref">Involute generated by unwinding a string from the base circle; pitch radius r = r<sub>b</sub>/cos&phi;.</p>
+  </div>
+
+  <h3>Tooth size: module and diametral pitch</h3>
+  <p>Two gears can only mesh if their teeth are the <em>same size</em>. Tooth size is captured by one number, expressed two ways:</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Module m (metric)</h4>
+      <div class="eqn" style="font-size:.96rem">m = d / N <span class="lbl">mm per tooth</span></div>
+      <p style="margin:.3em 0 0">Pitch diameter <em>d</em> divided by tooth count <em>N</em>. A module-2 gear with 40 teeth has a pitch diameter of 80&nbsp;mm. Two gears mesh only if they share the same module.</p>
+    </div>
+    <div class="card">
+      <h4>Diametral pitch P (US)</h4>
+      <div class="eqn" style="font-size:.96rem">P = N / d <span class="lbl">teeth per inch</span></div>
+      <p style="margin:.3em 0 0">Tooth count per inch of pitch diameter &mdash; the inverse idea. Note <em>m</em> and <em>P</em> are reciprocals (with a unit conversion): big module = coarse, big teeth; big diametral pitch = fine, small teeth.</p>
+    </div>
+  </div>
+  <p>Because <em>d = m&middot;N</em>, the pitch radius is <em>&rho; = r = m&middot;N/2</em>. Substitute that into any ratio from &sect;3.6 and the module cancels &mdash; which is exactly why <strong>tooth counts alone</strong> determine the gear ratio, <em>R = &minus;N<sub>3</sub>/N<sub>2</sub></em>. The module sets the <em>size</em> of the gears; the tooth-count ratio sets the <em>ratio</em>.</p>
+
+  <div class="real-world">
+    <span class="h">In the real world&hellip; reading a gear catalog</span>
+    <p>A gear listed as &ldquo;module 1.5, 20&deg; PA, 24T&rdquo; tells you everything: 1.5&nbsp;mm of pitch diameter per tooth (so d = 36&nbsp;mm), a 20&deg; pressure angle, 24 teeth. To mesh with it you need <em>another</em> module-1.5, 20&deg; gear &mdash; any tooth count you like, and the count you pick sets the ratio. Mixing modules or pressure angles is the classic beginner mistake that leaves you with two gears that simply will not run together.</p>
+  </div>
+
+  <h3>Interference and undercutting</h3>
+  <p>The involute profile is only defined <em>outside</em> the base circle. If a small gear with few teeth meshes with a much larger one, the tip of the big gear&rsquo;s tooth can try to contact the little gear <em>below</em> its base circle, where no proper involute exists. The result is <strong>interference</strong>: the tip gouges the root of the mating tooth. When gears are cut, this shows up as <strong>undercutting</strong> &mdash; the cutter removes material at the tooth root, weakening it.</p>
+
+  <div class="card">
+    <h4>Three standard cures for interference</h4>
+    <ul class="clean">
+      <li><strong>Use more teeth</strong> on the pinion. With a 20&deg; pressure angle, a pinion of about 17 or more teeth avoids interference against a rack &mdash; a rule of thumb worth memorizing.</li>
+      <li><strong>Increase the pressure angle</strong> (e.g. 20&deg; &rarr; 25&deg;), which shrinks the non-involute region near the base circle.</li>
+      <li><strong>Profile shift</strong> (addendum modification): cut the teeth slightly farther out so contact stays above the base circle.</li>
+    </ul>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip; a key cut too deep</span>
+    <p>Interference is like a key whose teeth are cut so deep they bite into the body of the lock rather than just turning the pins. The fix is the same in spirit: don&rsquo;t cut where the working surface isn&rsquo;t supposed to reach. A gear avoids &ldquo;cutting too deep&rdquo; by having enough teeth, a steeper pressure angle, or a shifted profile so all contact stays on the valid involute region above the base circle.</p>
+  </div>
+
+  <div class="callout">
+    <span class="h">How this connects back to the chapter</span>
+    <p style="margin:.4em 0 0">None of this geometry changes the rolling-contact equations &mdash; that is the whole point of the involute. The pitch circles still roll without slipping, so &rho;<sub>x</sub>&Delta;&theta;<sub>x/z</sub> = &#8723;&rho;<sub>y</sub>&Delta;&theta;<sub>y/z</sub> and R = &minus;N<sub>3</sub>/N<sub>2</sub> remain exactly true. Gear-tooth geometry is what lets a manufacturable, force-transmitting part <em>behave</em> like the idealized rolling circle your equations assume.</p>
+  </div>
+</section>
+
+<!-- ============ WORKED EXAMPLES ============ -->
+<section id="examples" aria-labelledby="ex-h">
+  <span class="sec-tag">Worked Examples</span>
+  <h2 id="ex-h">Worked examples</h2>
+  <p>Two complete examples from the course text, expanded with commentary. Work through each with pencil in hand, then expand the solution to check yourself.</p>
+
+  <h3>Example 3.1 &mdash; A five-bar mechanism with a rolling contact</h3>
+  <div class="card">
+    <p><strong>Problem.</strong> A five-bar mechanism has one of its coupler links, body&nbsp;4, in <em>rolling contact with the ground</em> (body&nbsp;1). Link&nbsp;5 is the &ldquo;arm&rdquo; connecting the rolling centers. Derive the mechanism&rsquo;s position equations and deduce the number of degrees of freedom.</p>
+
+    <div class="callout">
+      <span class="h">A puzzle about mobility</span>
+      <p style="margin:.4em 0 0">Run Gr&uuml;bler&rsquo;s criterion on the full five links (with the arm) and you get <em>F</em>&nbsp;=&nbsp;0 &mdash; it looks locked. The arm, link&nbsp;5, is the culprit: it is not <em>kinematically</em> necessary, only <em>practically</em> necessary to keep body&nbsp;4 touching the ground. Remove link&nbsp;5 from the count and Gr&uuml;bler gives the correct <em>F</em>&nbsp;=&nbsp;1. This is a classic case where a redundant practical link fools the mobility formula.</p>
+    </div>
+
+    <details>
+      <summary>Show the full solution</summary>
+      <div class="body">
+        <p><strong>Step 1 &mdash; Vector loop.</strong> A suitable loop gives r&#772;<sub>2</sub> + r&#772;<sub>3</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>5</sub> + r&#772;<sub>1</sub> = 0&#772;. With &theta;<sub>1</sub> = 0 the two scalar component equations are:</p>
+        <div class="eqn">r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>5</sub>cos&theta;<sub>5</sub> + r<sub>1</sub> = 0 <span class="lbl">(3.11)</span></div>
+        <div class="eqn">r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>3</sub>sin&theta;<sub>3</sub> &minus; r<sub>4</sub>sin&theta;<sub>4</sub> &minus; r<sub>5</sub>sin&theta;<sub>5</sub> = 0 <span class="lbl">(3.12)</span></div>
+        <p><strong>Step 2 &mdash; Rolling-contact equation.</strong> Body&nbsp;4 rolls <em>externally</em> on body&nbsp;1, with arm body&nbsp;5. Using Equation&nbsp;(3.1) with <em>x</em>=4, <em>y</em>=1, <em>z</em>=5:</p>
+        <div class="eqn">&rho;<sub>4</sub>&Delta;&theta;<sub>4/5</sub> = &minus;&rho;<sub>1</sub>&Delta;&theta;<sub>1/5</sub></div>
+        <p>that is, &rho;<sub>4</sub>(&Delta;&theta;<sub>4</sub> &minus; &Delta;&theta;<sub>5</sub>) = &minus;&rho;<sub>1</sub>(&Delta;&theta;<sub>1</sub> &minus; &Delta;&theta;<sub>5</sub>). Since body&nbsp;1 is fixed, &Delta;&theta;<sub>1</sub> = 0, so:</p>
+        <div class="eqn">&rho;<sub>4</sub>(&Delta;&theta;<sub>4</sub> &minus; &Delta;&theta;<sub>5</sub>) = &rho;<sub>1</sub>&Delta;&theta;<sub>5</sub></div>
+        <p><strong>Step 3 &mdash; Incorporate the assembly configuration</strong> and write in homogeneous form:</p>
+        <div class="eqn">&rho;<sub>4</sub>[(&theta;<sub>4</sub> &minus; &theta;<sub>4<sub>i</sub></sub>) &minus; (&theta;<sub>5</sub> &minus; &theta;<sub>5<sub>i</sub></sub>)] = &rho;<sub>1</sub>(&theta;<sub>5</sub> &minus; &theta;<sub>5<sub>i</sub></sub>)</div>
+        <div class="eqn">&rho;<sub>4</sub>(&theta;<sub>4</sub> &minus; &theta;<sub>4<sub>i</sub></sub>) &minus; (&rho;<sub>1</sub> + &rho;<sub>4</sub>)(&theta;<sub>5</sub> &minus; &theta;<sub>5<sub>i</sub></sub>) = 0 <span class="lbl">(3.13)</span></div>
+        <p><strong>Step 4 &mdash; Count.</strong> Equations (3.11), (3.12), (3.13) are three position equations.</p>
+        <p><span class="pill p1">scalar knowns</span> &nbsp;r<sub>1</sub>, &theta;<sub>1</sub>=0, r<sub>2</sub>, r<sub>3</sub>, r<sub>4</sub>, r<sub>5</sub>, &rho;<sub>1</sub>, &rho;<sub>4</sub>, &theta;<sub>4<sub>i</sub></sub>, &theta;<sub>5<sub>i</sub></sub></p>
+        <p><span class="pill p2">scalar unknowns</span> &nbsp;&theta;<sub>2</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub>, &theta;<sub>5</sub></p>
+        <p><strong>Result.</strong> Three equations in four unknowns &rArr; one of the unknowns must be supplied as the input. The mechanism has <strong>one degree of freedom</strong> &mdash; matching the corrected Gr&uuml;bler result. Notice that the rolling radii (&rho;<sub>1</sub>, &rho;<sub>4</sub>) and the assembly-configuration angles (&theta;<sub>4<sub>i</sub></sub>, &theta;<sub>5<sub>i</sub></sub>) are <em>knowns</em>, exactly as &sect;3.4 promised.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3>Example 3.3 &mdash; Gear ratio of a single-stage simple geartrain</h3>
+  <div class="card">
+    <p><strong>Problem.</strong> In the single-stage simple geartrain (the two gears of &sect;3.5, with gear&nbsp;2 as input and gear&nbsp;3 as output), derive the position equation, deduce the degrees of freedom, and compute the gear ratio <em>R</em>.</p>
+
+    <details>
+      <summary>Show the full solution</summary>
+      <div class="body">
+        <p><strong>Step 1 &mdash; The vector loop is meaningless.</strong> The only loop vector r&#772;<sub>1</sub> runs between the two fixed centers and back, giving r&#772;<sub>1</sub> &minus; r&#772;<sub>1</sub> = 0&#772; &mdash; no information. As promised in &sect;3.5, the <em>only</em> meaningful equations for a geartrain are rolling-contact equations.</p>
+        <p><strong>Step 2 &mdash; Rolling-contact equation.</strong> The contact is external (gear 3 = <em>x</em>, gear 2 = <em>y</em>, ground = arm = body 1 = <em>z</em>):</p>
+        <div class="eqn">&rho;<sub>3</sub>&Delta;&theta;<sub>3/1</sub> = &minus;&rho;<sub>2</sub>&Delta;&theta;<sub>2/1</sub></div>
+        <div class="eqn">&rho;<sub>3</sub>(&Delta;&theta;<sub>3</sub> &minus; &Delta;&theta;<sub>1</sub>) = &minus;&rho;<sub>2</sub>(&Delta;&theta;<sub>2</sub> &minus; &Delta;&theta;<sub>1</sub>)</div>
+        <p>Body&nbsp;1 (the arm) is fixed, so &Delta;&theta;<sub>1</sub> = 0 (this is what makes it a <em>simple</em> train):</p>
+        <div class="eqn">&rho;<sub>3</sub>&Delta;&theta;<sub>3</sub> = &minus;&rho;<sub>2</sub>&Delta;&theta;<sub>2</sub> &nbsp;&rarr;&nbsp; &rho;<sub>3</sub>&Delta;&theta;<sub>3</sub> + &rho;<sub>2</sub>&Delta;&theta;<sub>2</sub> = 0 <span class="lbl">(3.25)</span></div>
+        <p><strong>Step 3 &mdash; Assembly configuration:</strong></p>
+        <div class="eqn">&rho;<sub>3</sub>(&theta;<sub>3</sub> &minus; &theta;<sub>3<sub>i</sub></sub>) + &rho;<sub>2</sub>(&theta;<sub>2</sub> &minus; &theta;<sub>2<sub>i</sub></sub>) = 0</div>
+        <p><span class="pill p1">scalar knowns</span> &nbsp;&rho;<sub>3</sub>, &rho;<sub>2</sub>, &theta;<sub>2<sub>i</sub></sub>, &theta;<sub>3<sub>i</sub></sub> &nbsp;&middot;&nbsp; <span class="pill p2">scalar unknowns</span> &nbsp;&theta;<sub>2</sub>, &theta;<sub>3</sub></p>
+        <p>One equation, two unknowns &rArr; <strong>one degree of freedom</strong>. Supply the input &theta;<sub>2</sub> and the output &theta;<sub>3</sub> follows.</p>
+        <p><strong>Step 4 &mdash; Gear ratio.</strong> From Equation&nbsp;(3.25), with <em>R</em> = &Delta;&theta;<sub>in</sub>/&Delta;&theta;<sub>out</sub> = &Delta;&theta;<sub>2</sub>/&Delta;&theta;<sub>3</sub>:</p>
+        <div class="eqn">R = &Delta;&theta;<sub>2</sub>/&Delta;&theta;<sub>3</sub> = &minus;&rho;<sub>3</sub>/&rho;<sub>2</sub> <span class="lbl">(3.26)</span></div>
+        <p>Because <em>R</em> &lt; 0, &Delta;&theta;<sub>2</sub> and &Delta;&theta;<sub>3</sub> are in <strong>opposite directions</strong> (external mesh). The torque ratio n<sub>t</sub> = &minus;R = &rho;<sub>3</sub>/&rho;<sub>2</sub> &gt; 0, so the driving torque T<sub>2</sub> and the load torque T<sub>3</sub> act in the same sense.</p>
+        <p><strong>Step 5 &mdash; Convert to tooth counts.</strong> Since meshing gears share tooth size, &rho;<sub>3</sub>/&rho;<sub>2</sub> = N<sub>3</sub>/N<sub>2</sub>, so the practical answer is:</p>
+        <div class="eqn" style="font-size:1.1rem">R = &minus;N<sub>3</sub>/N<sub>2</sub></div>
+        <p>You rarely know the pitch radii of a real gear, but you can always count teeth &mdash; so this is the form an engineer actually uses.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="analogy">
+    <span class="h">The thread connecting both examples</span>
+    <p>Both examples follow the identical recipe: write whatever vector loop equations exist, <em>add a rolling-contact equation for each rolling joint</em>, fold in the assembly-configuration initial values, then count knowns against unknowns to find the degrees of freedom. The geartrain example is just the limiting case where the loop equations vanish and the rolling-contact equation does all the work.</p>
+  </div>
+</section>
+
+<!-- ============ SELF-CHECK ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Self-Check</span>
+  <h2 id="quiz-h">Test yourself</h2>
+  <p>Ten questions across the whole chapter. Pick an answer for instant feedback and an explanation. Your running score: <span class="q-score" id="quizScore" aria-live="polite">0 / 0</span></p>
+  <div id="quizMount"></div>
+  <button type="button" class="secondary" id="quizReset" style="margin-top:14px">Reset self-check</button>
+</section>
+
+<!-- ============ VIDEOS ============ -->
+<section id="videos" aria-labelledby="vid-h">
+  <span class="sec-tag">Video Lectures</span>
+  <h2 id="vid-h">Watch &amp; reinforce</h2>
+  <p>Four short videos that reinforce the core ideas of this chapter. Watch each alongside the matching section &mdash; the first explains gears from the ground up, the second tours the types of geartrains (simple, compound, reverted, and epicyclic), the third animates the sun&ndash;planet&ndash;ring planetary set of &sect;3.7, and the fourth shows a differential: a planetary geartrain doing real work in a vehicle.</p>
+  <p class="ext-note">Videos are hosted on YouTube and play in-page; an internet connection is required to view them.</p>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/4ROtKKuSaBI?rel=0"
+        title="Gears Explained — mechanical engineering"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Gears Explained</h3>
+      <p style="margin:.3em 0 .2em">A from-the-ground-up tour of how gears mesh, why teeth let pitch circles roll without slipping, and how tooth counts set the speed and torque relationship. Watch this first to build the physical picture behind &sect;0 and the gear-geometry deep dive.</p>
+      <div class="video-tags"><span>Source: <b>The Engineering Mindset</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 0 Foundations &amp; &sect; G Gear Geometry</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/LmYhzHnMH9o?rel=0"
+        title="Gear Train and its Types — Simple, Compound, Reverted, Epicyclic"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Gear Trains and Their Types</h3>
+      <p style="margin:.3em 0 .2em">A 3D-animated survey of simple, compound, reverted, and epicyclic gear trains. Maps directly onto &sect;3.5: notice that the simple/compound trains hold their arms fixed (&Delta;&theta;_z = 0), while the epicyclic train lets the arm rotate &mdash; the exact distinction our equations make.</p>
+      <div class="video-tags"><span>Source: <b>CAD CAE Solidworks</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 3.5 Geartrains &amp; &sect; 3.6 Ratios</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="h">Notation bridge</span>
+    <p style="margin:.4em 0 0">Different sources use different letters for the rolling radius: our text uses &rho; (rho) for a pitch radius, while many gear videos use <em>r</em>, <em>d</em> (diameter), or jump straight to tooth counts <em>N</em>. They are interchangeable through &rho; &prop; <em>N</em> for meshing gears. When you watch, map whatever symbol the speaker uses onto our &ldquo;arc length = &rho;&middot;&Delta;&theta;&rdquo; picture.</p>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/QzTa3uBVSW0?rel=0"
+        title="Epicyclic gear train, sun and planet gear animation"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Epicyclic (Planetary) Set in Motion</h3>
+      <p style="margin:.3em 0 .2em">A clean animation of the sun&ndash;planet&ndash;ring arrangement with the carrier in orbit. Watch how the planet meshes <em>externally</em> with the sun and <em>internally</em> with the ring &mdash; the same minus/plus sign rules from &sect;3.1 and &sect;3.2 acting at once. Pair it with the animated planetary tool above.</p>
+      <div class="video-tags"><span>Source: <b>iBECK ENGINEERING</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 3.7 Planetary Geartrains</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/drZBnqIqfVk?rel=0"
+        title="Differential Gear Train — 3D Animation"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>The Differential — a Planetary Train at Work</h3>
+      <p style="margin:.3em 0 .2em">A car&rsquo;s differential is a planetary geartrain with a moving arm: it lets the two drive wheels turn at <em>different</em> speeds through a curve while still splitting torque between them. A perfect real-world payoff for &sect;3.7 &mdash; here the arm&rsquo;s rotation isn&rsquo;t a nuisance to solve around, it&rsquo;s the whole point.</p>
+      <div class="video-tags"><span>Source: <b>XL Machines 120</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 3.7 (planetary trains in the real world)</span>
+    </div>
+  </div>
+  <p>After watching, return to the <a href="#ratios">gear-ratio calculator</a> and the <a href="#planetary">animated planetary tool</a> and try to reproduce the ratios each video describes.</p>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rc-h">
+  <span class="sec-tag">Quick Reference</span>
+  <h2 id="rc-h">Chapter 3 formula card</h2>
+  <p>Everything at a glance &mdash; good for review and exam prep. Use your browser&rsquo;s print function to save just this card (interactive tools and navigation are hidden when printing).</p>
+  <div class="refcard">
+    <div class="rc-head"><span>ENGI 216 &middot; Ch.3 &mdash; Rolling Contacts &amp; Geartrains</span><span>&rho;&Delta;&theta;<sub>x/z</sub> = &#8723;&rho;&Delta;&theta;<sub>y/z</sub></span></div>
+    <div class="rc-body">
+      <div class="rc-grid">
+        <div class="rc-block">
+          <h4>Rolling-contact equations</h4>
+          <div class="rc-eq">Arc length: s = &rho;&middot;&Delta;&theta;</div>
+          <div class="rc-eq">External: &rho;<sub>x</sub>&Delta;&theta;<sub>x/z</sub> = &minus;&rho;<sub>y</sub>&Delta;&theta;<sub>y/z</sub> &nbsp;(3.1)</div>
+          <div class="rc-eq">Internal: &rho;<sub>x</sub>&Delta;&theta;<sub>x/z</sub> = +&rho;<sub>y</sub>&Delta;&theta;<sub>y/z</sub> &nbsp;(3.6)</div>
+          <div class="rc-eq">Flat: r<sub>y</sub>&minus;r<sub>y<sub>i</sub></sub> = &rho;<sub>x</sub>&Delta;&theta;<sub>x/z</sub> &nbsp;(3.8)</div>
+          <div class="rc-eq">&Delta;&theta;<sub>x/z</sub> = (&theta;<sub>x</sub>&minus;&theta;<sub>x<sub>i</sub></sub>) &minus; (&theta;<sub>z</sub>&minus;&theta;<sub>z<sub>i</sub></sub>)</div>
+        </div>
+        <div class="rc-block">
+          <h4>Geartrain ratios</h4>
+          <div class="rc-eq">Gear ratio: R = &Delta;&theta;<sub>in</sub>/&Delta;&theta;<sub>out</sub> &nbsp;(3.18)</div>
+          <div class="rc-eq">Torque: n<sub>t</sub> = T<sub>out</sub>/T<sub>in</sub> = &minus;R &nbsp;(3.19,3.21)</div>
+          <div class="rc-eq">Speed: n<sub>s</sub> = &omega;<sub>out</sub>/&omega;<sub>in</sub> = 1/R &nbsp;(3.22,3.24)</div>
+          <div class="rc-eq" style="font-weight:700">R = &minus;n<sub>t</sub> = 1/n<sub>s</sub></div>
+          <div class="rc-eq">Teeth: &rho;<sub>x</sub>/&rho;<sub>y</sub> = N<sub>x</sub>/N<sub>y</sub> &rArr; R = &minus;N<sub>3</sub>/N<sub>2</sub></div>
+        </div>
+        <div class="rc-block">
+          <h4>Definitions</h4>
+          <ul class="rc-list">
+            <li><span class="k">Rolling joint</span> two bodies that roll without slipping.</li>
+            <li><span class="k">Arm (z)</span> link joining the rolling centers; the reference for &Delta;&theta;.</li>
+            <li><span class="k">Assembly config</span> the initial values &theta;<sub>i</sub> that fix the start.</li>
+            <li><span class="k">Stage</span> = number of rolling contacts.</li>
+            <li><span class="k">Simple train</span> arm fixed (&Delta;&theta;<sub>z</sub>=0).</li>
+            <li><span class="k">Planetary</span> arm rotates (&Delta;&theta;<sub>z</sub>&ne;0).</li>
+          </ul>
+        </div>
+        <div class="rc-block">
+          <h4>Sign &amp; sense quick rule</h4>
+          <ul class="rc-list">
+            <li><span class="k">External mesh</span> opposite directions, R &lt; 0.</li>
+            <li><span class="k">Internal mesh</span> same direction, R &gt; 0.</li>
+            <li><span class="k">Flat / rack</span> rotation &harr; straight travel.</li>
+            <li><span class="k">Planetary fit</span> N<sub>ring</sub> = N<sub>sun</sub> + 2N<sub>planet</sub>.</li>
+            <li><span class="k">Fixed-ring</span> &omega;<sub>carrier</sub>/&omega;<sub>sun</sub> = N<sub>sun</sub>/(N<sub>sun</sub>+N<sub>ring</sub>).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Glossary</span>
+  <h2 id="gl-h">Key terms</h2>
+  <p>Search or scroll. <span class="q-score" id="glossCount">terms</span></p>
+  <div class="glossary-search">
+    <label for="glossInput" class="visually-hidden">Filter glossary terms</label>
+    <input type="text" id="glossInput" placeholder="Filter terms (e.g. planetary, arm, ratio)&hellip;" autocomplete="off">
+  </div>
+  <dl class="gloss-list" id="glossList"></dl>
+  <p class="gloss-empty" id="glossEmpty" hidden>No terms match that search.</p>
+</section>
+
+<!-- ============ RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">External Resources</span>
+  <h2 id="res-h">Go deeper</h2>
+  <p>Curated outside material for review and enrichment. All links open in a new tab (look for the <span class="ext-note">↗ new tab</span> indicator).</p>
+
+  <div class="res-group">
+    <h3>Foundations &amp; lessons</h3>
+    <div class="res-grid" id="resTextbooks"></div>
+  </div>
+  <div class="res-group">
+    <h3>Interactive simulators</h3>
+    <div class="res-grid" id="resSimulators"></div>
+  </div>
+  <div class="res-group">
+    <h3>Concept refreshers</h3>
+    <div class="res-grid" id="resConcepts"></div>
+  </div>
+</section>
+
+<!-- ============ RECAP ============ -->
+<section id="recap" aria-labelledby="recap-h">
+  <span class="sec-tag">Objectives Recap</span>
+  <h2 id="recap-h">What you should now be able to do</h2>
+  <ul class="clean">
+    <li>Recognize a <strong>rolling contact</strong> in a mechanism and explain why the vector loop method alone cannot describe it.</li>
+    <li>Write the <strong>external</strong> (&minus;), <strong>internal</strong> (+), and <strong>flat-surface</strong> rolling-contact equations and expand them with assembly-configuration initial values.</li>
+    <li>Identify the <strong>arm</strong> (body <em>z</em>) and measure rotations relative to it.</li>
+    <li>Include the <strong>assembly configuration</strong> in a position analysis and explain why identical changes from different starts give different results.</li>
+    <li>Classify a geartrain as <strong>simple</strong> or <strong>planetary</strong> and count its stages.</li>
+    <li>Compute the <strong>gear ratio</strong> <em>R</em>, <strong>torque ratio</strong> <em>n<sub>t</sub></em> = &minus;<em>R</em>, and <strong>speed ratio</strong> <em>n<sub>s</sub></em> = 1/<em>R</em>, and convert pitch-radius ratios into tooth-count ratios.</li>
+    <li>Explain how a <strong>planetary set</strong> produces multiple ratios from one piece of hardware by holding different members.</li>
+  </ul>
+
+  <div class="real-world">
+    <span class="h">Looking ahead</span>
+    <p>You now have the complete <em>position</em> toolkit: vector loops (Ch.&nbsp;2) plus rolling-contact equations (Ch.&nbsp;3). The next step in the course is to differentiate these position equations with respect to time to get <strong>velocities</strong> and <strong>accelerations</strong> &mdash; and the rolling-contact equations differentiate just as cleanly, turning the constant gear ratio <em>R</em> into the constant speed ratio you already met as <em>n<sub>s</sub></em>.</p>
+  </div>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Lecture progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+    <span id="readpct" class="q-score" aria-live="polite">0%</span>
+  </div>
+</div>
+
+<footer class="site">
+  <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · 2026</p>
+  <p style="margin-top:6px">Terminology and worked examples follow the course text (Stani&scaron;i&cacute;, <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em>). The rolling-contact equations, geartrain classification, and the worked examples are presented for instructional use. Diagrams are original SVG renderings created for this module.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var n = document.createElementNS(SVGNS, tag);
+    if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); }
+    return n;
+  }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#000";
+  }
+  function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+  function txt(stage,x,y,s,color,size,anchor,weight){
+    var t=el("text",{x:x,y:y,fill:color||cssVar('--ink'),"font-size":size||12,"text-anchor":anchor||"middle"});
+    if(weight) t.setAttribute("font-weight",weight);
+    t.textContent=s; stage.appendChild(t); return t;
+  }
+  function circle(stage,cx,cy,r,stroke,w,fill){
+    stage.appendChild(el("circle",{cx:cx,cy:cy,r:r,fill:fill||"none",stroke:stroke,"stroke-width":w||2}));
+  }
+  function line(stage,x1,y1,x2,y2,color,w,dash){
+    var o={x1:x1,y1:y1,x2:x2,y2:y2,stroke:color,"stroke-width":w||2};
+    if(dash) o["stroke-dasharray"]=dash;
+    stage.appendChild(el("line",o));
+  }
+  function radiusMark(stage,cx,cy,r,ang,color){
+    // a painted reference radius on a wheel, ang in radians (math, y-up)
+    var x2=cx + r*Math.cos(ang), y2=cy - r*Math.sin(ang);
+    line(stage,cx,cy,x2,y2,color,3);
+    stage.appendChild(el("circle",{cx:x2,cy:y2,r:4,fill:color}));
+  }
+  function gearTeeth(stage,cx,cy,r,n,ang,color){
+    // light decorative teeth ticks around a pitch circle
+    var g=el("g",{stroke:color,"stroke-width":1.5});
+    n=Math.max(6,Math.min(60,Math.round(n)));
+    for(var i=0;i<n;i++){
+      var a=ang + i*2*Math.PI/n;
+      var x1=cx+r*Math.cos(a), y1=cy-r*Math.sin(a);
+      var x2=cx+(r+5)*Math.cos(a), y2=cy-(r+5)*Math.sin(a);
+      g.appendChild(el("line",{x1:x1,y1:y1,x2:x2,y2:y2}));
+    }
+    stage.appendChild(g);
+  }
+  function groundHatch(stage,x,y,w){
+    line(stage,x-w/2,y,x+w/2,y,cssVar('--ground-fill'),2);
+    var g=el("g",{stroke:cssVar('--ground-fill'),"stroke-width":1.4});
+    for(var i=-w/2;i<=w/2;i+=8){ g.appendChild(el("line",{x1:x+i,y1:y,x2:x+i-7,y2:y+9})); }
+    stage.appendChild(g);
+  }
+  function pin(stage,x,y){
+    stage.appendChild(el("circle",{cx:x,cy:y,r:5,fill:cssVar('--panel'),stroke:cssVar('--ink'),"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:x,cy:y,r:1.6,fill:cssVar('--ink')}));
+  }
+  function degTxt(d){ return Math.round(d)+"\u00B0"; }
+
+  /* ============================================================
+     0 · ARC LENGTH / ROLLING TOOL
+     ============================================================ */
+  (function(){
+    var stage=$("arcStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var rx=+$("arcRx").value, ry=+$("arcRy").value, rot=+$("arcRot").value;
+      $("arcRxv").textContent=rx; $("arcRyv").textContent=ry; $("arcRotv").textContent=degTxt(rot);
+      var rotR=rot*Math.PI/180;
+      // place two externally touching circles, contact on the line between them
+      var cyx=170, cyy=170;
+      var cxx=180, cyx2=170;          // small wheel center
+      var cyx_x=cxx, cyx_y=cyy;
+      var cx2=cyx_x + rx + ry, cy2=cyy; // large wheel center to the right
+      // small wheel
+      circle(stage,cyx_x,cyx_y,rx,cssVar('--accent'),2.5);
+      // large wheel
+      circle(stage,cx2,cy2,ry,cssVar('--accent-dk'),2.5);
+      // arc length s = rx*rot ; the large wheel turns rot_y = -(rx/ry)*rot (opposite, external)
+      var rotY = (rx/ry)*rot; // magnitude
+      // highlight arc on small wheel from contact point (pointing toward large center = angle 0 in math? contact is to +x)
+      function arcPath(cx,cy,r,a0,a1,color){
+        // a0,a1 in math radians, y-up; draw arc
+        var x0=cx+r*Math.cos(a0), y0=cy-r*Math.sin(a0);
+        var x1=cx+r*Math.cos(a1), y1=cy-r*Math.sin(a1);
+        var large=(Math.abs(a1-a0)>Math.PI)?1:0;
+        var sweep=(a1>a0)?0:1; // y-down flips sweep
+        stage.appendChild(el("path",{d:"M "+x0+" "+y0+" A "+r+" "+r+" 0 "+large+" "+sweep+" "+x1+" "+y1,fill:"none",stroke:color,"stroke-width":5,"stroke-linecap":"round"}));
+      }
+      // small wheel contact at angle 0 (+x toward large wheel)
+      arcPath(cyx_x,cyx_y,rx,0,rotR,cssVar('--accent-2'));
+      // large wheel contact at angle PI (-x toward small wheel); it turns opposite sense
+      arcPath(cx2,cy2,ry,Math.PI,Math.PI+ (rotY*Math.PI/180?0:0) ,cssVar('--accent-2'));
+      // (compute large arc end properly)
+      var endL = Math.PI - rotY*Math.PI/180; // opposite direction
+      // redraw large arc correctly
+      (function(){
+        var r=ry,cx=cx2,cy=cy2,a0=Math.PI,a1=endL,color=cssVar('--accent-2');
+        var x0=cx+r*Math.cos(a0), y0=cy-r*Math.sin(a0);
+        var x1=cx+r*Math.cos(a1), y1=cy-r*Math.sin(a1);
+        var large=(Math.abs(a1-a0)>Math.PI)?1:0;
+        var sweep=(a1>a0)?0:1;
+        stage.appendChild(el("path",{d:"M "+x0+" "+y0+" A "+r+" "+r+" 0 "+large+" "+sweep+" "+x1+" "+y1,fill:"none",stroke:color,"stroke-width":5,"stroke-linecap":"round"}));
+      })();
+      // reference radii
+      radiusMark(stage,cyx_x,cyx_y,rx,rotR,cssVar('--ink'));
+      radiusMark(stage,cx2,cy2,ry,endL,cssVar('--ink'));
+      // centers
+      pin(stage,cyx_x,cyx_y); pin(stage,cx2,cy2);
+      // contact point dot
+      stage.appendChild(el("circle",{cx:cyx_x+rx,cy:cyy,r:4,fill:cssVar('--accent-2')}));
+      // labels
+      txt(stage,cyx_x,cyx_y-rx-8,"\u03C1\u2093="+rx,cssVar('--accent'),13,"middle","700");
+      txt(stage,cx2,cy2-ry-8,"\u03C1\u1d67="+ry,cssVar('--accent-dk'),13,"middle","700");
+      var arc=(rx*rotR).toFixed(0);
+      $("arcReadout").innerHTML =
+        "<span>Arc laid down s = \u03C1\u2093\u00B7\u0394\u03B8\u2093 = <b>"+arc+"</b> (svg units)</span>"+
+        "<span>Small wheel turned <b>"+degTxt(rot)+"</b></span>"+
+        "<span>Large wheel must turn <b>"+rotY.toFixed(1)+"\u00B0</b> (opposite sense)</span>"+
+        "<span>Ratio \u0394\u03B8\u1d67/\u0394\u03B8\u2093 = \u03C1\u2093/\u03C1\u1d67 = <b>"+(rx/ry).toFixed(2)+"</b></span>";
+    }
+    ["arcRx","arcRy","arcRot"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     3.1 · EXTERNAL ROLLING CONTACT SIMULATOR
+     ============================================================ */
+  (function(){
+    var stage=$("exStage"); if(!stage) return;
+    var spinning=false, raf=null;
+    function render(){
+      clear(stage);
+      var rx=+$("exRx").value, ry=+$("exRy").value, drive=+$("exDrive").value;
+      $("exRxv").textContent=rx; $("exRyv").textContent=ry; $("exDrivev").textContent=degTxt(drive);
+      var driveR=drive*Math.PI/180;
+      var cx1=170, cy=180, cx2=cx1+rx+ry;
+      // recenter so both fit
+      var span=(cx2+ry)-(cx1-rx);
+      var shift=(600-span)/2-(cx1-rx);
+      cx1+=shift; cx2+=shift;
+      // arm connecting centers
+      line(stage,cx1,cy,cx2,cy,cssVar('--ink-soft'),5);
+      txt(stage,(cx1+cx2)/2,cy+22,"arm (z, fixed)",cssVar('--ink-soft'),11,"middle");
+      // gears
+      gearTeeth(stage,cx1,cy,rx,Math.max(8,rx/4),driveR,cssVar('--accent'));
+      circle(stage,cx1,cy,rx,cssVar('--accent'),2.5);
+      var driveY = -(rx/ry)*driveR; // opposite sense
+      gearTeeth(stage,cx2,cy,ry,Math.max(8,ry/4),driveY+Math.PI,cssVar('--accent-dk'));
+      circle(stage,cx2,cy,ry,cssVar('--accent-dk'),2.5);
+      // reference marks
+      radiusMark(stage,cx1,cy,rx,driveR,cssVar('--accent-2'));
+      radiusMark(stage,cx2,cy,ry,driveY+Math.PI,cssVar('--accent-2'));
+      // centers + contact
+      pin(stage,cx1,cy); pin(stage,cx2,cy);
+      stage.appendChild(el("circle",{cx:cx1+rx,cy:cy,r:4,fill:cssVar('--bad')}));
+      txt(stage,cx1,cy-rx-10,"x (input)",cssVar('--accent'),12,"middle","700");
+      txt(stage,cx2,cy-ry-10,"y (output)",cssVar('--accent-dk'),12,"middle","700");
+      var degY=(driveY*180/Math.PI);
+      $("exReadout").innerHTML=
+        "<span>Input \u0394\u03B8\u2093 = <b>"+degTxt(drive)+"</b></span>"+
+        "<span>Output \u0394\u03B8\u1d67 = \u2212(\u03C1\u2093/\u03C1\u1d67)\u0394\u03B8\u2093 = <b>"+degY.toFixed(1)+"\u00B0</b></span>"+
+        "<span>Ratio \u03C1\u2093/\u03C1\u1d67 = <b>"+(rx/ry).toFixed(2)+"</b></span>"+
+        "<span>Sense: <b>opposite</b> (external, \u2212)</span>";
+    }
+    function step(){
+      if(!spinning) return;
+      var v=+$("exDrive").value+3; if(v>360) v-=720;
+      $("exDrive").value=v; render();
+      raf=requestAnimationFrame(step);
+    }
+    ["exRx","exRy","exDrive"].forEach(function(id){ $(id).addEventListener("input",function(){ if(spinning){spinning=false;$("exSpin").textContent="Spin continuously";cancelAnimationFrame(raf);} render(); }); });
+    $("exSpin").addEventListener("click",function(){
+      if(reduceMotion){ // step once for reduced motion
+        var v=+$("exDrive").value+30; if(v>360) v-=720; $("exDrive").value=v; render(); return;
+      }
+      spinning=!spinning; this.textContent=spinning?"Pause":"Spin continuously";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    $("exReset").addEventListener("click",function(){ spinning=false; $("exSpin").textContent="Spin continuously"; cancelAnimationFrame(raf); $("exDrive").value=0; render(); });
+    render();
+  })();
+
+  /* ============================================================
+     3.2 · INTERNAL ROLLING CONTACT SIMULATOR (with mode toggle)
+     ============================================================ */
+  (function(){
+    var stage=$("inStage"); if(!stage) return;
+    var spinning=false, raf=null, internal=true;
+    function render(){
+      clear(stage);
+      var rx=+$("inRx").value, ry=+$("inRy").value, drive=+$("inDrive").value;
+      if(rx>ry-12) rx=ry-12;
+      $("inRxv").textContent=rx; $("inRyv").textContent=ry; $("inDrivev").textContent=degTxt(drive);
+      var driveR=drive*Math.PI/180;
+      var cx=300, cy=180;
+      if(internal){
+        // ring y centered; small wheel x rides inside, contact at +x of ring
+        circle(stage,cx,cy,ry,cssVar('--accent-dk'),3);
+        circle(stage,cx,cy,ry-9,cssVar('--accent-dk'),1.4); // inner rim of ring (annulus)
+        gearTeeth(stage,cx,cy,ry-9,Math.max(10,ry/5),0,cssVar('--accent-dk')); // ring teeth point inward visually approximated
+        // small wheel center inside, contact point at +x: wheel center at cx+ry-rx
+        var wcx=cx+(ry-rx), wcy=cy;
+        circle(stage,wcx,wcy,rx,cssVar('--accent'),2.5);
+        gearTeeth(stage,wcx,wcy,rx,Math.max(8,rx/4),driveR,cssVar('--accent'));
+        // internal: same direction. ring turns driveY same sense
+        var driveYi=(rx/ry)*driveR;
+        radiusMark(stage,wcx,wcy,rx,driveR,cssVar('--accent-2'));
+        radiusMark(stage,cx,cy,ry-9,driveYi,cssVar('--ink'));
+        pin(stage,wcx,wcy); pin(stage,cx,cy);
+        // arm from ring center to wheel center
+        line(stage,cx,cy,wcx,wcy,cssVar('--ink-soft'),4);
+        stage.appendChild(el("circle",{cx:cx+ry-9,cy:cy,r:4,fill:cssVar('--bad')}));
+        txt(stage,wcx,wcy-rx-8,"x",cssVar('--accent'),12,"middle","700");
+        txt(stage,cx,cy-ry-8,"ring y",cssVar('--accent-dk'),12,"middle","700");
+        var degY=(driveYi*180/Math.PI);
+        $("inReadout").innerHTML=
+          "<span>Mode: <b>internal (+)</b></span>"+
+          "<span>Input \u0394\u03B8\u2093 = <b>"+degTxt(drive)+"</b></span>"+
+          "<span>Ring \u0394\u03B8\u1d67 = +(\u03C1\u2093/\u03C1\u1d67)\u0394\u03B8\u2093 = <b>"+degY.toFixed(1)+"\u00B0</b></span>"+
+          "<span>Sense: <b>same direction</b></span>";
+      } else {
+        // external: two wheels side by side (reuse compact layout)
+        var cx1=cx-(rx+ry)/2, cx2=cx+(rx+ry)/2;
+        gearTeeth(stage,cx1,cy,rx,Math.max(8,rx/4),driveR,cssVar('--accent'));
+        circle(stage,cx1,cy,rx,cssVar('--accent'),2.5);
+        var driveY=-(rx/ry)*driveR;
+        gearTeeth(stage,cx2,cy,ry,Math.max(8,ry/4),driveY+Math.PI,cssVar('--accent-dk'));
+        circle(stage,cx2,cy,ry,cssVar('--accent-dk'),2.5);
+        radiusMark(stage,cx1,cy,rx,driveR,cssVar('--accent-2'));
+        radiusMark(stage,cx2,cy,ry,driveY+Math.PI,cssVar('--accent-2'));
+        line(stage,cx1,cy,cx2,cy,cssVar('--ink-soft'),4);
+        pin(stage,cx1,cy); pin(stage,cx2,cy);
+        txt(stage,cx1,cy-rx-8,"x",cssVar('--accent'),12,"middle","700");
+        txt(stage,cx2,cy-ry-8,"y",cssVar('--accent-dk'),12,"middle","700");
+        var degYe=(driveY*180/Math.PI);
+        $("inReadout").innerHTML=
+          "<span>Mode: <b>external (\u2212)</b></span>"+
+          "<span>Input \u0394\u03B8\u2093 = <b>"+degTxt(drive)+"</b></span>"+
+          "<span>Output \u0394\u03B8\u1d67 = \u2212(\u03C1\u2093/\u03C1\u1d67)\u0394\u03B8\u2093 = <b>"+degYe.toFixed(1)+"\u00B0</b></span>"+
+          "<span>Sense: <b>opposite</b></span>";
+      }
+    }
+    function step(){
+      if(!spinning) return;
+      var v=+$("inDrive").value+3; if(v>360) v-=720;
+      $("inDrive").value=v; render();
+      raf=requestAnimationFrame(step);
+    }
+    ["inRx","inRy","inDrive"].forEach(function(id){ $(id).addEventListener("input",function(){ if(spinning){spinning=false;$("inSpin").textContent="Spin continuously";cancelAnimationFrame(raf);} render(); }); });
+    $("inMode").addEventListener("click",function(){
+      internal=!internal; this.setAttribute("aria-pressed",internal?"true":"false");
+      this.textContent= internal?"Mode: Internal (+)":"Mode: External (\u2212)";
+      render();
+    });
+    $("inSpin").addEventListener("click",function(){
+      if(reduceMotion){ var v=+$("inDrive").value+30; if(v>360) v-=720; $("inDrive").value=v; render(); return; }
+      spinning=!spinning; this.textContent=spinning?"Pause":"Spin continuously";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    $("inReset").addEventListener("click",function(){ spinning=false; $("inSpin").textContent="Spin continuously"; cancelAnimationFrame(raf); $("inDrive").value=0; render(); });
+    render();
+  })();
+
+  /* ============================================================
+     3.3 · RACK & PINION (FLAT SURFACE) SIMULATOR
+     ============================================================ */
+  (function(){
+    var stage=$("rkStage"); if(!stage) return;
+    var rolling=false, raf=null;
+    function render(){
+      clear(stage);
+      var rx=+$("rkRx").value, rot=+$("rkRot").value;
+      $("rkRxv").textContent=rx; $("rkRotv").textContent=degTxt(rot);
+      var rotR=rot*Math.PI/180;
+      var cx=300, pinY=120;
+      var rackY=pinY+rx; // rack top surface tangent below pinion
+      // rack travel = arc = rx*rotR ; rack slides horizontally
+      var travel=rx*rotR;
+      // draw rack (a long bar with tooth ticks), offset by -travel so it appears to move
+      var rackLeft=40, rackRight=560, rackH=22;
+      stage.appendChild(el("rect",{x:rackLeft,y:rackY,width:rackRight-rackLeft,height:rackH,fill:"none",stroke:cssVar('--accent-dk'),"stroke-width":2,rx:3}));
+      // tooth ticks on rack top, shifted by travel (mod spacing) to suggest motion
+      var spacing=18, g=el("g",{stroke:cssVar('--accent-dk'),"stroke-width":1.5});
+      var off=((-travel)%spacing+spacing)%spacing;
+      for(var x=rackLeft+off; x<rackRight; x+=spacing){ g.appendChild(el("line",{x1:x,y1:rackY,x2:x,y2:rackY-6})); }
+      stage.appendChild(g);
+      // pinion
+      gearTeeth(stage,cx,pinY,rx,Math.max(8,rx/4),rotR,cssVar('--accent'));
+      circle(stage,cx,pinY,rx,cssVar('--accent'),2.5);
+      radiusMark(stage,cx,pinY,rx,rotR,cssVar('--accent-2'));
+      pin(stage,cx,pinY);
+      // contact point
+      stage.appendChild(el("circle",{cx:cx,cy:rackY,r:4,fill:cssVar('--bad')}));
+      // travel arrow on rack
+      if(Math.abs(travel)>4){
+        var ax0=cx, ax1=cx-travel, ay=rackY+rackH+16;
+        line(stage,ax0,ay,ax1,ay,cssVar('--accent-2'),2.5);
+        var dir=(travel>0)?-1:1;
+        stage.appendChild(el("polygon",{points:(ax1)+","+(ay)+" "+(ax1-dir*8)+","+(ay-5)+" "+(ax1-dir*8)+","+(ay+5),fill:cssVar('--accent-2')}));
+        txt(stage,(ax0+ax1)/2,ay-6,"rack travel",cssVar('--accent-2'),11,"middle");
+      }
+      txt(stage,cx,pinY-rx-10,"pinion x",cssVar('--accent'),12,"middle","700");
+      txt(stage,rackLeft+60,rackY-12,"flat body y (rack)",cssVar('--accent-dk'),11,"start");
+      $("rkReadout").innerHTML=
+        "<span>Pinion turned \u0394\u03B8\u2093 = <b>"+degTxt(rot)+"</b></span>"+
+        "<span>Rack travel r\u1d67\u2212r\u1d67\u1d62 = \u03C1\u2093\u00B7\u0394\u03B8\u2093 = <b>"+travel.toFixed(0)+"</b> units</span>"+
+        "<span>One full turn \u2192 <b>"+(2*Math.PI*rx).toFixed(0)+"</b> units (circumference)</span>";
+    }
+    function step(){
+      if(!rolling) return;
+      var v=+$("rkRot").value+3; if(v>270) v=-270;
+      $("rkRot").value=v; render();
+      raf=requestAnimationFrame(step);
+    }
+    ["rkRx","rkRot"].forEach(function(id){ $(id).addEventListener("input",function(){ if(rolling){rolling=false;$("rkRoll").textContent="Roll continuously";cancelAnimationFrame(raf);} render(); }); });
+    $("rkRoll").addEventListener("click",function(){
+      if(reduceMotion){ var v=+$("rkRot").value+30; if(v>270) v=-270; $("rkRot").value=v; render(); return; }
+      rolling=!rolling; this.textContent=rolling?"Pause":"Roll continuously";
+      if(rolling) step(); else cancelAnimationFrame(raf);
+    });
+    $("rkReset").addEventListener("click",function(){ rolling=false; $("rkRoll").textContent="Roll continuously"; cancelAnimationFrame(raf); $("rkRot").value=0; render(); });
+    render();
+  })();
+
+  /* ============================================================
+     3.4 · ASSEMBLY CONFIGURATION DEMONSTRATOR
+     ============================================================ */
+  (function(){
+    var stage=$("asmStage"); if(!stage) return;
+    function drawCopy(ox,oy,startDeg,changeDeg,label){
+      var r2=34, r3=50;
+      // two gears on a fixed arm, gear3 left gear2 right
+      var c3x=ox-(r3), c2x=ox+(r2)+ (r3); // place so they touch: distance r2+r3
+      c3x=ox-40; c2x=c3x+r3+r2;
+      var cy=oy;
+      var start=startDeg*Math.PI/180, change=changeDeg*Math.PI/180;
+      // gear 3 initial pointer -> final = start+change ; gear 2 opposite
+      var a3=start+change;
+      var a2=Math.PI - (r3/r2)*change + start; // external opposite, rough
+      // arm
+      line(stage,c3x,cy,c2x,cy,cssVar('--ink-soft'),4);
+      circle(stage,c3x,cy,r3,cssVar('--accent-dk'),2.2);
+      circle(stage,c2x,cy,r2,cssVar('--accent'),2.2);
+      // initial (ghost) pointer dashed
+      var gi3x=c3x+r3*Math.cos(start), gi3y=cy-r3*Math.sin(start);
+      line(stage,c3x,cy,gi3x,gi3y,cssVar('--panel-line'),2,"4 3");
+      // final pointer solid
+      radiusMark(stage,c3x,cy,r3,a3,cssVar('--accent-2'));
+      radiusMark(stage,c2x,cy,r2,a2,cssVar('--ink'));
+      pin(stage,c3x,cy); pin(stage,c2x,cy);
+      groundHatch(stage,c3x,cy+r3+2,26); groundHatch(stage,c2x,cy+r2+2,22);
+      txt(stage,ox,oy-r3-30,label,cssVar('--ink'),12,"middle","700");
+      txt(stage,c3x,cy+r3+26,"start \u03B8\u1d62="+Math.round(startDeg)+"\u00B0",cssVar('--ink-soft'),10,"middle");
+      return a3*180/Math.PI;
+    }
+    function render(){
+      clear(stage);
+      var diff=+$("asmStart").value, change=+$("asmChange").value;
+      $("asmStartv").textContent=degTxt(diff); $("asmChangev").textContent=degTxt(change);
+      var f1=drawCopy(160,150,30,change,"Copy A");
+      var f2=drawCopy(440,150,30+diff,change,"Copy B");
+      $("asmReadout").innerHTML=
+        "<span>Same change applied: <b>"+degTxt(change)+"</b></span>"+
+        "<span>Start difference: <b>"+degTxt(diff)+"</b></span>"+
+        "<span>Final pointer A: <b>"+((30+change))+"\u00B0</b></span>"+
+        "<span>Final pointer B: <b>"+((30+diff+change))+"\u00B0</b></span>"+
+        "<span>Different start \u2192 <b>different final position</b></span>";
+    }
+    ["asmStart","asmChange"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     3.5 · SIMPLE GEARTRAIN DEMO
+     ============================================================ */
+  (function(){
+    var stage=$("sgStage"); if(!stage) return;
+    var spinning=false, raf=null, phase=0;
+    function render(){
+      clear(stage);
+      var n2=+$("sgN2").value, n3=+$("sgN3").value;
+      $("sgN2v").textContent=n2; $("sgN3v").textContent=n3;
+      // pitch radii proportional to teeth
+      var k=2.2; var r2=k*n2, r3=k*n3;
+      // clamp visually
+      var maxr=110; if(r3>maxr){ var s=maxr/r3; r2*=s; r3*=s; }
+      var cy=170, c2x, c3x;
+      var gap=r2+r3;
+      var c3x0=300-gap/2, c2x0=300+gap/2;
+      c3x=c3x0; c2x=c2x0;
+      var a2=phase, a3=Math.PI-(n2/n3)*phase; // output opposite, slower if bigger
+      // arm/ground
+      line(stage,c3x,cy,c2x,cy,cssVar('--ink-soft'),4);
+      gearTeeth(stage,c2x,cy,r2,n2,a2,cssVar('--accent'));
+      circle(stage,c2x,cy,r2,cssVar('--accent'),2.5);
+      gearTeeth(stage,c3x,cy,r3,n3,a3,cssVar('--accent-dk'));
+      circle(stage,c3x,cy,r3,cssVar('--accent-dk'),2.5);
+      radiusMark(stage,c2x,cy,r2,a2,cssVar('--accent-2'));
+      radiusMark(stage,c3x,cy,r3,a3,cssVar('--ink'));
+      pin(stage,c2x,cy); pin(stage,c3x,cy);
+      groundHatch(stage,c2x,cy+2+0,0); // skip
+      txt(stage,c2x,cy-r2-10,"input gear 2 (N\u2082="+n2+")",cssVar('--accent'),12,"middle","700");
+      txt(stage,c3x,cy-r3-10,"output gear 3 (N\u2083="+n3+")",cssVar('--accent-dk'),12,"middle","700");
+      var R=-n3/n2;
+      $("sgReadout").innerHTML=
+        "<span>Gear ratio R = \u2212N\u2083/N\u2082 = <b>"+R.toFixed(2)+"</b></span>"+
+        "<span>Output turns <b>"+(Math.abs(1/R)).toFixed(2)+"\u00D7</b> per input turn</span>"+
+        "<span>Torque ratio n\u209C = \u2212R = <b>"+(-R).toFixed(2)+"</b></span>"+
+        "<span>Speed ratio n\u209B = 1/R = <b>"+(1/R).toFixed(2)+"</b></span>"+
+        "<span>Direction: <b>reversed</b> (external)</span>";
+    }
+    function step(){
+      if(!spinning) return;
+      phase+=0.04; render();
+      raf=requestAnimationFrame(step);
+    }
+    ["sgN2","sgN3"].forEach(function(id){ $(id).addEventListener("input",render); });
+    $("sgSpin").addEventListener("click",function(){
+      if(reduceMotion){ phase+=0.5; render(); return; }
+      spinning=!spinning; this.textContent=spinning?"Pause":"Spin input";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    $("sgReset").addEventListener("click",function(){ spinning=false; $("sgSpin").textContent="Spin input"; cancelAnimationFrame(raf); phase=0; render(); });
+    render();
+  })();
+
+  /* ============================================================
+     3.6 · GEAR-RATIO & TOOTH-COUNT CALCULATOR
+     ============================================================ */
+  (function(){
+    var wrap=$("grStageWrap"); if(!wrap) return;
+    function buildStages(){
+      var n=+$("grStages").value; $("grStagesv").textContent=n;
+      wrap.innerHTML="";
+      var holder=document.createElement("div"); holder.className="controls";
+      for(var i=1;i<=n;i++){
+        var blockIn=document.createElement("div"); blockIn.className="ctrl";
+        var labIn=document.createElement("label"); labIn.setAttribute("for","grIn"+i);
+        labIn.innerHTML="Stage "+i+" input teeth N<sub>in</sub>"; blockIn.appendChild(labIn);
+        var inp=document.createElement("input"); inp.type="number"; inp.id="grIn"+i; inp.value=(i===1?18:16); inp.min=8; inp.step=1; blockIn.appendChild(inp);
+        var blockOut=document.createElement("div"); blockOut.className="ctrl";
+        var labOut=document.createElement("label"); labOut.setAttribute("for","grOut"+i);
+        labOut.innerHTML="Stage "+i+" output teeth N<sub>out</sub>"; blockOut.appendChild(labOut);
+        var out=document.createElement("input"); out.type="number"; out.id="grOut"+i; out.value=(i===1?36:48); out.min=8; out.step=1; blockOut.appendChild(out);
+        var blockMode=document.createElement("div"); blockMode.className="ctrl";
+        var labMode=document.createElement("label"); labMode.setAttribute("for","grMode"+i); labMode.textContent="Stage "+i+" mesh"; blockMode.appendChild(labMode);
+        var btn=document.createElement("button"); btn.type="button"; btn.id="grMode"+i; btn.className="secondary"; btn.setAttribute("data-internal","false"); btn.textContent="External (\u2212)"; btn.style.minWidth="150px";
+        btn.addEventListener("click",function(){ var iv=this.getAttribute("data-internal")==="true"; this.setAttribute("data-internal", iv?"false":"true"); this.textContent= iv?"External (\u2212)":"Internal (+)"; });
+        blockMode.appendChild(btn);
+        holder.appendChild(blockIn); holder.appendChild(blockOut); holder.appendChild(blockMode);
+      }
+      wrap.appendChild(holder);
+    }
+    function compute(){
+      var n=+$("grStages").value;
+      var R=1, ok=true;
+      for(var i=1;i<=n;i++){
+        var nin=+$("grIn"+i).value, nout=+$("grOut"+i).value;
+        if(nin<=0||nout<=0){ ok=false; break; }
+        var internal=$("grMode"+i).getAttribute("data-internal")==="true";
+        var stageR=(internal?1:-1)*(nout/nin); // R = in/out rotations => Nout/Nin
+        R*=stageR;
+      }
+      var win=+$("grWin").value, tin=+$("grTin").value;
+      var wout=win/R, tout=-R*tin; // n_s=1/R, n_t=-R
+      var pin=tin*win*(2*Math.PI/60), pout=tout*wout*(2*Math.PI/60);
+      if(!ok){ $("grReadout").innerHTML="<span>Please enter positive tooth counts.</span>"; $("grVerdict").className="verdict warn"; $("grVerdict").textContent="Check inputs."; return; }
+      $("grReadout").innerHTML=
+        "<span>Overall gear ratio R = <b>"+R.toFixed(3)+"</b></span>"+
+        "<span>Torque ratio n\u209C = \u2212R = <b>"+(-R).toFixed(3)+"</b></span>"+
+        "<span>Speed ratio n\u209B = 1/R = <b>"+(1/R).toFixed(4)+"</b></span>"+
+        "<span>Output speed \u03C9\u2092\u1d64\u209C = <b>"+wout.toFixed(1)+"</b> rpm</span>"+
+        "<span>Output torque T\u2092\u1d64\u209C = <b>"+tout.toFixed(2)+"</b> N\u00B7m</span>";
+      var match=Math.abs(pin-Math.abs(pout))<0.01*Math.max(1,Math.abs(pin));
+      $("grVerdict").className="verdict "+(match?"good":"warn");
+      $("grVerdict").textContent= "Power check (ideal): P_in = "+pin.toFixed(1)+" W, |P_out| = "+Math.abs(pout).toFixed(1)+" W \u2014 "+(match?"conserved \u2713 (speed traded for torque)":"see rounding");
+    }
+    $("grStages").addEventListener("input",function(){ buildStages(); });
+    $("grCalc").addEventListener("click",compute);
+    buildStages(); compute();
+  })();
+
+  /* ============================================================
+     3.7 · ANIMATED PLANETARY GEAR TRAIN
+     ============================================================ */
+  (function(){
+    var stage=$("plStage"); if(!stage) return;
+    var spinning=false, raf=null, t=0, fixed="ring";
+    function setFixed(which){
+      fixed=which;
+      $("plFixRing").setAttribute("aria-pressed", which==="ring"?"true":"false");
+      $("plFixSun").setAttribute("aria-pressed", which==="sun"?"true":"false");
+      $("plFixCarrier").setAttribute("aria-pressed", which==="carrier"?"true":"false");
+    }
+    function render(){
+      clear(stage);
+      var Ns=+$("plNs").value, Np=+$("plNp").value;
+      var Nr=Ns+2*Np;
+      $("plNsv").textContent=Ns; $("plNpv").textContent=Np;
+      // visual radii proportional to teeth
+      var scale=2.0;
+      var rs=scale*Ns/2, rp=scale*Np/2, rr=scale*Nr/2;
+      // fit
+      var maxR=150; if(rr>maxR){ var s=maxR/rr; rs*=s; rp*=s; rr*=s; }
+      var cx=300, cy=190;
+      // kinematics: choose input member, compute motions parameterized by t
+      // Use fixed-carrier ratio R0 = -Nr/Ns (ring/sun with carrier fixed)
+      // We'll animate based on which is fixed:
+      var wSun=0, wCarrier=0, wRing=0, wPlanetSpin=0, ratioText="";
+      var drive=t; // input angle
+      if(fixed==="ring"){
+        // sun input, carrier output: wc/ws = Ns/(Ns+Nr)
+        wSun=drive;
+        wCarrier=drive*Ns/(Ns+Nr);
+        wRing=0;
+        ratioText="Fixed RING \u2014 sun in, carrier out: \u03C9c/\u03C9s = Ns/(Ns+Nr) = "+(Ns/(Ns+Nr)).toFixed(3)+"  (R = "+((Ns+Nr)/Ns).toFixed(2)+":1)";
+      } else if(fixed==="sun"){
+        // ring input, carrier output: wc/wr = Nr/(Ns+Nr)
+        wRing=drive;
+        wCarrier=drive*Nr/(Ns+Nr);
+        wSun=0;
+        ratioText="Fixed SUN \u2014 ring in, carrier out: \u03C9c/\u03C9r = Nr/(Ns+Nr) = "+(Nr/(Ns+Nr)).toFixed(3)+"  (R = "+((Ns+Nr)/Nr).toFixed(2)+":1)";
+      } else {
+        // carrier fixed: simple/ordinary train, ring vs sun: wr/ws = -Ns/Nr
+        wSun=drive; wRing=-drive*Ns/Nr; wCarrier=0;
+        ratioText="Fixed CARRIER \u2014 sun in, ring out: \u03C9r/\u03C9s = \u2212Ns/Nr = "+(-Ns/Nr).toFixed(3)+" (ordinary train, reversed)";
+      }
+      // ring (annulus)
+      circle(stage,cx,cy,rr,cssVar('--accent-dk'),3);
+      circle(stage,cx,cy,rr+8,cssVar('--accent-dk'),3);
+      gearTeeth(stage,cx,cy,rr,Nr,wRing,cssVar('--accent-dk'));
+      radiusMark(stage,cx,cy,rr,wRing+0.0,cssVar('--ink'));
+      // sun
+      gearTeeth(stage,cx,cy,rs,Ns,wSun,cssVar('--accent'));
+      circle(stage,cx,cy,rs,cssVar('--accent'),2.5);
+      radiusMark(stage,cx,cy,rs,wSun,cssVar('--accent-2'));
+      // planets: 3 planets at carrier angle + spacing, orbit radius = rs+rp
+      var orbit=rs+rp;
+      // planet spin relative to carrier: rolling on sun (external):
+      // wp_spin (absolute) ; for animation, derive planet absolute spin from no-slip on sun:
+      // (wp - wc) * rp = -(ws - wc) * rs  => wp = wc - (rs/rp)(ws-wc)
+      var wpSpin = wCarrier - (rs/rp)*(wSun - wCarrier);
+      var carrierColor=cssVar('--good');
+      for(var i=0;i<3;i++){
+        var ang=wCarrier + i*2*Math.PI/3;
+        var px=cx+orbit*Math.cos(ang), py=cy-orbit*Math.sin(ang);
+        // carrier arm
+        line(stage,cx,cy,px,py,carrierColor,5);
+        gearTeeth(stage,px,py,rp,Np,wpSpin+ang,cssVar('--accent'));
+        circle(stage,px,py,rp,cssVar('--accent'),2);
+        radiusMark(stage,px,py,rp,wpSpin+ang,cssVar('--ink'));
+        pin(stage,px,py);
+      }
+      pin(stage,cx,cy);
+      // labels + legend
+      txt(stage,cx,cy-rr-14,"ring (annulus)",cssVar('--accent-dk'),12,"middle","700");
+      txt(stage,cx,cy+rs+14,"sun",cssVar('--accent'),11,"middle","700");
+      txt(stage,cx,cy+rr+26,"green arms = carrier",carrierColor,11,"middle","700");
+      // fixed badge
+      txt(stage,cx,28,"HELD FIXED: "+fixed.toUpperCase(),cssVar('--accent-2'),13,"middle","700");
+      $("plReadout").innerHTML=
+        "<span>N<sub>sun</sub>=<b>"+Ns+"</b>, N<sub>planet</sub>=<b>"+Np+"</b>, N<sub>ring</sub>=N<sub>sun</sub>+2N<sub>planet</sub>=<b>"+Nr+"</b></span>"+
+        "<span>"+ratioText+"</span>";
+    }
+    function step(){ if(!spinning) return; t+=0.025; render(); raf=requestAnimationFrame(step); }
+    ["plNs","plNp"].forEach(function(id){ $(id).addEventListener("input",render); });
+    $("plFixRing").addEventListener("click",function(){ setFixed("ring"); render(); });
+    $("plFixSun").addEventListener("click",function(){ setFixed("sun"); render(); });
+    $("plFixCarrier").addEventListener("click",function(){ setFixed("carrier"); render(); });
+    $("plSpin").addEventListener("click",function(){
+      if(reduceMotion){ t+=0.4; render(); return; }
+      spinning=!spinning; this.textContent=spinning?"Pause":"Run animation";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    $("plReset").addEventListener("click",function(){ spinning=false; $("plSpin").textContent="Run animation"; cancelAnimationFrame(raf); t=0; render(); });
+    setFixed("ring"); render();
+  })();
+
+  /* ============================================================
+     G · INVOLUTE & PRESSURE-ANGLE EXPLORER
+     ============================================================ */
+  (function(){
+    var stage=$("invStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var phiDeg=+$("invPhi").value, rb=+$("invRb").value;
+      $("invPhiv").textContent=degTxt(phiDeg);
+      $("invRbv").textContent=rb;
+      var phi=phiDeg*Math.PI/180;
+      var rp=rb/Math.cos(phi); // pitch radius
+      var cx=210, cy=200;
+      // base circle
+      circle(stage,cx,cy,rb,cssVar('--accent'),2);
+      txt(stage,cx,cy+rb+16,"base circle r_b",cssVar('--accent'),11,"middle");
+      // pitch circle (dashed)
+      stage.appendChild(el("circle",{cx:cx,cy:cy,r:rp,fill:"none",stroke:cssVar('--accent-dk'),"stroke-width":1.6,"stroke-dasharray":"6 4"}));
+      txt(stage,cx,cy-rp-8,"pitch circle r = r_b/cos\u03C6",cssVar('--accent-dk'),11,"middle");
+      // involute curve: param t (unwind angle)
+      var pts=[];
+      for(var i=0;i<=60;i++){
+        var tt=i/60*Math.PI*0.9;
+        var x=rb*(Math.cos(tt)+tt*Math.sin(tt));
+        var y=rb*(Math.sin(tt)-tt*Math.cos(tt));
+        // start the involute near angle 0 (rightmost), rotate so it climbs nicely
+        var px=cx + x*Math.cos(-0.4) - y*Math.sin(-0.4);
+        var py=cy - (x*Math.sin(-0.4) + y*Math.cos(-0.4));
+        pts.push(px+","+py);
+      }
+      stage.appendChild(el("polyline",{points:pts.join(" "),fill:"none",stroke:cssVar('--accent-2'),"stroke-width":3}));
+      txt(stage,cx+rb+50,cy-60,"involute",cssVar('--accent-2'),12,"start","700");
+      // pitch point on the line of centers (to the right at distance rp)
+      var ppx=cx+rp, ppy=cy;
+      stage.appendChild(el("circle",{cx:ppx,cy:ppy,r:4,fill:cssVar('--bad')}));
+      txt(stage,ppx+6,ppy+16,"pitch point",cssVar('--bad'),11,"start");
+      // line of centers
+      line(stage,cx,cy,ppx+60,ppy,cssVar('--ink-soft'),1.5,"4 4");
+      // common tangent at pitch point (vertical)
+      line(stage,ppx,ppy-70,ppx,ppy+70,cssVar('--ink-soft'),1.4,"3 3");
+      // line of action tilted by phi from the common tangent, tangent to base circle
+      var lax=ppx, lay=ppy;
+      var dx=Math.sin(phi), dy=Math.cos(phi);
+      line(stage,lax-90*dx,lay-90*dy,lax+90*dx,lay+90*dy,cssVar('--good'),3);
+      txt(stage,lax+90*dx+4,lay+90*dy,"line of action",cssVar('--good'),11,"start","700");
+      // pressure angle arc
+      stage.appendChild(el("path",{d:"M "+(ppx)+" "+(ppy-40)+" A 40 40 0 0 1 "+(ppx+40*Math.sin(phi))+" "+(ppy-40*Math.cos(phi)),fill:"none",stroke:cssVar('--good'),"stroke-width":2}));
+      txt(stage,ppx+22,ppy-30,"\u03C6",cssVar('--good'),13,"middle","700");
+      pin(stage,cx,cy);
+      $("invReadout").innerHTML=
+        "<span>Pressure angle \u03C6 = <b>"+degTxt(phiDeg)+"</b></span>"+
+        "<span>Base radius r_b = <b>"+rb+"</b></span>"+
+        "<span>Pitch radius r = r_b/cos\u03C6 = <b>"+rp.toFixed(1)+"</b></span>"+
+        "<span>cos\u03C6 = <b>"+Math.cos(phi).toFixed(3)+"</b></span>";
+    }
+    ["invPhi","invRb"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     QUIZ
+     ============================================================ */
+  (function(){
+    var mount=$("quizMount"); if(!mount) return;
+    var bank=[
+      {q:"Why must the vector loop method be supplemented for mechanisms with rolling contacts?",
+       opts:["Loops cannot close with circles","It does not capture the fixed rotation relationship between rolling bodies","Vectors cannot represent radii","Rolling contacts have no position"],
+       correct:1, fb:"The loop method sees two rolling bodies as merely touching circles; it never states that turning one forces the other to turn in a fixed ratio. The rolling-contact equation adds that."},
+      {q:"For two EXTERNALLY contacting rolling bodies, the rolling-contact equation \u03C1\u2093\u0394\u03B8\u2093/\u1d63 = ? carries which sign on the right side?",
+       opts:["Plus (+)","Minus (\u2212)","No sign \u2014 it is always zero","Depends on the radius"],
+       correct:1, fb:"External contact forces opposite-direction rotation, giving \u03C1\u2093\u0394\u03B8\u2093/\u1d63 = \u2212\u03C1\u1d67\u0394\u03B8\u1d67/\u1d63 (Eq. 3.1)."},
+      {q:"For INTERNALLY contacting rolling bodies, the two bodies rotate (as seen from the arm):",
+       opts:["In opposite directions","In the same direction","At ninety degrees","Not at all"],
+       correct:1, fb:"Internal contact (a wheel inside a ring) gives same-direction rotation \u2014 the plus sign of Eq. 3.6."},
+      {q:"The body labeled z in every rolling-contact equation is almost always the:",
+       opts:["Sun gear","Arm connecting the rolling centers","Ground only","Largest gear"],
+       correct:1, fb:"z is the arm \u2014 the link joining the centers. Rotations are measured relative to it, which is why \u0394\u03B8\u2093/\u1d63 = \u0394\u03B8\u2093 \u2212 \u0394\u03B8_z appears throughout."},
+      {q:"The arc-length relation s = \u03C1\u00B7\u0394\u03B8 underlies all rolling-contact equations. For two bodies rolling without slipping, the arcs that pass the contact point are:",
+       opts:["Equal in length","Equal in angle","Always zero","Proportional to torque"],
+       correct:0, fb:"No slipping means the same length of surface 'tape' is laid against both bodies \u2014 equal arc length, which forces unequal angles when radii differ."},
+      {q:"A circle rolling on a flat surface (a rack) converts rotation into:",
+       opts:["Another rotation only","Straight-line travel: r\u1d67 \u2212 r\u1d67\u1d62 = \u03C1\u2093\u0394\u03B8\u2093/\u1d63","Heat","Torque with no motion"],
+       correct:1, fb:"The flat-surface case (Eq. 3.8) sets the linear travel along the flat body equal to the arc \u03C1\u2093\u00B7(relative rotation) \u2014 the rack-and-pinion relation."},
+      {q:"The assembly configuration of a mechanism is:",
+       opts:["Its final position","The set of initial-value terms (\u03B8\u1d62) that fix where it starts","Its mass","The gear ratio"],
+       correct:1, fb:"The \u03B8\u1d62 terms are the assembly configuration; identical changes from different starts give different final positions, so they must be known before a position analysis."},
+      {q:"A SIMPLE geartrain is one in which:",
+       opts:["There is only one gear","The arms are fixed (\u0394\u03B8_z = 0)","The arms rotate","There are no rolling contacts"],
+       correct:1, fb:"In a simple train the arms are bolted to ground, so \u0394\u03B8_z = 0 and the rolling-contact equations simplify. A planetary train has rotating arms."},
+      {q:"The three geartrain ratios are related by:",
+       opts:["R = n\u209C = n\u209B","R = \u2212n\u209C = 1/n\u209B","R = n\u209C\u00B2","They are unrelated"],
+       correct:1, fb:"R = \u2212n\u209C = 1/n\u209B: a train that makes input turn R times per output turn multiplies torque by R and divides speed by R (conservation of power)."},
+      {q:"In a planetary set, the tooth-fit constraint linking ring, sun, and planet counts is:",
+       opts:["N\u1d63 = N\u209B \u00D7 N\u209a","N\u1d63 = N\u209B + 2N\u209a","N\u1d63 = N\u209B \u2212 N\u209a","N\u1d63 = 2N\u209B"],
+       correct:1, fb:"Geometry requires N_ring = N_sun + 2\u00B7N_planet so the planets fit exactly between sun and ring."}
+    ];
+    var answered=0, correctCount=0;
+    function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+    function updateScore(){ $("quizScore").textContent=correctCount+" / "+answered; }
+    function build(){
+      mount.innerHTML=""; answered=0; correctCount=0; updateScore();
+      bank.forEach(function(item,qi){
+        var order=shuffle(item.opts.map(function(_,i){return i;}));
+        var wrap=document.createElement("div"); wrap.className="q";
+        var stem=document.createElement("p"); stem.className="stem"; stem.textContent=(qi+1)+". "+item.q; wrap.appendChild(stem);
+        var opts=document.createElement("div"); opts.className="opts"; opts.setAttribute("role","group");
+        opts.setAttribute("aria-label","Answer choices for question "+(qi+1));
+        var done=false;
+        var fb=document.createElement("div"); fb.className="fb";
+        order.forEach(function(origIdx){
+          var lbl=document.createElement("label"); lbl.className="opt";
+          var inp=document.createElement("input"); inp.type="radio"; inp.name="q"+qi;
+          var span=document.createElement("span"); span.textContent=item.opts[origIdx];
+          lbl.appendChild(inp); lbl.appendChild(span);
+          inp.addEventListener("change",function(){
+            if(done) return; done=true; answered++;
+            var isRight=(origIdx===item.correct);
+            if(isRight){ correctCount++; lbl.classList.add("correct"); }
+            else{
+              lbl.classList.add("incorrect");
+              Array.prototype.forEach.call(opts.querySelectorAll(".opt"),function(o){
+                if(o.querySelector("span").textContent===item.opts[item.correct]) o.classList.add("correct");
+              });
+            }
+            Array.prototype.forEach.call(opts.querySelectorAll("input"),function(x){ x.disabled=true; });
+            fb.className="fb show "+(isRight?"right":"wrong");
+            fb.textContent=(isRight?"Correct. ":"Not quite. ")+item.fb;
+            updateScore();
+          });
+          opts.appendChild(lbl);
+        });
+        wrap.appendChild(opts); wrap.appendChild(fb);
+        mount.appendChild(wrap);
+      });
+    }
+    $("quizReset").addEventListener("click",build);
+    build();
+  })();
+
+  /* ============================================================
+     GLOSSARY
+     ============================================================ */
+  (function(){
+    var list=$("glossList"); if(!list) return;
+    var terms=[
+      ["Rolling contact (rolling joint)","A place where two bodies touch and roll on one another without slipping; the subject of Chapter 3.","\u00A7 3.0 Rolling Joints"],
+      ["No slipping","The condition of zero relative velocity at the contact point; the idealization behind every rolling-contact equation.","\u00A7 0 Foundations"],
+      ["Arc length","s = \u03C1\u00B7\u0394\u03B8 (radians); the length of surface that passes the contact point as a body of radius \u03C1 turns \u0394\u03B8.","\u00A7 0 Foundations"],
+      ["Pitch circle","The imaginary circle on a gear that rolls without slipping against its mate's pitch circle; radius \u03C1.","\u00A7 0 Foundations"],
+      ["Arm (body z)","The link connecting the centers of two rolling bodies; rotations are measured relative to it.","\u00A7 3.0 Rolling Joints"],
+      ["External contact","Two bodies touching on their outsides; they rotate in opposite directions (minus sign, Eq. 3.1).","\u00A7 3.1 External"],
+      ["Internal contact","One body rolling inside another (annulus); they rotate in the same direction (plus sign, Eq. 3.6).","\u00A7 3.2 Internal"],
+      ["Annulus (ring gear)","An internally toothed gear on which a smaller gear rolls; the outer member of a planetary set.","\u00A7 3.2 Internal"],
+      ["Flat-surface contact","A circle rolling on a straight line (a rack); rotation becomes straight-line travel (Eq. 3.8).","\u00A7 3.3 Flat Surface"],
+      ["Rack and pinion","A round pinion rolling on a toothed rack; converts rotation to translation (e.g. car steering).","\u00A7 3.3 Flat Surface"],
+      ["Assembly configuration","The set of initial-value terms (\u03B8\u1d62) that fix where the mechanism starts; required for position analysis.","\u00A7 3.4 Assembly Config"],
+      ["Geartrain","A mechanism made entirely of rolling contacts and the arms joining their centers; its only equations are rolling-contact equations.","\u00A7 3.5 Geartrains"],
+      ["Stage","The classification by number of rolling contacts in a geartrain.","\u00A7 3.5 Geartrains"],
+      ["Simple geartrain","A geartrain whose arms are fixed (\u0394\u03B8_z = 0).","\u00A7 3.5 Geartrains"],
+      ["Planetary (epicyclic) geartrain","A geartrain whose arm rotates, carrying planet gears in orbit; produces multiple ratios from one set.","\u00A7 3.7 Planetary"],
+      ["Sun gear","The central gear of a planetary set, on the main axis.","\u00A7 3.7 Planetary"],
+      ["Planet gear","A gear that meshes with both the sun (external) and ring (internal) while orbiting.","\u00A7 3.7 Planetary"],
+      ["Carrier","The link holding the planet centers; the arm (body z) of a planetary set.","\u00A7 3.7 Planetary"],
+      ["Gear ratio R","Number of input rotations that cause one output rotation: R = \u0394\u03B8_in/\u0394\u03B8_out (Eq. 3.18).","\u00A7 3.6 Ratios"],
+      ["Torque ratio n\u209C","Torque change of a transmission: n\u209C = T_out/T_in = \u2212R (Eq. 3.19, 3.21).","\u00A7 3.6 Ratios"],
+      ["Speed ratio n\u209B","Speed change of a transmission: n\u209B = \u03C9_out/\u03C9_in = 1/R (Eq. 3.22, 3.24).","\u00A7 3.6 Ratios"],
+      ["Tooth count N","Number of teeth on a gear; for meshing gears \u03C1\u2093/\u03C1\u1d67 = N\u2093/N\u1d67, so R = \u2212N\u2083/N\u2082.","\u00A7 3.6 Ratios"],
+      ["Involute","The standard gear-tooth profile; the curve traced by the end of a string unwound from a base circle.","\u00A7 G Gear Geometry"],
+      ["Base circle","The circle from which an involute is generated; r_b = r\u00B7cos\u03C6.","\u00A7 G Gear Geometry"],
+      ["Pressure angle \u03C6","The angle between the line of action and the common tangent of the pitch circles; commonly 20\u00B0.","\u00A7 G Gear Geometry"],
+      ["Module m","Pitch diameter divided by tooth count, m = d/N (metric tooth-size measure).","\u00A7 G Gear Geometry"],
+      ["Diametral pitch P","Tooth count divided by pitch diameter, P = N/d (US tooth-size measure).","\u00A7 G Gear Geometry"],
+      ["Interference / undercutting","Contact below the base circle that gouges the tooth root; avoided by enough teeth, larger \u03C6, or profile shift.","\u00A7 G Gear Geometry"],
+      ["Line of action","The straight line along which gear teeth transmit force; tangent to both base circles, inclined at \u03C6.","\u00A7 G Gear Geometry"],
+      ["Pitch point","The single point on the line of centers where meshing teeth have pure rolling; elsewhere they slide.","\u00A7 G Gear Geometry"]
+    ];
+    terms.sort(function(a,b){ return a[0].toLowerCase().localeCompare(b[0].toLowerCase()); });
+    function render(filter){
+      list.innerHTML=""; var f=(filter||"").trim().toLowerCase(), n=0;
+      terms.forEach(function(t){
+        if(f && t[0].toLowerCase().indexOf(f)<0 && t[1].toLowerCase().indexOf(f)<0) return;
+        n++;
+        var item=document.createElement("div"); item.className="gloss-item";
+        var dt=document.createElement("dt"); dt.textContent=t[0];
+        var dd=document.createElement("dd"); dd.textContent=t[1];
+        var tg=document.createElement("span"); tg.className="tag"; tg.textContent=t[2];
+        item.appendChild(dt); item.appendChild(dd); item.appendChild(tg);
+        list.appendChild(item);
+      });
+      $("glossEmpty").hidden = (n>0);
+      $("glossCount").textContent = f ? (n+" of "+terms.length+" terms shown") : (terms.length+" terms");
+    }
+    $("glossInput").addEventListener("input",function(){ render(this.value); });
+    render("");
+  })();
+
+  /* ============================================================
+     EXTERNAL RESOURCES
+     ============================================================ */
+  (function(){
+    var data={
+      resTextbooks:[
+        ["How a Planetary Gear Works (tec-science)","Clear derivation of planetary transmission ratios for every fixed-member case, with animations.","tec-science.com","https://www.tec-science.com/mechanical-power-transmission/planetary-gear/epicyclic-planetary-gear/"],
+        ["Gear Systems Technical Reference (KHK)","Manufacturer reference on planetary, hypocycloid, and constrained gear systems and their ratios.","khkgears.net","https://khkgears.net/new/gear_knowledge/gear_technical_reference/gear_systems.html"],
+        ["Epicyclic Gearing (overview)","Background on sun/planet/ring arrangement, epicycloid motion, and ratio selection.","en.wikipedia.org","https://en.wikipedia.org/wiki/Epicyclic_gearing"]
+      ],
+      resSimulators:[
+        ["Planetary Gear Ratio Calculator","Interactive calculator: set sun/planet/ring teeth and the fixed member to see the resulting ratio.","woodgears.ca","https://woodgears.ca/gear/planetary.html"],
+        ["Epicyclic Gear Train Animation & Calculator","Animated planetary set with a live ratio calculator and tooth-fit check.","firgelliauto.com","https://www.firgelliauto.com/blogs/mechanisms/epicyclic-planetary-gear-train"]
+      ],
+      resConcepts:[
+        ["Rolling Without Slipping (lecture notes)","A dynamics lecture on a gear/cylinder rolling without slipping \u2014 the kinematics behind \u03C1\u0394\u03B8.","rotorlab.tamu.edu","https://rotorlab.tamu.edu/Dynamics_and_Vibrations/Lectures%20(pdf)%20and%20homework/Planar%20Kinematics/L19.pdf"],
+        ["Reverted Gear Train Q&A","Practice questions on gear contact, tooth counts, centre distance, and ratios.","sanfoundry.com","https://www.sanfoundry.com/machine-kinematics-questions-answers-reverted-gear-train/"]
+      ]
+    };
+    Object.keys(data).forEach(function(mountId){
+      var mount=$(mountId); if(!mount) return;
+      data[mountId].forEach(function(r){
+        var a=document.createElement("a");
+        a.className="res-link"; a.href=r[3]; a.target="_blank"; a.rel="noopener noreferrer";
+        var name=document.createElement("span"); name.className="name";
+        name.appendChild(document.createTextNode(r[0]+" "));
+        var ext=document.createElement("span"); ext.className="ext"; ext.textContent="\u2197 new tab";
+        name.appendChild(ext);
+        var desc=document.createElement("span"); desc.className="desc"; desc.textContent=r[1];
+        var hs=document.createElement("span"); hs.className="host"; hs.textContent=r[2];
+        a.appendChild(name); a.appendChild(desc); a.appendChild(hs);
+        a.setAttribute("aria-label", r[0]+" \u2014 opens "+r[2]+" in a new tab");
+        mount.appendChild(a);
+      });
+    });
+  })();
+
+  /* ============================================================
+     NAV ACTIVE STATE + READING PROGRESS
+     ============================================================ */
+  (function(){
+    var links=Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+    var sections=links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+    var prog=$("readprog"), pct=$("readpct");
+    function onScroll(){
+      var y=window.scrollY+90;
+      var active=sections[0];
+      sections.forEach(function(s){ if(s.offsetTop<=y) active=s; });
+      links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href")==="#"+active.id); });
+      var doc=document.documentElement;
+      var max=doc.scrollHeight - doc.clientHeight;
+      var p=max>0?Math.min(100,Math.round(window.scrollY/max*100)):0;
+      if(prog){ prog.value=p; pct.textContent=p+"%"; }
+    }
+    window.addEventListener("scroll",onScroll,{passive:true});
+    window.addEventListener("resize",onScroll);
+    onScroll();
+    var tw=$("tocWrap");
+    if(tw){
+      tw.addEventListener("keydown",function(e){
+        if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
+        var i=links.indexOf(document.activeElement); if(i<0) return;
+        e.preventDefault();
+        var ni=e.key==="ArrowRight"?Math.min(links.length-1,i+1):Math.max(0,i-1);
+        links[ni].focus();
+      });
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
+
+  /* ============================================================
+     SELF-CHECK QUIZ (build + shuffle + instant feedback)
+     ============================================================ */
+  (function(){
+    var mount=$("quizMount"); if(!mount) return;
+    var bank=[
+      {q:"For two EXTERNALLY contacting rolling bodies (no slip), how do the contacting surfaces move relative to each other and what sign relates their rotations?",
+       opts:["Same direction; positive sign","Opposite directions; negative sign","Same direction; negative sign","They cannot rotate"],
+       correct:1, fb:"External contact reverses sense: the bodies spin in opposite directions, so \\u03C1\\u2093\\u0394\\u03B8\\u2093/\\u1D63 = \\u2212\\u03C1\\u1D67\\u0394\\u03B8\\u1D67/\\u1D63 \\u2014 the minus sign (Eq 3.1)."},
+      {q:"For two INTERNALLY contacting rolling bodies (a smaller body inside a larger ring), the no-slip equation carries which sign, and what does that mean physically?",
+       opts:["Negative; opposite rotation","Positive; same direction of rotation","Negative; same direction","No sign \\u2014 they don't roll"],
+       correct:1, fb:"Internal contact keeps the same sense of rotation, so the equation takes the PLUS sign (Eq 3.6): both turn the same way."},
+      {q:"In the rolling-contact equations, the subscript on \\u0394\\u03B8/z refers to rotation measured relative to which body?",
+       opts:["The ground frame always","The arm (link z) that carries the contact","The faster gear","The point of interest"],
+       correct:1, fb:"Rotations are measured relative to the ARM (link z) joining the two centers \\u2014 that is what \\u0394\\u03B8\\u2093/\\u1D63 denotes. When the arm is fixed to ground it reduces to absolute rotation."},
+      {q:"A rack and pinion is the limiting case of rolling contact where one body has a flat surface. This corresponds to a circle of:",
+       opts:["Zero radius","Infinite radius","Negative radius","Unit radius"],
+       correct:1, fb:"A flat surface is a circle of infinite radius. The rack's linear travel equals the pinion's arc length: r\\u1D67\\u2212r\\u1D67\\u1D62 = \\u03C1\\u2093\\u0394\\u03B8\\u2093/\\u1D63 (Eq 3.8)."},
+      {q:"Two identical rolling-contact assemblies start at DIFFERENT initial angles but undergo the SAME change in input. The no-slip CHANGE equation tells us their outputs will:",
+       opts:["Differ in change but keep their initial offset","Become identical regardless of start","Reverse direction","Stop moving"],
+       correct:0, fb:"The equation governs the CHANGE \\u0394\\u03B8, not the absolute angle. Equal input change \\u2192 equal output change, but the initial-value (assembly) offset is preserved (\\u00A7 3.4)."},
+      {q:"A geartrain is built fundamentally from which elements?",
+       opts:["Springs and dampers","Rolling contacts plus arms","Cams and followers","Hydraulic cylinders"],
+       correct:1, fb:"A geartrain is just an assembly of rolling contacts connected by arms (links). Gear teeth simply enforce the no-slip pitch-circle rolling."},
+      {q:"What distinguishes a SIMPLE geartrain from a PLANETARY (epicyclic) geartrain?",
+       opts:["Simple has teeth, planetary doesn't","In a simple train the arms are fixed to ground; in a planetary train an arm (carrier) moves","Planetary trains have only one gear","Simple trains cannot change speed"],
+       correct:1, fb:"Simple geartrain = all arms grounded (axes fixed). Planetary = at least one arm (the carrier) is free to move, so gear centers orbit (\\u00A7 3.5)."},
+      {q:"The gear ratio is defined as R = \\u0394\\u03B8\\u1D62\\u2099 / \\u0394\\u03B8\\u2092\\u1D64\\u209C. How do the torque ratio n\\u209C and speed ratio n\\u209B relate to R?",
+       opts:["n\\u209C = R and n\\u209B = R","n\\u209C = \\u2212R and n\\u209B = 1/R","n\\u209C = 1/R and n\\u209B = \\u2212R","They are unrelated to R"],
+       correct:1, fb:"The master relationship is R = \\u2212n\\u209C = 1/n\\u209B. So the torque ratio is \\u2212R and the speed ratio is 1/R (Eqs 3.18\\u20133.24)."},
+      {q:"For a single external mesh, the gear ratio can be written in terms of tooth counts as:",
+       opts:["R = +N\\u2083/N\\u2082","R = \\u2212N\\u2083/N\\u2082","R = N\\u2082\\u00B7N\\u2083","R = N\\u2082\\u2212N\\u2083"],
+       correct:1, fb:"Because pitch radius is proportional to tooth count (\\u03C1\\u2093/\\u03C1\\u1D67 = N\\u2093/N\\u1D67) and external contact gives a minus sign: R = \\u2212\\u03C1\\u2083/\\u03C1\\u2082 = \\u2212N\\u2083/N\\u2082 (Eq 3.25)."},
+      {q:"In a planetary set, the ring tooth count is constrained by the sun and planet counts. That geometric fit relation is:",
+       opts:["N_ring = N_sun \\u2212 N_planet","N_ring = N_sun + 2\\u00B7N_planet","N_ring = 2\\u00B7N_sun","N_ring = N_planet/2"],
+       correct:1, fb:"For the planets to mesh both sun and ring, the radii must fit: N_ring = N_sun + 2\\u00B7N_planet."},
+      {q:"The number of STAGES in a geartrain equals the number of:",
+       opts:["Gears","Rolling contacts (meshes)","Arms fixed to ground","Degrees of freedom"],
+       correct:1, fb:"Each rolling contact (mesh) is one stage; the overall ratio is the product of the stage ratios."},
+      {q:"In Worked Example 3.1, a naive Gr\\u00FCbler count gave F = 0, but the rolling contact actually makes the true mobility:",
+       opts:["F = 0 (structure)","F = 1 (one DOF)","F = 2","F = \\u22121"],
+       correct:1, fb:"The rolling contact adds a constraint that Gr\\u00FCbler miscounts here; the corrected analysis (3 equations, 4 unknowns) yields F = 1 \\u2014 a working one-DOF mechanism."}
+    ];
+    var answered=0, correctCount=0;
+    function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+    function updateScore(){ $("quizScore").textContent=correctCount+" / "+answered; }
+    function build(){
+      mount.innerHTML=""; answered=0; correctCount=0; updateScore();
+      bank.forEach(function(item,qi){
+        var order=shuffle(item.opts.map(function(_,i){return i;}));
+        var wrap=document.createElement("div"); wrap.className="q";
+        var stem=document.createElement("p"); stem.className="stem"; stem.textContent=(qi+1)+". "+item.q; wrap.appendChild(stem);
+        var opts=document.createElement("div"); opts.className="opts"; opts.setAttribute("role","group");
+        opts.setAttribute("aria-label","Answer choices for question "+(qi+1));
+        var done=false;
+        order.forEach(function(origIdx){
+          var lbl=document.createElement("label"); lbl.className="opt";
+          var inp=document.createElement("input"); inp.type="radio"; inp.name="q"+qi;
+          var span=document.createElement("span"); span.textContent=item.opts[origIdx];
+          lbl.appendChild(inp); lbl.appendChild(span);
+          inp.addEventListener("change",function(){
+            if(done) return; done=true; answered++;
+            var isRight=(origIdx===item.correct);
+            if(isRight){ correctCount++; lbl.classList.add("correct"); }
+            else{
+              lbl.classList.add("incorrect");
+              Array.prototype.forEach.call(opts.querySelectorAll(".opt"),function(o){
+                if(o.querySelector("span").textContent===item.opts[item.correct]) o.classList.add("correct");
+              });
+            }
+            Array.prototype.forEach.call(opts.querySelectorAll("input"),function(x){ x.disabled=true; });
+            fb.className="fb show "+(isRight?"right":"wrong");
+            fb.textContent=(isRight?"Correct. ":"Not quite. ")+item.fb;
+            updateScore();
+          });
+          opts.appendChild(lbl);
+        });
+        wrap.appendChild(opts);
+        var fb=document.createElement("div"); fb.className="fb"; wrap.appendChild(fb);
+        mount.appendChild(wrap);
+      });
+    }
+    $("quizReset").addEventListener("click",build);
+    build();
+  })();
+
+  /* ============================================================
+     GLOSSARY (build + filter)
+     ============================================================ */
+  (function(){
+    var list=$("glossList"); if(!list) return;
+    var terms=[
+      ["Rolling contact","Two bodies touching along a line or point that roll on each other without slipping, so contacting arc lengths match.","\\u00A7 3.0 Rolling Contacts"],
+      ["No-slip condition","The kinematic constraint that contacting surfaces have equal arc length (and equal contact-point velocity): \\u03C1\\u2093\\u0394\\u03B8\\u2093 = \\u00B1\\u03C1\\u1D67\\u0394\\u03B8\\u1D67.","\\u00A7 3.0 Rolling Contacts"],
+      ["Arc length","Distance traveled along a circular edge, \\u03C1\\u00B7\\u0394\\u03B8; equal arc lengths at the contact express no slip.","\\u00A7 3.0 Rolling Contacts"],
+      ["Arm (link z)","The link connecting the two rolling-body centers; rotations in the contact equations are measured relative to this arm.","\\u00A7 3.0 Rolling Contacts"],
+      ["Pitch circle","The effective rolling circle of a gear; gears mesh as if these circles rolled together without slip.","\\u00A7 3.0 Foundations"],
+      ["Pitch point","The single contact point where gear-tooth motion is pure rolling; everywhere else there is sliding.","\\u00A7 3.0 Foundations"],
+      ["Involute profile","The standard gear-tooth curve that makes meshing teeth behave kinematically like rolling pitch circles.","\\u00A7 3.0 Foundations"],
+      ["External contact","Two bodies touching on the outsides of their circles; they rotate in OPPOSITE senses (minus sign).","\\u00A7 3.1 External Contact"],
+      ["Internal contact","A body rolling inside a ring/annulus; both rotate in the SAME sense (plus sign).","\\u00A7 3.2 Internal Contact"],
+      ["Flat surface contact","Limiting case where one body is a straight edge (a circle of infinite radius), e.g. a rack.","\\u00A7 3.3 Flat Surface"],
+      ["Rack and pinion","A pinion (gear) rolling on a rack (flat toothed bar); converts rotation to straight-line motion via r\\u1D67\\u2212r\\u1D67\\u1D62 = \\u03C1\\u2093\\u0394\\u03B8\\u2093/\\u1D63.","\\u00A7 3.3 Flat Surface"],
+      ["Assembly configuration","The set of initial angles (\\u03B8\\u1D62) at which a mechanism is put together; sets the constant offset preserved through motion.","\\u00A7 3.4 Assembly"],
+      ["Initial-value term","The starting-angle constant in the integrated rolling equation; equal input CHANGES give equal output changes about different starts.","\\u00A7 3.4 Assembly"],
+      ["Geartrain","An assembly of rolling contacts joined by arms that transmits rotation with a fixed ratio between input and output.","\\u00A7 3.5 Geartrains"],
+      ["Stage","A single rolling contact (mesh) in a geartrain; the overall ratio is the product of the stage ratios.","\\u00A7 3.5 Geartrains"],
+      ["Simple geartrain","A geartrain whose arms are all fixed to ground, so every gear axis is stationary.","\\u00A7 3.5 Geartrains"],
+      ["Planetary (epicyclic) geartrain","A geartrain in which a carrier arm moves, so gear centers orbit; built from sun, planets, ring, and carrier.","\\u00A7 3.7 Planetary"],
+      ["Sun gear","The central gear of a planetary set, meshing externally with the planets.","\\u00A7 3.7 Planetary"],
+      ["Planet gear","A gear that meshes with both sun and ring while its center orbits on the carrier.","\\u00A7 3.7 Planetary"],
+      ["Ring (annulus) gear","The internally toothed outer gear of a planetary set; meshes internally with the planets.","\\u00A7 3.7 Planetary"],
+      ["Carrier","The arm linking the planet centers; when free to rotate it makes the train planetary.","\\u00A7 3.7 Planetary"],
+      ["Gear ratio R","R = \\u0394\\u03B8\\u1D62\\u2099/\\u0394\\u03B8\\u2092\\u1D64\\u209C, the ratio of input rotation to output rotation; for one external mesh R = \\u2212N\\u2092\\u1D64\\u209C/N\\u1D62\\u2099.","\\u00A7 3.6 Ratios"],
+      ["Torque ratio n\\u209C","The output-to-input torque factor; related to the gear ratio by n\\u209C = \\u2212R.","\\u00A7 3.6 Ratios"],
+      ["Speed ratio n\\u209B","The output-to-input speed factor; related to the gear ratio by n\\u209B = 1/R.","\\u00A7 3.6 Ratios"],
+      ["Tooth count N","Number of teeth on a gear; proportional to pitch radius, so \\u03C1\\u2093/\\u03C1\\u1D67 = N\\u2093/N\\u1D67.","\\u00A7 3.6 Ratios"],
+      ["Power conservation","An ideal geartrain neither creates nor destroys power: speed gained is paid for in torque (P = \\u03C9\\u00B7\\u03C4 constant).","\\u00A7 3.6 Ratios"],
+      ["Degrees of freedom (DOF)","Independent inputs needed to drive a mechanism; rolling contacts add constraints that Gr\\u00FCbler's count can miss.","\\u00A7 3.8 Example 3.1"]
+    ];
+    terms.sort(function(a,b){ return a[0].toLowerCase().localeCompare(b[0].toLowerCase()); });
+    function render(filter){
+      list.innerHTML=""; var f=(filter||"").trim().toLowerCase(), n=0;
+      terms.forEach(function(t){
+        if(f && t[0].toLowerCase().indexOf(f)<0 && t[1].toLowerCase().indexOf(f)<0) return;
+        n++;
+        var item=document.createElement("div"); item.className="gloss-item";
+        var dt=document.createElement("dt"); dt.textContent=t[0];
+        var dd=document.createElement("dd"); dd.textContent=t[1];
+        var tg=document.createElement("span"); tg.className="tag"; tg.textContent=t[2];
+        item.appendChild(dt); item.appendChild(dd); item.appendChild(tg);
+        list.appendChild(item);
+      });
+      $("glossEmpty").hidden = (n>0);
+      $("glossCount").textContent = f ? (n+" of "+terms.length+" terms shown") : (terms.length+" terms");
+    }
+    $("glossInput").addEventListener("input",function(){ render(this.value); });
+    render("");
+  })();
+
+  /* ============================================================
+     EXTERNAL RESOURCES (build cards)
+     ============================================================ */
+  (function(){
+    var data={
+      resTextbooks:[
+        ["Epicyclic gearing (overview)","Background on sun/planet/ring/carrier, the three fixed-member ratios, and how pitch circles roll without slip.","en.wikipedia.org","https://en.wikipedia.org/wiki/Epicyclic_gearing"],
+        ["Gear train (ratios & stages)","How meshes combine into a train, the velocity ratio, and the role of idler gears.","en.wikipedia.org","https://en.wikipedia.org/wiki/Gear_train"],
+        ["Rack and pinion","The flat-surface limiting case: turning rotation into straight-line travel, with the geometry behind it.","en.wikipedia.org","https://en.wikipedia.org/wiki/Rack_and_pinion"]
+      ],
+      resSimulators:[
+        ["Planetary Gearbox Speed & Torque Calculator","Vary sun, planet, and ring tooth counts and see output speed and torque for each fixed-member configuration.","firgelliauto.com","https://www.firgelliauto.com/blogs/mechanisms/epicyclic-planetary-gear-train"],
+        ["Gears (Wood Gears) \\u2014 how gears mesh","Clear visual explanations of gear meshing, tooth counts, and ratio, with build-it-yourself planetary examples.","woodgears.ca","https://woodgears.ca/gear/"],
+        ["tec-science: Planetary gear","Animated explanation of planetary kinematics and the general ratio equation (Willis formula).","tec-science.com","https://www.tec-science.com/mechanical-power-transmission/planetary-gear/how-does-a-planetary-gear-work/"]
+      ],
+      resConcepts:[
+        ["Involute gear teeth","Why the involute profile makes meshing teeth act like rolling pitch circles \\u2014 the link between Chapter 3 and real gears.","en.wikipedia.org","https://en.wikipedia.org/wiki/Involute_gear"],
+        ["Gear ratio (fundamentals)","A refresher on R as the ratio of rotations, its inverse speed ratio, and the torque trade-off.","en.wikipedia.org","https://en.wikipedia.org/wiki/Gear_ratio"],
+        ["KHK: Gear technical reference","Manufacturer reference on tooth counts, module, pitch, and how they set the rolling geometry.","khkgears.net","https://khkgears.net/new/gear_knowledge/"]
+      ]
+    };
+    Object.keys(data).forEach(function(mountId){
+      var mount=$(mountId); if(!mount) return;
+      data[mountId].forEach(function(r){
+        var a=document.createElement("a");
+        a.className="res-link"; a.href=r[3]; a.target="_blank"; a.rel="noopener noreferrer";
+        var name=document.createElement("span"); name.className="name";
+        name.appendChild(document.createTextNode(r[0]+" "));
+        var ext=document.createElement("span"); ext.className="ext"; ext.textContent="\\u2197 new tab";
+        name.appendChild(ext);
+        var desc=document.createElement("span"); desc.className="desc"; desc.textContent=r[1];
+        var hs=document.createElement("span"); hs.className="host"; hs.textContent=r[2];
+        a.appendChild(name); a.appendChild(desc); a.appendChild(hs);
+        a.setAttribute("aria-label", r[0]+" \\u2014 opens "+r[2]+" in a new tab");
+        mount.appendChild(a);
+      });
+    });
+  })();
+
+  /* ============================================================
+     NAV ACTIVE STATE + READING PROGRESS + ARROW-KEY NAV
+     ============================================================ */
+  (function(){
+    var links=Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+    var sections=links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+    var prog=$("readprog"), pct=$("readpct");
+    function onScroll(){
+      var y=window.scrollY+90;
+      var active=sections[0];
+      sections.forEach(function(s){ if(s.offsetTop<=y) active=s; });
+      links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href")==="#"+active.id); });
+      var doc=document.documentElement;
+      var max=doc.scrollHeight - doc.clientHeight;
+      var p=max>0?Math.min(100,Math.round(window.scrollY/max*100)):0;
+      if(prog){ prog.value=p; if(pct) pct.textContent=p+"%"; }
+    }
+    window.addEventListener("scroll",onScroll,{passive:true});
+    window.addEventListener("resize",onScroll);
+    onScroll();
+    var tw=$("tocWrap");
+    if(tw){
+      tw.addEventListener("keydown",function(e){
+        if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
+        var i=links.indexOf(document.activeElement); if(i<0) return;
+        e.preventDefault();
+        var ni=e.key==="ArrowRight"?Math.min(links.length-1,i+1):Math.max(0,i-1);
+        links[ni].focus();
+      });
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
