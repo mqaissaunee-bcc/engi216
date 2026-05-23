@@ -165,6 +165,22 @@
   .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
   .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
 
+  /* ---------- analogy & real-world callouts ---------- */
+  .analogy{ border-left:4px solid var(--accent); background:linear-gradient(180deg, var(--paper-2), var(--panel)); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; }
+  .analogy::before{ content:"\1F4A1"; position:absolute; left:14px; top:13px; font-size:1.2rem; line-height:1; }
+  .analogy .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; margin-bottom:3px; }
+  .analogy p:last-child{ margin-bottom:0; }
+
+  .realworld{ border:1px solid var(--panel-line); border-left:4px solid var(--accent-2); background:var(--panel); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; box-shadow:var(--shadow); }
+  .realworld::before{ content:"\1F527"; position:absolute; left:14px; top:13px; font-size:1.15rem; line-height:1; }
+  .realworld .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:3px; }
+  .realworld p:last-child{ margin-bottom:0; }
+  .realworld ul{ margin:.4em 0 0; padding-left:1.1em; }
+  .realworld li{ margin:.3em 0; }
+  @media (prefers-color-scheme: dark){
+    .analogy{ background:linear-gradient(180deg, var(--paper-2), var(--panel)); }
+  }
+
   .eqn{
     font-family:var(--mono); background:var(--ink); color:#e9f6fb;
     padding:14px 18px; border-radius:8px; font-size:1.02rem; overflow-x:auto;
@@ -402,6 +418,11 @@
     <div class="defn"><strong>Mechanism</strong> &mdash; a device consisting of a system of interconnected rigid links.</div>
   </div>
 
+  <div class="analogy">
+    <span class="h">Analogy &mdash; choreography vs. the workout</span>
+    <p style="margin:.3em 0 0"><strong>Kinematics</strong> is like the <em>choreography</em> of a dance written on paper: it says where every limb goes and in what order, but says nothing about how much effort it takes or how tired you&rsquo;ll be. <strong>Dynamics</strong> is the actual <em>workout</em> &mdash; the forces, the strain, the sweat that produce that motion over time. This whole chapter lives in the choreography: we ask only <em>what motions are possible</em>, never how hard you have to push.</p>
+  </div>
+
   <details>
     <summary>Where dynamics is headed (preview of later chapters)</summary>
     <div class="body">
@@ -477,6 +498,16 @@
     <span class="h">The central trade</span>
     <p style="margin:.4em 0 0">A <em>joint</em> connects two bodies and <strong>removes</strong> some of those freedoms. The whole of Gruebler&rsquo;s criterion is bookkeeping: start from the freedoms all the loose links would have, then subtract what each joint takes away.</p>
   </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; a hockey puck vs. a train</span>
+    <p style="margin:.3em 0 0">Think of a hockey puck sitting on the ice. It can slide left-right, slide up-down the rink, and spin &mdash; three independent things, so 3 DOF. Now picture a train: it can only move forward or backward along its track. The rails have stripped away two of those freedoms, leaving just <strong>one</strong>. A joint does to a link exactly what the rails do to the train.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; where DOF counts decide the design</span>
+    <p style="margin:.3em 0 0">DOF is not academic &mdash; it is a spec sheet. An industrial robot arm advertised as &ldquo;6-axis&rdquo; literally has 6 DOF, one motor per freedom, so it can reach any position <em>and</em> orientation in its workspace. A drawer slide is built to have exactly 1 DOF (in/out) and nothing else. A camera tripod ball-head gives you 3 rotational DOF so you can aim freely but not drift sideways. Designers choose the DOF first, then pick joints to deliver it.</p>
+  </div>
 </section>
 
 <!-- ============ 1 · JOINTS ============ -->
@@ -508,6 +539,21 @@
   <div class="callout">
     <span class="h">Cross-reference for other textbooks</span>
     <p style="margin:.4em 0 0">Most references call a one-freedom contact a <strong>lower pair</strong> (surface contact: revolute = pin, prismatic = slider) and a two-freedom rolling/sliding contact a <strong>higher pair</strong> (point or line contact, e.g. a cam on a follower or meshing gear teeth). This course&rsquo;s <span class="pill p1">P1</span> = lower pair and <span class="pill p2">P2</span> = higher pair. Same physics, different label.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; joints are like dance holds</span>
+    <p style="margin:.3em 0 0">A <strong>pin joint</strong> is two dancers holding both hands and spinning &mdash; they stay connected at one point but can rotate freely around it. A <strong>sliding joint</strong> is a dancer gliding along a barre: they can move along it but cannot rotate off it. A <strong>rolling joint</strong> is someone walking a tightrope without slipping &mdash; every step forward is locked to a precise amount of foot-roll. And a <strong>slipping joint</strong> is skidding on that rope: you can roll <em>and</em> slide independently, which is why it has the extra freedom.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; spot these joints around you</span>
+    <ul>
+      <li><strong>Pin (P1):</strong> a door hinge, scissors pivot, the elbow of a desk lamp, a bicycle pedal crank.</li>
+      <li><strong>Sliding (P1):</strong> a desk drawer, a window sash, the slide of a trombone, a syringe plunger.</li>
+      <li><strong>Rolling (P1):</strong> a train wheel on a rail (no slip under normal traction), a ball bearing rolling in its race.</li>
+      <li><strong>Slipping (P2):</strong> a cam pushing a follower, meshing gear teeth, a car tire skidding on ice &mdash; rolling <em>and</em> sliding at once.</li>
+    </ul>
   </div>
 
   <div class="card tool" aria-labelledby="joint-tool-h">
@@ -599,9 +645,19 @@
     </div>
   </div>
 
+  <div class="analogy">
+    <span class="h">Analogy &mdash; a subway map</span>
+    <p style="margin:.3em 0 0">A subway map is a skeleton diagram of a city&rsquo;s transit. It throws away street curves, building shapes, and exact distances, and keeps only what matters for <em>getting around</em>: which stations connect to which, and in what order. A skeleton diagram does the same for a machine &mdash; it discards the styling, the casings, and the bolts, and keeps only the pivot-to-pivot geometry that determines how the thing moves.</p>
+  </div>
+
   <div class="callout">
     <span class="h">Why this matters</span>
     <p style="margin:.4em 0 0">If two machines reduce to the <em>same</em> skeleton, they have the <em>same</em> kinematics &mdash; a windshield-wiper linkage and a certain locomotive drive may be kinematically identical. The skeleton is the abstraction that lets one analysis serve many machines.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; same skeleton, different machine</span>
+    <p style="margin:.3em 0 0">Engineers reuse skeletons constantly. The four-bar skeleton behind a <strong>car&rsquo;s hood hinge</strong> is the same one behind a <strong>desk lamp arm</strong>, a <strong>locking pliers</strong>, and a <strong>bicycle&rsquo;s rear suspension</strong>. Once you can sketch the skeleton, you can analyze all of them with one set of tools &mdash; which is exactly why we strip machines down before doing any math.</p>
   </div>
 </section>
 
@@ -620,6 +676,11 @@
       <h4>The hierarchy in one breath</h4>
       <p>Links + joints &rarr; <strong>kinematic chain</strong>. Pin one link to ground &rarr; <strong>mechanism</strong>. Push power through it from a source to a load &rarr; <strong>machine</strong>. A bicycle&rsquo;s chain-and-sprocket is a mechanism; the whole bicycle doing work on the road is a machine.</p>
     </div>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; a stapler climbs the hierarchy</span>
+    <p style="margin:.3em 0 0">Pick up a desk stapler. Its loose pivoting arms are a <strong>kinematic chain</strong>. Bolt the base to the desk and it becomes a <strong>mechanism</strong> with predictable motion. Now press down so it drives a staple through paper &mdash; it is transmitting force from your hand (source) to the staple (load), making it a <strong>machine</strong>. Nothing physical changed; the same parts earn each label as you add a ground and then a job to do.</p>
   </div>
 
   <h3>Kinematic inversion</h3>
@@ -641,6 +702,23 @@
       </svg>
     </div>
     <div class="readout" id="invInfo" aria-live="polite"></div>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; inversion is like changing your frame of reference</span>
+    <p style="margin:.3em 0 0">Imagine four friends linked hand-to-hand in a ring. If one person plants their feet and refuses to move, everyone else swings around <em>them</em>. If instead a different friend plants their feet, the whole group&rsquo;s motion looks completely different &mdash; even though nobody let go of anyone&rsquo;s hand. The <em>connections</em> (the chain) never change; only <em>who stays still</em> (the ground) changes. That is exactly a kinematic inversion.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; the slider-crank chain&rsquo;s four lives</span>
+    <p style="margin:.3em 0 0">One slider-crank chain becomes four different machines depending on which link you ground:</p>
+    <ul>
+      <li><strong>Fix the block (cylinder):</strong> the <strong>internal-combustion engine</strong> &mdash; piston drives the crank.</li>
+      <li><strong>Fix the crank:</strong> the <strong>Whitworth quick-return</strong> mechanism used in old shaping machines.</li>
+      <li><strong>Fix the connecting rod:</strong> the <strong>oscillating-cylinder engine</strong> found in early steam toys.</li>
+      <li><strong>Fix the slider:</strong> a <strong>hand water pump</strong> &mdash; you rock the handle and the &ldquo;cylinder&rdquo; moves.</li>
+    </ul>
+    <p>Same four parts, four products. This is why inversion is one of the most powerful ideas in machine design.</p>
   </div>
 </section>
 
@@ -673,6 +751,16 @@
 
   <p>The same equation appears elsewhere as the <strong>Gr&uuml;bler&ndash;Kutzbach criterion</strong>, usually written F = 3(n&minus;1) &minus; 2j&#8321; &minus; j&#8322; with <em>j</em><sub>1</sub> lower pairs and <em>j</em><sub>2</sub> higher pairs &mdash; identical to ours.</p>
 
+  <div class="analogy">
+    <span class="h">Analogy &mdash; a budget for movement</span>
+    <p style="margin:.3em 0 0">Treat freedoms like money. Every moving link is handed a &ldquo;budget&rdquo; of 3 freedoms to spend. Each joint is a <em>bill</em>: a P1 joint charges 2, a P2 joint charges 1. F is simply what&rsquo;s left in the account after all the bills are paid. Land on F = 1 and you have exactly enough for one controllable motion. Overspend (F &lt; 0) and you&rsquo;re in debt &mdash; the structure is over-constrained.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; why a triangle is the strongest shape</span>
+    <p style="margin:.3em 0 0">Run Gruebler on a triangle of three pinned links and you get F = 0 &mdash; a rigid structure that cannot move. That single fact is why <strong>roof trusses, bridge frames, bicycle frames, and crane booms are built from triangles</strong>. Add one more link to make a four-bar (F = 1) and it suddenly moves freely &mdash; great for a linkage, terrible for a bridge. Gruebler tells a structural engineer &ldquo;rigid&rdquo; and a machine designer &ldquo;moves&rdquo; from the very same number.</p>
+  </div>
+
   <div class="card tool" aria-labelledby="gru-tool-h">
     <div class="tool-label"><span>Live Gruebler calculator</span></div>
     <h3 id="gru-tool-h" style="margin-top:.3em">Compute F and read the verdict</h3>
@@ -703,6 +791,16 @@
   <div class="defn"><strong>Mobility (M):</strong> the actual number of degrees of freedom. Always <strong>M &ge; F</strong>. Equivalently, M is the number of P1 joints you would need to remove to make the structure determinate.</div>
 
   <div class="eqn">M &ge; F <span class="lbl">the formula can be &ldquo;fooled,&rdquo; never too high</span></div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; the GPS that ignores the open gate</span>
+    <p style="margin:.3em 0 0">Gruebler is like a GPS that only knows the official road network. If a shortcut exists that isn&rsquo;t on its map &mdash; an open field, a gate left unlocked &mdash; the GPS insists you can&rsquo;t get through, yet you drive right across. Special geometry is that off-map shortcut: the formula reports &ldquo;no movement&rdquo; (F = 0) while the real linkage strolls right through. Mobility is the honest count you get by actually <em>trying</em> to move.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; redundancy you can see</span>
+    <p style="margin:.3em 0 0">A <strong>locomotive&rsquo;s driving wheels</strong> are linked by parallel coupling rods so they turn in unison. Strict Gruebler bookkeeping would call that over-constrained (F &lt; 0), yet the wheels spin freely &mdash; the parallel geometry is deliberately redundant for strength and load-sharing. The same trick appears in <strong>parallelogram drafting lamps</strong> and <strong>double-parallel robot linkages</strong> that keep a platform level. Engineers add redundancy on purpose; mobility analysis is how they confirm the thing still moves.</p>
+  </div>
 
   <div class="card">
     <h3 style="margin-top:.2em">The classic counter-example: the parallelogram with a redundant link</h3>
@@ -740,6 +838,11 @@
     <div class="defn"><strong>Rocker</strong> &mdash; a lever that only <em>oscillates</em> between limit positions.</div>
   </div>
 
+  <div class="analogy">
+    <span class="h">Analogy &mdash; a bike pedal vs. a playground seesaw</span>
+    <p style="margin:.3em 0 0">A <strong>crank</strong> is your <em>bicycle pedal</em>: it goes all the way around, over and over, without stopping. A <strong>rocker</strong> is a <em>playground seesaw</em>: it tips up, tips down, and reverses &mdash; it never spins in a full circle. Grashof&rsquo;s criterion is the rule that tells you, just from the four link lengths, whether a given lever will behave like a pedal or like a seesaw.</p>
+  </div>
+
   <p>Label the four lengths: <em>L</em><sub>max</sub> (longest), <em>L</em><sub>min</sub> (shortest), and <em>L</em><sub>a</sub>, <em>L</em><sub>b</sub> (the two intermediate lengths). Grashof&rsquo;s criterion:</p>
   <div class="eqn">L<sub>max</sub> + L<sub>min</sub> &le; L<sub>a</sub> + L<sub>b</sub> <span class="lbl">Eq. 1.10 &mdash; Grashof</span></div>
   <p>When this holds, the <strong>shortest link can make complete revolutions</strong> while the three longer links can only oscillate relative to one another. Which specific behavior you get depends on <em>where the shortest link sits</em>:</p>
@@ -759,6 +862,17 @@
   <div class="callout">
     <span class="h">Non-Grashof cases, in the text&rsquo;s words</span>
     <p style="margin:.4em 0 0">When Eq. 1.10 is contradicted: if the sum of the intermediate lengths is <em>greater</em> than the sum of shortest + longest, <strong>no link can revolve completely</strong>. If they are <em>equal</em>, the links can become collinear and may overlap (the change-point case).</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Real-world &mdash; every four-bar type is something you&rsquo;ve used</span>
+    <ul>
+      <li><strong>Crank-rocker:</strong> a <strong>windshield wiper</strong> &mdash; the motor cranks a full circle, the wiper arm rocks back and forth across the glass. Also an oscillating fan&rsquo;s sweep.</li>
+      <li><strong>Double-crank (drag link):</strong> the drive between a locomotive&rsquo;s wheels, and <strong>conveyor / agitator drives</strong> where both ends rotate fully.</li>
+      <li><strong>Double-rocker:</strong> a <strong>car&rsquo;s front suspension</strong> control arms, and the <strong>landing-gear retraction</strong> linkage &mdash; both levers swing within limits.</li>
+      <li><strong>Parallelogram (change-point):</strong> a <strong>drafting lamp</strong>, <strong>parallel-jaw pliers</strong>, and <strong>balance scales</strong> that keep one link parallel as it moves.</li>
+      <li><strong>Triple-rocker (non-Grashof):</strong> a <strong>folding table leg</strong> or <strong>locking toggle clamp</strong> &mdash; it moves between set positions but never spins around.</li>
+    </ul>
   </div>
 
   <div class="card tool" aria-labelledby="gra-tool-h">
