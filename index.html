@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms — Course Home</title>
+<meta name="description" content="Course home for ENGI 216: an interactive, accessible series of single-file HTML lecture modules on the kinematics, dynamics, and synthesis of planar mechanisms and machines, based on the Vector Loop Method.">
+<style>
+  /* ============================================================
+     THEME TOKENS  — engineering-blueprint / technical drafting
+     (locked design standard, shared with all chapter modules)
+     ============================================================ */
+  :root{
+    --ink:        #10243a;   /* deep drafting ink */
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;   /* drafting paper */
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;   /* textbook cyan */
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;   /* rust / annotation orange */
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --muted-bg:   #ece9db;
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --muted-bg:   #182833;
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- masthead ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:42px 20px 38px; position:relative; overflow:hidden;
+    border-bottom:3px solid var(--accent);
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:2; }
+  header.site::after{
+    content:""; position:absolute; inset:0; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-dk); background:#f3f1e7;
+    padding:5px 12px; border-radius:30px; font-weight:700; margin-bottom:14px;
+  }
+  @media (prefers-color-scheme: dark){ .chip{ background:#cfe7ef; color:#06384a; } }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; margin:.1em 0 .18em;
+    font-size:clamp(1.8rem, 4.8vw, 3.1rem); line-height:1.08; color:#fff;
+  }
+  header.site .sub{ font-size:clamp(1rem,2.2vw,1.22rem); color:#d6e6ee; max-width:60ch; }
+  .meta-row{ margin-top:20px; display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:.78rem; color:#bcd2dd; }
+  .meta-row span{ display:inline-flex; align-items:center; gap:6px; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:8px 18px 70px; }
+
+  section{ padding:38px 0 8px; scroll-margin-top:20px; }
+
+  .sec-tag{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h2{ font-family:var(--serif); font-size:clamp(1.45rem,3.4vw,2.1rem); line-height:1.12; margin:.18em 0 .5em; color:var(--ink); }
+  h3{ font-family:var(--sans); font-weight:700; font-size:1.15rem; margin:1.4em 0 .4em; color:var(--ink); }
+  p{ margin:.6em 0 1em; }
+  a{ color:var(--accent-dk); }
+  .lead{ font-size:1.12rem; color:var(--ink); max-width:70ch; }
+
+  /* ---------- overview cards ---------- */
+  .info-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:18px 0 6px; }
+  @media (max-width:760px){ .info-grid{ grid-template-columns:1fr; } }
+  .info-card{
+    background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent);
+    border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);
+  }
+  .info-card .ic-label{ font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  .info-card p{ margin:.4em 0 0; font-size:.96rem; }
+
+  /* ---------- progress summary ---------- */
+  .progress-line{
+    display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px;
+    background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px;
+    padding:12px 16px; font-family:var(--mono); font-size:.82rem; margin:6px 0 4px;
+  }
+  .progress-line .bars{ display:flex; gap:4px; flex:1 1 220px; min-width:200px; }
+  .progress-line .seg{ height:12px; flex:1; border-radius:3px; background:var(--muted-bg); border:1px solid var(--panel-line); }
+  .progress-line .seg.done{ background:var(--accent); border-color:var(--accent-dk); }
+  .progress-line b{ color:var(--accent-dk); }
+
+  /* ---------- chapter list ---------- */
+  .ch-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:14px 0; }
+  @media (max-width:760px){ .ch-grid{ grid-template-columns:1fr; } }
+
+  .ch{
+    position:relative; display:flex; flex-direction:column;
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:18px 20px 16px; box-shadow:var(--shadow);
+    text-decoration:none; color:inherit;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .ch.available{ border-left:5px solid var(--accent); }
+  .ch.placeholder{ border-left:5px solid var(--panel-line); background:var(--paper-2); }
+  a.ch:hover{ transform:translateY(-3px); box-shadow:0 6px 12px rgba(16,36,58,.14), 0 14px 30px rgba(16,36,58,.16); border-color:var(--accent); }
+  a.ch:focus-visible{ outline:3px solid var(--accent-2); outline-offset:3px; }
+
+  .ch-top{ display:flex; align-items:baseline; gap:12px; }
+  .ch-num{
+    font-family:var(--mono); font-weight:700; font-size:.78rem; letter-spacing:.1em;
+    color:#fff; background:var(--accent); border-radius:6px; padding:4px 9px; white-space:nowrap;
+  }
+  .ch.placeholder .ch-num{ background:var(--ink-soft); }
+  .ch-part{ font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); }
+  .ch h3{ font-family:var(--serif); font-weight:700; font-size:1.24rem; margin:.5em 0 .15em; line-height:1.18; color:var(--ink); }
+  .ch .desc{ font-size:.94rem; color:var(--ink-soft); margin:.2em 0 .9em; flex:1; }
+
+  .ch-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; }
+  .topics{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+  .status{
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase;
+    font-weight:700; padding:4px 9px; border-radius:20px; white-space:nowrap;
+  }
+  .status.ready{ background:var(--good-bg); color:var(--good); border:1px solid var(--good); }
+  .status.soon{ background:var(--muted-bg); color:var(--ink-soft); border:1px dashed var(--panel-line); }
+  .status .arrow{ font-weight:700; }
+  .ext-note{
+    font-family:var(--mono); font-size:.66rem; letter-spacing:.06em; color:var(--accent-dk);
+    margin-top:8px; display:inline-flex; align-items:center; gap:5px;
+  }
+
+  /* ---------- part headings ---------- */
+  .part-head{
+    grid-column:1 / -1; display:flex; align-items:center; gap:12px; margin:10px 0 -2px;
+  }
+  .part-head .pp{ font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  .part-head .rule{ flex:1; height:1px; background:var(--panel-line); }
+
+  /* ---------- general info / callout ---------- */
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:14px 18px; border-radius:0 8px 8px 0; margin:16px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+  .callout p{ margin:.4em 0 0; font-size:.96rem; }
+
+  .defn{ border-left:4px solid var(--accent); background:var(--paper-2); padding:14px 18px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .defn strong{ color:var(--accent-dk); }
+
+  /* ---------- objectives list ---------- */
+  ul.obj{ list-style:none; padding:0; margin:10px 0; display:grid; grid-template-columns:1fr 1fr; gap:8px 22px; }
+  @media (max-width:680px){ ul.obj{ grid-template-columns:1fr; } }
+  ul.obj li{ position:relative; padding-left:26px; font-size:.97rem; }
+  ul.obj li::before{ content:"▸"; position:absolute; left:4px; top:0; color:var(--accent); font-weight:700; }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--panel-line); margin-top:30px; padding:26px 18px 50px;
+    text-align:center; color:var(--ink-soft); font-size:.86rem;
+  }
+  footer .program{ color:var(--accent-dk); font-weight:700; }
+  footer .refs{ font-family:var(--mono); font-size:.74rem; max-width:70ch; margin:10px auto 0; line-height:1.6; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Mechanical Engineering</span>
+    <h1>Dynamics &amp; Kinematics of Machines and Mechanisms</h1>
+    <p class="sub">An interactive course in the synthesis and analysis of planar mechanisms — built on the Vector Loop Method, kinematic coefficients, and machine dynamics.</p>
+    <div class="meta-row">
+      <span>◷ 9 chapters</span>
+      <span>▣ ~3 hours lecture each</span>
+      <span>◆ Junior-level mechanical engineering</span>
+      <span>⌨ Interactive · keyboard accessible</span>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section id="overview" aria-labelledby="overview-h">
+    <span class="sec-tag">Course Home</span>
+    <h2 id="overview-h">Welcome to the interactive course</h2>
+    <p class="lead">This course presents the kinematics, dynamics, and synthesis of planar mechanisms and machines as a series of self-contained, interactive lecture modules. Each chapter opens in your browser, runs offline, and includes live mechanism simulations, worked examples, self-checks, embedded video, a glossary, and a printable formula reference.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <span class="ic-label">Approach</span>
+        <p>Synthesis is taught first, then analysis — so the mathematics behind mechanism design makes sense before you analyze existing machines.</p>
+      </div>
+      <div class="info-card">
+        <span class="ic-label">Core method</span>
+        <p>The Vector Loop Method and kinematic coefficients run through the whole sequence, giving a single consistent, programmable framework.</p>
+      </div>
+      <div class="info-card">
+        <span class="ic-label">How to use</span>
+        <p>Work through chapters in order. Each module is one browser tab; the simulators and self-checks are designed for active, hands-on practice.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="chapters" aria-labelledby="chapters-h">
+    <span class="sec-tag">Modules</span>
+    <h2 id="chapters-h">Chapters</h2>
+    <p>Chapter modules open in a new browser tab. Cards marked <em>Coming soon</em> are placeholders for modules still in development.</p>
+
+    <div class="progress-line" role="img" aria-label="Course build progress: 6 of 9 chapter modules are ready.">
+      <span><b>Build status:</b> 6 of 9 modules ready</span>
+      <span class="bars" aria-hidden="true">
+        <span class="seg done"></span><span class="seg done"></span><span class="seg done"></span>
+        <span class="seg done"></span><span class="seg done"></span><span class="seg"></span>
+        <span class="seg"></span><span class="seg done"></span><span class="seg"></span>
+      </span>
+    </div>
+
+    <div class="ch-grid">
+
+      <!-- ===================== PART: FUNDAMENTALS ===================== -->
+      <div class="part-head"><span class="pp">Foundations &amp; Kinematic Analysis</span><span class="rule" aria-hidden="true"></span></div>
+
+      <a class="ch available" href="chapter1-introduction-to-mechanisms.html" target="_blank" rel="noopener noreferrer"
+         aria-label="Chapter 1: Introduction to Mechanisms — open module in a new tab">
+        <div class="ch-top"><span class="ch-num">CH 1</span><span class="ch-part">Introduction</span></div>
+        <h3>Introduction to Mechanisms</h3>
+        <p class="desc">Links and joints, skeleton diagrams, mechanisms vs. machines, mobility, Gruebler's criterion, and Grashof's criterion.</p>
+        <div class="ch-foot">
+          <span class="topics">Joints · Mobility · Grashof</span>
+          <span class="status ready">Open <span class="arrow">↗</span></span>
+        </div>
+        <span class="ext-note">↗ opens in a new tab</span>
+      </a>
+
+      <a class="ch available" href="chapter2-kinematic-analysis-vector-loop-method.html" target="_blank" rel="noopener noreferrer"
+         aria-label="Chapter 2: Kinematic Analysis Part I, Vector Loop Method — open module in a new tab">
+        <div class="ch-top"><span class="ch-num">CH 2</span><span class="ch-part">Kinematic Analysis · I</span></div>
+        <h3>Vector Loop Method</h3>
+        <p class="desc">Position analysis: drawing vector loops, writing vector loop equations, geometric constraints, knowns vs. unknowns, and the position solution.</p>
+        <div class="ch-foot">
+          <span class="topics">Vector loops · VLE · Position</span>
+          <span class="status ready">Open <span class="arrow">↗</span></span>
+        </div>
+        <span class="ext-note">↗ opens in a new tab</span>
+      </a>
+
+      <a class="ch available" href="chapter3-kinematic-analysis-rolling-contacts.html" target="_blank" rel="noopener noreferrer"
+         aria-label="Chapter 3: Kinematic Analysis Part II, Rolling Contacts — open module in a new tab">
+        <div class="ch-top"><span class="ch-num">CH 3</span><span class="ch-part">Kinematic Analysis · II</span></div>
+        <h3>Rolling Contacts</h3>
+        <p class="desc">Rolling without slipping, rolling-contact constraints in vector loops, gears and friction wheels, and contact point kinematics.</p>
+        <div class="ch-foot">
+          <span class="topics">Rolling · No-slip · Gears</span>
+          <span class="status ready">Open <span class="arrow">↗</span></span>
+        </div>
+        <span class="ext-note">↗ opens in a new tab</span>
+      </a>
+
+      <a class="ch available" href="chapter4-kinematic-analysis-kinematic-coefficients.html" target="_blank" rel="noopener noreferrer"
+         aria-label="Chapter 4: Kinematic Analysis Part III, Kinematic Coefficients — open module in a new tab">
+        <div class="ch-top"><span class="ch-num">CH 4</span><span class="ch-part">Kinematic Analysis · III</span></div>
+        <h3>Kinematic Coefficients</h3>
+        <p class="desc">First- and second-order kinematic coefficients, separating geometry from speed, velocity and acceleration analysis, and mechanical advantage.</p>
+        <div class="ch-foot">
+          <span class="topics">First/second order · Velocity · Accel.</span>
+          <span class="status ready">Open <span class="arrow">↗</span></span>
+        </div>
+        <span class="ext-note">↗ opens in a new tab</span>
+      </a>
+
+      <!-- ===================== PART: MACHINE DYNAMICS ===================== -->
+      <div class="part-head"><span class="pp">Machine Dynamics</span><span class="rule" aria-hidden="true"></span></div>
+
+      <a class="ch available" href="chapter5-machine-dynamics-inverse-dynamics-problem.html" target="_blank" rel="noopener noreferrer"
+         aria-label="Chapter 5: Machine Dynamics Part I, The Inverse Dynamics Problem — open module in a new tab">
+        <div class="ch-top"><span class="ch-num">CH 5</span><span class="ch-part">Machine Dynamics · I</span></div>
+        <h3>The Inverse Dynamics Problem</h3>
+        <p class="desc">Newton–Euler equations for mechanisms, mass centers and inertia, joint and driving forces, and solving for the torque required for a prescribed motion.</p>
+        <div class="ch-foot">
+          <span class="topics">Newton–Euler · Joint forces · Torque</span>
+          <span class="status ready">Open <span class="arrow">↗</span></span>
+        </div>
+        <span class="ext-note">↗ opens in a new tab</span>
+      </a>
+
+      <div class="ch placeholder" aria-label="Chapter 6: Machine Dynamics Part II, Joint Friction — coming soon">
+        <div class="ch-top"><span class="ch-num">CH 6</span><span class="ch-part">Machine Dynamics · II</span></div>
+        <h3>Joint Friction</h3>
+        <p class="desc">Friction in a pin joint, a pin-in-a-slot joint, and a straight sliding joint, and how friction terms enter the dynamic equations.</p>
+        <div class="ch-foot">
+          <span class="topics">Pin · Pin-in-slot · Sliding</span>
+          <span class="status soon">Coming soon</span>
+        </div>
+      </div>
+
+      <div class="ch placeholder" aria-label="Chapter 7: Machine Dynamics Part III, The Power Equation — coming soon">
+        <div class="ch-top"><span class="ch-num">CH 7</span><span class="ch-part">Machine Dynamics · III</span></div>
+        <h3>The Power Equation</h3>
+        <p class="desc">Developing the power equation, applying it to the inverse and forward dynamics problems, and mechanical advantage and efficiency.</p>
+        <div class="ch-foot">
+          <span class="topics">Power · Forward dynamics · Efficiency</span>
+          <span class="status soon">Coming soon</span>
+        </div>
+      </div>
+
+      <!-- ===================== PART: MECHANISM SYNTHESIS ===================== -->
+      <div class="part-head"><span class="pp">Mechanism Synthesis</span><span class="rule" aria-hidden="true"></span></div>
+
+      <a class="ch available" href="chapter8-mechanism-synthesis-freudensteins-equation.html" target="_blank" rel="noopener noreferrer"
+         aria-label="Chapter 8: Mechanism Synthesis Part I, Freudenstein's Equation — open module in a new tab">
+        <div class="ch-top"><span class="ch-num">CH 8</span><span class="ch-part">Mechanism Synthesis · I</span></div>
+        <h3>Freudenstein's Equation</h3>
+        <p class="desc">Function generation, Freudenstein's equation for the four-bar and crank-slider mechanisms, precision points, and link-length design.</p>
+        <div class="ch-foot">
+          <span class="topics">Function gen · Four-bar · Crank-slider</span>
+          <span class="status ready">Open <span class="arrow">↗</span></span>
+        </div>
+        <span class="ext-note">↗ opens in a new tab</span>
+      </a>
+
+      <div class="ch placeholder" aria-label="Chapter 9: Mechanism Synthesis Part II, Rigid Body Guidance — coming soon">
+        <div class="ch-top"><span class="ch-num">CH 9</span><span class="ch-part">Mechanism Synthesis · II</span></div>
+        <h3>Rigid Body Guidance</h3>
+        <p class="desc">Modeling planar rigid-body displacement, and the three-, four-, and five-position synthesis problems for guiding a body through poses.</p>
+        <div class="ch-foot">
+          <span class="topics">Displacement · 3/4/5-position</span>
+          <span class="status soon">Coming soon</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="objectives" aria-labelledby="obj-h">
+    <span class="sec-tag">What you'll be able to do</span>
+    <h2 id="obj-h">Course learning objectives</h2>
+    <p>By the end of this course, students will be able to:</p>
+    <ul class="obj">
+      <li>Identify links and joints and draw skeleton (kinematic) diagrams of real machines.</li>
+      <li>Compute mobility with Gruebler's criterion and classify four-bars with Grashof's criterion.</li>
+      <li>Set up and solve vector loop equations for the position of planar mechanisms.</li>
+      <li>Handle rolling-contact constraints, including gears and friction wheels.</li>
+      <li>Use first- and second-order kinematic coefficients for velocity and acceleration.</li>
+      <li>Solve the inverse dynamics problem to find the driving torque for a prescribed motion.</li>
+      <li>Account for friction in pin, pin-in-slot, and sliding joints.</li>
+      <li>Apply the power equation and evaluate mechanical advantage and efficiency.</li>
+      <li>Synthesize four-bar and crank-slider mechanisms with Freudenstein's equation.</li>
+      <li>Design mechanisms for rigid-body guidance through multiple prescribed positions.</li>
+    </ul>
+  </section>
+
+  <section id="about" aria-labelledby="about-h">
+    <span class="sec-tag">About these modules</span>
+    <h2 id="about-h">How the modules are built</h2>
+    <p>Each chapter is a single self-contained HTML file: all styling and interactivity are inline, so the modules run in any modern browser, work offline, and embed cleanly in a learning-management system. They follow a consistent engineering-blueprint design and are built to meet WCAG 2.1 AA accessibility guidance.</p>
+
+    <div class="defn">
+      <strong>Every chapter module includes:</strong> a guided lecture, interactive mechanism simulators, worked examples, self-check questions, an embedded video page, a searchable glossary, categorized external resources, a printable quick-reference formula card, an objectives recap, and an attribution block.
+    </div>
+
+    <div class="callout">
+      <span class="h">Accessibility &amp; new tabs</span>
+      <p>Chapter links open in a new tab and are marked with a visible "↗ opens in a new tab" indicator and a screen-reader label so the behavior is never a surprise. All modules support keyboard navigation, dark mode, and reduced-motion preferences.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> · <span class="year">2026</span></p>
+  <p class="refs">Course content adapted from Stanišić, <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em> (Cengage Learning), supplemented with openly available reference and foundational material. Interactive modules are original instructional works.</p>
+</footer>
+
+</body>
+</html>
