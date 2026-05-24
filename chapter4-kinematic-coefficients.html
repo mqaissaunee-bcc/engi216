@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 4 · Kinematic Analysis III: Kinematic Coefficients — Kinematics &amp; Dynamics of Machines</title>
+<meta name="description" content="An interactive lecture on kinematic coefficients: the geometric, time-free way to do velocity and acceleration analysis. Covers first- and second-order coefficients, the Jacobian, dead and limit positions, points of interest, and geartrain coefficients, with worked examples, analogies, and real-world applications.">
+<style>
+  /* ============================================================
+     THEME TOKENS  — engineering-blueprint / technical drafting
+     (locked ENGI 216 design standard — identical to Chapters 1–3)
+     ============================================================ */
+  :root{
+    --ink:        #10243a;   /* deep drafting ink */
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;   /* drafting paper */
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;   /* textbook cyan */
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;   /* rust / annotation orange */
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --analogy-bg: #e2f1f5;   /* pale cyan wash */
+    --rw-bg:      #f6e7dc;   /* pale rust wash */
+    --rw-h:       #9c4416;   /* rust heading, AA on --rw-bg */
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --analogy-bg: #0f2a33;   /* deep cyan wash */
+      --rw-bg:      #33210f;   /* deep rust wash */
+      --rw-h:       #e8853f;   /* rust heading on dark */
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- layout ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+    border-bottom:3px solid var(--accent);
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:2; }
+  header.site::after{
+    content:""; position:absolute; inset:0; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-dk); background:#f3f1e7;
+    padding:5px 12px; border-radius:30px; font-weight:700; margin-bottom:14px;
+  }
+  @media (prefers-color-scheme: dark){ .chip{ background:#cfe7ef; color:#06384a; } }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; margin:.1em 0 .15em;
+    font-size:clamp(1.7rem, 4.6vw, 3rem); line-height:1.08; color:#fff;
+  }
+  header.site .sub{ font-size:clamp(1rem,2.2vw,1.2rem); color:#d6e6ee; max-width:58ch; }
+  .meta-row{ margin-top:18px; display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:.78rem; color:#bcd2dd; }
+  .meta-row span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- sticky nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50;
+    background:var(--panel); border-bottom:1px solid var(--panel-line);
+    box-shadow:0 2px 8px rgba(16,36,58,.06);
+  }
+  nav.toc .wrap{ max-width:var(--maxw); margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:8px 12px; }
+  nav.toc a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink-soft);
+    font-family:var(--mono); font-size:.76rem; font-weight:600; letter-spacing:.02em;
+    padding:8px 12px; border-radius:7px; white-space:nowrap; min-height:36px; display:inline-flex; align-items:center;
+  }
+  nav.toc a:hover{ background:var(--paper-2); color:var(--ink); }
+  nav.toc a:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  nav.toc a.active{ background:var(--accent); color:#fff; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:10px 18px 60px; }
+
+  section{ padding:40px 0 12px; scroll-margin-top:64px; border-top:1px dashed var(--panel-line); }
+  section:first-of-type{ border-top:none; }
+
+  .sec-tag{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h2{ font-family:var(--serif); font-size:clamp(1.45rem,3.4vw,2.1rem); line-height:1.12; margin:.18em 0 .5em; color:var(--ink); }
+  h3{ font-family:var(--sans); font-weight:700; font-size:1.18rem; margin:1.5em 0 .4em; color:var(--ink); letter-spacing:.005em; }
+  h4{ font-family:var(--mono); font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:1.2em 0 .4em; }
+  p{ margin:.6em 0 1em; }
+  a{ color:var(--accent-dk); }
+
+  .lead{ font-size:1.12rem; color:var(--ink); }
+
+  /* ---------- cards & panels ---------- */
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:20px 22px; margin:16px 0; box-shadow:var(--shadow);
+  }
+  .card.tool{ border-top:3px solid var(--accent); }
+  .tool-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .tool-label::before{ content:"▸ INTERACTIVE"; }
+  .tool-label span{ color:var(--ink-soft); }
+
+  .defn{
+    border-left:4px solid var(--accent); background:var(--paper-2);
+    padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0;
+  }
+  .defn strong{ color:var(--accent-dk); }
+
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* Analogy callout — cyan, "think of it like…" */
+  .analogy{
+    border-left:4px solid var(--accent); background:var(--analogy-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .analogy .h{ display:block; font-weight:700; color:var(--accent-dk); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .analogy::before{
+    content:"\01F4A1"; /* light bulb */
+    position:absolute; left:13px; top:11px; font-size:1.15rem; line-height:1;
+  }
+  .analogy p{ margin:.3em 0 0; }
+  .analogy p:first-of-type{ margin-top:0; }
+
+  /* Real-world callout — rust, "in the real world" */
+  .real-world{
+    border-left:4px solid var(--accent-2); background:var(--rw-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .real-world .h{ display:block; font-weight:700; color:var(--rw-h); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .real-world::before{
+    content:"\01F527"; /* wrench */
+    position:absolute; left:13px; top:11px; font-size:1.1rem; line-height:1;
+  }
+  .real-world p{ margin:.3em 0 0; }
+  .real-world p:first-of-type{ margin-top:0; }
+
+  .eqn{
+    font-family:var(--mono); background:var(--ink); color:#e9f6fb;
+    padding:14px 18px; border-radius:8px; font-size:1.02rem; overflow-x:auto;
+    margin:14px 0; letter-spacing:.01em;
+  }
+  .eqn .lbl{ float:right; color:#8fc6d8; font-size:.8rem; }
+  .eqn .c{ color:#ffd9a8; }       /* highlighted coefficient */
+  .eqn .m{ color:#9fe6c4; }       /* highlighted secondary term */
+  @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
+
+  /* ---------- grids ---------- */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:760px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+  /* ---------- buttons & controls ---------- */
+  button, .btn{
+    font-family:var(--sans); font-size:.92rem; font-weight:600;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:10px 16px; min-height:44px; cursor:pointer; box-shadow:var(--shadow);
+    transition:transform .08s ease, background .15s ease;
+  }
+  button:hover, .btn:hover{ background:var(--accent-dk); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  button.secondary{ background:var(--panel); color:var(--accent-dk); border:1.5px solid var(--accent); box-shadow:none; }
+  button.secondary:hover{ background:var(--paper-2); }
+  button[aria-pressed="true"]{ background:var(--ink); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:8px 0; }
+  .ctrl{ display:flex; flex-direction:column; gap:4px; min-width:150px; flex:1 1 160px; }
+  .ctrl label{ font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; text-transform:uppercase; }
+  .ctrl .val{ color:var(--accent-dk); }
+  input[type="range"]{ width:100%; accent-color:var(--accent); height:32px; }
+  input[type="range"]:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  input[type="number"]{ font-family:var(--mono); padding:8px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); width:100%; min-height:40px; font-size:.95rem; }
+  input[type="number"]:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+
+  /* ---------- svg stage ---------- */
+  .stage{
+    width:100%; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:8px; touch-action:none; display:block;
+  }
+  .stage-wrap{ position:relative; }
+  svg text{ font-family:var(--mono); }
+
+  /* ---------- readouts ---------- */
+  .readout{
+    margin-top:10px; padding:12px 14px; background:var(--paper-2); border-radius:8px;
+    font-family:var(--mono); display:flex; flex-wrap:wrap; gap:10px 18px;
+    font-size:.92rem; line-height:1.4;
+  }
+  .readout b{ color:var(--accent-dk); }
+  .readout .unit{ color:var(--ink-soft); font-size:.82rem; }
+  .verdict{ font-family:var(--mono); font-weight:700; padding:10px 14px; border-radius:8px; margin-top:10px; }
+  .verdict.ok{ background:var(--good-bg); color:var(--good); }
+  .verdict.no{ background:var(--bad-bg); color:var(--bad); }
+  .verdict.warn{ background:var(--warn-bg); color:var(--warn); }
+
+  /* ---------- tables ---------- */
+  table{ border-collapse:collapse; width:100%; margin:14px 0; font-size:.92rem; }
+  caption{ text-align:left; font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding-bottom:6px; }
+  th,td{ border:1px solid var(--panel-line); padding:8px 11px; text-align:left; }
+  th{ background:var(--paper-2); font-family:var(--mono); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+  td.mono, th.mono{ font-family:var(--mono); }
+
+  /* ---------- details / steps ---------- */
+  details{ border:1px solid var(--panel-line); border-radius:8px; margin:10px 0; background:var(--panel); overflow:hidden; }
+  summary{ cursor:pointer; padding:13px 16px; font-weight:700; font-family:var(--sans); list-style:none; min-height:44px; display:flex; align-items:center; gap:10px; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::before{ content:"+"; font-family:var(--mono); color:var(--accent); font-weight:700; font-size:1.2rem; width:1ch; }
+  details[open] summary::before{ content:"–"; }
+  summary:focus-visible{ outline:3px solid var(--accent); outline-offset:-2px; }
+  details .body{ padding:2px 16px 16px; }
+
+  /* ---------- quiz ---------- */
+  .q{ margin:14px 0; padding:16px; border:1px solid var(--panel-line); border-radius:8px; background:var(--panel); }
+  .q .stem{ font-weight:600; margin-bottom:10px; }
+  .q .opts{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1.5px solid var(--panel-line); border-radius:8px; cursor:pointer; background:var(--panel); min-height:44px; }
+  .opt:hover{ border-color:var(--accent); }
+  .opt input{ margin-top:4px; accent-color:var(--accent); width:18px; height:18px; flex:0 0 auto; }
+  .opt.correct{ border-color:var(--good); background:var(--good-bg); }
+  .opt.incorrect{ border-color:var(--bad); background:var(--bad-bg); }
+  .fb{ margin-top:10px; font-size:.92rem; padding:10px 12px; border-radius:8px; display:none; }
+  .fb.show{ display:block; }
+  .fb.right{ background:var(--good-bg); color:var(--good); }
+  .fb.wrong{ background:var(--bad-bg); color:var(--bad); }
+  .q-score{ font-family:var(--mono); font-weight:700; color:var(--accent-dk); }
+
+  /* ---------- objectives list ---------- */
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:28px; margin:.5em 0; }
+  ul.clean li::before{ content:"◆"; position:absolute; left:4px; color:var(--accent); font-size:.8rem; top:.25em; }
+
+  .pill{ display:inline-block; font-family:var(--mono); font-size:.72rem; padding:2px 9px; border-radius:20px; font-weight:700; letter-spacing:.04em; }
+  .pill.p1{ background:#dceefb; color:#075a76; }
+  .pill.p2{ background:#f7e6d8; color:#9a4715; }
+  @media (prefers-color-scheme: dark){ .pill.p1{ background:#0d3647; color:#9fdcef; } .pill.p2{ background:#3a2616; color:#f0b487; } }
+
+  /* ---------- legend dots ---------- */
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; font-family:var(--mono); font-size:.8rem; margin:8px 0; }
+  .legend i{ width:14px; height:14px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-2px; }
+
+  footer.site{ max-width:var(--maxw); margin:0 auto; padding:28px 18px 50px; border-top:1px dashed var(--panel-line); color:var(--ink-soft); font-size:.85rem; }
+  footer.site .program{ color:var(--accent-dk); font-weight:700; }
+
+  .visually-hidden{ position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0; }
+
+  .kbd{ font-family:var(--mono); font-size:.8rem; background:var(--paper-2); border:1px solid var(--panel-line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; }
+
+  .figref{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+
+  /* progress dock */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  /* ---------- video embeds ---------- */
+  .video-card{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent-2); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); margin:16px 0; }
+  .video-frame{ position:relative; width:100%; aspect-ratio:16/9; background:var(--ink); }
+  .video-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-meta{ padding:14px 18px; }
+  .video-meta h3{ margin:.1em 0 .3em; font-size:1.08rem; }
+  .video-tags{ display:flex; flex-wrap:wrap; gap:8px 14px; font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+  .video-tags b{ color:var(--accent-dk); }
+  .video-supports{ display:inline-block; font-family:var(--mono); font-size:.72rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:20px; padding:3px 11px; color:var(--accent-dk); font-weight:700; margin-top:8px; }
+
+  /* ---------- glossary ---------- */
+  .glossary-search{ position:relative; margin:14px 0; }
+  .glossary-search input{ width:100%; font-family:var(--sans); font-size:1rem; padding:12px 14px 12px 40px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--panel); color:var(--ink); min-height:48px; }
+  .glossary-search input:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  .glossary-search::before{ content:"⌕"; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:1.3rem; }
+  .gloss-list{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .gloss-list{ grid-template-columns:1fr; } }
+  .gloss-item{ background:var(--panel); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 15px; }
+  .gloss-item dt{ font-weight:700; color:var(--accent-dk); font-family:var(--sans); margin-bottom:3px; }
+  .gloss-item dd{ margin:0; font-size:.93rem; color:var(--ink); }
+  .gloss-item .tag{ font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); display:block; margin-top:6px; }
+  .gloss-empty{ font-family:var(--mono); color:var(--ink-soft); padding:14px; text-align:center; }
+
+  /* ---------- resources ---------- */
+  .res-group{ margin:18px 0; }
+  .res-group h3{ display:flex; align-items:center; gap:10px; }
+  .res-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .res-grid{ grid-template-columns:1fr; } }
+  .res-link{ display:block; text-decoration:none; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:14px 16px; color:var(--ink); transition:border-color .15s ease, transform .08s ease; }
+  .res-link:hover{ border-color:var(--accent); transform:translateY(-1px); }
+  .res-link:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .res-link .name{ font-weight:700; color:var(--accent-dk); display:flex; align-items:center; gap:6px; }
+  .res-link .name .ext{ font-size:.72rem; font-family:var(--mono); color:var(--ink-soft); font-weight:600; }
+  .res-link .desc{ font-size:.88rem; color:var(--ink); margin-top:4px; }
+  .res-link .host{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin-top:6px; display:block; }
+
+  /* ---------- formula / quick-reference card ---------- */
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:var(--radius); padding:0; overflow:hidden; box-shadow:var(--shadow); }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--mono); font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:18px; }
+  .rc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:680px){ .rc-grid{ grid-template-columns:1fr; } }
+  .rc-block h4{ margin:0 0 6px; color:var(--accent-dk); }
+  .rc-eq{ font-family:var(--mono); background:var(--paper-2); border-radius:6px; padding:9px 12px; margin:6px 0; font-size:.92rem; }
+  .rc-list{ list-style:none; padding:0; margin:0; font-size:.9rem; }
+  .rc-list li{ padding:3px 0; border-bottom:1px dotted var(--panel-line); }
+  .rc-list li:last-child{ border-bottom:none; }
+  .rc-list .k{ font-family:var(--mono); color:var(--accent-dk); font-weight:700; }
+  @media print{
+    nav.toc, .progress-dock, .card.tool, .video-frame, button{ display:none !important; }
+    body{ background:#fff; color:#000; }
+  }
+
+  /* ---------- references ---------- */
+  .refs{ font-size:.88rem; color:var(--ink-soft); }
+  .refs li{ margin:.5em 0; }
+  .ext-note{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+
+  /* ---------- step walkthrough ---------- */
+  .stepper{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .stepdot{ font-family:var(--mono); font-size:.74rem; font-weight:700; padding:6px 10px; border-radius:20px; border:1.5px solid var(--panel-line); background:var(--panel); color:var(--ink-soft); min-height:34px; }
+  .stepdot.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stepdot.done{ border-color:var(--good); color:var(--good); }
+  .step-body{ min-height:64px; }
+  .step-nav{ display:flex; gap:10px; margin-top:12px; align-items:center; flex-wrap:wrap; }
+  .step-count{ font-family:var(--mono); font-size:.8rem; color:var(--ink-soft); margin-left:auto; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Chapter 4</span>
+    <h1>Kinematic Analysis III: Kinematic Coefficients</h1>
+    <p class="sub">The geometric, time-free way to do velocity and acceleration analysis &middot; first- and second-order coefficients &middot; the Jacobian &middot; dead &amp; limit positions &middot; points of interest &middot; geartrain coefficients.</p>
+    <div class="meta-row">
+      <span>◷ ~3 hour lecture</span>
+      <span>◆ 8 interactive tools</span>
+      <span>✎ 2 worked examples + self-check</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Chapter sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#foundations">0 · Foundations</a>
+    <a href="#timebased">4.1 · Time-Based</a>
+    <a href="#coeffs">4.2 · Coefficients</a>
+    <a href="#units">Units &amp; Meaning</a>
+    <a href="#dead">4.3 · Dead Positions</a>
+    <a href="#limit">4.4 · Limit Positions</a>
+    <a href="#points">4.5 · Points of Interest</a>
+    <a href="#gears">4.6 · Geartrains</a>
+    <a href="#examples">Worked Examples</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#videos">Videos</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+    <a href="#recap">Recap</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START / ROADMAP ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Chapter Roadmap</span>
+  <h2 id="start-h">Where this chapter fits</h2>
+  <p class="lead">In Chapter&nbsp;2 you mastered the <strong>vector loop method</strong> for <em>position</em>, and you saw that taking time derivatives of those loop equations gives you <em>velocity</em> and <em>acceleration</em>. That works &mdash; but it drags <strong>time</strong> through every step, even though the velocity and acceleration of a one&#8209;degree&#8209;of&#8209;freedom mechanism are really just <em>geometry</em>. This chapter introduces a cleaner tool: the <strong>kinematic coefficient</strong>.</p>
+
+  <p>A kinematic coefficient answers the question, &ldquo;If I nudge the input by a tiny amount, how much does each output move?&rdquo; &mdash; <em>purely as a property of the linkage&rsquo;s shape at that instant</em>, with no clock involved. Once you have these coefficients, velocities and accelerations fall out by multiplying by the input&rsquo;s speed. The same coefficients also tell you, at a glance, where a mechanism <strong>locks up</strong> (dead positions) and where an output <strong>reverses</strong> (limit positions).</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…the <strong>gear ratio</strong> printed on the side of a bicycle&rsquo;s drivetrain. The ratio &ldquo;3.2 rear turns per pedal turn&rdquo; says nothing about how fast you&rsquo;re pedaling. It&rsquo;s a fixed geometric fact about <em>this</em> gear combination. Multiply it by your pedal cadence and you get wheel speed; change cadence and the ratio doesn&rsquo;t care. A kinematic coefficient is exactly that idea generalized to <em>any</em> linkage &mdash; and unlike a bike gear, it can change as the mechanism moves through its range.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:.2em">What you&rsquo;ll be able to do</h3>
+    <ul class="clean">
+      <li>Convert position equations into <strong>velocity</strong> and <strong>acceleration</strong> systems &mdash; both the time-based way and the coefficient way.</li>
+      <li>Define and compute <strong>first&#8209;order</strong> ( <i>h<sub>k</sub></i>, <i>f<sub>k</sub></i> ) and <strong>second&#8209;order</strong> ( <i>h&prime;<sub>k</sub></i>, <i>f&prime;<sub>k</sub></i> ) kinematic coefficients.</li>
+      <li>Recognize the <strong>Jacobian</strong> as the shared coefficient matrix and reuse it for velocity, acceleration, dead, and limit analysis.</li>
+      <li>Locate <strong>dead positions</strong> ( |<i>J</i>|&nbsp;=&nbsp;0 ) and <strong>limit positions</strong> ( a first&#8209;order coefficient&nbsp;=&nbsp;0 ).</li>
+      <li>Extend the coefficients to <strong>points of interest</strong> like a coupler point or a mass center.</li>
+      <li>Read a <strong>geartrain</strong> speed ratio directly off its first&#8209;order coefficient: <i>n<sub>s</sub></i>&nbsp;=&nbsp;<i>h<sub>k</sub></i>.</li>
+    </ul>
+  </div>
+
+  <h3>The 30-second picture</h3>
+  <p>Hold this single chain-rule identity in your head &mdash; everything in the chapter is a variation on it:</p>
+  <div class="eqn" role="img" aria-label="d S k d t equals d S k d S i times d S i d t. The first factor is the kinematic coefficient; the second is the input speed.">
+    dS<sub>k</sub>/dt &nbsp;=&nbsp; <span class="c">(dS<sub>k</sub>/dS<sub>i</sub>)</span> &middot; <span class="m">(dS<sub>i</sub>/dt)</span>
+    <span class="lbl">output speed = (coefficient) &times; (input speed)</span>
+  </div>
+  <p>The orange factor is <strong>geometry</strong> (the kinematic coefficient). The green factor is <strong>how fast you drive the input</strong>. Separating them is the whole idea.</p>
+</section>
+
+<!-- ============ FOUNDATIONS ============ -->
+<section id="foundations" aria-labelledby="found-h">
+  <span class="sec-tag">Foundations</span>
+  <h2 id="found-h">0 · The math you&rsquo;ll lean on</h2>
+  <p>Kinematic coefficients are an exercise in careful differentiation. Before the mechanism math, let&rsquo;s make sure four calculus and linear-algebra ideas are sharp. If these are second nature, skim; if not, this is the time to firm them up.</p>
+
+  <h3>The chain rule</h3>
+  <p>If a quantity <i>y</i> depends on <i>x</i>, and <i>x</i> depends on <i>t</i>, then the time rate of <i>y</i> is the &ldquo;sensitivity&rdquo; of <i>y</i> to <i>x</i> multiplied by the rate of <i>x</i>:</p>
+  <div class="eqn" role="img" aria-label="d y d t equals d y d x times d x d t">dy/dt = (dy/dx)&middot;(dx/dt)</div>
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…<strong>currency conversion through a layover</strong>. To get from dollars to yen you might go dollars&nbsp;&rarr;&nbsp;euros&nbsp;&rarr;&nbsp;yen. The total exchange rate is the product of the two leg rates. The chain rule is the same bookkeeping: each &ldquo;leg&rdquo; ( <i>dy/dx</i> and <i>dx/dt</i> ) is a rate, and you multiply them to convert all the way through.</p>
+  </div>
+
+  <h3>The product rule (you&rsquo;ll need it constantly)</h3>
+  <p>Most terms in a loop equation look like <i>r&nbsp;cos&theta;</i> or <i>r&nbsp;sin&theta;</i> &mdash; a product. Differentiating a product never gives just one term:</p>
+  <div class="eqn" role="img" aria-label="d by d t of u times v equals u dot v plus u v dot">d(uv)/dt = u&#775;&middot;v + u&middot;v&#775;</div>
+  <p>When you differentiate twice (for acceleration or second-order coefficients) the product rule fires <em>repeatedly</em>, which is exactly why the time-based route gets messy &mdash; and why a bookkeeping system helps.</p>
+
+  <h3>Linear systems &amp; the determinant</h3>
+  <p>A 2&times;2 system <i>A&nbsp;x</i>&nbsp;=&nbsp;<i>b</i> has a unique solution as long as the matrix <i>A</i> is invertible &mdash; equivalently, as long as its <strong>determinant</strong> is nonzero. For</p>
+  <div class="eqn" role="img" aria-label="determinant of the two by two matrix a b c d equals a d minus b c">|A| = |a&nbsp;&nbsp;b ; c&nbsp;&nbsp;d| = ad &minus; bc</div>
+  <p>When |<i>A</i>|&nbsp;&rarr;&nbsp;0 the solution blows up. Keep that picture &mdash; it returns in &sect;4.3 as the signature of a <strong>dead position</strong>.</p>
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…<strong>two streets on a map</strong>. Two equations are two lines; their solution is the intersection. As the lines become more and more parallel, the determinant shrinks toward zero and the intersection slides off toward infinity. When the lines are exactly parallel ( determinant&nbsp;=&nbsp;0 ) there&rsquo;s no finite crossing &mdash; the system can&rsquo;t be solved. A mechanism in a dead position has its &ldquo;lines&rdquo; parallel.</p>
+  </div>
+
+  <h3>Implicit differentiation</h3>
+  <p>The loop equations don&rsquo;t hand you &theta;<sub>3</sub> as a tidy formula of &theta;<sub>2</sub>; they tie the variables together implicitly, e.g. &ldquo;these projections must sum to zero.&rdquo; You differentiate the <em>whole equation</em> with respect to the input and solve for the derivative you want. That single move &mdash; differentiate the constraint, then solve for the rate &mdash; is the engine of this entire chapter.</p>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Every robot-arm controller and CNC machine does this conversion thousands of times per second. The motors are told a desired tool-tip <em>velocity</em>; the controller multiplies by the inverse of a coefficient matrix (the <strong>Jacobian</strong>) to find the joint speeds to command. The word &ldquo;Jacobian&rdquo; you&rsquo;ll meet in &sect;4.2 is the very same object robotics engineers stare at all day.</p>
+  </div>
+</section>
+
+<!-- ============ 4.1 TIME-BASED ============ -->
+<section id="timebased" aria-labelledby="tb-h">
+  <span class="sec-tag">Section 4.1</span>
+  <h2 id="tb-h">4.1 · Time-based velocity &amp; acceleration of the four-bar</h2>
+  <p>Let&rsquo;s start where Chapter&nbsp;2 left off. The four-bar loop equation <i>r&#8407;<sub>2</sub> + r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub> &minus; r&#8407;<sub>1</sub></i>&nbsp;=&nbsp;0 splits into an <i>X</i> and a <i>Y</i> scalar equation. Differentiate both once with respect to <strong>time</strong> and you get the velocity equations:</p>
+  <div class="eqn" role="img" aria-label="negative r 2 sine theta 2 theta 2 dot minus r 3 sine theta 3 theta 3 dot plus r 4 sine theta 4 theta 4 dot equals zero">
+    &minus;r<sub>2</sub>sin&theta;<sub>2</sub>&nbsp;&theta;&#775;<sub>2</sub> &minus; r<sub>3</sub>sin&theta;<sub>3</sub>&nbsp;&theta;&#775;<sub>3</sub> + r<sub>4</sub>sin&theta;<sub>4</sub>&nbsp;&theta;&#775;<sub>4</sub> = 0
+    <span class="lbl">(4.3)</span>
+  </div>
+  <div class="eqn" role="img" aria-label="r 2 cosine theta 2 theta 2 dot plus r 3 cosine theta 3 theta 3 dot minus r 4 cosine theta 4 theta 4 dot equals zero">
+    r<sub>2</sub>cos&theta;<sub>2</sub>&nbsp;&theta;&#775;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub>&nbsp;&theta;&#775;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub>&nbsp;&theta;&#775;<sub>4</sub> = 0
+    <span class="lbl">(4.4)</span>
+  </div>
+  <p>Treating &theta;<sub>2</sub> (and therefore &theta;&#775;<sub>2</sub>) as the known input, group the unknowns &theta;&#775;<sub>3</sub>, &theta;&#775;<sub>4</sub> on the left in matrix form:</p>
+  <div class="eqn" role="img" aria-label="matrix system 4.5 for theta 3 dot and theta 4 dot">
+    [ &minus;r<sub>3</sub>sin&theta;<sub>3</sub> &nbsp; r<sub>4</sub>sin&theta;<sub>4</sub> ;<br>
+    &nbsp; r<sub>3</sub>cos&theta;<sub>3</sub> &nbsp; &minus;r<sub>4</sub>cos&theta;<sub>4</sub> ] [ &theta;&#775;<sub>3</sub> ; &theta;&#775;<sub>4</sub> ] = [ r<sub>2</sub>sin&theta;<sub>2</sub>&nbsp;&theta;&#775;<sub>2</sub> ; &minus;r<sub>2</sub>cos&theta;<sub>2</sub>&nbsp;&theta;&#775;<sub>2</sub> ]
+    <span class="lbl">(4.5)</span>
+  </div>
+  <p>Differentiate <em>again</em> &mdash; carefully applying the product rule to every term &mdash; and you get a second matrix system for the accelerations &theta;&#776;<sub>3</sub>, &theta;&#776;<sub>4</sub> with the <em>same</em> matrix on the left and a right-hand side full of &theta;&#775;<sup>2</sup> terms:</p>
+  <div class="eqn" role="img" aria-label="acceleration matrix system 4.8 with the same left matrix and a right hand side of squared velocity terms">
+    [ &minus;r<sub>3</sub>sin&theta;<sub>3</sub> &nbsp; r<sub>4</sub>sin&theta;<sub>4</sub> ;<br>
+    &nbsp; r<sub>3</sub>cos&theta;<sub>3</sub> &nbsp; &minus;r<sub>4</sub>cos&theta;<sub>4</sub> ] [ &theta;&#776;<sub>3</sub> ; &theta;&#776;<sub>4</sub> ] = ( terms in &theta;&#776;<sub>2</sub>, &theta;&#775;<sub>2</sub><sup>2</sup>, &theta;&#775;<sub>3</sub><sup>2</sup>, &theta;&#775;<sub>4</sub><sup>2</sup> )
+    <span class="lbl">(4.8)</span>
+  </div>
+
+  <div class="callout">
+    <span class="h">Notice this — it&rsquo;s the whole motivation</span>
+    <p style="margin:.4em 0 0">The <strong>same 2&times;2 matrix</strong> appears on the left of both the velocity system (4.5) and the acceleration system (4.8). Only the right-hand side changes. That matrix is purely geometric. Time-based differentiation <em>works</em>, but it (a) is cumbersome &mdash; the product rule explodes the second derivative &mdash; and (b) hides the fact that the heart of the problem is geometry, not timing. Section&nbsp;4.2 fixes both.</p>
+  </div>
+
+  <!-- TOOL 1: chain-rule speedometer -->
+  <div class="card tool" id="speedoTool">
+    <div class="tool-label">Tool 1 <span>&middot; The chain-rule &ldquo;speedometer&rdquo;</span></div>
+    <h3 style="margin-top:.3em">Separate the geometry from the clock</h3>
+    <p>Here is the central identity made tangible. The output&rsquo;s velocity is the <em>coefficient</em> (a fixed geometric ratio at this instant) times the <em>input speed</em>. Slide the input speed and watch the output speed track it &mdash; while the coefficient stays put. Then change the coefficient and watch the slope of the relationship change.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="spCoef">First-order coefficient h<sub>k</sub> = dS<sub>k</sub>/dS<sub>i</sub> &mdash; <span class="val" id="spCoefv">2.0</span></label>
+        <input type="range" id="spCoef" min="-3" max="3" step="0.1" value="2">
+      </div>
+      <div class="ctrl">
+        <label for="spIn">Input speed &theta;&#775;<sub>i</sub> (rad/s) &mdash; <span class="val" id="spInv">4.0</span></label>
+        <input type="range" id="spIn" min="-8" max="8" step="0.5" value="4">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="spStage" class="stage" viewBox="0 0 640 300" role="img" aria-label="Two dials: an input speed dial and an output speed dial. The output reading equals the coefficient times the input.">
+      </svg>
+    </div>
+    <div class="readout" id="spOut" aria-live="polite"></div>
+    <p style="margin:.6em 0 0; font-size:.92rem; color:var(--ink-soft)">Set the coefficient to <span class="kbd">0</span> and notice the output dial freezes no matter how hard you drive the input &mdash; that is a <strong>limit position</strong> (&sect;4.4) in miniature.</p>
+  </div>
+</section>
+
+<!-- ============ 4.2 KINEMATIC COEFFICIENTS ============ -->
+<section id="coeffs" aria-labelledby="kc-h">
+  <span class="sec-tag">Section 4.2</span>
+  <h2 id="kc-h">4.2 · Kinematic coefficients, defined</h2>
+  <p>We restrict the discussion to <strong>planar, one-degree-of-freedom mechanisms</strong>. For such a mechanism there are <i>n</i> scalar position equations and (<i>n</i>&nbsp;+&nbsp;1) unknown variables. One of those variables is the <strong>input</strong> &mdash; call it <i>S<sub>i</sub></i>. The remaining <i>n</i> are <strong>outputs</strong>, written <i>S<sub>k</sub></i> for 1&nbsp;&le;&nbsp;<i>k</i>&nbsp;&le;&nbsp;<i>n</i>. Because the mechanism has one DOF, every output is determined once you fix the input.</p>
+
+  <div class="defn">
+    <p style="margin:.2em 0"><strong>Kinematic coefficient.</strong> A derivative of an output variable <i>S<sub>k</sub></i> with respect to the input variable <i>S<sub>i</sub></i>. The <strong>first-order</strong> coefficient is dS<sub>k</sub>/dS<sub>i</sub>; the <strong>second-order</strong> coefficient is d&sup2;S<sub>k</sub>/dS<sub>i</sub>&sup2;.</p>
+  </div>
+
+  <p>The defining feature: <strong>there is no time in these derivatives.</strong> They are properties of the mechanism&rsquo;s geometry at a given configuration. The notation depends on whether the output is an <em>angle</em> or a <em>length</em>:</p>
+
+  <div class="grid2">
+    <div class="card" style="margin:8px 0">
+      <h4 style="margin-top:.2em">If S<sub>k</sub> is a direction &theta;<sub>k</sub></h4>
+      <div class="eqn" style="font-size:.96rem" role="img" aria-label="h k equals d theta k d S i, and h prime k equals d squared theta k d S i squared">
+        h<sub>k</sub> = d&theta;<sub>k</sub>/dS<sub>i</sub><br>
+        h&prime;<sub>k</sub> = d&sup2;&theta;<sub>k</sub>/dS<sub>i</sub>&sup2;
+        <span class="lbl">(4.9)</span>
+      </div>
+    </div>
+    <div class="card" style="margin:8px 0">
+      <h4 style="margin-top:.2em">If S<sub>k</sub> is a length r<sub>k</sub></h4>
+      <div class="eqn" style="font-size:.96rem" role="img" aria-label="f k equals d r k d S i, and f prime k equals d squared r k d S i squared">
+        f<sub>k</sub> = dr<sub>k</sub>/dS<sub>i</sub><br>
+        f&prime;<sub>k</sub> = d&sup2;r<sub>k</sub>/dS<sub>i</sub>&sup2;
+        <span class="lbl">(4.10)</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>How to get them: differentiate the loop, keep the same matrix</h3>
+  <p>Differentiate each position equation with respect to the <em>input</em> instead of time. Where time-based work produced &theta;&#775;<sub>k</sub>, coefficient work produces <i>h<sub>k</sub></i>; where it produced &theta;&#776;<sub>k</sub>, it produces <i>h&prime;<sub>k</sub></i>. For the four-bar with input &theta;<sub>2</sub>, the first-order coefficients solve the system whose matrix is the <strong>Jacobian</strong> <i>J</i>:</p>
+  <div class="eqn" role="img" aria-label="Jacobian times vector of h 3 and h 4 equals a right hand side from the input">
+    <span class="c">J</span> [ h<sub>3</sub> ; h<sub>4</sub> ] = [ r<sub>2</sub>sin&theta;<sub>2</sub> ; &minus;r<sub>2</sub>cos&theta;<sub>2</sub> ]
+    <span class="lbl">first-order</span>
+  </div>
+  <p>Differentiate once more to get the second-order coefficients &mdash; <strong>same Jacobian</strong> on the left, a right-hand side built from the <i>h</i>&rsquo;s you just found:</p>
+  <div class="eqn" role="img" aria-label="the same Jacobian times the vector of h prime 3 and h prime 4 equals a right hand side built from the first order coefficients">
+    <span class="c">J</span> [ h&prime;<sub>3</sub> ; h&prime;<sub>4</sub> ] = ( terms in h<sub>3</sub>&sup2;, h<sub>4</sub>&sup2; )
+    <span class="lbl">second-order</span>
+  </div>
+
+  <div class="callout">
+    <span class="h">The payoff</span>
+    <p style="margin:.4em 0 0">You solve the position equations <strong>once</strong> (Newton&rsquo;s method, Chapter&nbsp;2), and that already gives you the Jacobian. Reuse it for first-order coefficients, reuse it <em>again</em> for second-order coefficients. One matrix, factored once, drives velocity, acceleration, dead-position, and limit-position analysis. That economy is why kinematic coefficients are the professional&rsquo;s tool.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…a <strong>recipe written in &ldquo;parts&rdquo; instead of cups</strong>. &ldquo;Two parts flour to one part water&rdquo; is a coefficient: it doesn&rsquo;t commit to a batch size. Decide later that one part&nbsp;=&nbsp;200&nbsp;g (that&rsquo;s your input speed) and every ingredient scales instantly. Kinematic coefficients are the linkage&rsquo;s recipe in parts; the input speed is the batch size you pour in at the end.</p>
+  </div>
+
+  <!-- TOOL 2: FOUR-BAR FLAGSHIP SIMULATOR -->
+  <div class="card tool" id="fourbarTool">
+    <div class="tool-label">Tool 2 <span>&middot; Flagship: four-bar coefficient explorer</span></div>
+    <h3 style="margin-top:.3em">Drive a four-bar and watch its coefficients live</h3>
+    <p>This is the centerpiece. Drag the crank or play the animation. The linkage solves its own position equations, builds the Jacobian, and reports the first-order coefficients <i>h<sub>3</sub></i>, <i>h<sub>4</sub></i> and the determinant |<i>J</i>| in real time. The strip chart plots <i>h<sub>4</sub></i> versus the crank angle &mdash; watch where it <strong>crosses zero</strong> (a limit position of link&nbsp;4) and where |<i>J</i>| <strong>approaches zero</strong> (a dead position).</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="fbR1">Ground r<sub>1</sub> &mdash; <span class="val" id="fbR1v">120</span></label>
+        <input type="range" id="fbR1" min="80" max="180" step="2" value="120">
+      </div>
+      <div class="ctrl">
+        <label for="fbR2">Crank r<sub>2</sub> &mdash; <span class="val" id="fbR2v">45</span></label>
+        <input type="range" id="fbR2" min="20" max="90" step="2" value="45">
+      </div>
+      <div class="ctrl">
+        <label for="fbR3">Coupler r<sub>3</sub> &mdash; <span class="val" id="fbR3v">115</span></label>
+        <input type="range" id="fbR3" min="60" max="170" step="2" value="115">
+      </div>
+      <div class="ctrl">
+        <label for="fbR4">Rocker r<sub>4</sub> &mdash; <span class="val" id="fbR4v">100</span></label>
+        <input type="range" id="fbR4" min="50" max="160" step="2" value="100">
+      </div>
+    </div>
+    <div class="controls">
+      <div class="ctrl" style="flex:2 1 280px">
+        <label for="fbTheta">Crank angle &theta;<sub>2</sub> &mdash; <span class="val" id="fbThetav">60&deg;</span></label>
+        <input type="range" id="fbTheta" min="0" max="360" step="1" value="60">
+      </div>
+      <button id="fbPlay" aria-pressed="false">▶ Animate</button>
+      <button id="fbReset" class="secondary">Reset</button>
+    </div>
+    <div class="grid2">
+      <div class="stage-wrap">
+        <svg id="fbStage" class="stage" viewBox="0 0 420 320" role="img" aria-label="A four-bar linkage with ground, crank, coupler, and rocker. The current configuration is drawn and updates as the crank turns.">
+        </svg>
+      </div>
+      <div class="stage-wrap">
+        <svg id="fbChart" class="stage" viewBox="0 0 420 320" role="img" aria-label="A strip chart of the first-order coefficient h 4 against crank angle, with the current angle marked.">
+        </svg>
+      </div>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--accent)"></i>crank r&#8322;</span>
+      <span><i style="background:var(--accent-2)"></i>coupler r&#8323;</span>
+      <span><i style="background:var(--good)"></i>rocker r&#8324;</span>
+      <span><i style="background:var(--ink-soft)"></i>ground r&#8321;</span>
+    </div>
+    <div class="readout" id="fbOut" aria-live="polite"></div>
+    <div id="fbVerdict" class="verdict ok" role="status">Linkage assembles normally.</div>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A windshield-wiper linkage is a four-bar. Engineers tune <i>r<sub>1</sub></i>&hellip;<i>r<sub>4</sub></i> so the blade <strong>sweeps wide and pauses cleanly at each end</strong>. Those clean pauses are limit positions &mdash; designed in by making <i>h<sub>4</sub></i> pass through zero exactly where the blade should reverse. Try sizing the links above to make <i>h<sub>4</sub></i> cross zero twice per revolution: you&rsquo;ve just done wiper kinematics.</p>
+  </div>
+</section>
+
+<!-- ============ UNITS & PHYSICAL MEANING ============ -->
+<section id="units" aria-labelledby="un-h">
+  <span class="sec-tag">Interpretation</span>
+  <h2 id="un-h">Units &amp; the physical meaning</h2>
+
+  <h3>What the coefficients <em>mean</em></h3>
+  <p>The first-order coefficient is exactly the <strong>ratio of output velocity to input velocity</strong> &mdash; the chain rule rearranged:</p>
+  <div class="eqn" role="img" aria-label="d S k d S i equals S k dot over S i dot">
+    dS<sub>k</sub>/dS<sub>i</sub> = ( S&#775;<sub>k</sub> / S&#775;<sub>i</sub> )
+    <span class="lbl">(4.12)</span>
+  </div>
+  <p>The second-order coefficient is the <strong>rate of change of the first-order coefficient</strong> as the input advances &mdash; how quickly the &ldquo;gear ratio&rdquo; itself is shifting:</p>
+  <div class="eqn" role="img" aria-label="d squared S k d S i squared equals d by d S i of d S k d S i">
+    d&sup2;S<sub>k</sub>/dS<sub>i</sub>&sup2; = (d/dS<sub>i</sub>)( dS<sub>k</sub>/dS<sub>i</sub> )
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…a car&rsquo;s <strong>continuously variable transmission (CVT)</strong>. The first-order coefficient is the instantaneous gear ratio. The second-order coefficient is how fast the CVT is <em>changing</em> that ratio. If you held the ratio fixed there&rsquo;d be no second-order term &mdash; which is precisely why geartrains (&sect;4.6), with constant ratios, have <i>h&prime;<sub>k</sub></i>&nbsp;=&nbsp;0.</p>
+  </div>
+
+  <h3>Units: it depends on what&rsquo;s an angle and what&rsquo;s a length</h3>
+  <p>Because a coefficient is output-per-input, its units are (output units)&divide;(input units). The four cases:</p>
+  <table>
+    <caption>Units of kinematic coefficients (4.11)</caption>
+    <thead><tr><th>Input S<sub>i</sub></th><th>Output S<sub>k</sub></th><th class="mono">first-order</th><th class="mono">second-order</th></tr></thead>
+    <tbody>
+      <tr><td>angle &theta;<sub>i</sub></td><td>angle &theta;<sub>k</sub></td><td class="mono">h<sub>k</sub> &mdash; dimensionless</td><td class="mono">h&prime;<sub>k</sub> &mdash; dimensionless</td></tr>
+      <tr><td>length r<sub>i</sub></td><td>length r<sub>k</sub></td><td class="mono">f<sub>k</sub> &mdash; dimensionless</td><td class="mono">f&prime;<sub>k</sub> &mdash; length<sup>&minus;1</sup></td></tr>
+      <tr><td>angle &theta;<sub>i</sub></td><td>length r<sub>k</sub></td><td class="mono">f<sub>k</sub> &mdash; length</td><td class="mono">f&prime;<sub>k</sub> &mdash; length</td></tr>
+      <tr><td>length r<sub>i</sub></td><td>angle &theta;<sub>k</sub></td><td class="mono">h<sub>k</sub> &mdash; length<sup>&minus;1</sup></td><td class="mono">h&prime;<sub>k</sub> &mdash; length<sup>&minus;2</sup></td></tr>
+    </tbody>
+  </table>
+
+  <!-- TOOL 3: units classifier -->
+  <div class="card tool" id="unitsTool">
+    <div class="tool-label">Tool 3 <span>&middot; Units classifier</span></div>
+    <h3 style="margin-top:.3em">Pick the input and output types &rarr; get the units</h3>
+    <p>Choose what the input and output variables are, and the tool reports the units of both the first- and second-order coefficients, with a one-line reason.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="uIn">Input S<sub>i</sub> is a&hellip;</label>
+        <select id="uIn" style="font-family:var(--mono); padding:9px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); min-height:40px;">
+          <option value="angle">direction (angle)</option>
+          <option value="length">magnitude (length)</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <label for="uOut">Output S<sub>k</sub> is a&hellip;</label>
+        <select id="uOut" style="font-family:var(--mono); padding:9px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); min-height:40px;">
+          <option value="angle">direction (angle)</option>
+          <option value="length">magnitude (length)</option>
+        </select>
+      </div>
+    </div>
+    <div class="readout" id="uOutRead" aria-live="polite"></div>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A <strong>rack-and-pinion steering rack</strong> turns the steering shaft (an angle) into rack travel (a length), so its first-order coefficient carries units of <em>length per radian</em> &mdash; literally &ldquo;millimeters of rack per radian of wheel.&rdquo; That number is on the spec sheet of every steering system; it&rsquo;s a kinematic coefficient by another name.</p>
+  </div>
+</section>
+
+<!-- ============ 4.3 DEAD POSITIONS ============ -->
+<section id="dead" aria-labelledby="dead-h">
+  <span class="sec-tag">Section 4.3</span>
+  <h2 id="dead-h">4.3 · Finding dead positions</h2>
+  <p>A <strong>dead position</strong> (also called a lock-up or singular position) happens when the Jacobian becomes singular:</p>
+  <div class="eqn" role="img" aria-label="determinant of J equals zero">|<span class="c">J</span>| = 0 <span class="lbl">dead position</span></div>
+  <p>Watch what that does to the coefficients. Solving for <i>h<sub>k</sub></i> divides by |<i>J</i>|, so as |<i>J</i>|&nbsp;&rarr;&nbsp;0 the kinematic coefficients <strong>tend to infinity</strong>. Taken literally, that says a finite input velocity would produce an infinite output velocity &mdash; physically impossible. The only consistent reading is the reverse: at this configuration the <strong>input cannot move</strong>. The mechanism is &ldquo;dead&rdquo; with respect to that input.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…pushing a door <strong>exactly along its own plane</strong> instead of perpendicular to it. No matter how hard you push, the door won&rsquo;t swing &mdash; your effort has no leverage on the hinge. The math &ldquo;wants&rdquo; an infinite response for any motion, which is its way of telling you the input direction you chose is locked. Pick a different driver (push the door face-on) and motion is possible again.</p>
+  </div>
+
+  <div class="callout">
+    <span class="h">Dead vs. limit — keep them straight</span>
+    <p style="margin:.4em 0 0">A <strong>dead position</strong> is about the <em>input</em>: |<i>J</i>|&nbsp;=&nbsp;0, coefficients blow up, the chosen input can&rsquo;t drive the linkage. A <strong>limit position</strong> (next section) is about an <em>output</em>: its first-order coefficient is zero, so that output momentarily stops and reverses while the input keeps going. One is the matrix going singular; the other is a single coefficient passing through zero.</p>
+  </div>
+
+  <!-- TOOL 4: determinant / dead-position scope -->
+  <div class="card tool" id="deadTool">
+    <div class="tool-label">Tool 4 <span>&middot; Determinant scope</span></div>
+    <h3 style="margin-top:.3em">Hunt for |J| = 0 around the cycle</h3>
+    <p>This scope sweeps the crank through a full turn and plots the Jacobian determinant |<i>J</i>| for the four-bar you size below. Wherever the curve <strong>touches or crosses the zero line</strong>, you&rsquo;ve found a dead position &mdash; the tool marks it. Try a non-Grashof set of links and watch |<i>J</i>| hit zero where the crank can no longer push the linkage through.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="dR1">Ground r<sub>1</sub> &mdash; <span class="val" id="dR1v">120</span></label>
+        <input type="range" id="dR1" min="80" max="180" step="2" value="120">
+      </div>
+      <div class="ctrl">
+        <label for="dR2">Crank r<sub>2</sub> &mdash; <span class="val" id="dR2v">40</span></label>
+        <input type="range" id="dR2" min="20" max="90" step="2" value="40">
+      </div>
+      <div class="ctrl">
+        <label for="dR3">Coupler r<sub>3</sub> &mdash; <span class="val" id="dR3v">130</span></label>
+        <input type="range" id="dR3" min="60" max="170" step="2" value="130">
+      </div>
+      <div class="ctrl">
+        <label for="dR4">Rocker r<sub>4</sub> &mdash; <span class="val" id="dR4v">95</span></label>
+        <input type="range" id="dR4" min="50" max="160" step="2" value="95">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="dStage" class="stage" viewBox="0 0 640 300" role="img" aria-label="A plot of the Jacobian determinant against crank angle, with a zero baseline and any dead positions marked.">
+      </svg>
+    </div>
+    <div class="readout" id="dOut" aria-live="polite"></div>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p><strong>Locking pliers (Vise-Grips) and toggle clamps</strong> deliberately park themselves at a dead position. As the handle closes, the linkage approaches |<i>J</i>|&nbsp;=&nbsp;0, where it can resist enormous force with almost no input effort &mdash; that&rsquo;s the satisfying &ldquo;snap&rdquo; and the reason the clamp holds without you holding it. Engineers exploit the same singularity that, elsewhere, they work hard to avoid.</p>
+  </div>
+</section>
+
+<!-- ============ 4.4 LIMIT POSITIONS ============ -->
+<section id="limit" aria-labelledby="lim-h">
+  <span class="sec-tag">Section 4.4</span>
+  <h2 id="lim-h">4.4 · Finding limit positions</h2>
+  <p>When an output reaches the end of its travel it has to <strong>reverse direction</strong>. At the instant of reversal its velocity passes through zero. Since the output&rsquo;s velocity is its first-order coefficient times the input speed,</p>
+  <div class="eqn" role="img" aria-label="S k dot equals h k times S i dot">
+    S&#775;<sub>k</sub> = <span class="c">h<sub>k</sub></span> &middot; S&#775;<sub>i</sub>
+  </div>
+  <p>and the input is still moving ( S&#775;<sub>i</sub>&nbsp;&ne;&nbsp;0 ), the only way the output velocity can be zero is for its first-order coefficient to vanish:</p>
+  <div class="eqn" role="img" aria-label="limit position when h k equals zero">
+    <span class="c">h<sub>k</sub></span> = 0 <span class="lbl">limit position of output k</span>
+  </div>
+  <p>So locating a limit position is a root-find: sweep the input and find where the relevant first-order coefficient crosses zero. There the output momentarily halts &mdash; its extreme position &mdash; and then comes back.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…a <strong>ball thrown straight up</strong>. At the peak its velocity is exactly zero for an instant, even though gravity (the &ldquo;input&rdquo;) never stopped acting. The peak is the ball&rsquo;s limit position. A rocker arm at the end of its swing is doing the same thing: stationary for an instant, input still driving, about to reverse.</p>
+  </div>
+
+  <!-- TOOL 5: limit-position finder -->
+  <div class="card tool" id="limitTool">
+    <div class="tool-label">Tool 5 <span>&middot; Limit-position finder</span></div>
+    <h3 style="margin-top:.3em">Find where h<sub>4</sub> = 0 and see the rocker freeze</h3>
+    <p>Step the crank and watch the rocker (link&nbsp;4). The tool tracks <i>h<sub>4</sub></i> and flags each crank angle where it crosses zero. Click <span class="kbd">Jump to next limit</span> to snap the crank to the exact reversal angle and see the rocker at its swing extreme.</p>
+    <div class="controls">
+      <div class="ctrl" style="flex:2 1 280px">
+        <label for="lTheta">Crank angle &theta;<sub>2</sub> &mdash; <span class="val" id="lThetav">30&deg;</span></label>
+        <input type="range" id="lTheta" min="0" max="360" step="1" value="30">
+      </div>
+      <button id="lJump">Jump to next limit</button>
+      <button id="lReset" class="secondary">Reset</button>
+    </div>
+    <div class="grid2">
+      <div class="stage-wrap">
+        <svg id="lStage" class="stage" viewBox="0 0 420 320" role="img" aria-label="The four-bar drawn at the current crank angle, with the rocker highlighted.">
+        </svg>
+      </div>
+      <div class="stage-wrap">
+        <svg id="lChart" class="stage" viewBox="0 0 420 320" role="img" aria-label="A plot of h 4 versus crank angle with zero crossings marked as limit positions.">
+        </svg>
+      </div>
+    </div>
+    <div class="readout" id="lOut" aria-live="polite"></div>
+    <div id="lVerdict" class="verdict ok" role="status"></div>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>The <strong>oscillating-arm of a windshield wiper, a metronome, and a sewing-machine needle bar</strong> all live between two limit positions. Designers place those limits precisely &mdash; the wiper must clear the same arc every stroke, the needle must rise fully clear of the fabric. &ldquo;Where does <i>h<sub>k</sub></i>&nbsp;=&nbsp;0?&rdquo; is the question that sets the stroke.</p>
+  </div>
+</section>
+
+<!-- ============ 4.5 POINTS OF INTEREST ============ -->
+<section id="points" aria-labelledby="pt-h">
+  <span class="sec-tag">Section 4.5</span>
+  <h2 id="pt-h">4.5 · Kinematic coefficients of points of interest</h2>
+  <p>The coefficients we&rsquo;ve found so far are the <strong>basic</strong> ones &mdash; derivatives of the loop-equation unknowns (<i>S<sub>k</sub></i>) with respect to the input. But often you care about a point that <em>isn&rsquo;t</em> a loop variable: the mass center of a link (for dynamics, Chapter&nbsp;5+), the tip of a coupler, the location of a cutting tool. Once the basic coefficients are known, you get any point&rsquo;s coefficients in two steps:</p>
+  <ol>
+    <li>Write a <strong>vector</strong> locating the point of interest in the fixed frame, using the loop variables.</li>
+    <li>Differentiate that vector&rsquo;s <i>X</i> and <i>Y</i> components with respect to the <strong>input</strong>, applying the chain rule through the basic coefficients.</li>
+  </ol>
+
+  <p>For a coupler point <i>C</i> referenced from the pin between links 2 and 3 by a vector <i>r&#8407;&prime;<sub>3</sub></i> at angle (&theta;<sub>3</sub>&nbsp;+&nbsp;&phi;<sub>3</sub>), the components are:</p>
+  <div class="eqn" role="img" aria-label="r C x equals r 2 cosine theta 2 plus r prime 3 cosine of theta 3 plus phi 3; r C y equals r 2 sine theta 2 plus r prime 3 sine of theta 3 plus phi 3">
+    r<sub>Cx</sub> = r<sub>2</sub>cos&theta;<sub>2</sub> + r&prime;<sub>3</sub>cos(&theta;<sub>3</sub>+&phi;<sub>3</sub>)<br>
+    r<sub>Cy</sub> = r<sub>2</sub>sin&theta;<sub>2</sub> + r&prime;<sub>3</sub>sin(&theta;<sub>3</sub>+&phi;<sub>3</sub>)
+    <span class="lbl">(4.37&ndash;4.38)</span>
+  </div>
+  <p>Differentiate once with respect to &theta;<sub>2</sub> (using <i>h<sub>3</sub></i> wherever &theta;<sub>3</sub> appears) to get the point&rsquo;s first-order coefficients <i>f<sub>Cx</sub></i>, <i>f<sub>Cy</sub></i>; differentiate again (now <i>h&prime;<sub>3</sub></i> appears too) for the second-order <i>f&prime;<sub>Cx</sub></i>, <i>f&prime;<sub>Cy</sub></i>. Then velocity and acceleration of <i>C</i> are just:</p>
+  <div class="eqn" role="img" aria-label="velocity components equal f times theta 2 dot; acceleration components equal f prime times theta 2 dot squared plus f times theta 2 double dot">
+    v<sub>Cx</sub> = f<sub>Cx</sub>&middot;&theta;&#775;<sub>2</sub> &nbsp;&nbsp; a<sub>Cx</sub> = f&prime;<sub>Cx</sub>&middot;&theta;&#775;<sub>2</sub>&sup2; + f<sub>Cx</sub>&middot;&theta;&#776;<sub>2</sub>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…locating a <strong>passenger on a Ferris wheel that&rsquo;s mounted on a moving truck</strong>. The truck&rsquo;s position is one vector; the seat&rsquo;s offset from the wheel&rsquo;s hub is another. Add them to locate the passenger, then differentiate the sum. The point-of-interest trick is exactly this &ldquo;vector to a base, plus a vector out to the point, then differentiate the whole chain.&rdquo;</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A <strong>coupler point traces those beautiful looping curves</strong> you see in mechanism design &mdash; film-advance claws in old movie projectors, mixing-blade paths, walking-robot foot trajectories. The path&rsquo;s shape is set by the basic coefficients; its speed and acceleration along the path (which decide wear and vibration) come straight from <i>f<sub>Cx</sub></i>, <i>f<sub>Cy</sub></i> and their primes. Tool&nbsp;6 in &sect;Examples animates exactly this curve.</p>
+  </div>
+</section>
+
+<!-- ============ 4.6 GEARTRAINS ============ -->
+<section id="gears" aria-labelledby="gt-h">
+  <span class="sec-tag">Section 4.6</span>
+  <h2 id="gt-h">4.6 · Kinematic coefficients of geartrains</h2>
+  <p>Geartrains are the friendliest case. Their position equations are <strong>only rolling-contact equations</strong> (Chapter&nbsp;3), which means:</p>
+  <ul class="clean">
+    <li>Every scalar unknown is an <strong>angle</strong> &mdash; <i>S<sub>k</sub></i> and <i>S<sub>i</sub></i> are always &theta;<sub>k</sub>, &theta;<sub>i</sub>.</li>
+    <li>The equations are <strong>linear</strong>, so the first-order coefficients <i>h<sub>k</sub></i> are <strong>constants</strong> and the second-order coefficients <i>h&prime;<sub>k</sub></i> are <strong>zero</strong>.</li>
+  </ul>
+  <p>Because the ratio never changes, the first-order coefficient simply <em>is</em> the speed ratio:</p>
+  <div class="eqn" role="img" aria-label="speed ratio n s equals omega k over omega i equals h k">
+    n<sub>s</sub> = &omega;<sub>k</sub>/&omega;<sub>i</sub> = <span class="c">h<sub>k</sub></span>
+    <span class="lbl">(4.43, 4.45)</span>
+  </div>
+
+  <div class="callout">
+    <span class="h">Tidy result</span>
+    <p style="margin:.4em 0 0">Everything that made the four-bar hard &mdash; the changing Jacobian, the nonzero second-order terms, the dead/limit positions &mdash; vanishes for a simple geartrain. The whole kinematic story is one constant number, <i>h<sub>k</sub></i>, and it equals the gear speed ratio you already know from Chapter&nbsp;3. Kinematic coefficients aren&rsquo;t a new theory for gears; they&rsquo;re the same idea, simplified.</p>
+  </div>
+
+  <!-- TOOL 7: geartrain coefficient -->
+  <div class="card tool" id="gearTool">
+    <div class="tool-label">Tool 6 <span>&middot; Geartrain coefficient = speed ratio</span></div>
+    <h3 style="margin-top:.3em">Build a train, read h<sub>k</sub> straight off it</h3>
+    <p>Add meshes by choosing tooth counts. The tool multiplies the stage ratios, applies the sign for each external mesh, and reports the overall first-order coefficient <i>h<sub>k</sub></i> &mdash; which <em>is</em> the speed ratio &mdash; plus the confirmation that <i>h&prime;<sub>k</sub></i>&nbsp;=&nbsp;0.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="gStages">Number of external meshes &mdash; <span class="val" id="gStagesv">2</span></label>
+        <input type="range" id="gStages" min="1" max="4" step="1" value="2">
+      </div>
+    </div>
+    <div id="gMeshes"></div>
+    <div class="stage-wrap">
+      <svg id="gStage" class="stage" viewBox="0 0 640 240" role="img" aria-label="A row of meshing gears whose tooth counts you set; the running speed ratio is shown.">
+      </svg>
+    </div>
+    <div class="readout" id="gOut" aria-live="polite"></div>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>…the <strong>single number on a power-drill&rsquo;s gearbox</strong>: &ldquo;1:&nbsp;0&ndash;450 rpm / 2:&nbsp;0&ndash;1500 rpm.&rdquo; Each setting is one fixed <i>h<sub>k</sub></i>. The drill never &ldquo;shifts mid-hole&rdquo; on its own, so there&rsquo;s no second-order coefficient &mdash; <i>h&prime;<sub>k</sub></i>&nbsp;=&nbsp;0, exactly as the theory says for a constant-ratio train.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>An <strong>automotive final-drive ratio</strong> (say 3.73:1) is a first-order kinematic coefficient stamped on the differential. Marketing calls it a &ldquo;ratio,&rdquo; the parts catalog calls it &ldquo;final drive,&rdquo; and this chapter calls it <i>h<sub>k</sub></i> &mdash; three names for the same constant geometric derivative.</p>
+  </div>
+</section>
+
+<!-- ============ WORKED EXAMPLES ============ -->
+<section id="examples" aria-labelledby="ex-h">
+  <span class="sec-tag">Worked Examples</span>
+  <h2 id="ex-h">Worked examples</h2>
+  <p>Two textbook examples, fully worked. The first is a step-through derivation you advance one logical move at a time; the second is animated so you can watch a coupler point&rsquo;s velocity and acceleration come from its coefficients.</p>
+
+  <h3>Example 4.1 &middot; Inverted crank-slider</h3>
+  <p>The mechanism is an inverted crank-slider with loop equation <i>r&#8407;<sub>1</sub> + r&#8407;<sub>2</sub> &minus; r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub></i>&nbsp;=&nbsp;0. Its <i>X</i>, <i>Y</i> components plus a geometric constraint give three position equations:</p>
+  <div class="eqn" role="img" aria-label="position equations 4.16, 4.17, 4.18">
+    r<sub>1</sub> + r<sub>2</sub>cos&theta;<sub>2</sub> &minus; r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> = 0 &nbsp;<span style="color:#8fc6d8">(4.16)</span><br>
+    r<sub>2</sub>sin&theta;<sub>2</sub> &minus; r<sub>3</sub>sin&theta;<sub>3</sub> &minus; r<sub>4</sub>sin&theta;<sub>4</sub> = 0 &nbsp;<span style="color:#8fc6d8">(4.17)</span><br>
+    &theta;<sub>4</sub> &minus; &pi;/2 &minus; &theta;<sub>3</sub> = 0 &nbsp;<span style="color:#8fc6d8">(4.18)</span>
+  </div>
+  <p><strong>Knowns:</strong> r<sub>1</sub>, &theta;<sub>1</sub>&nbsp;=&nbsp;0&deg;, r<sub>2</sub>, r<sub>4</sub>. &nbsp;<strong>Unknowns:</strong> &theta;<sub>2</sub>, &theta;<sub>3</sub>, r<sub>3</sub>, &theta;<sub>4</sub>. Take &theta;<sub>2</sub> as the input <i>S<sub>i</sub></i>; the three outputs are &theta;<sub>3</sub>, r<sub>3</sub>, &theta;<sub>4</sub>, so the coefficients we want are <i>h<sub>3</sub></i>, <i>f<sub>3</sub></i>, <i>h<sub>4</sub></i> (first order) and their primes (second order).</p>
+
+  <!-- TOOL 6: Example 4.1 step-through -->
+  <div class="card tool" id="ex41Tool">
+    <div class="tool-label">Tool 7 <span>&middot; Example 4.1 step-through solver</span></div>
+    <h3 style="margin-top:.3em">Build the coefficient equations one move at a time</h3>
+    <p>Advance through the derivation. Each step reveals the next logical operation &mdash; differentiate, group, identify the Jacobian, read off the time derivatives &mdash; so you see <em>why</em> each line follows from the last, not just the final answer.</p>
+    <div class="stepper" id="ex41Dots" role="tablist" aria-label="Derivation steps"></div>
+    <div class="step-body" id="ex41Body" aria-live="polite"></div>
+    <div class="step-nav">
+      <button id="ex41Prev" class="secondary">‹ Previous</button>
+      <button id="ex41Next">Next ›</button>
+      <span class="step-count" id="ex41Count"></span>
+    </div>
+  </div>
+
+  <details>
+    <summary>See the full first- and second-order systems for Example 4.1</summary>
+    <div class="body">
+      <p>Differentiating (4.16)&ndash;(4.18) with respect to &theta;<sub>2</sub> gives three equations linear in <i>h<sub>3</sub></i>, <i>f<sub>3</sub></i>, <i>h<sub>4</sub></i>, written with the 3&times;3 Jacobian <i>J</i>:</p>
+      <div class="eqn" style="font-size:.92rem" role="img" aria-label="first order three by three system, equation 4.22">
+        [ r<sub>3</sub>sin&theta;<sub>3</sub> &nbsp; &minus;cos&theta;<sub>3</sub> &nbsp; r<sub>4</sub>sin&theta;<sub>4</sub> ;<br>
+        &nbsp;&minus;r<sub>3</sub>cos&theta;<sub>3</sub> &nbsp; &minus;sin&theta;<sub>3</sub> &nbsp; &minus;r<sub>4</sub>cos&theta;<sub>4</sub> ;<br>
+        &nbsp;&minus;1 &nbsp;&nbsp; 0 &nbsp;&nbsp; 1 ] [ h<sub>3</sub> ; f<sub>3</sub> ; h<sub>4</sub> ] = [ r<sub>2</sub>sin&theta;<sub>2</sub> ; &minus;r<sub>2</sub>cos&theta;<sub>2</sub> ; 0 ]
+        <span class="lbl">(4.22)</span>
+      </div>
+      <p>The 3&times;3 matrix is the <strong>same Jacobian</strong> you&rsquo;d build solving the position equations by Newton&rsquo;s method &mdash; no need to recompute it. Differentiating once more produces the second-order system with the <em>same</em> <i>J</i> and a right-hand side carrying the Coriolis-type terms in 2<i>f<sub>3</sub>h<sub>3</sub></i>:</p>
+      <div class="eqn" style="font-size:.92rem" role="img" aria-label="second order system 4.26 with the same Jacobian and a Coriolis right hand side">
+        <span class="c">J</span> [ h&prime;<sub>3</sub> ; f&prime;<sub>3</sub> ; h&prime;<sub>4</sub> ] = ( terms in r<sub>2</sub>, h<sub>3</sub>&sup2;, h<sub>4</sub>&sup2;, and 2f<sub>3</sub>h<sub>3</sub> )
+        <span class="lbl">(4.26)</span>
+      </div>
+      <p>With both sets of coefficients known, the time derivatives of the outputs follow by (4.11) and (4.13):</p>
+      <div class="eqn" style="font-size:.92rem" role="img" aria-label="theta 3 dot equals h 3 theta 2 dot; r 3 dot equals f 3 theta 2 dot; theta 4 dot equals h 4 theta 2 dot">
+        &theta;&#775;<sub>3</sub> = h<sub>3</sub>&theta;&#775;<sub>2</sub> &nbsp;&nbsp; r&#775;<sub>3</sub> = f<sub>3</sub>&theta;&#775;<sub>2</sub> &nbsp;&nbsp; &theta;&#775;<sub>4</sub> = h<sub>4</sub>&theta;&#775;<sub>2</sub><br>
+        &theta;&#776;<sub>3</sub> = h&prime;<sub>3</sub>&theta;&#775;<sub>2</sub>&sup2; + h<sub>3</sub>&theta;&#776;<sub>2</sub> &nbsp;&nbsp; r&#776;<sub>3</sub> = f&prime;<sub>3</sub>&theta;&#775;<sub>2</sub>&sup2; + f<sub>3</sub>&theta;&#776;<sub>2</sub> &nbsp;&nbsp; &theta;&#776;<sub>4</sub> = h&prime;<sub>4</sub>&theta;&#775;<sub>2</sub>&sup2; + h<sub>4</sub>&theta;&#776;<sub>2</sub>
+      </div>
+    </div>
+  </details>
+
+  <h3>Example 4.6 &middot; Coefficients of a coupler point</h3>
+  <p>Find the kinematic coefficients of point <i>C</i> on the coupler of a four-bar, with &theta;<sub>2</sub> as input. First solve the loop <i>r&#8407;<sub>2</sub> + r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub> &minus; r&#8407;<sub>1</sub></i>&nbsp;=&nbsp;0 for the basic coefficients <i>h<sub>3</sub></i>, <i>h&prime;<sub>3</sub></i>, <i>h<sub>4</sub></i>, <i>h&prime;<sub>4</sub></i>. Then locate <i>C</i> with <i>r&#8407;<sub>C</sub></i>&nbsp;=&nbsp;<i>r&#8407;<sub>2</sub> + r&#8407;&prime;<sub>3</sub></i> and differentiate as in &sect;4.5. The animated tool below traces the coupler curve and shows how <i>C</i>&rsquo;s velocity and acceleration are built from its coefficients.</p>
+
+  <!-- TOOL 7: coupler-point animator -->
+  <div class="card tool" id="couplerTool">
+    <div class="tool-label">Tool 8 <span>&middot; Coupler-point curve &amp; coefficients</span></div>
+    <h3 style="margin-top:.3em">Watch point C trace its path &mdash; speed from f<sub>C</sub></h3>
+    <p>The crank turns; point <i>C</i> (offset from the coupler) traces its characteristic curve. The velocity vector drawn at <i>C</i> is <i>f&#8407;<sub>C</sub>&middot;&theta;&#775;<sub>2</sub></i> &mdash; longest where the coefficient is largest. Adjust the offset to reshape the curve.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="cpOff">Coupler offset r&prime;<sub>3</sub> &mdash; <span class="val" id="cpOffv">70</span></label>
+        <input type="range" id="cpOff" min="0" max="120" step="2" value="70">
+      </div>
+      <div class="ctrl">
+        <label for="cpPhi">Offset angle &phi;<sub>3</sub> &mdash; <span class="val" id="cpPhiv">35&deg;</span></label>
+        <input type="range" id="cpPhi" min="-90" max="90" step="2" value="35">
+      </div>
+      <button id="cpPlay" aria-pressed="false">▶ Animate</button>
+      <button id="cpReset" class="secondary">Reset</button>
+    </div>
+    <div class="stage-wrap">
+      <svg id="cpStage" class="stage" viewBox="0 0 480 340" role="img" aria-label="A four-bar with a coupler point C tracing a closed curve; a velocity arrow is drawn at C.">
+      </svg>
+    </div>
+    <div class="readout" id="cpOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============ SELF-CHECK QUIZ ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Self-Check</span>
+  <h2 id="quiz-h">Check your understanding</h2>
+  <p>Eight questions across the chapter. Each gives feedback immediately; choices are reshuffled when you reset.</p>
+  <div style="margin:10px 0;">Score: <span class="q-score" id="quizScore">0 / 0</span> &nbsp; <button id="quizReset" class="secondary" style="min-height:38px; padding:7px 14px;">Reset &amp; reshuffle</button></div>
+  <div id="quizMount"></div>
+</section>
+
+<!-- ============ VIDEOS ============ -->
+<section id="videos" aria-labelledby="vid-h">
+  <span class="sec-tag">Video Lectures</span>
+  <h2 id="vid-h">Watch &amp; reinforce</h2>
+  <p>Four videos that reinforce the chapter. The first works a kinematic-coefficient example end-to-end; the second places coefficients inside the broader study of mechanisms; the third shows vector-loop velocity analysis on a real machine; the fourth builds the dyad that creates limit positions.</p>
+  <p class="ext-note">Videos are hosted on YouTube and play in-page; an internet connection is required to view them.</p>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/2YuIDwzKpRg?rel=0"
+        title="Method of Kinematic Coefficients Example Problem using Complex Algebra"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Method of Kinematic Coefficients &mdash; worked example</h3>
+      <p style="margin:.3em 0 .2em">A complete example carrying the method from position equations through the first- and second-order coefficients, using complex-algebra bookkeeping. The cleanest single demonstration of the &sect;4.1&ndash;4.2 workflow; watch it after the flagship four-bar tool.</p>
+      <div class="video-tags"><span>Source: <b>Brian Bernard</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 4.1 &amp; &sect; 4.2</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/db812RGmCQ4?rel=0"
+        title="Traditional Mechanisms and Mechanical Systems: Topic 6 Part 1"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Mechanisms &amp; mechanical systems &mdash; context</h3>
+      <p style="margin:.3em 0 .2em">Frames the four-bar and slider mechanisms this chapter analyzes inside the wider family of mechanical systems. Good orientation for the Foundations section and a reminder of where the loop equations came from.</p>
+      <div class="video-tags"><span>Source: <b>The FACTs of Mechanical Design</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 0 Foundations &amp; &sect; 4.1</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="h">Notation bridge</span>
+    <p style="margin:.4em 0 0">Speakers vary: some write the first-order coefficient as <i>h</i> or <i>K<sub>1</sub></i>, some as &part;&theta;<sub>k</sub>/&part;&theta;<sub>i</sub>, and complex-algebra treatments hide it inside a derivative of <i>e<sup>i&theta;</sup></i>. Map whatever symbol you see onto our &ldquo;output-per-input geometric ratio&rdquo; <i>h<sub>k</sub></i> = d&theta;<sub>k</sub>/d&theta;<sub>i</sub>. They are the same object.</p>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/vmmUyfpPQNk?rel=0"
+        title="Vector Loop Velocity Analysis - Dump Truck Example"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Vector-loop velocity analysis &mdash; dump-truck example</h3>
+      <p style="margin:.3em 0 .2em">A real machine (a dump-truck bed lift) analyzed with the vector-loop velocity method of &sect;4.1. Watch the same differentiate-the-loop move we use, then notice how factoring out the input speed would hand you the kinematic coefficients directly.</p>
+      <div class="video-tags"><span>Source: <b>ENGR 2120 Dynamics and Kinematics</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 4.1 Time-Based Analysis</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/PYTtdkzO__Y?rel=0"
+        title="How to Add a Dyad (Links 5–6) to a 4-Bar for Limit Positions"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Adding a dyad to a four-bar &mdash; limit positions in design</h3>
+      <p style="margin:.3em 0 .2em">Shows how a four-bar&rsquo;s rocker &mdash; whose swing extremes are the limit positions of &sect;4.4 &mdash; drives an added dyad (links 5&ndash;6) to place an output at chosen end points. A design-side view of the very <i>h<sub>k</sub></i>&nbsp;=&nbsp;0 condition the limit tool flags.</p>
+      <div class="video-tags"><span>Source: <b>Rogelio P&eacute;rez Santiago (Dr. Simu)</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 4.4 Limit Positions</span>
+    </div>
+  </div>
+  <p>After watching, return to the <a href="#fourbarTool">flagship four-bar explorer</a> and the <a href="#limitTool">limit-position finder</a> and reproduce the reversal angles each video implies.</p>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rc-h">
+  <span class="sec-tag">Quick Reference</span>
+  <h2 id="rc-h">Chapter 4 formula card</h2>
+  <p>Everything at a glance &mdash; good for review and exam prep. Use your browser&rsquo;s print function to save just this card (interactive tools and navigation are hidden when printing).</p>
+  <div class="refcard">
+    <div class="rc-head"><span>ENGI 216 · CH 4 · KINEMATIC COEFFICIENTS</span><span>output = coefficient × input</span></div>
+    <div class="rc-body">
+      <div class="rc-grid">
+        <div class="rc-block">
+          <h4>Core identity</h4>
+          <div class="rc-eq">S&#775;<sub>k</sub> = (dS<sub>k</sub>/dS<sub>i</sub>)·S&#775;<sub>i</sub></div>
+          <h4>Definitions</h4>
+          <div class="rc-eq">angle: h<sub>k</sub>=d&theta;<sub>k</sub>/dS<sub>i</sub>, h&prime;<sub>k</sub>=d&sup2;&theta;<sub>k</sub>/dS<sub>i</sub>&sup2;</div>
+          <div class="rc-eq">length: f<sub>k</sub>=dr<sub>k</sub>/dS<sub>i</sub>, f&prime;<sub>k</sub>=d&sup2;r<sub>k</sub>/dS<sub>i</sub>&sup2;</div>
+          <h4>Velocity &amp; acceleration (from coefficients)</h4>
+          <div class="rc-eq">&theta;&#775;<sub>k</sub>=h<sub>k</sub>&theta;&#775;<sub>i</sub></div>
+          <div class="rc-eq">&theta;&#776;<sub>k</sub>=h&prime;<sub>k</sub>&theta;&#775;<sub>i</sub>&sup2;+h<sub>k</sub>&theta;&#776;<sub>i</sub></div>
+        </div>
+        <div class="rc-block">
+          <h4>Same Jacobian everywhere</h4>
+          <div class="rc-eq">J·[coeffs] = (RHS); J reused for 1st &amp; 2nd order</div>
+          <h4>Dead position</h4>
+          <div class="rc-eq">|J| = 0 &rarr; coefficients &rarr; &infin; (input locked)</div>
+          <h4>Limit position of output k</h4>
+          <div class="rc-eq">h<sub>k</sub> = 0 &rarr; output stops &amp; reverses</div>
+          <h4>Geartrain</h4>
+          <div class="rc-eq">n<sub>s</sub> = &omega;<sub>k</sub>/&omega;<sub>i</sub> = h<sub>k</sub> (const), h&prime;<sub>k</sub> = 0</div>
+          <h4>Point of interest C</h4>
+          <div class="rc-eq">r&#8407;<sub>C</sub> = r&#8407;<sub>2</sub>+r&#8407;&prime;<sub>3</sub>; differentiate X,Y w.r.t. input</div>
+        </div>
+      </div>
+      <h4 style="margin-top:14px">Reading the signs</h4>
+      <ul class="rc-list">
+        <li><span class="k">h<sub>k</sub> &gt; 0</span> output advances with the input</li>
+        <li><span class="k">h<sub>k</sub> &lt; 0</span> output moves opposite the input</li>
+        <li><span class="k">h<sub>k</sub> = 0</span> limit position (output instantaneously stopped)</li>
+        <li><span class="k">|J| = 0</span> dead position (input can&rsquo;t drive the linkage)</li>
+        <li><span class="k">h&prime;<sub>k</sub> = 0</span> coefficient not changing &mdash; e.g. any geartrain</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Glossary</span>
+  <h2 id="gl-h">Key terms</h2>
+  <p>Search or scroll. <span id="glossCount" class="ext-note"></span></p>
+  <div class="glossary-search">
+    <label for="glossInput" class="visually-hidden">Search glossary terms</label>
+    <input type="text" id="glossInput" placeholder="Search terms (e.g. Jacobian, dead position, h prime)…" autocomplete="off">
+  </div>
+  <dl class="gloss-list" id="glossList"></dl>
+  <p class="gloss-empty" id="glossEmpty" hidden>No terms match your search.</p>
+</section>
+
+<!-- ============ EXTERNAL RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">External Resources</span>
+  <h2 id="res-h">Go deeper</h2>
+  <p>Curated links for supplementary and foundational study. All open in a new tab (indicated on each card).</p>
+  <div class="res-group">
+    <h3>Foundations &amp; refreshers</h3>
+    <div class="res-grid" id="resFound"></div>
+  </div>
+  <div class="res-group">
+    <h3>Kinematic coefficients &amp; the Jacobian</h3>
+    <div class="res-grid" id="resCore"></div>
+  </div>
+  <div class="res-group">
+    <h3>Interactive &amp; visual</h3>
+    <div class="res-grid" id="resVisual"></div>
+  </div>
+</section>
+
+<!-- ============ RECAP ============ -->
+<section id="recap" aria-labelledby="recap-h">
+  <span class="sec-tag">Objectives Recap</span>
+  <h2 id="recap-h">What you should now be able to do</h2>
+  <div class="card">
+    <ul class="clean">
+      <li><strong>Explain</strong> why kinematic coefficients separate geometry from time, and state the core identity S&#775;<sub>k</sub>&nbsp;=&nbsp;h<sub>k</sub>S&#775;<sub>i</sub>.</li>
+      <li><strong>Derive</strong> first- and second-order coefficients by differentiating the loop equations with respect to the input.</li>
+      <li><strong>Recognize</strong> the Jacobian as the shared coefficient matrix and reuse it across velocity, acceleration, dead, and limit analysis.</li>
+      <li><strong>Locate</strong> dead positions ( |J|&nbsp;=&nbsp;0 ) and limit positions ( h<sub>k</sub>&nbsp;=&nbsp;0 ), and explain the physical difference.</li>
+      <li><strong>Extend</strong> coefficients to a point of interest (coupler point, mass center) via the vector-and-differentiate method.</li>
+      <li><strong>Read</strong> a geartrain speed ratio directly off its first-order coefficient, and explain why h&prime;<sub>k</sub>&nbsp;=&nbsp;0 there.</li>
+    </ul>
+  </div>
+
+  <h3>References &amp; attribution</h3>
+  <ul class="refs">
+    <li>Stani&scaron;i&cacute;, M. M. <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis.</em> Cengage Learning, 2015 &mdash; Chapter&nbsp;4 (source for equations 4.3&ndash;4.45 and Examples 4.1, 4.6).</li>
+    <li>Equation numbers in dark callouts (e.g. 4.16, 4.22, 4.45) follow the textbook&rsquo;s numbering for cross-reference.</li>
+    <li>Videos are independently produced and hosted on YouTube; they are embedded for educational reinforcement and credited to their creators on each card.</li>
+    <li>Interactive tools, analogies, and real-world examples were built for this ENGI&nbsp;216 module and are original to it.</li>
+  </ul>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Lecture progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+    <span class="ext-note" id="readpct" aria-live="off">0%</span>
+  </div>
+</div>
+
+<footer class="site">
+  <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · <span class="year">2026</span></p>
+  <p class="ext-note">Chapter 4 of 8 · Engineering-blueprint module series · Self-contained, offline-capable except for YouTube video embeds.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var n = document.createElementNS(SVGNS, tag);
+    if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); }
+    return n;
+  }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#000";
+  }
+  function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+  function txt(stage,x,y,s,color,size,anchor,weight){
+    var t=el("text",{x:x,y:y,fill:color||cssVar('--ink'),"font-size":size||12,"text-anchor":anchor||"middle"});
+    if(weight) t.setAttribute("font-weight",weight);
+    t.textContent=s; stage.appendChild(t); return t;
+  }
+  function circle(stage,cx,cy,r,stroke,w,fill){
+    stage.appendChild(el("circle",{cx:cx,cy:cy,r:r,fill:fill||"none",stroke:stroke,"stroke-width":w||2}));
+  }
+  function line(stage,x1,y1,x2,y2,color,w,dash){
+    var o={x1:x1,y1:y1,x2:x2,y2:y2,stroke:color,"stroke-width":w||2};
+    if(dash) o["stroke-dasharray"]=dash;
+    stage.appendChild(el("line",o));
+  }
+  function pin(stage,x,y){
+    stage.appendChild(el("circle",{cx:x,cy:y,r:5,fill:cssVar('--panel'),stroke:cssVar('--ink'),"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:x,cy:y,r:1.6,fill:cssVar('--ink')}));
+  }
+  function groundHatch(stage,x,y,w){
+    line(stage,x-w/2,y,x+w/2,y,cssVar('--ink-soft'),2);
+    var g=el("g",{stroke:cssVar('--ink-soft'),"stroke-width":1.4});
+    for(var i=-w/2;i<=w/2;i+=8){ g.appendChild(el("line",{x1:x+i,y1:y,x2:x+i-7,y2:y+9})); }
+    stage.appendChild(g);
+  }
+  function degTxt(d){ return Math.round(d)+"\u00B0"; }
+  function arrow(stage,x1,y1,x2,y2,color,w){
+    line(stage,x1,y1,x2,y2,color,w||2.5);
+    var a=Math.atan2(y2-y1,x2-x1), h=9;
+    var p=el("polygon",{points:[
+      x2+","+y2,
+      (x2-h*Math.cos(a-0.4))+","+(y2-h*Math.sin(a-0.4)),
+      (x2-h*Math.cos(a+0.4))+","+(y2-h*Math.sin(a+0.4))
+    ].join(" "), fill:color});
+    stage.appendChild(p);
+  }
+
+  /* ============================================================
+     FOUR-BAR SOLVER (shared math)
+     Standard open-chain loop closure. Ground along +x from O2 at origin.
+     O2=(0,0), O4=(r1,0). Crank tip A = (r2 cosθ2, r2 sinθ2).
+     Solve θ3, θ4 from coupler r3 and rocker r4 (two-circle intersection
+     of B about A radius r3 and about O4 radius r4). Returns null if
+     the linkage cannot assemble at this θ2.
+     ============================================================ */
+  function solveFourbar(r1,r2,r3,r4,th2){
+    var ax=r2*Math.cos(th2), ay=r2*Math.sin(th2);
+    var o4x=r1, o4y=0;
+    var dx=o4x-ax, dy=o4y-ay;
+    var d=Math.sqrt(dx*dx+dy*dy);
+    if(d>r3+r4 || d<Math.abs(r3-r4) || d===0) return null; // cannot assemble
+    // B is intersection of circle(A,r3) and circle(O4,r4)
+    var aa=(r3*r3 - r4*r4 + d*d)/(2*d);
+    var h2=r3*r3 - aa*aa;
+    if(h2<0) h2=0;
+    var hh=Math.sqrt(h2);
+    var xm=ax + aa*dx/d, ym=ay + aa*dy/d;
+    // two solutions; pick the "open" (elbow up) consistently: +normal
+    var bx=xm + hh*(-dy)/d, by=ym + hh*(dx)/d;
+    var th3=Math.atan2(by-ay, bx-ax);
+    var th4=Math.atan2(by-o4y, bx-o4x);
+    return {ax:ax,ay:ay,bx:bx,by:by,o4x:o4x,o4y:o4y,th3:th3,th4:th4};
+  }
+  // First-order coefficients h3=dθ3/dθ2, h4=dθ4/dθ2 and |J| for the four-bar.
+  // Velocity loop (Eq 4.5 form):  r3 sinθ3 h3 - r4 sinθ4 h4 = r2 sinθ2
+  //                              -r3 cosθ3 h3 + r4 cosθ4 h4 = -r2 cosθ2
+  // det J = r3 r4 sin(θ4 - θ3)  (transmission-angle term)
+  function coeffsFourbar(s,r2,r3,r4,th2){
+    var detJ = r3*r4*Math.sin(s.th4 - s.th3);
+    if(Math.abs(detJ) < 1e-9) return {h3:Infinity,h4:Infinity,detJ:detJ};
+    var b1 = -r2*Math.sin(th2),  b2 =  r2*Math.cos(th2);
+    // Solve 2x2:  [ r3 sinθ3   -r4 sinθ4 ][h3]=[b1]
+    //            [-r3 cosθ3    r4 cosθ4 ][h4]=[b2]
+    var a11= r3*Math.sin(s.th3), a12=-r4*Math.sin(s.th4);
+    var a21=-r3*Math.cos(s.th3), a22= r4*Math.cos(s.th4);
+    var det=a11*a22-a12*a21;
+    if(Math.abs(det)<1e-9) return {h3:Infinity,h4:Infinity,detJ:det};
+    var h3=( b1*a22 - a12*b2)/det;
+    var h4=( a11*b2 - b1*a21)/det;
+    return {h3:h3,h4:h4,detJ:det};
+  }
+
+  // Map model coords (x right, y up, mm) to an SVG stage box.
+  function makeMapper(r1,r2,r3,r4,W,H,pad){
+    var span=r1+r2+r3+r4;
+    var minx=-r2-10, maxx=r1+r4+10;
+    var maxy= (r2+r3)*0.8+10, miny=-(r2+r3)*0.8-10;
+    var sx=(W-2*pad)/(maxx-minx), sy=(H-2*pad)/(maxy-miny);
+    var s=Math.min(sx,sy);
+    var cx=(minx+maxx)/2, cy=(miny+maxy)/2;
+    return function(x,y){
+      return { X: W/2 + (x-cx)*s, Y: H/2 - (y-cy)*s };
+    };
+  }
+
+  /* ============================================================
+     TOOL 1 · CHAIN-RULE SPEEDOMETER
+     ============================================================ */
+  (function(){
+    var stage=$("spStage"); if(!stage) return;
+    function dial(cx,cy,r,val,maxv,label,color){
+      circle(stage,cx,cy,r,cssVar('--ink-soft'),2);
+      circle(stage,cx,cy,r-0.5,cssVar('--panel'),0,cssVar('--panel'));
+      circle(stage,cx,cy,r,cssVar('--ink-soft'),2);
+      // ticks
+      for(var i=0;i<=10;i++){
+        var a=Math.PI*(1 - i/10); // 180°..0° sweep (left to right, top arc)
+        var x1=cx+(r-3)*Math.cos(a), y1=cy-(r-3)*Math.sin(a);
+        var x2=cx+(r-10)*Math.cos(a), y2=cy-(r-10)*Math.sin(a);
+        line(stage,x1,y1,x2,y2,cssVar('--ink-soft'),1.2);
+      }
+      // needle: clamp val to [-maxv,maxv] -> angle 180..0
+      var frac=(val/maxv+1)/2; frac=Math.max(0,Math.min(1,frac));
+      var na=Math.PI*(1-frac);
+      arrow(stage,cx,cy,cx+(r-14)*Math.cos(na),cy-(r-14)*Math.sin(na),color,3);
+      stage.appendChild(el("circle",{cx:cx,cy:cy,r:5,fill:cssVar('--ink')}));
+      txt(stage,cx,cy+r+22,label,cssVar('--ink'),13,"middle","600");
+      txt(stage,cx,cy-r-8,val.toFixed(1),color,15,"middle","700");
+    }
+    function render(){
+      clear(stage);
+      var c=+$("spCoef").value, inp=+$("spIn").value;
+      $("spCoefv").textContent=c.toFixed(1);
+      $("spInv").textContent=inp.toFixed(1);
+      var out=c*inp;
+      dial(170,160,90,inp,8,"input  \u03B8\u0307\u1D62 (rad/s)",cssVar('--accent'));
+      // equals + coefficient box
+      txt(stage,320,150,"\u00D7",cssVar('--ink'),26,"middle","700");
+      txt(stage,320,180,"h\u2096 = "+c.toFixed(1),cssVar('--accent-2'),14,"middle","700");
+      txt(stage,320,120,"=",cssVar('--ink'),26,"middle","700");
+      var omax=8*3; // coef range *in range
+      dial(470,160,90,out,omax,"output  S\u0307\u2096",cssVar('--good'));
+      $("spOut").innerHTML = "Output rate = <b>h\u2096 \u00D7 \u03B8\u0307\u1D62</b> = "+c.toFixed(1)+" \u00D7 "+inp.toFixed(1)+
+        " = <b>"+out.toFixed(2)+"</b> (units of S\u2096 per second). The coefficient is the geometry; the input speed is the clock.";
+    }
+    ["spCoef","spIn"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 2 · FLAGSHIP FOUR-BAR COEFFICIENT EXPLORER
+     ============================================================ */
+  (function(){
+    var stage=$("fbStage"), chart=$("fbChart"); if(!stage) return;
+    var spinning=false, raf=null;
+    function drawLinkage(r1,r2,r3,r4,th2){
+      clear(stage);
+      var W=420,H=320,pad=30;
+      var map=makeMapper(r1,r2,r3,r4,W,H,pad);
+      var s=solveFourbar(r1,r2,r3,r4,th2);
+      var O2=map(0,0), O4=map(r1,0);
+      // ground line
+      groundHatch(stage,(O2.X+O4.X)/2,Math.max(O2.Y,O4.Y)+0, Math.abs(O4.X-O2.X)+40);
+      line(stage,O2.X,O2.Y,O4.X,O4.Y,cssVar('--ink-soft'),2,"6 5");
+      if(!s){
+        pin(stage,O2.X,O2.Y); pin(stage,O4.X,O4.Y);
+        txt(stage,W/2,H/2,"cannot assemble at this angle",cssVar('--accent-2'),14,"middle","700");
+        return null;
+      }
+      var A=map(s.ax,s.ay), B=map(s.bx,s.by);
+      line(stage,O2.X,O2.Y,A.X,A.Y,cssVar('--accent'),5);      // crank r2
+      line(stage,A.X,A.Y,B.X,B.Y,cssVar('--accent-2'),5);      // coupler r3
+      line(stage,O4.X,O4.Y,B.X,B.Y,cssVar('--good'),5);        // rocker r4
+      pin(stage,O2.X,O2.Y); pin(stage,O4.X,O4.Y); pin(stage,A.X,A.Y); pin(stage,B.X,B.Y);
+      txt(stage,O2.X-6,O2.Y+18,"O\u2082",cssVar('--ink'),12,"end","700");
+      txt(stage,O4.X+6,O4.Y+18,"O\u2084",cssVar('--ink'),12,"start","700");
+      return s;
+    }
+    function drawChart(r1,r2,r3,r4,th2){
+      clear(chart);
+      var W=420,H=320,pad=34;
+      // axes
+      line(chart,pad,H-pad,W-10,H-pad,cssVar('--ink-soft'),1.5); // x
+      line(chart,pad,12,pad,H-pad,cssVar('--ink-soft'),1.5);     // y
+      txt(chart,W/2,H-8,"crank angle \u03B8\u2082 (0\u2013360\u00B0)",cssVar('--ink-soft'),11,"middle");
+      // sample h4
+      var pts=[], maxAbs=0.5;
+      for(var d=0; d<=360; d+=2){
+        var th=d*Math.PI/180;
+        var ss=solveFourbar(r1,r2,r3,r4,th);
+        var v=null;
+        if(ss){ var c=coeffsFourbar(ss,r2,r3,r4,th); v=isFinite(c.h4)?c.h4:null; }
+        pts.push({d:d,v:v});
+        if(v!==null && isFinite(v)) maxAbs=Math.max(maxAbs,Math.abs(v));
+      }
+      maxAbs=Math.min(maxAbs,6); // clamp wild spikes for readability
+      var x0=pad, x1=W-10, y0=12, y1=H-pad;
+      var midY=(y0+y1)/2;
+      // zero line for h4
+      line(chart,x0,midY,x1,midY,cssVar('--accent-2'),1.2,"4 4");
+      txt(chart,x1-2,midY-4,"h\u2084 = 0 (limit)",cssVar('--accent-2'),10,"end");
+      function px(d){ return x0+(d/360)*(x1-x0); }
+      function py(v){ return midY - (v/maxAbs)*((y1-y0)/2 - 6); }
+      // polyline (break on nulls)
+      var path=el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:""});
+      var run=[];
+      function flush(){ if(run.length>1){ var pl=el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:run.join(" ")}); chart.appendChild(pl);} run=[]; }
+      pts.forEach(function(p){
+        if(p.v===null||!isFinite(p.v)){ flush(); return; }
+        var vv=Math.max(-maxAbs,Math.min(maxAbs,p.v));
+        run.push(px(p.d)+","+py(vv));
+        // mark zero crossings
+      });
+      flush();
+      // mark current angle
+      var cx=px(th2*180/Math.PI);
+      line(chart,cx,y0,cx,y1,cssVar('--good'),1.6);
+      txt(chart,cx,y0+10,"\u03B8\u2082",cssVar('--good'),11,"middle","700");
+    }
+    function render(){
+      var r1=+$("fbR1").value,r2=+$("fbR2").value,r3=+$("fbR3").value,r4=+$("fbR4").value;
+      var th2=(+$("fbTheta").value)*Math.PI/180;
+      $("fbR1v").textContent=r1; $("fbR2v").textContent=r2; $("fbR3v").textContent=r3; $("fbR4v").textContent=r4;
+      $("fbThetav").textContent=degTxt(+$("fbTheta").value);
+      var s=drawLinkage(r1,r2,r3,r4,th2);
+      drawChart(r1,r2,r3,r4,th2);
+      var vd=$("fbVerdict");
+      if(!s){
+        $("fbOut").innerHTML="At this crank angle the chosen link lengths cannot close the loop \u2014 the coupler and rocker can\u2019t reach. Adjust the lengths or the angle.";
+        vd.className="verdict no"; vd.textContent="Linkage cannot assemble at \u03B8\u2082 = "+degTxt(+$("fbTheta").value)+".";
+        return;
+      }
+      var c=coeffsFourbar(s,r2,r3,r4,th2);
+      var detTxt = isFinite(c.detJ)?c.detJ.toFixed(1):"\u2014";
+      var near = Math.abs(c.detJ) < 0.04*r3*r4;
+      var h4z  = isFinite(c.h4) && Math.abs(c.h4) < 0.04;
+      var h3s = isFinite(c.h3)?c.h3.toFixed(3):"\u221E";
+      var h4s = isFinite(c.h4)?c.h4.toFixed(3):"\u221E";
+      $("fbOut").innerHTML =
+        "<b>First-order coefficients</b> &nbsp; h\u2083 = dθ\u2083/dθ\u2082 = <b>"+h3s+"</b> &nbsp;&middot;&nbsp; h\u2084 = dθ\u2084/dθ\u2082 = <b>"+h4s+"</b><br>"+
+        "<b>Jacobian determinant</b> |J| = r\u2083r\u2084 sin(θ\u2084\u2212θ\u2083) = <b>"+detTxt+"</b> &nbsp; (units mm\u00B2)";
+      if(near){ vd.className="verdict no"; vd.textContent="Near a DEAD position: |J| \u2192 0, coefficients blow up \u2014 the crank can barely drive the linkage here."; }
+      else if(h4z){ vd.className="verdict warn"; vd.textContent="At a LIMIT position of link 4: h\u2084 \u2248 0, so the rocker momentarily stops and reverses while the crank keeps turning."; }
+      else { vd.className="verdict ok"; vd.textContent="Linkage assembles and transmits normally at this configuration."; }
+    }
+    function step(){
+      if(!spinning) return;
+      var t=+$("fbTheta").value; t=(t+1.4)%360; $("fbTheta").value=t; render();
+      raf=requestAnimationFrame(step);
+    }
+    $("fbPlay").addEventListener("click",function(){
+      if(reduceMotion){ // single nudge if user prefers reduced motion
+        var t=(+$("fbTheta").value+10)%360; $("fbTheta").value=t; render(); return;
+      }
+      spinning=!spinning; this.setAttribute("aria-pressed",spinning?"true":"false");
+      this.textContent=spinning?"\u275A\u275A Pause":"\u25B6 Animate";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    $("fbReset").addEventListener("click",function(){
+      spinning=false; $("fbPlay").setAttribute("aria-pressed","false"); $("fbPlay").textContent="\u25B6 Animate"; cancelAnimationFrame(raf);
+      $("fbR1").value=120;$("fbR2").value=45;$("fbR3").value=115;$("fbR4").value=100;$("fbTheta").value=60; render();
+    });
+    ["fbR1","fbR2","fbR3","fbR4","fbTheta"].forEach(function(id){
+      $(id).addEventListener("input",function(){
+        if(spinning && id!=="fbTheta"){ /* keep spinning */ }
+        render();
+      });
+    });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 3 · UNITS CLASSIFIER
+     ============================================================ */
+  (function(){
+    var out=$("uOutRead"); if(!out) return;
+    function render(){
+      var i=$("uIn").value, o=$("uOut").value;
+      var first, second, why;
+      if(i==="angle" && o==="angle"){
+        first="dimensionless"; second="dimensionless";
+        why="Angle in, angle out: h = d\u03B8\u2096/d\u03B8\u1D62 is radian/radian, and its derivative h\u2032 is per-radian \u00D7 radian \u2014 both pure numbers.";
+      } else if(i==="length" && o==="length"){
+        first="dimensionless"; second="length\u207B\u00B9 (per unit length)";
+        why="Length in, length out: f = dr\u2096/dr\u1D62 is length/length (dimensionless), but f\u2032 = d\u00B2r\u2096/dr\u1D62\u00B2 carries 1/length.";
+      } else if(i==="angle" && o==="length"){
+        first="length (per radian)"; second="length (per radian\u00B2)";
+        why="Angle in, length out: f = dr\u2096/d\u03B8\u1D62 has units of length (radians are dimensionless), and f\u2032 too \u2014 e.g. a steering rack\u2019s mm-per-radian.";
+      } else {
+        first="length\u207B\u00B9 (per unit length)"; second="length\u207B\u00B2 (per length squared)";
+        why="Length in, angle out: h = d\u03B8\u2096/dr\u1D62 is 1/length, and h\u2032 = d\u00B2\u03B8\u2096/dr\u1D62\u00B2 is 1/length\u00B2.";
+      }
+      out.innerHTML="<b>First-order coefficient:</b> "+first+"<br><b>Second-order coefficient:</b> "+second+
+        "<br><span style='color:var(--ink-soft)'>"+why+"</span>";
+    }
+    ["uIn","uOut"].forEach(function(id){ $(id).addEventListener("change",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 4 · DETERMINANT SCOPE (|J| over a full turn)
+     ============================================================ */
+  (function(){
+    var stage=$("dStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var r1=+$("dR1").value,r2=+$("dR2").value,r3=+$("dR3").value,r4=+$("dR4").value;
+      $("dR1v").textContent=r1; $("dR2v").textContent=r2; $("dR3v").textContent=r3; $("dR4v").textContent=r4;
+      var W=640,H=300,pad=42;
+      var x0=pad,x1=W-14,y0=16,y1=H-pad, midY=(y0+y1)/2;
+      line(stage,x0,y1,x1,y1,cssVar('--ink-soft'),1.5);
+      line(stage,x0,y0,x0,y1,cssVar('--ink-soft'),1.5);
+      line(stage,x0,midY,x1,midY,cssVar('--accent-2'),1.2,"5 4");
+      txt(stage,W/2,H-10,"crank angle \u03B8\u2082 (0\u2013360\u00B0)",cssVar('--ink-soft'),11,"middle");
+      txt(stage,x1-2,midY-5,"|J| = 0  (dead position)",cssVar('--accent-2'),10,"end");
+      txt(stage,x0-6,y0+8,"|J|",cssVar('--ink-soft'),11,"end");
+      var pts=[], maxAbs=1;
+      for(var d=0; d<=360; d+=1){
+        var th=d*Math.PI/180;
+        var s=solveFourbar(r1,r2,r3,r4,th);
+        var v=null;
+        if(s){ v=r3*r4*Math.sin(s.th4-s.th3); }
+        pts.push({d:d,v:v});
+        if(v!==null) maxAbs=Math.max(maxAbs,Math.abs(v));
+      }
+      function px(d){ return x0+(d/360)*(x1-x0); }
+      function py(v){ return midY - (v/maxAbs)*((y1-y0)/2-8); }
+      var run=[]; var zeros=[];
+      function flush(){ if(run.length>1){ stage.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:run.join(" ")})); } run=[]; }
+      var prev=null;
+      pts.forEach(function(p){
+        if(p.v===null){ flush(); prev=null; return; }
+        run.push(px(p.d)+","+py(p.v));
+        if(prev!==null && prev.v!==null && (prev.v<0)!==(p.v<0)){ zeros.push((prev.d+p.d)/2); }
+        prev=p;
+      });
+      flush();
+      zeros.forEach(function(z){
+        var X=px(z);
+        stage.appendChild(el("circle",{cx:X,cy:midY,r:5,fill:cssVar('--accent-2')}));
+        txt(stage,X,midY+18,degTxt(z),cssVar('--accent-2'),10,"middle","700");
+      });
+      // detect non-assembly span
+      var gaps=pts.filter(function(p){return p.v===null;}).length;
+      var msg;
+      if(zeros.length){
+        msg="Found <b>"+zeros.length+"</b> dead position"+(zeros.length>1?"s":"")+" where |J| crosses zero (marked). At those angles the coefficients diverge and the crank locks.";
+      } else if(gaps>0){
+        msg="This link set does not assemble through part of the turn ("+Math.round(gaps/361*100)+"% of angles), so the crank cannot complete a revolution \u2014 the missing span is itself a motion limit.";
+      } else {
+        msg="|J| never reaches zero for this set \u2014 a clean crank-rocker with no dead position in the cycle. Try a longer coupler or shorter ground to force one.";
+      }
+      $("dOut").innerHTML=msg;
+    }
+    ["dR1","dR2","dR3","dR4"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 5 · LIMIT-POSITION FINDER  (fixed geometry)
+     ============================================================ */
+  (function(){
+    var stage=$("lStage"), chart=$("lChart"); if(!stage) return;
+    var R1=120,R2=45,R3=130,R4=95; // a crank-rocker with limit positions
+    // precompute h4 zero crossings
+    var limits=[];
+    (function(){
+      var prev=null;
+      for(var d=0; d<=360; d+=1){
+        var th=d*Math.PI/180, s=solveFourbar(R1,R2,R3,R4,th), v=null;
+        if(s){ var c=coeffsFourbar(s,R2,R3,R4,th); v=isFinite(c.h4)?c.h4:null; }
+        if(prev!==null && prev.v!==null && v!==null && (prev.v<0)!==(v<0)) limits.push(Math.round((prev.d+d)/2));
+        prev={d:d,v:v};
+      }
+    })();
+    function drawLinkage(th2){
+      clear(stage);
+      var W=420,H=320,pad=30, map=makeMapper(R1,R2,R3,R4,W,H,pad);
+      var s=solveFourbar(R1,R2,R3,R4,th2);
+      var O2=map(0,0),O4=map(R1,0);
+      groundHatch(stage,(O2.X+O4.X)/2,Math.max(O2.Y,O4.Y),Math.abs(O4.X-O2.X)+40);
+      line(stage,O2.X,O2.Y,O4.X,O4.Y,cssVar('--ink-soft'),2,"6 5");
+      if(!s){ pin(stage,O2.X,O2.Y); pin(stage,O4.X,O4.Y); txt(stage,W/2,H/2,"no assembly",cssVar('--accent-2'),13); return null; }
+      var A=map(s.ax,s.ay),B=map(s.bx,s.by);
+      var c=coeffsFourbar(s,R2,R3,R4,th2);
+      var atLimit=isFinite(c.h4)&&Math.abs(c.h4)<0.03;
+      line(stage,O2.X,O2.Y,A.X,A.Y,cssVar('--accent'),5);
+      line(stage,A.X,A.Y,B.X,B.Y,cssVar('--accent-2'),5);
+      line(stage,O4.X,O4.Y,B.X,B.Y, atLimit?cssVar('--accent-2'):cssVar('--good'), atLimit?7:5);
+      pin(stage,O2.X,O2.Y);pin(stage,O4.X,O4.Y);pin(stage,A.X,A.Y);pin(stage,B.X,B.Y);
+      if(atLimit) txt(stage,B.X,B.Y-14,"rocker frozen",cssVar('--accent-2'),11,"middle","700");
+      return c;
+    }
+    function drawChart(th2){
+      clear(chart);
+      var W=420,H=320,pad=34, x0=pad,x1=W-10,y0=12,y1=H-pad,midY=(y0+y1)/2,maxAbs=0.6;
+      var pts=[];
+      for(var d=0; d<=360; d+=2){
+        var th=d*Math.PI/180, s=solveFourbar(R1,R2,R3,R4,th), v=null;
+        if(s){ var c=coeffsFourbar(s,R2,R3,R4,th); v=isFinite(c.h4)?c.h4:null; }
+        pts.push({d:d,v:v}); if(v!==null) maxAbs=Math.max(maxAbs,Math.abs(v));
+      }
+      maxAbs=Math.min(maxAbs,4);
+      line(chart,x0,y1,x1,y1,cssVar('--ink-soft'),1.4);
+      line(chart,x0,midY,x1,midY,cssVar('--accent-2'),1.2,"4 4");
+      txt(chart,W/2,H-8,"\u03B8\u2082 (deg)",cssVar('--ink-soft'),11,"middle");
+      txt(chart,x1-2,midY-4,"h\u2084 = 0",cssVar('--accent-2'),10,"end");
+      function px(d){return x0+(d/360)*(x1-x0);}
+      function py(v){return midY-(Math.max(-maxAbs,Math.min(maxAbs,v))/maxAbs)*((y1-y0)/2-6);}
+      var run=[];
+      function flush(){ if(run.length>1) chart.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:run.join(" ")})); run=[]; }
+      pts.forEach(function(p){ if(p.v===null){flush();return;} run.push(px(p.d)+","+py(p.v)); });
+      flush();
+      limits.forEach(function(z){ var X=px(z); chart.appendChild(el("circle",{cx:X,cy:midY,r:4,fill:cssVar('--accent-2')})); });
+      var cx=px(th2*180/Math.PI);
+      line(chart,cx,y0,cx,y1,cssVar('--good'),1.6);
+    }
+    function render(){
+      var deg=+$("lTheta").value, th2=deg*Math.PI/180;
+      $("lThetav").textContent=degTxt(deg);
+      var c=drawLinkage(th2); drawChart(th2);
+      var vd=$("lVerdict");
+      if(!c){ $("lOut").textContent="No assembly at this angle."; vd.className="verdict no"; vd.textContent="The linkage cannot close here."; return; }
+      var h4=isFinite(c.h4)?c.h4.toFixed(3):"\u221E";
+      $("lOut").innerHTML="h\u2084 = dθ\u2084/dθ\u2082 = <b>"+h4+"</b>. The chart marks every angle where h\u2084 crosses zero \u2014 those are link\u00A04\u2019s limit positions ("+(limits.length?limits.map(degTxt).join(", "):"none in this set")+").";
+      if(isFinite(c.h4)&&Math.abs(c.h4)<0.03){ vd.className="verdict warn"; vd.textContent="Limit position: the rocker is momentarily stationary and about to reverse."; }
+      else { vd.className="verdict ok"; vd.textContent="Rocker is moving; h\u2084 \u2260 0."; }
+    }
+    $("lJump").addEventListener("click",function(){
+      if(!limits.length) return;
+      var cur=+$("lTheta").value, next=null;
+      for(var i=0;i<limits.length;i++){ if(limits[i]>cur+0.5){ next=limits[i]; break; } }
+      if(next===null) next=limits[0];
+      $("lTheta").value=next; render();
+    });
+    $("lReset").addEventListener("click",function(){ $("lTheta").value=30; render(); });
+    $("lTheta").addEventListener("input",render);
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 6 · GEARTRAIN COEFFICIENT  (h_k = speed ratio, h'_k = 0)
+     ============================================================ */
+  (function(){
+    var stage=$("gStage"), meshWrap=$("gMeshes"); if(!stage) return;
+    var counts=[[20,40],[18,54],[16,32],[20,60]]; // default driver,driven per mesh
+    function buildInputs(n){
+      meshWrap.innerHTML="";
+      var row=document.createElement("div"); row.className="controls";
+      for(var m=0;m<n;m++){
+        (function(m){
+          var c=document.createElement("div"); c.className="ctrl";
+          var lab=document.createElement("label"); lab.textContent="Mesh "+(m+1)+": driver / driven teeth";
+          var wrap=document.createElement("div"); wrap.style.display="flex"; wrap.style.gap="8px";
+          var a=document.createElement("input"); a.type="number"; a.min="8"; a.max="120"; a.step="1"; a.value=counts[m][0];
+          var b=document.createElement("input"); b.type="number"; b.min="8"; b.max="120"; b.step="1"; b.value=counts[m][1];
+          [a,b].forEach(function(inp){ inp.style.cssText="font-family:var(--mono);padding:8px;border:1.5px solid var(--panel-line);border-radius:6px;background:var(--panel);color:var(--ink);width:80px;min-height:40px;"; });
+          a.addEventListener("input",function(){ counts[m][0]=Math.max(8,+a.value||8); render(); });
+          b.addEventListener("input",function(){ counts[m][1]=Math.max(8,+b.value||8); render(); });
+          wrap.appendChild(a); wrap.appendChild(b);
+          c.appendChild(lab); c.appendChild(wrap); row.appendChild(c);
+        })(m);
+      }
+      meshWrap.appendChild(row);
+    }
+    function render(){
+      var n=+$("gStages").value; $("gStagesv").textContent=n;
+      clear(stage);
+      var ratio=1, sign=1, parts=[];
+      for(var m=0;m<n;m++){
+        var nd=counts[m][0], ndn=counts[m][1];
+        ratio *= nd/ndn; sign *= -1; // each external mesh reverses sense
+        parts.push("(\u2212N"+(m+1)+"d/N"+(m+1)+"D)");
+      }
+      var hk = sign*ratio;
+      // draw a row of gears scaled by tooth count
+      var W=640,H=240, x=70, y=H/2;
+      var scale=1.1;
+      var prevR=0;
+      for(var i=0;i<n;i++){
+        var rD=Math.max(14,counts[i][0]*0.9), rN=Math.max(14,counts[i][1]*0.9);
+        // driver
+        if(i>0) x += prevR + rD + 6;
+        circle(stage,x,y,rD,cssVar('--accent'),2.5);
+        txt(stage,x,y-rD-6,counts[i][0]+"T",cssVar('--accent'),11,"middle","700");
+        // driven meshes to the right
+        var x2=x+rD+rN;
+        circle(stage,x2,y,rN,cssVar('--accent-2'),2.5);
+        txt(stage,x2,y+rN+14,counts[i][1]+"T",cssVar('--accent-2'),11,"middle","700");
+        pin(stage,x,y); pin(stage,x2,y);
+        x=x2; prevR=rN;
+        if(x>W-80) break;
+      }
+      $("gOut").innerHTML =
+        "Overall first-order coefficient &nbsp;<b>h\u2096 = "+hk.toFixed(4)+"</b> &nbsp;(this <i>is</i> the speed ratio \u03C9\u2096/\u03C9\u1D62).<br>"+
+        "Sign = "+(sign<0?"\u2212 (output reverses; odd # of external meshes)":"+ (output same sense; even # of meshes)")+
+        ". &nbsp; Because the ratio is constant, <b>h\u2032\u2096 = 0</b> \u2014 no second-order term.";
+    }
+    $("gStages").addEventListener("input",function(){ buildInputs(+this.value); render(); });
+    buildInputs(+$("gStages").value); render();
+  })();
+
+  /* ============================================================
+     TOOL 7 · EXAMPLE 4.1 STEP-THROUGH SOLVER
+     ============================================================ */
+  (function(){
+    var dots=$("ex41Dots"), body=$("ex41Body"); if(!body) return;
+    var steps=[
+      {t:"Write the position equations",
+       h:"Loop r\u20D7\u2081 + r\u20D7\u2082 \u2212 r\u20D7\u2083 \u2212 r\u20D7\u2084 = 0 gives X, Y components plus the geometric constraint \u03B8\u2084 = \u03C0/2 + \u03B8\u2083:",
+       eq:"r\u2081 + r\u2082cos\u03B8\u2082 \u2212 r\u2083cos\u03B8\u2083 \u2212 r\u2084cos\u03B8\u2084 = 0&nbsp; (4.16)<br>r\u2082sin\u03B8\u2082 \u2212 r\u2083sin\u03B8\u2083 \u2212 r\u2084sin\u03B8\u2084 = 0&nbsp; (4.17)<br>\u03B8\u2084 \u2212 \u03C0/2 \u2212 \u03B8\u2083 = 0&nbsp; (4.18)",
+       n:"Knowns: r\u2081, \u03B8\u2081=0, r\u2082, r\u2084. Unknowns: \u03B8\u2082(input), \u03B8\u2083, r\u2083, \u03B8\u2084. We want h\u2083, f\u2083, h\u2084."},
+      {t:"Differentiate once w.r.t. the input \u03B8\u2082",
+       h:"Apply d/d\u03B8\u2082. Every output picks up its first-order coefficient: d\u03B8\u2083/d\u03B8\u2082 = h\u2083, dr\u2083/d\u03B8\u2082 = f\u2083, d\u03B8\u2084/d\u03B8\u2082 = h\u2084. The known \u03B8\u2082 differentiates to 1.",
+       eq:"\u2212r\u2082sin\u03B8\u2082 + r\u2083sin\u03B8\u2083\u00B7h\u2083 \u2212 f\u2083cos\u03B8\u2083 + r\u2084sin\u03B8\u2084\u00B7h\u2084 = 0<br>r\u2082cos\u03B8\u2082 \u2212 r\u2083cos\u03B8\u2083\u00B7h\u2083 \u2212 f\u2083sin\u03B8\u2083 \u2212 r\u2084cos\u03B8\u2084\u00B7h\u2084 = 0<br>h\u2084 \u2212 h\u2083 = 0",
+       n:"Note r\u2083 is a variable here (slider joint), so the product rule produces both an f\u2083 term and an h\u2083 term from the r\u2083cos\u03B8\u2083 piece."},
+      {t:"Group into the linear system",
+       h:"Collect the unknown coefficients h\u2083, f\u2083, h\u2084 on the left and the known \u03B8\u2082 terms on the right. The coefficient matrix is the Jacobian J.",
+       eq:"[ r\u2083sin\u03B8\u2083 &nbsp; \u2212cos\u03B8\u2083 &nbsp; r\u2084sin\u03B8\u2084 ]<br>[ \u2212r\u2083cos\u03B8\u2083 &nbsp; \u2212sin\u03B8\u2083 &nbsp; \u2212r\u2084cos\u03B8\u2084 ]<br>[ \u22121 &nbsp; 0 &nbsp; 1 ] &nbsp;[h\u2083; f\u2083; h\u2084] = [ r\u2082sin\u03B8\u2082; \u2212r\u2082cos\u03B8\u2082; 0 ]",
+       n:"This is Eq 4.22. The right-hand side holds only known quantities."},
+      {t:"Recognize the Jacobian",
+       h:"That 3\u00D73 matrix is exactly the Jacobian you would form solving the position equations by Newton\u2013Raphson. You never build a new matrix \u2014 the same J serves position, velocity, and acceleration.",
+       eq:"J = \u2202(F\u2081,F\u2082,F\u2083)/\u2202(\u03B8\u2083, r\u2083, \u03B8\u2084)",
+       n:"If |J| = 0 at some \u03B8\u2082, that\u2019s a dead position: the coefficients h\u2083, f\u2083, h\u2084 cannot be solved \u2014 they diverge."},
+      {t:"Solve for the first-order coefficients",
+       h:"Invert (or back-substitute) once to get all three first-order coefficients at this configuration.",
+       eq:"[h\u2083; f\u2083; h\u2084] = J\u207B\u00B9 [ r\u2082sin\u03B8\u2082; \u2212r\u2082cos\u03B8\u2082; 0 ]",
+       n:"These are pure geometry \u2014 no time, no speed yet."},
+      {t:"Differentiate again for second order",
+       h:"Apply d/d\u03B8\u2082 once more. The left side keeps the SAME J multiplying [h\u2032\u2083; f\u2032\u2083; h\u2032\u2084]; the right side gains quadratic terms in the first-order coefficients \u2014 including a Coriolis-type 2f\u2083h\u2083.",
+       eq:"J [h\u2032\u2083; f\u2032\u2083; h\u2032\u2084] = ( terms in r\u2082, h\u2083\u00B2, h\u2084\u00B2, and 2f\u2083h\u2083 )&nbsp; (4.26)",
+       n:"Reusing J is the whole payoff of the method: one matrix, factored once, drives every order."},
+      {t:"Attach the clock \u2014 time derivatives",
+       h:"Finally multiply by the input speed and acceleration to recover real velocities and accelerations of the outputs.",
+       eq:"\u03B8\u0307\u2083 = h\u2083\u03B8\u0307\u2082 &nbsp;&middot;&nbsp; r\u0307\u2083 = f\u2083\u03B8\u0307\u2082 &nbsp;&middot;&nbsp; \u03B8\u0307\u2084 = h\u2084\u03B8\u0307\u2082<br>\u03B8\u0308\u2083 = h\u2032\u2083\u03B8\u0307\u2082\u00B2 + h\u2083\u03B8\u0308\u2082 &nbsp; (and similarly for r\u2083, \u03B8\u2084)",
+       n:"Geometry (coefficients) and motion (input speed) stay cleanly separated \u2014 exactly the chapter\u2019s thesis."}
+    ];
+    var idx=0;
+    function buildDots(){
+      dots.innerHTML="";
+      steps.forEach(function(s,i){
+        var b=document.createElement("button");
+        b.className="stepdot"+(i===idx?" active":""); b.type="button";
+        b.setAttribute("role","tab"); b.setAttribute("aria-selected",i===idx?"true":"false");
+        b.setAttribute("aria-label","Step "+(i+1)+": "+s.t);
+        b.textContent=(i+1);
+        b.addEventListener("click",function(){ idx=i; render(); });
+        dots.appendChild(b);
+      });
+    }
+    function render(){
+      buildDots();
+      var s=steps[idx];
+      body.innerHTML="<h4 style='margin:.1em 0 .5em; font-family:var(--serif)'>"+s.t+"</h4>"+
+        "<p style='margin:.2em 0 .6em'>"+s.h+"</p>"+
+        "<div class='eqn' role='img' aria-label='equation for "+s.t+"'>"+s.eq+"</div>"+
+        "<p style='margin:.5em 0 0; color:var(--ink-soft); font-size:.92rem'>"+s.n+"</p>";
+      $("ex41Count").textContent="Step "+(idx+1)+" of "+steps.length;
+      $("ex41Prev").disabled=(idx===0);
+      $("ex41Next").disabled=(idx===steps.length-1);
+    }
+    $("ex41Prev").addEventListener("click",function(){ if(idx>0){idx--; render();} });
+    $("ex41Next").addEventListener("click",function(){ if(idx<steps.length-1){idx++; render();} });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 8 · COUPLER-POINT ANIMATOR (Example 4.6)
+     C = A + r'3 at angle (θ3 + φ3).  Trace path; draw velocity arrow f_C.
+     ============================================================ */
+  (function(){
+    var stage=$("cpStage"); if(!stage) return;
+    var R1=120,R2=48,R3=120,R4=100; // a working crank-rocker
+    var spinning=false, raf=null, theta=40;
+    function couplerC(off,phi,th2){
+      var s=solveFourbar(R1,R2,R3,R4,th2); if(!s) return null;
+      var ang=s.th3 + phi;
+      var cx=s.ax + off*Math.cos(ang), cy=s.ay + off*Math.sin(ang);
+      return {s:s, cx:cx, cy:cy, ang:ang};
+    }
+    function render(){
+      clear(stage);
+      var off=+$("cpOff").value, phi=(+$("cpPhi").value)*Math.PI/180, th2=theta*Math.PI/180;
+      $("cpOffv").textContent=off; $("cpPhiv").textContent=degTxt(+$("cpPhi").value);
+      var W=480,H=340,pad=34, map=makeMapper(R1,R2,R3,R4+off*0.5,W,H,pad);
+      // trace coupler curve
+      var trace=[];
+      for(var d=0; d<=360; d+=3){
+        var cc=couplerC(off,phi,d*Math.PI/180);
+        if(cc){ var P=map(cc.cx,cc.cy); trace.push(P.X+","+P.Y); }
+      }
+      if(trace.length>1) stage.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent-2'),"stroke-width":1.6,"stroke-dasharray":"3 3",points:trace.join(" "),opacity:"0.7"}));
+      var cur=couplerC(off,phi,th2);
+      var O2=map(0,0),O4=map(R1,0);
+      groundHatch(stage,(O2.X+O4.X)/2,Math.max(O2.Y,O4.Y),Math.abs(O4.X-O2.X)+40);
+      line(stage,O2.X,O2.Y,O4.X,O4.Y,cssVar('--ink-soft'),2,"6 5");
+      if(!cur){ pin(stage,O2.X,O2.Y);pin(stage,O4.X,O4.Y); txt(stage,W/2,H/2,"no assembly",cssVar('--accent-2'),13); $("cpOut").textContent="No assembly at this angle."; return; }
+      var s=cur.s, A=map(s.ax,s.ay), B=map(s.bx,s.by), C=map(cur.cx,cur.cy);
+      line(stage,O2.X,O2.Y,A.X,A.Y,cssVar('--accent'),5);
+      line(stage,A.X,A.Y,B.X,B.Y,cssVar('--accent-2'),5);
+      line(stage,O4.X,O4.Y,B.X,B.Y,cssVar('--good'),5);
+      // coupler point arm A->C
+      line(stage,A.X,A.Y,C.X,C.Y,cssVar('--accent-2'),2,"4 3");
+      pin(stage,O2.X,O2.Y);pin(stage,O4.X,O4.Y);pin(stage,A.X,A.Y);pin(stage,B.X,B.Y);
+      stage.appendChild(el("circle",{cx:C.X,cy:C.Y,r:6,fill:cssVar('--accent-2')}));
+      txt(stage,C.X+8,C.Y-8,"C",cssVar('--accent-2'),13,"start","700");
+      // velocity coefficient at C: numerically d(C)/dθ2
+      var eps=0.001;
+      var c1=couplerC(off,phi,th2+eps), c0=couplerC(off,phi,th2-eps);
+      var out="";
+      if(c1&&c0){
+        var fCx=(c1.cx-c0.cx)/(2*eps), fCy=(c1.cy-c0.cy)/(2*eps);
+        var mag=Math.sqrt(fCx*fCx+fCy*fCy);
+        // draw arrow scaled
+        var sc=0.5*(map(1,0).X-map(0,0).X); // model->screen scale approx via unit
+        var scale=40/Math.max(mag,1e-6);
+        var vx=C.X + fCx*scale, vy=C.Y - fCy*scale;
+        arrow(stage,C.X,C.Y,vx,vy,cssVar('--accent'),3);
+        out="Velocity coefficient at C: f_Cx = <b>"+fCx.toFixed(2)+"</b>, f_Cy = <b>"+fCy.toFixed(2)+"</b> (per rad). "+
+            "Multiply by \u03B8\u0307\u2082 for the true velocity v\u20D7_C = f\u20D7_C \u03B8\u0307\u2082; the arrow shows its direction. The dashed curve is the coupler path C traces over one crank revolution.";
+      }
+      $("cpOut").innerHTML=out;
+    }
+    function step(){ if(!spinning) return; theta=(theta+1.4)%360; render(); raf=requestAnimationFrame(step); }
+    $("cpPlay").addEventListener("click",function(){
+      if(reduceMotion){ theta=(theta+10)%360; render(); return; }
+      spinning=!spinning; this.setAttribute("aria-pressed",spinning?"true":"false");
+      this.textContent=spinning?"\u275A\u275A Pause":"\u25B6 Animate";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    $("cpReset").addEventListener("click",function(){
+      spinning=false; $("cpPlay").setAttribute("aria-pressed","false"); $("cpPlay").textContent="\u25B6 Animate"; cancelAnimationFrame(raf);
+      theta=40; $("cpOff").value=70; $("cpPhi").value=35; render();
+    });
+    ["cpOff","cpPhi"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     SELF-CHECK QUIZ
+     ============================================================ */
+  (function(){
+    var mount=$("quizMount"); if(!mount) return;
+    var bank=[
+      {q:"What is the defining idea of a kinematic coefficient h\u2096 = dS\u2096/dS\u1D62?",
+       opts:["The output's acceleration","A purely geometric derivative of output w.r.t. input, independent of speed","The input torque","The mechanism's mass"],
+       correct:1, fb:"A kinematic coefficient is geometry alone \u2014 the derivative of an output variable with respect to the input variable, carrying no information about how fast the input moves."},
+      {q:"How do you recover the true output velocity from the first-order coefficient?",
+       opts:["Add the input speed","Multiply the coefficient by the input speed: S\u0307\u2096 = h\u2096\u00B7S\u0307\u1D62","Differentiate the coefficient w.r.t. time","Divide by the Jacobian"],
+       correct:1, fb:"Velocity = coefficient \u00D7 input speed (S\u0307\u2096 = h\u2096 S\u0307\u1D62). The coefficient is the geometry; the input speed is the clock."},
+      {q:"For an input that is an ANGLE and an output that is a LENGTH, the first-order coefficient f = dr\u2096/d\u03B8\u1D62 has units of:",
+       opts:["Dimensionless","Length (per radian)","1/length","Length squared"],
+       correct:1, fb:"Radians are dimensionless, so dr\u2096/d\u03B8\u1D62 carries units of length \u2014 e.g. a steering rack's millimeters per radian (Eq 4.11)."},
+      {q:"A DEAD position occurs when:",
+       opts:["A single coefficient is zero","The Jacobian determinant |J| = 0, so coefficients diverge and the input locks","The output reverses","The input speed is zero"],
+       correct:1, fb:"|J| = 0 makes the coefficients (which divide by |J|) blow up; physically the chosen input cannot drive the mechanism \u2014 it is dead with respect to that input."},
+      {q:"A LIMIT position of an output link occurs when:",
+       opts:["|J| = 0","Its first-order coefficient h\u2096 = 0, so it momentarily stops and reverses","The coupler breaks","Two links become parallel"],
+       correct:1, fb:"h\u2096 = 0 means that output's velocity is zero for an instant even though the input keeps moving \u2014 the link is at a swing extreme, about to reverse."},
+      {q:"What is the key difference between a dead position and a limit position?",
+       opts:["They are the same thing","Dead is about the INPUT (|J|=0); limit is about an OUTPUT (one h\u2096=0)","Dead applies only to gears","Limit applies only to sliders"],
+       correct:1, fb:"Dead = the whole Jacobian goes singular, the input can't drive. Limit = a single coefficient passes through zero, one output stalls and reverses."},
+      {q:"For a constant-ratio geartrain, the second-order coefficient h\u2032\u2096 is:",
+       opts:["Equal to the speed ratio","Zero, because the ratio doesn't change with position","Infinite at mesh","Equal to the tooth count"],
+       correct:1, fb:"A geartrain's ratio is constant, so its first-order coefficient h\u2096 is constant and its derivative h\u2032\u2096 = 0 \u2014 no second-order term."},
+      {q:"To get the velocity of a coupler POINT of interest (not a joint), the method is to:",
+       opts:["Ignore it \u2014 only joints matter","Write the point's position as a vector sum, then differentiate to get its coefficients f\u20D7_C","Measure it experimentally","Use the input torque"],
+       correct:1, fb:"Express the point's position vectorially (e.g. r\u20D7_C = r\u20D7\u2082 + r\u20D7\u2032\u2083), differentiate w.r.t. the input to get f\u20D7_C, then v\u20D7_C = f\u20D7_C \u03B8\u0307\u2082 (Ex 4.6)."}
+    ];
+    var answered=0, correctCount=0;
+    function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+    function updateScore(){ $("quizScore").textContent=correctCount+" / "+answered; }
+    function build(){
+      mount.innerHTML=""; answered=0; correctCount=0; updateScore();
+      bank.forEach(function(item,qi){
+        var order=shuffle(item.opts.map(function(_,i){return i;}));
+        var wrap=document.createElement("div"); wrap.className="q";
+        var stem=document.createElement("p"); stem.className="stem"; stem.textContent=(qi+1)+". "+item.q; wrap.appendChild(stem);
+        var opts=document.createElement("div"); opts.className="opts"; opts.setAttribute("role","group");
+        opts.setAttribute("aria-label","Answer choices for question "+(qi+1));
+        var done=false;
+        order.forEach(function(origIdx){
+          var lbl=document.createElement("label"); lbl.className="opt";
+          var inp=document.createElement("input"); inp.type="radio"; inp.name="q"+qi;
+          var span=document.createElement("span"); span.textContent=item.opts[origIdx];
+          lbl.appendChild(inp); lbl.appendChild(span);
+          inp.addEventListener("change",function(){
+            if(done) return; done=true; answered++;
+            var isRight=(origIdx===item.correct);
+            if(isRight){ correctCount++; lbl.classList.add("correct"); }
+            else{
+              lbl.classList.add("incorrect");
+              Array.prototype.forEach.call(opts.querySelectorAll(".opt"),function(o){
+                if(o.querySelector("span").textContent===item.opts[item.correct]) o.classList.add("correct");
+              });
+            }
+            Array.prototype.forEach.call(opts.querySelectorAll("input"),function(x){ x.disabled=true; });
+            fb.className="fb show "+(isRight?"right":"wrong");
+            fb.textContent=(isRight?"Correct. ":"Not quite. ")+item.fb;
+            updateScore();
+          });
+          opts.appendChild(lbl);
+        });
+        wrap.appendChild(opts);
+        var fb=document.createElement("div"); fb.className="fb"; wrap.appendChild(fb);
+        mount.appendChild(wrap);
+      });
+    }
+    $("quizReset").addEventListener("click",build);
+    build();
+  })();
+
+  /* ============================================================
+     GLOSSARY (build + filter)
+     ============================================================ */
+  (function(){
+    var list=$("glossList"); if(!list) return;
+    var terms=[
+      ["Kinematic coefficient","A geometric derivative of an output variable with respect to the input variable, independent of input speed; the heart of Chapter 4.","\u00A7 4.2 Coefficients"],
+      ["First-order coefficient (h\u2096, f\u2096)","dS\u2096/dS\u1D62 \u2014 relates output velocity to input velocity: S\u0307\u2096 = h\u2096 S\u0307\u1D62. h for angular outputs, f for length outputs.","\u00A7 4.2 Coefficients"],
+      ["Second-order coefficient (h\u2032\u2096, f\u2032\u2096)","d\u00B2S\u2096/dS\u1D62\u00B2 \u2014 supplies the geometry-driven part of output acceleration; multiplies the input speed squared.","\u00A7 4.2 Coefficients"],
+      ["Input variable (S\u1D62)","The single chosen variable that drives the mechanism (often a crank angle \u03B8\u2082). All coefficients are taken with respect to it.","\u00A7 4.1 Time-based"],
+      ["Output variable (S\u2096)","Any dependent position variable (an angle or length) whose motion follows from the input via the coefficients.","\u00A7 4.2 Coefficients"],
+      ["Jacobian (J)","The matrix of partial derivatives of the position equations w.r.t. the unknowns; the shared coefficient matrix for velocity, acceleration, dead and limit analysis.","\u00A7 4.2 Coefficients"],
+      ["Dead position","A configuration where |J| = 0; the coefficients diverge and the chosen input cannot drive the mechanism (lock-up).","\u00A7 4.3 Dead positions"],
+      ["Limit position","A configuration where an output's first-order coefficient is zero (e.g. h\u2084 = 0); that output momentarily stops and reverses.","\u00A7 4.4 Limit positions"],
+      ["Speed ratio","The ratio of output to input angular speed; for a geartrain it equals the constant first-order coefficient h\u2096.","\u00A7 4.6 Geartrains"],
+      ["Point of interest","A point on a link (e.g. a coupler point or mass center) whose velocity/acceleration is found by writing its position vectorially and differentiating.","\u00A7 4.5 Points"],
+      ["Coupler point","A point fixed on the coupler (floating link) that traces a coupler curve; its coefficients f\u20D7_C give its velocity direction.","\u00A7 4.5 / Ex 4.6"],
+      ["Coriolis term","The 2f\u2096h\u2096-type product appearing in second-order equations when a length and angle both vary (e.g. sliding joints).","Ex 4.1"],
+      ["Loop-closure equation","The vector equation \u03A3 r\u20D7 = 0 around a mechanism loop; differentiating it generates the coefficient equations.","\u00A7 4.1 Time-based"],
+      ["Crank-rocker","A four-bar in which the crank fully rotates while the rocker oscillates between two limit positions.","\u00A7 4.4 Limit positions"],
+      ["Determinant |J|","Scalar measuring how far the Jacobian is from singular; its zeros are the dead positions. For a four-bar, |J| \u221D sin(\u03B8\u2084 \u2212 \u03B8\u2083).","\u00A7 4.3 Dead positions"],
+      ["Chain rule","The calculus identity that separates geometry from time: dS\u2096/dt = (dS\u2096/dS\u1D62)(dS\u1D62/dt) = h\u2096 S\u0307\u1D62.","\u00A7 4.0 Foundations"],
+      ["Implicit differentiation","Differentiating the position equations (which define outputs implicitly) to obtain the coefficient equations without solving for outputs in closed form.","\u00A7 4.0 Foundations"],
+      ["Transmission angle","The angle between coupler and rocker; as it approaches 0 or 180\u00B0, sin(\u03B8\u2084\u2212\u03B8\u2083) \u2192 0 and the linkage nears a dead position.","\u00A7 4.3 Dead positions"],
+      ["Inverted crank-slider","The mechanism of Example 4.1, with a sliding length r\u2083 as one of the outputs; produces a Coriolis term in second order.","Ex 4.1"],
+      ["Speedometer analogy","The mental model that output rate = fixed geometric ratio \u00D7 input rate, used in Tool 1 to make the central identity tangible.","\u00A7 4.1 Time-based"]
+    ];
+    terms.sort(function(a,b){ return a[0].toLowerCase().localeCompare(b[0].toLowerCase()); });
+    function render(filter){
+      list.innerHTML=""; var f=(filter||"").trim().toLowerCase(), n=0;
+      terms.forEach(function(t){
+        if(f && t[0].toLowerCase().indexOf(f)<0 && t[1].toLowerCase().indexOf(f)<0) return;
+        n++;
+        var item=document.createElement("div"); item.className="gloss-item";
+        var dt=document.createElement("dt"); dt.textContent=t[0];
+        var dd=document.createElement("dd"); dd.textContent=t[1];
+        var tg=document.createElement("span"); tg.className="tag"; tg.textContent=t[2];
+        item.appendChild(dt); item.appendChild(dd); item.appendChild(tg);
+        list.appendChild(item);
+      });
+      $("glossEmpty").hidden = (n>0);
+      $("glossCount").textContent = f ? (n+" of "+terms.length+" terms shown") : (terms.length+" terms");
+    }
+    $("glossInput").addEventListener("input",function(){ render(this.value); });
+    render("");
+  })();
+
+  /* ============================================================
+     EXTERNAL RESOURCES (build cards)
+     ============================================================ */
+  (function(){
+    var data={
+      resFound:[
+        ["Chain rule (refresher)","The single calculus identity behind every kinematic coefficient: how to differentiate a composed function.","en.wikipedia.org","https://en.wikipedia.org/wiki/Chain_rule"],
+        ["Implicit function & differentiation","Why you can differentiate position equations to get output rates without solving for the outputs explicitly.","en.wikipedia.org","https://en.wikipedia.org/wiki/Implicit_function"],
+        ["Jacobian matrix and determinant","The matrix of partial derivatives whose determinant signals dead positions when it vanishes.","en.wikipedia.org","https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant"]
+      ],
+      resCore:[
+        ["Four-bar linkage","Geometry, mobility, Grashof conditions, and the crank-rocker that frames this chapter's dead and limit positions.","en.wikipedia.org","https://en.wikipedia.org/wiki/Four-bar_linkage"],
+        ["Kinematics (overview)","Position, velocity, and acceleration analysis of mechanisms \u2014 the larger context for the method of coefficients.","en.wikipedia.org","https://en.wikipedia.org/wiki/Kinematics"],
+        ["tec-science: velocity & acceleration of linkages","Worked treatment of analyzing mechanism velocities and accelerations, complementary to the coefficient method.","tec-science.com","https://www.tec-science.com/mechanical-power-transmission/mechanisms/"]
+      ],
+      resVisual:[
+        ["Coupler curve","The path traced by a coupler point \u2014 the curve animated in Tool 8 \u2014 with examples and history.","en.wikipedia.org","https://en.wikipedia.org/wiki/Coupler_curve"],
+        ["Dead centre (engineering)","The lock-up configurations of a linkage, the physical face of |J| = 0.","en.wikipedia.org","https://en.wikipedia.org/wiki/Dead_centre_(engineering)"],
+        ["Linkage simulator (MechDesigner / linkage demos)","Browser and desktop tools to build a four-bar and watch its motion, dead, and limit positions live.","en.wikipedia.org","https://en.wikipedia.org/wiki/Linkage_(mechanical)"]
+      ]
+    };
+    Object.keys(data).forEach(function(mountId){
+      var mount=$(mountId); if(!mount) return;
+      data[mountId].forEach(function(r){
+        var a=document.createElement("a");
+        a.className="res-link"; a.href=r[3]; a.target="_blank"; a.rel="noopener noreferrer";
+        var name=document.createElement("span"); name.className="name";
+        name.appendChild(document.createTextNode(r[0]+" "));
+        var ext=document.createElement("span"); ext.className="ext"; ext.textContent="\u2197 new tab";
+        name.appendChild(ext);
+        var desc=document.createElement("span"); desc.className="desc"; desc.textContent=r[1];
+        var hs=document.createElement("span"); hs.className="host"; hs.textContent=r[2];
+        a.appendChild(name); a.appendChild(desc); a.appendChild(hs);
+        a.setAttribute("aria-label", r[0]+" \u2014 opens "+r[2]+" in a new tab");
+        mount.appendChild(a);
+      });
+    });
+  })();
+
+  /* ============================================================
+     NAV ACTIVE STATE + READING PROGRESS + ARROW-KEY NAV
+     ============================================================ */
+  (function(){
+    var links=Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+    var sections=links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+    var prog=$("readprog"), pct=$("readpct");
+    function onScroll(){
+      var y=window.scrollY+90;
+      var active=sections[0];
+      sections.forEach(function(s){ if(s.offsetTop<=y) active=s; });
+      if(active) links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href")==="#"+active.id); });
+      var doc=document.documentElement;
+      var max=doc.scrollHeight - doc.clientHeight;
+      var p=max>0?Math.min(100,Math.round(window.scrollY/max*100)):0;
+      if(prog){ prog.value=p; if(pct) pct.textContent=p+"%"; }
+    }
+    window.addEventListener("scroll",onScroll,{passive:true});
+    window.addEventListener("resize",onScroll);
+    onScroll();
+    var tw=$("tocWrap");
+    if(tw){
+      tw.addEventListener("keydown",function(e){
+        if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
+        var i=links.indexOf(document.activeElement); if(i<0) return;
+        e.preventDefault();
+        var ni=e.key==="ArrowRight"?Math.min(links.length-1,i+1):Math.max(0,i-1);
+        links[ni].focus();
+      });
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
