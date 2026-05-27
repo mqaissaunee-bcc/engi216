@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 7 · Machine Dynamics III: The Power Equation — Kinematics &amp; Dynamics of Machines</title>
+<meta name="description" content="An interactive lecture on the power equation: an energy-based method for machine dynamics. Covers the energy balance, equivalent inertia, potential energy and friction terms, the inverse and forward dynamics problems, Euler integration, flywheels and the coefficient of variation, mechanical advantage, and efficiency, with worked examples, analogies, and real-world applications.">
+<style>
+  /* ============================================================
+     THEME TOKENS  — engineering-blueprint / technical drafting
+     (locked ENGI 216 design standard — identical to Chapters 1–4)
+     ============================================================ */
+  :root{
+    --ink:        #10243a;   /* deep drafting ink */
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;   /* drafting paper */
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;   /* textbook cyan */
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;   /* rust / annotation orange */
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --analogy-bg: #e2f1f5;   /* pale cyan wash */
+    --rw-bg:      #f6e7dc;   /* pale rust wash */
+    --rw-h:       #9c4416;   /* rust heading, AA on --rw-bg */
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --analogy-bg: #0f2a33;   /* deep cyan wash */
+      --rw-bg:      #33210f;   /* deep rust wash */
+      --rw-h:       #e8853f;   /* rust heading on dark */
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- layout ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+    border-bottom:3px solid var(--accent);
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:2; }
+  header.site::after{
+    content:""; position:absolute; inset:0; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-dk); background:#f3f1e7;
+    padding:5px 12px; border-radius:30px; font-weight:700; margin-bottom:14px;
+  }
+  @media (prefers-color-scheme: dark){ .chip{ background:#cfe7ef; color:#06384a; } }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; margin:.1em 0 .15em;
+    font-size:clamp(1.7rem, 4.6vw, 3rem); line-height:1.08; color:#fff;
+  }
+  header.site .sub{ font-size:clamp(1rem,2.2vw,1.2rem); color:#d6e6ee; max-width:58ch; }
+  .meta-row{ margin-top:18px; display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:.78rem; color:#bcd2dd; }
+  .meta-row span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- sticky nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50;
+    background:var(--panel); border-bottom:1px solid var(--panel-line);
+    box-shadow:0 2px 8px rgba(16,36,58,.06);
+  }
+  nav.toc .wrap{ max-width:var(--maxw); margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:8px 12px; }
+  nav.toc a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink-soft);
+    font-family:var(--mono); font-size:.76rem; font-weight:600; letter-spacing:.02em;
+    padding:8px 12px; border-radius:7px; white-space:nowrap; min-height:36px; display:inline-flex; align-items:center;
+  }
+  nav.toc a:hover{ background:var(--paper-2); color:var(--ink); }
+  nav.toc a:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  nav.toc a.active{ background:var(--accent); color:#fff; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:10px 18px 60px; }
+
+  section{ padding:40px 0 12px; scroll-margin-top:64px; border-top:1px dashed var(--panel-line); }
+  section:first-of-type{ border-top:none; }
+
+  .sec-tag{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h2{ font-family:var(--serif); font-size:clamp(1.45rem,3.4vw,2.1rem); line-height:1.12; margin:.18em 0 .5em; color:var(--ink); }
+  h3{ font-family:var(--sans); font-weight:700; font-size:1.18rem; margin:1.5em 0 .4em; color:var(--ink); letter-spacing:.005em; }
+  h4{ font-family:var(--mono); font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:1.2em 0 .4em; }
+  p{ margin:.6em 0 1em; }
+  a{ color:var(--accent-dk); }
+
+  .lead{ font-size:1.12rem; color:var(--ink); }
+
+  /* ---------- cards & panels ---------- */
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:20px 22px; margin:16px 0; box-shadow:var(--shadow);
+  }
+  .card.tool{ border-top:3px solid var(--accent); }
+  .tool-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .tool-label::before{ content:"▸ INTERACTIVE"; }
+  .tool-label span{ color:var(--ink-soft); }
+
+  .defn{
+    border-left:4px solid var(--accent); background:var(--paper-2);
+    padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0;
+  }
+  .defn strong{ color:var(--accent-dk); }
+
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* Analogy callout — cyan, "think of it like…" */
+  .analogy{
+    border-left:4px solid var(--accent); background:var(--analogy-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .analogy .h{ display:block; font-weight:700; color:var(--accent-dk); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .analogy::before{
+    content:"\01F4A1"; /* light bulb */
+    position:absolute; left:13px; top:11px; font-size:1.15rem; line-height:1;
+  }
+  .analogy p{ margin:.3em 0 0; }
+  .analogy p:first-of-type{ margin-top:0; }
+
+  /* Real-world callout — rust, "in the real world" */
+  .real-world{
+    border-left:4px solid var(--accent-2); background:var(--rw-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .real-world .h{ display:block; font-weight:700; color:var(--rw-h); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .real-world::before{
+    content:"\01F527"; /* wrench */
+    position:absolute; left:13px; top:11px; font-size:1.1rem; line-height:1;
+  }
+  .real-world p{ margin:.3em 0 0; }
+  .real-world p:first-of-type{ margin-top:0; }
+
+  .eqn{
+    font-family:var(--mono); background:var(--ink); color:#e9f6fb;
+    padding:14px 18px; border-radius:8px; font-size:1.02rem; overflow-x:auto;
+    margin:14px 0; letter-spacing:.01em;
+  }
+  .eqn .lbl{ float:right; color:#8fc6d8; font-size:.8rem; }
+  .eqn .c{ color:#ffd9a8; }       /* highlighted coefficient */
+  .eqn .m{ color:#9fe6c4; }       /* highlighted secondary term */
+  @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
+
+  /* ---------- grids ---------- */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:760px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+  /* ---------- buttons & controls ---------- */
+  button, .btn{
+    font-family:var(--sans); font-size:.92rem; font-weight:600;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:10px 16px; min-height:44px; cursor:pointer; box-shadow:var(--shadow);
+    transition:transform .08s ease, background .15s ease;
+  }
+  button:hover, .btn:hover{ background:var(--accent-dk); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  button.secondary{ background:var(--panel); color:var(--accent-dk); border:1.5px solid var(--accent); box-shadow:none; }
+  button.secondary:hover{ background:var(--paper-2); }
+  button[aria-pressed="true"]{ background:var(--ink); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:8px 0; }
+  .ctrl{ display:flex; flex-direction:column; gap:4px; min-width:150px; flex:1 1 160px; }
+  .ctrl label{ font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; text-transform:uppercase; }
+  .ctrl .val{ color:var(--accent-dk); }
+  input[type="range"]{ width:100%; accent-color:var(--accent); height:32px; }
+  input[type="range"]:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  input[type="number"]{ font-family:var(--mono); padding:8px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); width:100%; min-height:40px; font-size:.95rem; }
+  input[type="number"]:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+
+  /* ---------- svg stage ---------- */
+  .stage{
+    width:100%; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:8px; touch-action:none; display:block;
+  }
+  .stage-wrap{ position:relative; }
+  svg text{ font-family:var(--mono); }
+
+  /* ---------- readouts ---------- */
+  .readout{
+    margin-top:10px; padding:12px 14px; background:var(--paper-2); border-radius:8px;
+    font-family:var(--mono); display:flex; flex-wrap:wrap; gap:10px 18px;
+    font-size:.92rem; line-height:1.4;
+  }
+  .readout b{ color:var(--accent-dk); }
+  .readout .unit{ color:var(--ink-soft); font-size:.82rem; }
+  .verdict{ font-family:var(--mono); font-weight:700; padding:10px 14px; border-radius:8px; margin-top:10px; }
+  .verdict.ok{ background:var(--good-bg); color:var(--good); }
+  .verdict.no{ background:var(--bad-bg); color:var(--bad); }
+  .verdict.warn{ background:var(--warn-bg); color:var(--warn); }
+
+  /* ---------- tables ---------- */
+  table{ border-collapse:collapse; width:100%; margin:14px 0; font-size:.92rem; }
+  caption{ text-align:left; font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding-bottom:6px; }
+  th,td{ border:1px solid var(--panel-line); padding:8px 11px; text-align:left; }
+  th{ background:var(--paper-2); font-family:var(--mono); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+  td.mono, th.mono{ font-family:var(--mono); }
+
+  /* ---------- details / steps ---------- */
+  details{ border:1px solid var(--panel-line); border-radius:8px; margin:10px 0; background:var(--panel); overflow:hidden; }
+  summary{ cursor:pointer; padding:13px 16px; font-weight:700; font-family:var(--sans); list-style:none; min-height:44px; display:flex; align-items:center; gap:10px; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::before{ content:"+"; font-family:var(--mono); color:var(--accent); font-weight:700; font-size:1.2rem; width:1ch; }
+  details[open] summary::before{ content:"–"; }
+  summary:focus-visible{ outline:3px solid var(--accent); outline-offset:-2px; }
+  details .body{ padding:2px 16px 16px; }
+
+  /* ---------- quiz ---------- */
+  .q{ margin:14px 0; padding:16px; border:1px solid var(--panel-line); border-radius:8px; background:var(--panel); }
+  .q .stem{ font-weight:600; margin-bottom:10px; }
+  .q .opts{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1.5px solid var(--panel-line); border-radius:8px; cursor:pointer; background:var(--panel); min-height:44px; }
+  .opt:hover{ border-color:var(--accent); }
+  .opt input{ margin-top:4px; accent-color:var(--accent); width:18px; height:18px; flex:0 0 auto; }
+  .opt.correct{ border-color:var(--good); background:var(--good-bg); }
+  .opt.incorrect{ border-color:var(--bad); background:var(--bad-bg); }
+  .fb{ margin-top:10px; font-size:.92rem; padding:10px 12px; border-radius:8px; display:none; }
+  .fb.show{ display:block; }
+  .fb.right{ background:var(--good-bg); color:var(--good); }
+  .fb.wrong{ background:var(--bad-bg); color:var(--bad); }
+  .q-score{ font-family:var(--mono); font-weight:700; color:var(--accent-dk); }
+
+  /* ---------- objectives list ---------- */
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:28px; margin:.5em 0; }
+  ul.clean li::before{ content:"◆"; position:absolute; left:4px; color:var(--accent); font-size:.8rem; top:.25em; }
+
+  .pill{ display:inline-block; font-family:var(--mono); font-size:.72rem; padding:2px 9px; border-radius:20px; font-weight:700; letter-spacing:.04em; }
+  .pill.p1{ background:#dceefb; color:#075a76; }
+  .pill.p2{ background:#f7e6d8; color:#9a4715; }
+  @media (prefers-color-scheme: dark){ .pill.p1{ background:#0d3647; color:#9fdcef; } .pill.p2{ background:#3a2616; color:#f0b487; } }
+
+  /* ---------- legend dots ---------- */
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; font-family:var(--mono); font-size:.8rem; margin:8px 0; }
+  .legend i{ width:14px; height:14px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-2px; }
+
+  footer.site{ max-width:var(--maxw); margin:0 auto; padding:28px 18px 50px; border-top:1px dashed var(--panel-line); color:var(--ink-soft); font-size:.85rem; }
+  footer.site .program{ color:var(--accent-dk); font-weight:700; }
+
+  .visually-hidden{ position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0; }
+
+  .kbd{ font-family:var(--mono); font-size:.8rem; background:var(--paper-2); border:1px solid var(--panel-line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; }
+
+  .figref{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+
+  /* progress dock */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  /* ---------- video embeds ---------- */
+  .video-card{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent-2); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); margin:16px 0; }
+  .video-frame{ position:relative; width:100%; aspect-ratio:16/9; background:var(--ink); }
+  .video-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-meta{ padding:14px 18px; }
+  .video-meta h3{ margin:.1em 0 .3em; font-size:1.08rem; }
+  .video-tags{ display:flex; flex-wrap:wrap; gap:8px 14px; font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+  .video-tags b{ color:var(--accent-dk); }
+  .video-supports{ display:inline-block; font-family:var(--mono); font-size:.72rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:20px; padding:3px 11px; color:var(--accent-dk); font-weight:700; margin-top:8px; }
+
+  /* ---------- glossary ---------- */
+  .glossary-search{ position:relative; margin:14px 0; }
+  .glossary-search input{ width:100%; font-family:var(--sans); font-size:1rem; padding:12px 14px 12px 40px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--panel); color:var(--ink); min-height:48px; }
+  .glossary-search input:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  .glossary-search::before{ content:"⌕"; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:1.3rem; }
+  .gloss-list{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .gloss-list{ grid-template-columns:1fr; } }
+  .gloss-item{ background:var(--panel); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 15px; }
+  .gloss-item dt{ font-weight:700; color:var(--accent-dk); font-family:var(--sans); margin-bottom:3px; }
+  .gloss-item dd{ margin:0; font-size:.93rem; color:var(--ink); }
+  .gloss-item .tag{ font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); display:block; margin-top:6px; }
+  .gloss-empty{ font-family:var(--mono); color:var(--ink-soft); padding:14px; text-align:center; }
+
+  /* ---------- resources ---------- */
+  .res-group{ margin:18px 0; }
+  .res-group h3{ display:flex; align-items:center; gap:10px; }
+  .res-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .res-grid{ grid-template-columns:1fr; } }
+  .res-link{ display:block; text-decoration:none; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:14px 16px; color:var(--ink); transition:border-color .15s ease, transform .08s ease; }
+  .res-link:hover{ border-color:var(--accent); transform:translateY(-1px); }
+  .res-link:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .res-link .name{ font-weight:700; color:var(--accent-dk); display:flex; align-items:center; gap:6px; }
+  .res-link .name .ext{ font-size:.72rem; font-family:var(--mono); color:var(--ink-soft); font-weight:600; }
+  .res-link .desc{ font-size:.88rem; color:var(--ink); margin-top:4px; }
+  .res-link .host{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin-top:6px; display:block; }
+
+  /* ---------- formula / quick-reference card ---------- */
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:var(--radius); padding:0; overflow:hidden; box-shadow:var(--shadow); }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--mono); font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:18px; }
+  .rc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:680px){ .rc-grid{ grid-template-columns:1fr; } }
+  .rc-block h4{ margin:0 0 6px; color:var(--accent-dk); }
+  .rc-eq{ font-family:var(--mono); background:var(--paper-2); border-radius:6px; padding:9px 12px; margin:6px 0; font-size:.92rem; }
+  .rc-list{ list-style:none; padding:0; margin:0; font-size:.9rem; }
+  .rc-list li{ padding:3px 0; border-bottom:1px dotted var(--panel-line); }
+  .rc-list li:last-child{ border-bottom:none; }
+  .rc-list .k{ font-family:var(--mono); color:var(--accent-dk); font-weight:700; }
+  @media print{
+    nav.toc, .progress-dock, .card.tool, .video-frame, button{ display:none !important; }
+    body{ background:#fff; color:#000; }
+  }
+
+  /* ---------- references ---------- */
+  .refs{ font-size:.88rem; color:var(--ink-soft); }
+  .refs li{ margin:.5em 0; }
+  .ext-note{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+
+  /* ---------- step walkthrough ---------- */
+  .stepper{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .stepdot{ font-family:var(--mono); font-size:.74rem; font-weight:700; padding:6px 10px; border-radius:20px; border:1.5px solid var(--panel-line); background:var(--panel); color:var(--ink-soft); min-height:34px; }
+  .stepdot.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stepdot.done{ border-color:var(--good); color:var(--good); }
+  .step-body{ min-height:64px; }
+  .step-nav{ display:flex; gap:10px; margin-top:12px; align-items:center; flex-wrap:wrap; }
+  .step-count{ font-family:var(--mono); font-size:.8rem; color:var(--ink-soft); margin-left:auto; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Chapter 7</span>
+    <h1>Machine Dynamics III: The Power Equation</h1>
+    <p class="sub">An energy&#8209;based method that links a machine&rsquo;s motion to the forces and torques acting on it &middot; equivalent inertia &middot; spring &amp; friction terms &middot; inverse &amp; forward dynamics &middot; Euler integration &middot; flywheels &middot; mechanical advantage &amp; efficiency.</p>
+    <div class="meta-row">
+      <span>&#9719; ~3 hour lecture</span>
+      <span>&#9670; 4 interactive tools</span>
+      <span>&#9998; 3 worked examples + self-check</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Chapter sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#foundations">0 · Foundations</a>
+    <a href="#develop">7.1 · Power Equation</a>
+    <a href="#kinetic">KE &amp; Equivalent Inertia</a>
+    <a href="#potential">Potential Energy</a>
+    <a href="#friction">Friction</a>
+    <a href="#idp">7.2 · Inverse Dynamics</a>
+    <a href="#fdp">7.3 · Forward Dynamics</a>
+    <a href="#euler">Euler &amp; Flywheels</a>
+    <a href="#ma">7.4 · Mechanical Advantage</a>
+    <a href="#eff">7.5 · Efficiency</a>
+    <a href="#examples">Worked Examples</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#videos">Videos</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+    <a href="#recap">Recap</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START / ROADMAP ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Chapter Roadmap</span>
+  <h2 id="start-h">A whole machine in a single scalar equation</h2>
+  <p class="lead">Newton&rsquo;s laws (Chapters&nbsp;5&ndash;6) let you analyze a machine by drawing a free&#8209;body diagram for <em>every</em> link, writing three equations apiece, and grinding through the algebra. That works, but for a one&#8209;degree&#8209;of&#8209;freedom machine it is a lot of bookkeeping to answer a simple question: &ldquo;how fast will it run, and how hard can it push?&rdquo; This chapter offers a shortcut. The <strong>power equation</strong> wraps the entire machine &mdash; every link, spring, and damper &mdash; into one scalar energy balance.</p>
+
+  <p>The idea is the bank&#8209;account idea from physics, scaled up to a full mechanism. <strong>Power in must equal the rate at which energy is going somewhere</strong>: into speeding things up (kinetic energy), into lifting weights or stretching springs (potential energy), or into heat (friction). Write that single sentence as an equation, plug in the <strong>kinematic coefficients</strong> from Chapter&nbsp;4, and a machine that took dozens of force equations collapses to one line.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>household budget</strong>. You don&rsquo;t need to track every coin to know whether you can afford something &mdash; you just balance <em>money in</em> against <em>spending + savings</em>. The power equation is that balance sheet for a machine: power supplied by the motor on one side; rate&#8209;of&#8209;change of kinetic energy (savings), potential energy (a different account), and friction (money burned) on the other. Newton&rsquo;s method audits every transaction; the power equation just balances the books.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:.2em">What you&rsquo;ll be able to do</h3>
+    <ul class="clean">
+      <li><strong>Write</strong> the energy balance of a machine and convert it to the <strong>power equation</strong> <i>P</i>&nbsp;=&nbsp;d<i>T</i>/d<i>t</i>&nbsp;+&nbsp;d<i>U</i>/d<i>t</i>&nbsp;+&nbsp;<i>P<sub>f</sub></i>.</li>
+      <li><strong>Build</strong> the kinetic&#8209;energy term using the <strong>equivalent inertia</strong> <i>I<sub>e</sub></i> and recognize where its rate of change <i>dI<sub>e</sub></i>/d<i>S<sub>i</sub></i> comes from.</li>
+      <li><strong>Account</strong> for potential energy (elevation and springs) and for power dissipated by <strong>viscous</strong> and <strong>Coulomb</strong> friction.</li>
+      <li><strong>Solve</strong> the <strong>inverse dynamics problem</strong> (find the unknown driver) and the <strong>forward dynamics problem</strong> (find the motion).</li>
+      <li><strong>Integrate</strong> the nonlinear forward&#8209;dynamics ODE with <strong>Euler&rsquo;s method</strong>, choose a sane time step, and use a <strong>flywheel</strong> to cut speed fluctuation (the coefficient of variation <i>C<sub>f</sub></i>).</li>
+      <li><strong>Compute</strong> a mechanism&rsquo;s <strong>mechanical advantage</strong> <i>M<sub>a</sub></i> and relate it to <strong>efficiency</strong> &eta;.</li>
+    </ul>
+  </div>
+
+  <h3>The 30-second picture</h3>
+  <p>One sentence governs the whole chapter. Read it as a balance, left equals right:</p>
+  <div class="eqn" role="img" aria-label="P equals the rate of change of kinetic energy plus the rate of change of potential energy plus the power dissipated by friction.">
+    P &nbsp;=&nbsp; <span class="c">dT/dt</span> &nbsp;+&nbsp; <span class="m">dU/dt</span> &nbsp;+&nbsp; P<sub>f</sub>
+    <span class="lbl">power in = speeding up + storing + heating</span>
+  </div>
+  <p>The orange term is <strong>motion</strong> (kinetic energy changing), the green term is <strong>storage</strong> (potential energy in height or springs), and <i>P<sub>f</sub></i> is energy <strong>lost to heat</strong>. Master those three terms and you have mastered Chapter&nbsp;7.</p>
+</section>
+
+<!-- ============ FOUNDATIONS ============ -->
+<section id="foundations" aria-labelledby="found-h">
+  <span class="sec-tag">Foundations</span>
+  <h2 id="found-h">0 · The physics &amp; math you&rsquo;ll lean on</h2>
+  <p>The power equation is built from a few ideas you already own. Before we develop it, let&rsquo;s sharpen five of them. If these are second nature, skim; if not, this is the place to firm them up.</p>
+
+  <h3>Work, energy, and power</h3>
+  <p><strong>Work</strong> is force acting through a distance; <strong>energy</strong> is stored capacity to do work; <strong>power</strong> is the <em>rate</em> of doing work &mdash; energy per unit time. Power is what differentiates this chapter from a static energy balance: by working with rates, the same balance that tells you &ldquo;how much energy&rdquo; now tells you &ldquo;how fast.&rdquo;</p>
+  <div class="eqn" role="img" aria-label="Power equals work over time, equals force dot velocity for a force, equals torque times angular velocity for a torque.">
+    P = dW/dt = <span class="c">F&#8407;&middot;v&#8407;</span> &nbsp;(force) = <span class="m">T&omega;</span> &nbsp;(torque)
+    <span class="lbl">SI unit: watt = N&middot;m/s = J/s</span>
+  </div>
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>filling a pool with a hose</strong>. Total water is <em>energy</em>; the flow rate from the hose is <em>power</em>. Two pools can hold the same water (energy) but a fire hose fills one far faster (more power). When we &ldquo;convert the energy balance to rates,&rdquo; we&rsquo;re simply switching from &ldquo;how much water&rdquo; to &ldquo;gallons per second.&rdquo;</p>
+  </div>
+
+  <h3>Kinetic energy of a rigid body in planar motion</h3>
+  <p>A rigid body that both translates and spins carries energy in <em>both</em> motions: a translational part from its mass center&rsquo;s speed, and a rotational part from its spin:</p>
+  <div class="eqn" role="img" aria-label="T equals one half m v g squared plus one half I g omega squared.">
+    T = &frac12; m v<sub>g</sub>&sup2; + &frac12; I<sub>g</sub>&omega;&sup2;
+    <span class="lbl">translation + rotation</span>
+  </div>
+  <p>Here <i>v<sub>g</sub></i> is the speed of the mass center <i>G</i>, <i>m</i> is the mass, <i>I<sub>g</sub></i> is the rotational inertia about <i>G</i>, and &omega; is the angular velocity. This single expression is the seed of the entire kinetic&#8209;energy term.</p>
+
+  <h3>The chain rule with kinematic coefficients</h3>
+  <p>This is the bridge from Chapter&nbsp;4. Every body&rsquo;s velocity is its kinematic coefficient times the input speed. So <i>v<sub>g</sub></i> and &omega; are both proportional to <i>S&#775;<sub>i</sub></i>:</p>
+  <div class="eqn" role="img" aria-label="v g x equals f g x times S i dot, v g y equals f g y times S i dot, omega equals h times S i dot.">
+    v<sub>gx</sub> = f<sub>gx</sub>S&#775;<sub>i</sub>, &nbsp; v<sub>gy</sub> = f<sub>gy</sub>S&#775;<sub>i</sub>, &nbsp; &omega; = h&middot;S&#775;<sub>i</sub>
+    <span class="lbl">velocity = (geometry) &times; (input speed)</span>
+  </div>
+  <p>That substitution is what lets us pull <i>S&#775;<sub>i</sub></i> out of the kinetic energy and discover an <strong>equivalent inertia</strong> that depends only on geometry. Hold this thought &mdash; it pays off in &sect;7.1.</p>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>This is exactly how a car&rsquo;s engineers reason about &ldquo;rotational mass.&rdquo; Heavy wheels and a heavy flywheel store kinetic energy when the car speeds up, so they feel like extra mass the engine must accelerate. The kinematic coefficients translate each spinning part&rsquo;s contribution back to the crankshaft &mdash; producing one <em>equivalent</em> inertia the engine actually feels.</p>
+  </div>
+
+  <h3>Numerical integration (a first look)</h3>
+  <p>When an equation is too tangled to solve with a formula, we march forward in small time steps: &ldquo;given where I am and how fast things are changing, take a tiny step and repeat.&rdquo; That is the essence of <strong>Euler&rsquo;s method</strong>, which we&rsquo;ll use in &sect;7.3 to solve the forward dynamics problem. You don&rsquo;t need it yet &mdash; just know the spirit: <em>small steps, repeated</em>.</p>
+
+  <h3>Hooke&rsquo;s law for a linear spring</h3>
+  <p>A linear spring resists with a force proportional to how far it is stretched from free length: <i>F<sub>s</sub></i>&nbsp;=&nbsp;<i>F<sub>o</sub></i>&nbsp;+&nbsp;<i>k</i>(<i>r<sub>s</sub></i>&minus;<i>r<sub>s<sub>o</sub></sub></i>), where <i>k</i> is the stiffness. The energy <em>stored</em> in the spring is the area under its force&ndash;deflection line &mdash; a fact we&rsquo;ll use directly for the potential&#8209;energy term.</p>
+</section>
+
+<!-- ============ 7.1 DEVELOPMENT ============ -->
+<section id="develop" aria-labelledby="dev-h">
+  <span class="sec-tag">Section 7.1</span>
+  <h2 id="dev-h">7.1 &middot; Developing the power equation</h2>
+  <p>Start from the most basic statement of conservation of energy for a machine over some interval. Whatever <strong>net work</strong> <i>W</i> you put in must show up as a change in kinetic energy, a change in potential energy, or energy lost to friction:</p>
+  <div class="defn">
+    <strong>Energy balance (Eq.&nbsp;7.1):</strong>
+    <div class="eqn" role="img" aria-label="W equals delta T plus delta U plus W f.">W = &Delta;T + &Delta;U + W<sub>f</sub></div>
+    where <i>W</i> = net work input, <i>&Delta;T</i> = change in kinetic energy, <i>&Delta;U</i> = change in potential energy, and <i>W<sub>f</sub></i> = energy dissipated by friction.
+  </div>
+  <p>Now take the time derivative of every term &mdash; convert &ldquo;how much energy&rdquo; into &ldquo;how fast.&rdquo; Work&#8209;per&#8209;time is power, and the result is the star of the chapter:</p>
+  <div class="defn">
+    <strong>The power equation (Eq.&nbsp;7.2):</strong>
+    <div class="eqn" role="img" aria-label="P equals d T d t plus d U d t plus P f.">P = dT/dt + dU/dt + P<sub>f</sub></div>
+    <i>P</i> = net power input, <i>dT/dt</i> = rate of change of kinetic energy, <i>dU/dt</i> = rate of change of potential energy, <i>P<sub>f</sub></i> = power dissipated by friction.
+  </div>
+
+  <h3>The three terms on the right &mdash; and which one wins</h3>
+  <p>A machine&rsquo;s personality is decided by which of the three right&#8209;hand terms dominates. Not every machine cares about all three equally:</p>
+  <div class="grid3">
+    <div class="card">
+      <h4 style="margin-top:0">dT/dt &mdash; kinetic</h4>
+      <p style="margin:.2em 0 0">Dominates in <strong>high&#8209;speed, well&#8209;lubricated</strong> machines &mdash; a turbine, a centrifuge. Most of the input goes into accelerating mass.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">dU/dt &mdash; potential</h4>
+      <p style="margin:.2em 0 0">Dominates in machines that <strong>lift loads or fight springs</strong> &mdash; an elevator, a hood strut, a press with a return spring.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">P<sub>f</sub> &mdash; friction</h4>
+      <p style="margin:.2em 0 0">Dominates in <strong>slow, heavily&#8209;loaded</strong> machines &mdash; a worm&#8209;gear winch, a screw jack. Most input becomes heat.</p>
+    </div>
+  </div>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A figure skater&rsquo;s spin is almost pure <em>dT/dt</em> &mdash; pulling the arms in changes the equivalent inertia and the spin speeds up, with negligible friction or height change. A canal lock is almost pure <em>dU/dt</em> &mdash; slow, but lifting an enormous mass of water and boat. A hand&#8209;cranked pencil sharpener is mostly <i>P<sub>f</sub></i> &mdash; you feel the grinding heat, not acceleration. Same equation; three different machines.</p>
+  </div>
+
+  <p>Over the next three subsections we develop each term into something you can actually compute from the kinematic coefficients. Then &sect;7.2 and &sect;7.3 put the assembled equation to work.</p>
+
+  <!-- TOOL 1: Power-balance explorer -->
+  <div class="card tool" id="balanceTool">
+    <div class="tool-label">Tool 1 <span>&middot; Power-balance explorer</span></div>
+    <h3 style="margin-top:.3em">Where does the power go?</h3>
+    <p>Set how fast a machine is accelerating, how much it is lifting/compressing, and how lossy it is. The bars show each term of <i>P</i>&nbsp;=&nbsp;dT/dt&nbsp;+&nbsp;dU/dt&nbsp;+&nbsp;P<sub>f</sub> and which one dominates. Notice that the terms can be <em>negative</em> &mdash; a descending load or a relaxing spring <em>returns</em> power to the machine.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="pbKE">Kinetic: dT/dt <span class="val" id="pbKEv"></span></label>
+        <input type="range" id="pbKE" min="-40" max="120" value="60" step="1">
+      </div>
+      <div class="ctrl">
+        <label for="pbPE">Potential: dU/dt <span class="val" id="pbPEv"></span></label>
+        <input type="range" id="pbPE" min="-60" max="80" value="20" step="1">
+      </div>
+      <div class="ctrl">
+        <label for="pbF">Friction: P<sub>f</sub> <span class="val" id="pbFv"></span></label>
+        <input type="range" id="pbF" min="0" max="80" value="15" step="1">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="pbStage" class="stage" viewBox="0 0 640 300" role="img" aria-label="Bar chart of the three power-equation terms and the required input power."></svg>
+    </div>
+    <div class="readout" id="pbOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============ KINETIC ENERGY TERM ============ -->
+<section id="kinetic" aria-labelledby="ke-h">
+  <span class="sec-tag">7.1 &middot; First term</span>
+  <h2 id="ke-h">Rate of change of kinetic energy &amp; the equivalent inertia</h2>
+  <p>Begin with one rigid body (Fig.&nbsp;7.1). Its kinetic energy combines translation of the mass center and rotation about it:</p>
+  <div class="eqn" role="img" aria-label="T equals one half m v g squared plus one half I g omega squared.">T = &frac12; m v<sub>g</sub>&sup2; + &frac12; I<sub>g</sub>&omega;&sup2;</div>
+
+  <p>Now substitute the kinematic coefficients (Chapter&nbsp;4): the mass&#8209;center velocity components are <i>f<sub>gx</sub>S&#775;<sub>i</sub></i> and <i>f<sub>gy</sub>S&#775;<sub>i</sub></i>, and the angular velocity is <i>hS&#775;<sub>i</sub></i>. Because every velocity carries the same factor <i>S&#775;<sub>i</sub></i>, it factors out and gets squared:</p>
+  <div class="defn">
+    <strong>Kinetic energy in coefficient form (Eq.&nbsp;7.4):</strong>
+    <div class="eqn" role="img" aria-label="T equals open bracket one half m times f g x squared plus f g y squared, plus one half I g h squared, close bracket times S i dot squared.">
+      T = [ &frac12; m(f<sub>gx</sub>&sup2;+f<sub>gy</sub>&sup2;) + &frac12; I<sub>g</sub>h&sup2; ] <span class="c">S&#775;<sub>i</sub>&sup2;</span>
+    </div>
+    Everything in the bracket is pure <strong>geometry</strong>; the only kinematics is the <i>S&#775;<sub>i</sub>&sup2;</i> outside.
+  </div>
+
+  <p>Differentiate with respect to time (the bracket itself changes as the mechanism moves, so the product rule fires). For one body you get Eq.&nbsp;7.5; summed over all the bodies in a machine it becomes Eq.&nbsp;7.6:</p>
+  <div class="defn">
+    <strong>Rate of change of kinetic energy (Eq.&nbsp;7.6):</strong>
+    <div class="eqn" role="img" aria-label="d T d t equals the sum of A times S i dot S i double dot plus the sum of B times S i dot cubed.">
+      dT/dt = (&Sigma;A) S&#775;<sub>i</sub>S&#776;<sub>i</sub> + (&Sigma;B) S&#775;<sub>i</sub>&sup3;
+    </div>
+  </div>
+
+  <p>The two sums have names worth knowing. &Sigma;<i>A</i> is the <strong>equivalent inertia</strong> <i>I<sub>e</sub></i> &mdash; the single inertia the input shaft &ldquo;feels&rdquo; from the whole machine. And &Sigma;<i>B</i> turns out to be exactly half the rate at which that equivalent inertia changes with the input:</p>
+  <div class="defn">
+    <strong>Equivalent inertia &amp; its rate (Eq.&nbsp;7.6 cont.):</strong>
+    <div class="eqn" role="img" aria-label="Sum of A equals I e. Sum of B equals one half d I e d S i.">
+      &Sigma;A = I<sub>e</sub> = &Sigma;[ m(f<sub>gx</sub>&sup2;+f<sub>gy</sub>&sup2;) + I<sub>g</sub>h&sup2; ] &nbsp;&nbsp;&nbsp; &Sigma;B = &frac12; dI<sub>e</sub>/dS<sub>i</sub>
+    </div>
+  </div>
+  <p>So the kinetic term takes the clean final form:</p>
+  <div class="eqn" role="img" aria-label="d T d t equals I e times S i dot times S i double dot plus one half d I e d S i times S i dot cubed.">
+    dT/dt = <span class="c">I<sub>e</sub></span> S&#775;<sub>i</sub>S&#776;<sub>i</sub> + <span class="m">&frac12; (dI<sub>e</sub>/dS<sub>i</sub>)</span> S&#775;<sub>i</sub>&sup3;
+    <span class="lbl">looks like  I&middot;&alpha;  &mdash; but with a correction</span>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>figure skater&rsquo;s spin</strong>. The first term, <i>I<sub>e</sub>S&#775;<sub>i</sub>S&#776;<sub>i</sub></i>, is the familiar &ldquo;inertia times acceleration&rdquo; &mdash; push harder, spin faster. The second term exists because the skater&rsquo;s equivalent inertia <em>changes</em>: pulling the arms in shrinks <i>I<sub>e</sub></i>, and that very change pumps energy into the spin even with no extra push. In a linkage, <i>I<sub>e</sub></i> breathes in and out as the geometry changes through a cycle &mdash; the <i>dI<sub>e</sub>/dS<sub>i</sub></i> term is the machine&rsquo;s version of arms moving in and out.</p>
+  </div>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Engine designers quote an &ldquo;effective rotating inertia at the crankshaft&rdquo; that lumps pistons, rods, flywheel, clutch, and geartrain into one number &mdash; that is <i>I<sub>e</sub></i>. In a reciprocating engine the pistons speed up and slow twice per revolution, so <i>I<sub>e</sub></i> genuinely rises and falls within a single turn, and the <i>dI<sub>e</sub>/dS<sub>i</sub></i> term is what makes a one&#8209;cylinder engine shake while a smooth multi&#8209;cylinder one barely does.</p>
+  </div>
+
+  <!-- TOOL 2: Equivalent inertia explorer -->
+  <div class="card tool" id="ieTool">
+    <div class="tool-label">Tool 2 <span>&middot; Equivalent-inertia explorer</span></div>
+    <h3 style="margin-top:.3em">How a slider-crank&rsquo;s I<sub>e</sub> &ldquo;breathes&rdquo;</h3>
+    <p>A slider&#8209;crank has a spinning crank and a sliding piston. As the crank turns, the piston&rsquo;s kinematic coefficient changes, so the inertia felt at the crank rises and falls through each revolution. Drag the crank angle and watch <i>I<sub>e</sub></i> trace its curve; note where <i>dI<sub>e</sub>/dS<sub>i</sub></i> (the slope) is zero versus largest.</p>
+    <div class="grid2">
+      <div class="stage-wrap">
+        <svg id="ieStage" class="stage" viewBox="0 0 420 300" role="img" aria-label="A slider-crank mechanism at the selected crank angle."></svg>
+      </div>
+      <div class="stage-wrap">
+        <svg id="ieChart" class="stage" viewBox="0 0 420 300" role="img" aria-label="Equivalent inertia plotted against crank angle, with the current angle marked."></svg>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="ieTh">Crank angle &theta;&#8322; <span class="val" id="ieThv"></span></label>
+        <input type="range" id="ieTh" min="0" max="360" value="60" step="1">
+      </div>
+      <div class="ctrl">
+        <label for="iePiston">Piston mass m&#8323; <span class="val" id="iePistonv"></span></label>
+        <input type="range" id="iePiston" min="0.2" max="4" value="1.5" step="0.1">
+      </div>
+    </div>
+    <div class="readout" id="ieOut" aria-live="polite"></div>
+    <p class="figref">Model: crank r&#8322;, connecting rod r&#8323;, piston sliding on the x&#8209;axis. I<sub>e</sub> combines the crank&rsquo;s fixed inertia with the rod and piston contributions, which depend on angle.</p>
+  </div>
+</section>
+
+<!-- ============ POTENTIAL ENERGY TERM ============ -->
+<section id="potential" aria-labelledby="pe-h">
+  <span class="sec-tag">7.1 &middot; Second term</span>
+  <h2 id="pe-h">Rate of change of potential energy</h2>
+  <p>Two kinds of stored energy come up again and again: energy from <strong>raising weight</strong> and energy in a <strong>spring</strong>. We handle each by writing the energy, then differentiating to a rate &mdash; and, as always, factoring out <i>S&#775;<sub>i</sub></i> via a kinematic coefficient.</p>
+
+  <h3>Potential energy due to elevation</h3>
+  <p>From elementary physics, raising a body of mass <i>m</i> to height <i>H</i> stores <i>U<sub>e</sub></i>&nbsp;=&nbsp;<i>mgH</i>. Differentiate, and recognize that the rate at which the mass center climbs is itself a kinematic coefficient times the input speed. That defines the <strong>kinematic coefficient of elevation</strong> <i>f<sub>e</sub></i>:</p>
+  <div class="defn">
+    <strong>Elevation term (Eq.&nbsp;7.10):</strong>
+    <div class="eqn" role="img" aria-label="d U e d t equals m g f e times S i dot.">
+      dU<sub>e</sub>/dt = mg&middot;<span class="c">f<sub>e</sub></span>&middot;S&#775;<sub>i</sub>
+    </div>
+    where <i>f<sub>e</sub></i>&nbsp;=&nbsp;<i>dH</i>/d<i>S<sub>i</sub></i> is how fast the mass center rises per unit of input. It is found from the basic coefficients by projecting onto the &ldquo;up&rdquo; direction: <i>f<sub>e</sub></i>&nbsp;=&nbsp;<i>f<sub>gx</sub></i>cos&theta;<sub>e</sub>&nbsp;+&nbsp;<i>f<sub>gy</sub></i>sin&theta;<sub>e</sub>.
+  </div>
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>climbing stairs vs. walking a ramp</strong>. <i>f<sub>e</sub></i> is the &ldquo;steepness&rdquo; the input feels &mdash; how much height you gain per step of input. On a flat stretch (<i>f<sub>e</sub></i>&nbsp;=&nbsp;0) the elevation term vanishes no matter how fast you go; on a steep pitch a small input buys a lot of height, and the potential&#8209;energy term is large.</p>
+  </div>
+
+  <h3>Potential energy in a spring</h3>
+  <p>The energy stored in a linear spring is the area under its force&ndash;deflection line (Fig.&nbsp;7.5): a rectangle of preload plus a triangle from the stiffness. Integrating gives Eq.&nbsp;7.14, and differentiating that yields a strikingly clean rate:</p>
+  <div class="defn">
+    <strong>Spring term (Eq.&nbsp;7.15):</strong>
+    <div class="eqn" role="img" aria-label="d U s d t equals F s times f s times S i dot.">
+      dU<sub>s</sub>/dt = <span class="c">F<sub>s</sub></span>&middot;<span class="m">f<sub>s</sub></span>&middot;S&#775;<sub>i</sub>
+    </div>
+    <i>F<sub>s</sub></i> is the current spring force; <i>f<sub>s</sub></i>&nbsp;=&nbsp;<i>dr<sub>s</sub></i>/d<i>S<sub>i</sub></i> (Eq.&nbsp;7.16) is the <strong>kinematic coefficient of the spring</strong> &mdash; how fast the spring stretches per unit input. It is found from an <em>additional vector loop</em> that spans the spring (see Example&nbsp;7.2).
+  </div>
+  <p>The pattern is the same every time: a <strong>generalized force</strong> (<i>mg</i> for gravity, <i>F<sub>s</sub></i> for the spring) times a <strong>kinematic coefficient</strong> (<i>f<sub>e</sub></i> or <i>f<sub>s</sub></i>) times the input speed. Power = force&nbsp;&times;&nbsp;velocity, expressed in the input&rsquo;s coordinates.</p>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A car&rsquo;s hood or trunk that stays up on its own uses a gas spring sized so its <i>F<sub>s</sub>f<sub>s</sub></i> term nearly cancels the <i>mg f<sub>e</sub></i> term of the lid&rsquo;s weight throughout the swing &mdash; the lid feels weightless because the two potential&#8209;energy rates balance. Example&nbsp;7.2 analyzes exactly this kind of hood&#8209;lift spring.</p>
+  </div>
+</section>
+
+<!-- ============ FRICTION TERM ============ -->
+<section id="friction" aria-labelledby="fr-h">
+  <span class="sec-tag">7.1 &middot; Third term</span>
+  <h2 id="fr-h">Power dissipated by friction</h2>
+  <p>Friction always takes the same sign &mdash; it removes energy &mdash; but it comes in two flavors that are modeled differently: <strong>viscous damping</strong> (think fluid) and <strong>Coulomb friction</strong> (think dry rubbing).</p>
+
+  <h3>Viscous damping</h3>
+  <p>A linear damper (a dashpot, Fig.&nbsp;7.8) resists with a force proportional to <em>speed</em>: <i>F<sub>c</sub></i>&nbsp;=&nbsp;<i>cr&#775;<sub>c</sub></i> (Eq.&nbsp;7.19). Power dissipated is force times speed, so it goes as speed <em>squared</em>:</p>
+  <div class="defn">
+    <strong>Viscous power loss (from Eq.&nbsp;7.19):</strong>
+    <div class="eqn" role="img" aria-label="P f equals c r c dot squared equals c times f c squared times S i dot squared.">
+      P<sub>f</sub> = c r&#775;<sub>c</sub>&sup2; = c&middot;<span class="c">f<sub>c</sub>&sup2;</span>&middot;S&#775;<sub>i</sub>&sup2;
+    </div>
+    where <i>f<sub>c</sub></i>&nbsp;=&nbsp;<i>dr<sub>c</sub></i>/d<i>S<sub>i</sub></i> is the <strong>damper kinematic coefficient</strong>, found just like the spring&rsquo;s.
+  </div>
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>sticking your hand out a car window</strong>. At walking speed you barely feel the air; at highway speed it shoves your arm back hard. Viscous drag grows with the <em>square</em> of speed, which is why a damper is gentle when the machine creeps and fierce when it races &mdash; and why a screen door closer eases shut instead of slamming.</p>
+  </div>
+
+  <h3>Coulomb (dry) friction &mdash; depends on the joint</h3>
+  <p>Dry friction at a joint dissipates power equal to the friction force or torque times the <em>rubbing</em> velocity at that joint. The exact expression depends on the joint type (these tie back to the friction analysis of Chapter&nbsp;6):</p>
+  <table>
+    <caption>Coulomb friction power loss by joint type (Eqs. 7.20&ndash;7.22)</caption>
+    <thead><tr><th>Joint</th><th class="mono">P<sub>f</sub></th><th>What rubs</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pin joint</strong></td><td class="mono">t<sub>yx</sub> &omega;<sub>yx</sub></td><td>friction torque &times; relative angular velocity</td></tr>
+      <tr><td><strong>Pin&#8209;in&#8209;a&#8209;slot</strong></td><td class="mono">f<sub>yx</sub> v<sub>cy/cx</sub> + t<sub>yx</sub> &omega;<sub>yx</sub></td><td>both sliding <em>and</em> turning rub</td></tr>
+      <tr><td><strong>Straight sliding</strong></td><td class="mono">f<sub>yx</sub> v<sub>cy/cx</sub></td><td>friction force &times; relative sliding velocity</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <span class="h">Why friction is the hard term</span>
+    <p style="margin:.4em 0 0">Unlike the KE and PE terms, the friction <em>forces and torques</em> aren&rsquo;t known up front &mdash; they depend on the joint loads, which depend on the motion, which depends on the friction&hellip; a circular dependency. As &sect;7.3 shows, including joint friction in a simulation requires an iterative inverse&#8209;dynamics solve at <em>every</em> time step. That is why many first&#8209;pass analyses set friction aside and add it later.</p>
+  </div>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>The two friction types feel completely different in your hands. A quality door damper (viscous) gets stiffer the faster you push &mdash; you can&rsquo;t slam it. A rusty hinge (Coulomb) takes a constant hard shove to break free and then drags evenly regardless of speed, often with a squeal. Designers exploit the difference: viscous dampers to absorb shock smoothly, Coulomb friction (brakes, clutches) to hold or stop with a predictable, speed&#8209;independent force.</p>
+  </div>
+</section>
+<!-- ============ 7.2 INVERSE DYNAMICS ============ -->
+<section id="idp" aria-labelledby="idp-h">
+  <span class="sec-tag">Section 7.2</span>
+  <h2 id="idp-h">7.2 &middot; The power equation &amp; the inverse dynamics problem</h2>
+  <p>Recall the two faces of machine dynamics. In the <strong>inverse dynamics problem (IDP)</strong> the motion is <em>known</em> &mdash; you have prescribed <i>S<sub>i</sub></i>, <i>S&#775;<sub>i</sub></i>, and <i>S&#776;<sub>i</sub></i> &mdash; and you want the one unknown force or torque, usually the <strong>driver</strong> that must be supplying the power.</p>
+
+  <div class="defn">
+    <strong>The IDP with the power equation:</strong> the unknown driver appears <em>linearly</em> inside <i>P</i>. Because everything else (the motion, hence all three right&#8209;hand terms) is known, the power equation becomes one linear equation in one unknown &mdash; just solve for the driver.
+  </div>
+
+  <p>A <strong>prime mover</strong> is whatever supplies the power to the input: an electric motor, an engine, a hydraulic cylinder, a solenoid. In the IDP you are effectively asking, &ldquo;given that I want the machine to move <em>this</em> way, how big a prime mover do I need?&rdquo;</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;reading a <strong>recipe backwards</strong>. Forward dynamics is &ldquo;I have these ingredients (forces) &mdash; what cake comes out (motion)?&rdquo; Inverse dynamics is &ldquo;I want <em>this</em> cake (a prescribed motion) &mdash; what ingredients (driver torque) does it take?&rdquo; The inverse question is usually the easier one, because once the motion is fixed, the power bookkeeping is just arithmetic.</p>
+  </div>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Sizing a motor is pure inverse dynamics. An elevator engineer specifies the desired motion profile &mdash; accelerate, cruise, decelerate &mdash; for a full car, then uses the power balance to find the peak power the hoist motor must deliver. Robot&#8209;joint motors, conveyor drives, and CNC spindle motors are all sized the same way: prescribe the motion, solve the power equation for the driver.</p>
+  </div>
+</section>
+
+<!-- ============ 7.3 FORWARD DYNAMICS ============ -->
+<section id="fdp" aria-labelledby="fdp-h">
+  <span class="sec-tag">Section 7.3</span>
+  <h2 id="fdp-h">7.3 &middot; The power equation &amp; the forward dynamics problem</h2>
+  <p>The <strong>forward dynamics problem (FDP)</strong> is the hard, interesting one: the driver is <em>known</em> and you want the resulting <strong>motion</strong> &mdash; <i>S<sub>i</sub></i> as a function of time. Substitute the kinetic&#8209;energy term (Eq.&nbsp;7.6) into the power equation and you get a differential equation:</p>
+  <div class="defn">
+    <strong>The FDP equation (Eq.&nbsp;7.35):</strong>
+    <div class="eqn" role="img" aria-label="P equals the sum of A times S i dot S i double dot plus the sum of B times S i dot cubed plus d U d t plus P f.">
+      P = (&Sigma;A)S&#775;<sub>i</sub>S&#776;<sub>i</sub> + (&Sigma;B)S&#775;<sub>i</sub>&sup3; + dU/dt + P<sub>f</sub>
+    </div>
+    Solve this for <i>S&#776;<sub>i</sub></i> and you have the acceleration at any instant. Integrate twice and you have the motion.
+  </div>
+
+  <p>Two facts make this genuinely difficult. First, you need <strong>initial conditions</strong> &mdash; the starting position and speed: <i>S<sub>i</sub></i>(t<sub>0</sub>)&nbsp;=&nbsp;<i>S<sub>i<sub>0</sub></sub></i> and <i>S&#775;<sub>i</sub></i>(t<sub>0</sub>)&nbsp;=&nbsp;<i>S&#775;<sub>i<sub>0</sub></sub></i>. Second, and more troubling, the equation contains <strong>products of <i>S<sub>i</sub></i> and <i>S&#775;<sub>i</sub></i></strong> (and <i>S&#775;<sub>i</sub>&sup3;</i>), so it is <strong>nonlinear</strong>. There is no tidy formula for the answer &mdash; it must be solved <em>numerically</em>.</p>
+
+  <div class="callout">
+    <span class="h">Linear vs. nonlinear &mdash; why it matters</span>
+    <p style="margin:.4em 0 0">A linear ODE has clean closed&#8209;form solutions (sines, exponentials). The FDP equation&rsquo;s coefficients (<i>I<sub>e</sub></i>, <i>dI<sub>e</sub>/dS<sub>i</sub></i>) <em>change with position</em>, and terms multiply each other. That is the signature of a nonlinear system &mdash; powerful and realistic, but only solvable by marching forward step by step.</p>
+  </div>
+</section>
+
+<!-- ============ EULER & FLYWHEELS ============ -->
+<section id="euler" aria-labelledby="eu-h">
+  <span class="sec-tag">7.3 &middot; Numerical solution</span>
+  <h2 id="eu-h">Euler&rsquo;s method, time steps &amp; flywheels</h2>
+  <p><strong>Euler&rsquo;s method</strong> is the simplest way to march a differential equation forward in time. Its one assumption: over a small enough step &Delta;t, the acceleration is <em>constant</em>. That turns calculus into arithmetic.</p>
+
+  <div class="defn">
+    <strong>Euler update (Eqs.&nbsp;7.36&ndash;7.39):</strong> assume <i>S&#776;<sub>i</sub></i>&nbsp;=&nbsp;<i>S&#776;<sub>i<sub>0</sub></sub></i> (constant over the step), then
+    <div class="eqn" role="img" aria-label="Delta S i dot equals S i double dot times delta t. Delta S i equals S i dot times delta t plus one half S i double dot delta t squared. Then add the changes to the initial values.">
+      &Delta;S&#775;<sub>i</sub> = S&#776;<sub>i<sub>0</sub></sub>&Delta;t &nbsp;&middot;&nbsp; &Delta;S<sub>i</sub> = S&#775;<sub>i<sub>0</sub></sub>&Delta;t + &frac12;S&#776;<sub>i<sub>0</sub></sub>&Delta;t&sup2;
+    </div>
+    <div class="eqn" role="img" aria-label="New S i dot equals old S i dot plus Delta S i dot. New S i equals old S i plus Delta S i.">
+      S&#775;<sub>i</sub> = S&#775;<sub>i<sub>0</sub></sub> + &Delta;S&#775;<sub>i</sub> &nbsp;&middot;&nbsp; S<sub>i</sub> = S<sub>i<sub>0</sub></sub> + &Delta;S<sub>i</sub>
+    </div>
+  </div>
+  <p>The recipe for one step: (1) solve the FDP equation for the acceleration at the current state; (2) assume it holds over &Delta;t; (3) update velocity and position; (4) repeat. Each step uses only what you know at its <em>start</em> &mdash; that is what makes Euler so easy to program.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>navigating by dead reckoning</strong>. A sailor without GPS notes the current heading and speed, assumes they hold for the next few minutes, plots a short straight line, then re&#8209;checks and repeats. Each leg is a tiny straight approximation of a curved path. Shorter legs (smaller &Delta;t) hug the true curve more faithfully; longer legs drift off. Euler&rsquo;s method is dead reckoning for a differential equation.</p>
+  </div>
+
+  <h3>Choosing the time step</h3>
+  <p>How small should &Delta;t be? Small enough that the &ldquo;constant acceleration&rdquo; lie stays believable. The textbook&rsquo;s rule of thumb works on the <em>change in the input</em> per step, &Delta;S<sub>i</sub>:</p>
+  <ul class="clean">
+    <li>If <i>S<sub>i</sub></i> is an angle &theta;<sub>i</sub>, keep <strong>&Delta;&theta;<sub>i</sub> &le; 5&deg;</strong> per step.</li>
+    <li>If <i>S<sub>i</sub></i> is a length <i>r<sub>i</sub></i>, keep <strong>&Delta;r<sub>i</sub> &le; 2%</strong> of the longest link length per step.</li>
+  </ul>
+  <p>Rather than guess &Delta;t and check &Delta;S<sub>i</sub> afterward, it is cleaner to <em>choose</em> &Delta;S<sub>i</sub> and back&#8209;solve for the matching &Delta;t (Eq.&nbsp;7.40):</p>
+  <div class="eqn" role="img" aria-label="Delta t equals negative S i dot naught plus or minus the square root of S i dot naught squared plus 2 S i double dot naught times Delta S i, all over S i double dot naught.">
+    &Delta;t = [ &minus;S&#775;<sub>i<sub>0</sub></sub> &plusmn; &radic;(S&#775;<sub>i<sub>0</sub></sub>&sup2; + 2S&#776;<sub>i<sub>0</sub></sub>&Delta;S<sub>i</sub>) ] / S&#776;<sub>i<sub>0</sub></sub>
+    <span class="lbl">solve &Delta;S = S&#775;&Delta;t + &frac12;S&#776;&Delta;t&sup2;  for &Delta;t</span>
+  </div>
+  <div class="callout">
+    <span class="h">The accuracy&ndash;cost trade</span>
+    <p style="margin:.4em 0 0">Halve &Delta;t and the path follows the truth more closely &mdash; but you double the number of steps and the computation time. Every numerical analyst lives on this trade&#8209;off. Euler is first&#8209;order accurate, so error shrinks only in proportion to &Delta;t; higher&#8209;order methods (Runge&ndash;Kutta, or the <em>modified</em> Euler in the videos) buy more accuracy per step at more arithmetic per step.</p>
+  </div>
+
+  <h3>Including joint friction: iterate each step</h3>
+  <p>Friction makes the march trickier. The rubbing velocities are easy &mdash; you know them at the start of each step. The friction <em>forces and torques</em> are not, because they come from a force analysis that itself needs the acceleration you&rsquo;re trying to find. The fix is a successive&#8209;iteration loop <em>within</em> each time step:</p>
+  <div class="card">
+    <ol style="margin:.3em 0 0; padding-left:1.4em; line-height:1.7">
+      <li>Assume the friction terms are zero (first step) or carry them over from the previous step.</li>
+      <li>Solve the FDP for the acceleration from the power equation.</li>
+      <li>Use that acceleration in an IDP / force analysis to compute new friction terms.</li>
+      <li>Feed the updated friction back into the FDP for a refined acceleration.</li>
+      <li>Repeat steps&nbsp;3&ndash;4 until the friction and acceleration <strong>converge</strong>.</li>
+      <li>Advance to the next time step, seeding it with the converged friction.</li>
+    </ol>
+  </div>
+  <p>Step by step, with an inner convergence loop at each, you build a simulation that honestly includes joint friction.</p>
+
+  <h3>Steady state, the coefficient of variation, and flywheels</h3>
+  <p>Run an engine&#8209;driven mechanism long enough and it settles into a repeating cycle whose speed still <em>wobbles</em> within each revolution &mdash; faster on the power stroke, slower against the load. Two results from the FDP examples matter in practice:</p>
+  <div class="grid2">
+    <div class="defn" style="margin:8px 0">
+      <strong>Coefficient of variation <i>C<sub>f</sub></i></strong> quantifies that wobble:
+      <div class="eqn" role="img" aria-label="C f equals omega max minus omega min over omega average.">C<sub>f</sub> = (&omega;<sub>max</sub> &minus; &omega;<sub>min</sub>) / &omega;<sub>avg</sub></div>
+      Smaller <i>C<sub>f</sub></i> = smoother running.
+    </div>
+    <div class="defn" style="margin:8px 0">
+      <strong>A flywheel</strong> is a cylindrical mass added to the input crank or output shaft. By raising the equivalent inertia <i>I<sub>e</sub></i>, it stores energy on the fast part of the cycle and gives it back on the slow part &mdash; cutting <i>C<sub>f</sub></i>.
+    </div>
+  </div>
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>heavy potter&rsquo;s wheel</strong>. You kick it once and it coasts smoothly for many seconds, smoothing your uneven kicks into steady rotation. A light wheel would lurch with every push. The flywheel&rsquo;s mass is a buffer that averages out the lumpy power &mdash; exactly what it does for a one&#8209;cylinder engine, a punch press, or a sewing machine.</p>
+  </div>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>The big disc you see on an old stationary engine or behind a punch press <em>is</em> the flywheel. A punch press loafs along storing energy in the flywheel, then dumps a huge burst of it during the split&#8209;second punch &mdash; letting a small motor do a big job. The same physics tames torque pulses in every piston engine, and grid&#8209;scale flywheels even buffer power on electrical networks.</p>
+  </div>
+
+  <!-- TOOL 3: Flywheel / Euler simulator -->
+  <div class="card tool" id="flyTool">
+    <div class="tool-label">Tool 3 <span>&middot; Forward-Euler flywheel simulator</span></div>
+    <h3 style="margin-top:.3em">Watch a machine settle &mdash; and a flywheel smooth it</h3>
+    <p>This runs a real Euler time&#8209;stepping loop on a shaft driven by a steady motor torque against a once&#8209;per&#8209;revolution load pulse (like a single&#8209;cylinder engine or a press). Add flywheel inertia and watch the speed trace flatten and the coefficient of variation <i>C<sub>f</sub></i> drop. Shrink &Delta;t and watch the integration tighten.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="flyFly">Flywheel inertia <span class="val" id="flyFlyv"></span></label>
+        <input type="range" id="flyFly" min="0" max="6" value="0.5" step="0.1">
+      </div>
+      <div class="ctrl">
+        <label for="flyLoad">Load pulse size <span class="val" id="flyLoadv"></span></label>
+        <input type="range" id="flyLoad" min="0" max="100" value="55" step="1">
+      </div>
+      <div class="ctrl">
+        <label for="flyDt">Time step &Delta;t <span class="val" id="flyDtv"></span></label>
+        <input type="range" id="flyDt" min="1" max="40" value="12" step="1">
+      </div>
+    </div>
+    <div class="controls">
+      <button id="flyRun" type="button" aria-pressed="false">&#9654; Run simulation</button>
+      <button id="flyReset" type="button" class="secondary">Reset</button>
+      <span class="legend"><span><i style="background:var(--accent)"></i>shaft speed &omega;</span><span><i style="background:var(--accent-2)"></i>load pulse</span></span>
+    </div>
+    <div class="stage-wrap">
+      <svg id="flyChart" class="stage" viewBox="0 0 640 300" role="img" aria-label="Plot of shaft angular speed over several revolutions, with the load pulse overlaid."></svg>
+    </div>
+    <div class="readout" id="flyOut" aria-live="polite"></div>
+    <p class="figref">Model: I<sub>e</sub>&omega;&#775; = T<sub>motor</sub> &minus; T<sub>load</sub>(&theta;), integrated by forward Euler. Total inertia = base shaft + flywheel. C<sub>f</sub> is measured over the last full revolution.</p>
+  </div>
+</section>
+
+<!-- ============ 7.4 MECHANICAL ADVANTAGE ============ -->
+<section id="ma" aria-labelledby="ma-h">
+  <span class="sec-tag">Section 7.4</span>
+  <h2 id="ma-h">7.4 &middot; Mechanical advantage</h2>
+  <p>Every machine has a <strong>driver</strong> that supplies effort and a <strong>load</strong> that resists. The driver provides either a torque (a motor) or a force (a solenoid, a hydraulic cylinder); we call it <i>D</i>. The load resists either the rotation of a shaft or the motion of a point; we call it <i>L</i>.</p>
+  <div class="defn">
+    <strong>Mechanical advantage (Eq.&nbsp;7.46):</strong>
+    <div class="eqn" role="img" aria-label="M a equals L over D, that is L equals M a times D.">
+      M<sub>a</sub> = L / D &nbsp;&nbsp;&rarr;&nbsp;&nbsp; L = M<sub>a</sub>D
+    </div>
+    <i>M<sub>a</sub></i> is synonymous with <strong>leverage</strong>: how big a load the driver can overcome. Its units depend on the units of <i>L</i> and <i>D</i> (it can be dimensionless, a length, or a 1/length).
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>crowbar</strong>. Push down on the long end with a small force; the short end lifts a huge load. The mechanical advantage is the ratio of the load you move to the effort you spend. A bottle&#8209;jack, a pair of bolt cutters, a nutcracker, a gear reduction &mdash; all trade speed for force, and <i>M<sub>a</sub></i> is the exchange rate.</p>
+  </div>
+
+  <h3>Finding M<sub>a</sub> with the power equation</h3>
+  <p>You <em>could</em> find <i>M<sub>a</sub></i> by a full force analysis &mdash; but the power equation gives a slicker route. The trick: at the instant of interest, write the total power as driver power minus load power, set it to zero (an idealized, lossless, quasi&#8209;static balance), and the input speed cancels, leaving <i>M<sub>a</sub></i> in pure kinematic&#8209;coefficient terms.</p>
+  <div class="card">
+    <h4 style="margin-top:0">Procedure for the mechanical advantage of a mechanism</h4>
+    <ol style="margin:.3em 0 0; padding-left:1.4em; line-height:1.7">
+      <li>Solve the position problem; find the basic first&#8209;order kinematic coefficients.</li>
+      <li>Express the coefficients of the <em>points of application</em> of any driving or load forces in terms of the basic ones.</li>
+      <li>Express the angular velocity of any body carrying a driving/load <em>torque</em> via the coefficients and the input speed <i>S&#775;<sub>i</sub></i>.</li>
+      <li>Express the linear velocity of the points of application of any driver/load <em>forces</em> via their coefficients and <i>S&#775;<sub>i</sub></i>.</li>
+      <li>Write the total power <i>P</i>, substituting the first&#8209;order coefficients.</li>
+      <li>Set <i>P</i>&nbsp;=&nbsp;0 and solve for <i>M<sub>a</sub></i>.</li>
+    </ol>
+  </div>
+  <p>Because the coefficients change as the mechanism moves, <i>M<sub>a</sub></i> is generally a <strong>function of position</strong> &mdash; and at special configurations it can swing to <strong>zero or infinity</strong> (a toggle). That tunable leverage is the whole reason linkages exist.</p>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A vise&#8209;grip or toggle clamp drives its <i>M<sub>a</sub></i> toward infinity as the links line up &mdash; a modest hand force becomes a near&#8209;unbreakable clamping force right at the locked position. Knee&#8209;joint exercise machines, rock&#8209;crushers, and stamping presses all park their working stroke near a high&#8209;<i>M<sub>a</sub></i> toggle to multiply force where it counts.</p>
+  </div>
+
+  <!-- TOOL 4: Mechanical advantage explorer (lever + efficiency) -->
+  <div class="card tool" id="maTool">
+    <div class="tool-label">Tool 4 <span>&middot; Mechanical advantage &amp; efficiency explorer</span></div>
+    <h3 style="margin-top:.3em">Trade force for distance &mdash; and pay the friction tax</h3>
+    <p>A lever is the simplest mechanism with a tunable <i>M<sub>a</sub></i>. Move the fulcrum to change the leverage; the ideal <i>M<sub>a</sub></i> is the ratio of arm lengths. Then dial in an efficiency &eta; and watch the <em>actual</em> load fall short of the ideal &mdash; the friction tax of &sect;7.5.</p>
+    <div class="stage-wrap">
+      <svg id="maStage" class="stage" viewBox="0 0 620 280" role="img" aria-label="A lever pivoting on a movable fulcrum, with effort on one side and load on the other."></svg>
+    </div>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="maFul">Fulcrum position <span class="val" id="maFulv"></span></label>
+        <input type="range" id="maFul" min="15" max="85" value="30" step="1">
+      </div>
+      <div class="ctrl">
+        <label for="maEff">Efficiency &eta; <span class="val" id="maEffv"></span></label>
+        <input type="range" id="maEff" min="40" max="100" value="100" step="1">
+      </div>
+      <div class="ctrl">
+        <label for="maDrive">Driver force D <span class="val" id="maDrivev"></span></label>
+        <input type="range" id="maDrive" min="10" max="100" value="50" step="1">
+      </div>
+    </div>
+    <div class="readout" id="maOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============ 7.5 EFFICIENCY ============ -->
+<section id="eff" aria-labelledby="ef-h">
+  <span class="sec-tag">Section 7.5</span>
+  <h2 id="ef-h">7.5 &middot; Efficiency &amp; mechanical advantage</h2>
+  <p>The <i>M<sub>a</sub></i> we just computed assumed <strong>no friction</strong> &mdash; it is the <em>ideal</em> leverage. A real machine never reaches it: friction eats some of the driver&rsquo;s effort, so the load you can actually move is smaller. That shortfall <em>is</em> the efficiency.</p>
+
+  <div class="defn">
+    <strong>Efficiency as a ratio of mechanical advantages:</strong>
+    <div class="eqn" role="img" aria-label="eta equals M a actual over M a ideal.">
+      &eta; = M<sub>a,actual</sub> / M<sub>a,ideal</sub>
+    </div>
+    Any inefficiency shows up as a <em>reduction in mechanical advantage</em>. Equivalently (Eq.&nbsp;7.86), the actual load is the ideal load scaled by &eta;:
+    <div class="eqn" role="img" aria-label="L actual equals eta times M a times D.">L<sub>actual</sub> = &eta; M<sub>a</sub> D</div>
+  </div>
+
+  <p>This is a beautiful unification: rather than treating &ldquo;leverage&rdquo; and &ldquo;losses&rdquo; as separate ideas, &sect;7.5 says efficiency simply <em>discounts</em> the mechanical advantage. A 90%&#8209;efficient hoist delivers 90% of its ideal lift for a given input &mdash; the missing 10% became heat in the bearings and gear teeth.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>currency exchange with a fee</strong>. The posted rate is your ideal mechanical advantage; the teller&rsquo;s commission is the friction. You hand over your dollars (driver effort) and the rate <em>says</em> you should get a certain amount &mdash; but after the fee you walk away with &eta; times that. Same transaction, smaller payout. The fee is unavoidable; good design just keeps it small.</p>
+  </div>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Efficiency ratings are everywhere once you look: a worm&#8209;gear reducer might be only 50&ndash;70% efficient (and deliberately so &mdash; the losses make it self&#8209;locking), while a quality spur&#8209;gear set tops 98%. A car&rsquo;s drivetrain, a bicycle&rsquo;s chain (~95&ndash;98%), a hydraulic press &mdash; every spec sheet quotes an &eta; that is exactly this ratio of actual to ideal mechanical advantage. Use Tool&nbsp;4 above to feel how &eta; shaves the deliverable load.</p>
+  </div>
+</section>
+<!-- ============ WORKED EXAMPLES ============ -->
+<section id="examples" aria-labelledby="ex-h">
+  <span class="sec-tag">Worked Examples</span>
+  <h2 id="ex-h">Worked examples</h2>
+  <p>Three examples from the textbook, each stepped through one idea at a time. Use the buttons to move between steps; the goal is to see <em>how</em> the pieces of &sect;7.1&ndash;&sect;7.4 assemble, not to memorize algebra.</p>
+
+  <!-- Example 7.1 -->
+  <div class="card" id="ex71">
+    <h3 style="margin-top:.2em">Example 7.1 &mdash; Kinematic coefficient of elevation <span class="pill p1">PE term</span></h3>
+    <p><strong>Problem.</strong> A four&#8209;bar linkage has a coupler (body&nbsp;3) with mass center at <i>G</i><sub>3</sub>. Find the kinematic coefficient of elevation, <i>f<sub>e</sub></i>, for body&nbsp;3 &mdash; the number you need for that body&rsquo;s potential&#8209;energy term <i>mg f<sub>e</sub>S&#775;<sub>i</sub></i>.</p>
+    <div class="stepper" id="ex71dots" role="list" aria-label="Example 7.1 steps"></div>
+    <div class="step-body" id="ex71body" aria-live="polite"></div>
+    <div class="step-nav">
+      <button id="ex71Prev" type="button" class="secondary">&larr; Prev</button>
+      <button id="ex71Next" type="button">Next &rarr;</button>
+      <span class="step-count" id="ex71count"></span>
+    </div>
+  </div>
+
+  <!-- Example 7.2 -->
+  <div class="card" id="ex72">
+    <h3 style="margin-top:.2em">Example 7.2 &mdash; Kinematic coefficient of a spring <span class="pill p1">PE term</span></h3>
+    <p><strong>Problem.</strong> A spring connects a moving point on body&nbsp;3 to a fixed point on the frame in a six&#8209;bar hood&#8209;lift linkage (textbook Fig.&nbsp;1.13). Find the spring&rsquo;s kinematic coefficient <i>f<sub>s</sub></i> for a given input angle &theta;<sub>2</sub>, so you can evaluate the spring term <i>F<sub>s</sub>f<sub>s</sub>S&#775;<sub>i</sub></i>.</p>
+    <div class="stepper" id="ex72dots" role="list" aria-label="Example 7.2 steps"></div>
+    <div class="step-body" id="ex72body" aria-live="polite"></div>
+    <div class="step-nav">
+      <button id="ex72Prev" type="button" class="secondary">&larr; Prev</button>
+      <button id="ex72Next" type="button">Next &rarr;</button>
+      <span class="step-count" id="ex72count"></span>
+    </div>
+  </div>
+
+  <!-- Example 7.10 -->
+  <div class="card" id="ex710">
+    <h3 style="margin-top:.2em">Example 7.10 &mdash; Mechanical advantage of a wrench <span class="pill p2">MA procedure</span></h3>
+    <p><strong>Problem.</strong> A wrench of length <i>r</i><sub>2</sub> turns a seated bolt. A driving force <i>F<sub>driver</sub></i> is applied at the handle; a resisting load torque <i>T<sub>load</sub></i> opposes turning. Use the six&#8209;step power&#8209;equation procedure to find <i>M<sub>a</sub></i> &mdash; you can already sense the answer is <i>M<sub>a</sub></i>&nbsp;=&nbsp;<i>r</i><sub>2</sub>.</p>
+    <div class="stepper" id="ex710dots" role="list" aria-label="Example 7.10 steps"></div>
+    <div class="step-body" id="ex710body" aria-live="polite"></div>
+    <div class="step-nav">
+      <button id="ex710Prev" type="button" class="secondary">&larr; Prev</button>
+      <button id="ex710Next" type="button">Next &rarr;</button>
+      <span class="step-count" id="ex710count"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SELF-CHECK QUIZ ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Self-Check</span>
+  <h2 id="quiz-h">Check your understanding</h2>
+  <p>Eight questions across the whole chapter. Pick an answer to see instant feedback; choices are reshuffled each time. Running score: <span class="q-score" id="quizScore">0 / 0</span></p>
+  <div id="quizMount"></div>
+  <div class="controls" style="margin-top:14px">
+    <button id="quizReset" type="button" class="secondary">&#8635; Reset &amp; reshuffle</button>
+  </div>
+</section>
+
+<!-- ============ VIDEOS ============ -->
+<section id="videos" aria-labelledby="vid-h">
+  <span class="sec-tag">Video Lectures</span>
+  <h2 id="vid-h">Watch &amp; reinforce</h2>
+  <p>Six videos spanning the chapter: the energy&ndash;power balance that opens &sect;7.1, the Euler integration that solves the forward dynamics problem in &sect;7.3 (plain forward Euler plus the closely related <em>modified</em> Euler), and the mechanical&#8209;advantage and efficiency ideas of &sect;7.4&ndash;&sect;7.5.</p>
+  <p class="ext-note">Videos are hosted on YouTube and play in-page; an internet connection is required to view them.</p>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/Ima9w2eK8Dg?rel=0"
+        title="Energy Equation with a Pump – Example Problem"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Energy / power balance &mdash; worked example</h3>
+      <p style="margin:.3em 0 .2em">An energy&#8209;balance problem worked end&#8209;to&#8209;end, with a power input on one side and energy going to motion, height, and losses on the other. The same bookkeeping that becomes our power equation <i>P</i>&nbsp;=&nbsp;dT/dt&nbsp;+&nbsp;dU/dt&nbsp;+&nbsp;P<sub>f</sub>.</p>
+      <div class="video-tags"><span>Source: <b>Brian Bernard</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 7.1 Energy &amp; power balance</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/rjeSqqHowTg?rel=0"
+        title="Numerical Analysis - Forward Euler Method"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Forward Euler method &mdash; the core integrator</h3>
+      <p style="margin:.3em 0 .2em">The plain forward&#8209;Euler scheme exactly as &sect;7.3 uses it: assume the rate is constant over a small step, take the step, repeat. Watch how step size trades accuracy against work &mdash; the same dial as Tool&nbsp;3&rsquo;s &Delta;t slider.</p>
+      <div class="video-tags"><span>Source: <b>Engineering Made Easy</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 7.3 Euler&rsquo;s method</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="h">Notation bridge</span>
+    <p style="margin:.4em 0 0">The next two videos teach <em>modified</em> Euler (also called Heun&rsquo;s method or the improved Euler / predictor&ndash;corrector method). It first takes a plain Euler step, then averages the slope at the start and end of the step to correct it. It is a refinement of the &sect;7.3 method &mdash; map &ldquo;predictor&rdquo; onto our basic Euler update and &ldquo;corrector&rdquo; onto a slope average. The textbook&rsquo;s algorithm is the plain forward version in the video above.</p>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/AxfnHrsJhT4?rel=0"
+        title="Modified Euler's Method | Power system Stability | Power system Analysis"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Modified Euler&rsquo;s method &mdash; predictor&ndash;corrector</h3>
+      <p style="margin:.3em 0 .2em">Modified Euler applied to a swing&#8209;type equation (a nonlinear second&#8209;order ODE much like our FDP). A clear look at the predictor&ndash;corrector idea that improves on the basic step we use.</p>
+      <div class="video-tags"><span>Source: <b>Simple n Easy Learning</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 7.3 Euler&rsquo;s method (refinement)</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/ojqdArjGHQg?rel=0"
+        title="Modified Euler's method engineering mathematics"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Modified Euler&rsquo;s method &mdash; step-by-step arithmetic</h3>
+      <p style="margin:.3em 0 .2em">A fully worked numerical pass through modified Euler, showing the per&#8209;step table of values. Good for seeing exactly what a hand (or computer) computation looks like before you trust Tool&nbsp;3 to do it automatically.</p>
+      <div class="video-tags"><span>Source: <b>Civil learning online</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 7.3 Euler&rsquo;s method (worked)</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/FSv-2Y58lCk?rel=0"
+        title="The Mechanical Advantage Definitions You Need To Know"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Mechanical advantage &mdash; the definitions</h3>
+      <p style="margin:.3em 0 .2em">A plain&#8209;language tour of mechanical advantage &mdash; ideal vs. real, and how leverage multiplies force &mdash; that mirrors the <i>M<sub>a</sub></i>&nbsp;=&nbsp;<i>L</i>/<i>D</i> definition of &sect;7.4 and sets up the efficiency discount of &sect;7.5.</p>
+      <div class="video-tags"><span>Source: <b>TreeStuff.com</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 7.4 Mechanical advantage</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/0Emk7sdNO30?rel=0"
+        title="Mechanical Efficiency (Engineering Dynamics)"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Mechanical efficiency &mdash; the friction discount</h3>
+      <p style="margin:.3em 0 .2em">How efficiency relates output to input when friction takes its cut &mdash; the &eta;&nbsp;=&nbsp;M<sub>a,actual</sub>/M<sub>a,ideal</sub> idea of &sect;7.5. Pair it with Tool&nbsp;4&rsquo;s efficiency slider.</p>
+      <div class="video-tags"><span>Source: <b>Engineer4Free</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 7.5 Efficiency</span>
+    </div>
+  </div>
+
+  <p>After watching, return to the <a href="#flyTool">flywheel simulator</a> and reproduce the &Delta;t accuracy trade the Euler videos describe, then use the <a href="#maTool">mechanical-advantage explorer</a> to feel the efficiency discount.</p>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rc-h">
+  <span class="sec-tag">Quick Reference</span>
+  <h2 id="rc-h">Chapter 7 formula card</h2>
+  <p>Everything at a glance &mdash; good for review and exam prep. Use your browser&rsquo;s print function to save just this card (interactive tools and navigation are hidden when printing).</p>
+  <div class="refcard">
+    <div class="rc-head"><span>ENGI 216 &middot; CH 7 &middot; THE POWER EQUATION</span><span>power in = motion + storage + heat</span></div>
+    <div class="rc-body">
+      <div class="rc-grid">
+        <div class="rc-block">
+          <h4>Master balance</h4>
+          <div class="rc-eq">W = &Delta;T + &Delta;U + W<sub>f</sub> &nbsp;(7.1)</div>
+          <div class="rc-eq">P = dT/dt + dU/dt + P<sub>f</sub> &nbsp;(7.2)</div>
+          <h4>Kinetic term</h4>
+          <div class="rc-eq">dT/dt = I<sub>e</sub>S&#775;<sub>i</sub>S&#776;<sub>i</sub> + &frac12;(dI<sub>e</sub>/dS<sub>i</sub>)S&#775;<sub>i</sub>&sup3;</div>
+          <div class="rc-eq">I<sub>e</sub> = &Sigma;[m(f<sub>gx</sub>&sup2;+f<sub>gy</sub>&sup2;)+I<sub>g</sub>h&sup2;]</div>
+          <h4>Potential terms</h4>
+          <div class="rc-eq">elevation: dU<sub>e</sub>/dt = mg&middot;f<sub>e</sub>&middot;S&#775;<sub>i</sub> (7.10)</div>
+          <div class="rc-eq">spring: dU<sub>s</sub>/dt = F<sub>s</sub>&middot;f<sub>s</sub>&middot;S&#775;<sub>i</sub> (7.15)</div>
+        </div>
+        <div class="rc-block">
+          <h4>Friction term</h4>
+          <div class="rc-eq">viscous: P<sub>f</sub> = c f<sub>c</sub>&sup2; S&#775;<sub>i</sub>&sup2;</div>
+          <div class="rc-eq">pin: P<sub>f</sub> = t<sub>yx</sub>&omega;<sub>yx</sub> (7.20)</div>
+          <div class="rc-eq">slider: P<sub>f</sub> = f<sub>yx</sub>v<sub>cy/cx</sub> (7.22)</div>
+          <h4>Forward dynamics (FDP)</h4>
+          <div class="rc-eq">solve 7.35 for S&#776;<sub>i</sub>; nonlinear &rarr; numerical</div>
+          <div class="rc-eq">Euler: &Delta;S&#775;=S&#776;&Delta;t; &Delta;S=S&#775;&Delta;t+&frac12;S&#776;&Delta;t&sup2;</div>
+          <div class="rc-eq">step: &Delta;&theta;&le;5&deg; or &Delta;r&le;2% of longest link</div>
+          <h4>Smoothness / leverage</h4>
+          <div class="rc-eq">C<sub>f</sub> = (&omega;<sub>max</sub>&minus;&omega;<sub>min</sub>)/&omega;<sub>avg</sub>; flywheel &darr;C<sub>f</sub></div>
+          <div class="rc-eq">M<sub>a</sub> = L/D (7.46); &eta; = M<sub>a,act</sub>/M<sub>a,ideal</sub></div>
+        </div>
+      </div>
+      <h4 style="margin-top:14px">Reading the terms</h4>
+      <ul class="rc-list">
+        <li><span class="k">dT/dt</span> dominates in fast, low&#8209;friction machines (turbines)</li>
+        <li><span class="k">dU/dt</span> dominates when lifting loads or fighting springs (elevators, struts)</li>
+        <li><span class="k">P<sub>f</sub></span> dominates in slow, heavily loaded machines (screw jacks)</li>
+        <li><span class="k">IDP</span> motion known &rarr; solve linearly for the driver</li>
+        <li><span class="k">FDP</span> driver known &rarr; integrate for the motion</li>
+        <li><span class="k">M<sub>a</sub>&rarr;&infin;</span> toggle position (clamps, presses); &eta; always &lt; 1 in reality</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Glossary</span>
+  <h2 id="gl-h">Key terms</h2>
+  <p>Search or scroll. <span id="glossCount" class="ext-note"></span></p>
+  <div class="glossary-search">
+    <label for="glossInput" class="visually-hidden">Search glossary terms</label>
+    <input type="text" id="glossInput" placeholder="Search terms (e.g. equivalent inertia, flywheel, Euler)…" autocomplete="off">
+  </div>
+  <dl class="gloss-list" id="glossList"></dl>
+  <p class="gloss-empty" id="glossEmpty" hidden>No terms match your search.</p>
+</section>
+
+<!-- ============ EXTERNAL RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">External Resources</span>
+  <h2 id="res-h">Go deeper</h2>
+  <p>Curated links for supplementary and foundational study. All open in a new tab (indicated on each card).</p>
+  <div class="res-group">
+    <h3>Foundations &amp; refreshers</h3>
+    <div class="res-grid" id="resFound"></div>
+  </div>
+  <div class="res-group">
+    <h3>Power, energy &amp; the dynamics method</h3>
+    <div class="res-grid" id="resCore"></div>
+  </div>
+  <div class="res-group">
+    <h3>Numerical integration, flywheels &amp; leverage</h3>
+    <div class="res-grid" id="resVisual"></div>
+  </div>
+</section>
+
+<!-- ============ RECAP ============ -->
+<section id="recap" aria-labelledby="recap-h">
+  <span class="sec-tag">Objectives Recap</span>
+  <h2 id="recap-h">What you should now be able to do</h2>
+  <div class="card">
+    <ul class="clean">
+      <li><strong>Write</strong> a machine&rsquo;s energy balance and convert it to the power equation <i>P</i>&nbsp;=&nbsp;dT/dt&nbsp;+&nbsp;dU/dt&nbsp;+&nbsp;P<sub>f</sub>, and say which term dominates a given machine.</li>
+      <li><strong>Assemble</strong> the kinetic term from the equivalent inertia <i>I<sub>e</sub></i> and its rate <i>dI<sub>e</sub>/dS<sub>i</sub></i>.</li>
+      <li><strong>Form</strong> the potential&#8209;energy rates for elevation ( <i>mg f<sub>e</sub>S&#775;<sub>i</sub></i> ) and springs ( <i>F<sub>s</sub>f<sub>s</sub>S&#775;<sub>i</sub></i> ), and the friction power for viscous and Coulomb joints.</li>
+      <li><strong>Distinguish</strong> the inverse dynamics problem (solve linearly for the driver) from the forward dynamics problem (integrate for the motion).</li>
+      <li><strong>Integrate</strong> the nonlinear FDP with Euler&rsquo;s method, choose &Delta;t sensibly, and iterate for joint friction.</li>
+      <li><strong>Use</strong> a flywheel to cut the coefficient of variation <i>C<sub>f</sub></i>, and <strong>compute</strong> mechanical advantage <i>M<sub>a</sub></i> and its efficiency discount &eta;.</li>
+    </ul>
+  </div>
+
+  <h3>References &amp; attribution</h3>
+  <ul class="refs">
+    <li>Stani&scaron;i&cacute;, M. M. <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis.</em> Cengage Learning, 2015 &mdash; Chapter&nbsp;7 (source for Equations&nbsp;7.1&ndash;7.86 and Examples&nbsp;7.1, 7.2, 7.10).</li>
+    <li>Equation numbers in dark callouts (e.g. 7.2, 7.6, 7.35, 7.46) follow the textbook&rsquo;s numbering for cross-reference.</li>
+    <li>Videos are independently produced and hosted on YouTube; they are embedded for educational reinforcement and credited to their creators on each card.</li>
+    <li>Interactive tools, analogies, and real-world examples were built for this ENGI&nbsp;216 module and are original to it.</li>
+  </ul>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Lecture progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+    <span class="ext-note" id="readpct" aria-live="off">0%</span>
+  </div>
+</div>
+
+<footer class="site">
+  <p>Built for <span class="program">ENGI 216 &middot; Dynamics &amp; Kinematics of Machines and Mechanisms</span> &middot; Brookdale Community College &middot; <span class="year">2026</span></p>
+  <p class="ext-note">Chapter 7 of 8 &middot; Engineering-blueprint module series &middot; Self-contained, offline-capable except for YouTube video embeds.</p>
+</footer>
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var n = document.createElementNS(SVGNS, tag);
+    if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); }
+    return n;
+  }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#000";
+  }
+  function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+  function txt(stage,x,y,s,color,size,anchor,weight){
+    var t=el("text",{x:x,y:y,fill:color||cssVar('--ink'),"font-size":size||12,"text-anchor":anchor||"middle"});
+    if(weight) t.setAttribute("font-weight",weight);
+    t.textContent=s; stage.appendChild(t); return t;
+  }
+  function circle(stage,cx,cy,r,stroke,w,fill){
+    stage.appendChild(el("circle",{cx:cx,cy:cy,r:r,fill:fill||"none",stroke:stroke,"stroke-width":w||2}));
+  }
+  function line(stage,x1,y1,x2,y2,color,w,dash){
+    var o={x1:x1,y1:y1,x2:x2,y2:y2,stroke:color,"stroke-width":w||2};
+    if(dash) o["stroke-dasharray"]=dash;
+    stage.appendChild(el("line",o));
+  }
+  function rect(stage,x,y,w,h,fill,stroke,sw){
+    var o={x:x,y:y,width:w,height:h,fill:fill||"none"};
+    if(stroke){ o.stroke=stroke; o["stroke-width"]=sw||1.5; }
+    stage.appendChild(el("rect",o));
+  }
+  function pin(stage,x,y){
+    stage.appendChild(el("circle",{cx:x,cy:y,r:5,fill:cssVar('--panel'),stroke:cssVar('--ink'),"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:x,cy:y,r:1.6,fill:cssVar('--ink')}));
+  }
+  function groundHatch(stage,x,y,w){
+    line(stage,x-w/2,y,x+w/2,y,cssVar('--ink-soft'),2);
+    var g=el("g",{stroke:cssVar('--ink-soft'),"stroke-width":1.4});
+    for(var i=-w/2;i<=w/2;i+=8){ g.appendChild(el("line",{x1:x+i,y1:y,x2:x+i-7,y2:y+9})); }
+    stage.appendChild(g);
+  }
+  function degTxt(d){ return Math.round(d)+"\u00B0"; }
+  function arrow(stage,x1,y1,x2,y2,color,w){
+    line(stage,x1,y1,x2,y2,color,w||2.5);
+    var a=Math.atan2(y2-y1,x2-x1), h=9;
+    var p=el("polygon",{points:[
+      x2+","+y2,
+      (x2-h*Math.cos(a-0.4))+","+(y2-h*Math.sin(a-0.4)),
+      (x2-h*Math.cos(a+0.4))+","+(y2-h*Math.sin(a+0.4))
+    ].join(" "), fill:color});
+    stage.appendChild(p);
+  }
+
+  /* ============================================================
+     TOOL 1 · POWER-BALANCE EXPLORER
+     Bars for dT/dt, dU/dt, P_f and the resulting P = sum.
+     ============================================================ */
+  (function(){
+    var stage=$("pbStage"); if(!stage) return;
+    var W=640,H=300, base=H-60, x0=70, slot=120;
+    function bar(cx,val,scale,color,label){
+      var h=val*scale;
+      var y=(h>=0)?(base-h):base;
+      rect(stage,cx-34,y,68,Math.abs(h),color,cssVar('--ink-soft'),1);
+      txt(stage,cx,base+20,label,cssVar('--ink'),12,"middle","700");
+      txt(stage,cx,(h>=0?y-8:y+Math.abs(h)+16),(val>=0?"+":"")+val,color,13,"middle","700");
+    }
+    function render(){
+      clear(stage);
+      var ke=+$("pbKE").value, pe=+$("pbPE").value, fr=+$("pbF").value;
+      $("pbKEv").textContent=(ke>=0?"+":"")+ke;
+      $("pbPEv").textContent=(pe>=0?"+":"")+pe;
+      $("pbFv").textContent="+"+fr;
+      var P=ke+pe+fr;
+      var maxv=Math.max(120, Math.abs(ke),Math.abs(pe),Math.abs(fr),Math.abs(P))*1.05;
+      var scale=(base-30)/maxv;
+      // zero axis
+      line(stage,40,base,W-20,base,cssVar('--ink-soft'),1.5);
+      txt(stage,30,base+4,"0",cssVar('--ink-soft'),11,"end");
+      bar(x0+slot*0,ke,scale,cssVar('--accent'),"dT/dt");
+      bar(x0+slot*1,pe,scale,cssVar('--accent-2'),"dU/dt");
+      bar(x0+slot*2,fr,scale,cssVar('--warn'),"P_f");
+      // total bar (offset, highlighted)
+      var cx=x0+slot*3+20;
+      line(stage,cx-58,30,cx-58,base+30,cssVar('--panel-line'),1,"4 4");
+      bar(cx,P,scale,cssVar('--good'),"P (in)");
+      txt(stage,W/2,20,"P  =  dT/dt  +  dU/dt  +  P_f",cssVar('--ink'),13,"middle","700");
+      // dominance
+      var dom="kinetic", dv=Math.abs(ke);
+      if(Math.abs(pe)>dv){dom="potential";dv=Math.abs(pe);}
+      if(Math.abs(fr)>dv){dom="friction";dv=Math.abs(fr);}
+      var note = P<0
+        ? "Net power is <b>negative</b> \u2014 the machine is <b>returning</b> power to its driver (e.g. a descending load or relaxing spring overhauling the motor)."
+        : "The motor must supply <b>P = "+P+"</b> units of power right now.";
+      $("pbOut").innerHTML = note + " Dominant term: <b>"+dom+"</b>. "+
+        "Try a negative dU/dt (lowering a load) and watch it shrink the required input \u2014 gravity helps.";
+    }
+    ["pbKE","pbPE","pbF"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 2 · EQUIVALENT-INERTIA EXPLORER  (slider-crank)
+     Crank r2 at angle th2, rod r3, piston slides on x-axis.
+     Piston x = r2 cos th2 + r3 cos th3, with r2 sin th2 = -r3 sin th3
+     Piston velocity coefficient f_p = dx/dth2.  I_e(th2) = I_crank
+       + m_rod*(rod-cm coeff)^2 contributions (approx) + m_piston*f_p^2
+     We use a transparent reduced model to show the "breathing".
+     ============================================================ */
+  (function(){
+    var stage=$("ieStage"), chart=$("ieChart"); if(!stage) return;
+    var r2=60, r3=150;           // crank and rod (model units)
+    var Icrank=0.9, mrod=0.6;    // fixed-ish contributions
+    function pistonCoeff(th2){
+      // x = r2 cos th2 + r3 cos th3 ; sin th3 = -(r2/r3) sin th2
+      var s3 = -(r2/r3)*Math.sin(th2);
+      var c3 = Math.sqrt(Math.max(0,1-s3*s3));         // th3 near 0 branch
+      // dx/dth2 = -r2 sin th2 - r3 sin th3 * dth3/dth2
+      // differentiate sin th3 = -(r2/r3) sin th2 -> cos th3 dth3 = -(r2/r3) cos th2 dth2
+      var dth3 = (c3>1e-6)? (-(r2/r3)*Math.cos(th2)/c3) : 0;
+      var fp = -r2*Math.sin(th2) - r3*s3*dth3; // note sin th3=s3
+      return fp/40; // scale to reasonable inertia units
+    }
+    function Ie(th2, mp){
+      var fp=pistonCoeff(th2);
+      return Icrank + mrod*0.25 + mp*fp*fp; // simple, transparent
+    }
+    function geom(th2){
+      var ax=r2*Math.cos(th2), ay=r2*Math.sin(th2);
+      var s3=-(r2/r3)*Math.sin(th2), c3=Math.sqrt(Math.max(0,1-s3*s3));
+      var bx=ax+r3*c3, by=ay+r3*s3; // piston on (near) x-axis
+      return {ax:ax,ay:ay,bx:bx,by:by};
+    }
+    function drawMech(th2){
+      clear(stage);
+      var W=420,H=300, ox=120, oy=160, sc=1.0;
+      // axis
+      line(stage,40,oy,400,oy,cssVar('--ink-soft'),1,"5 5");
+      var g=geom(th2);
+      var O={X:ox,Y:oy};
+      var A={X:ox+g.ax*sc, Y:oy-g.ay*sc};
+      var B={X:ox+g.bx*sc, Y:oy-g.by*sc};
+      // crank circle
+      circle(stage,O.X,O.Y,r2,cssVar('--panel-line'),1);
+      line(stage,O.X,O.Y,A.X,A.Y,cssVar('--accent'),5);   // crank
+      line(stage,A.X,A.Y,B.X,B.Y,cssVar('--accent-2'),5); // rod
+      // piston block
+      rect(stage,B.X-16,B.Y-20,32,40,cssVar('--paper-2'),cssVar('--ink'),2);
+      pin(stage,O.X,O.Y); pin(stage,A.X,A.Y); pin(stage,B.X,B.Y);
+      groundHatch(stage,O.X,O.Y+0,0); // small ground tick under O2
+      txt(stage,O.X-8,O.Y+20,"O\u2082",cssVar('--ink'),12,"end","700");
+      txt(stage,B.X,B.Y+34,"piston",cssVar('--ink-soft'),11,"middle");
+      txt(stage,210,24,"slider-crank at \u03B8\u2082 = "+degTxt(th2*180/Math.PI),cssVar('--ink'),13,"middle","700");
+    }
+    function drawChart(th2cur, mp){
+      clear(chart);
+      var W=420,H=300, pad=42;
+      line(chart,pad,H-pad,W-12,H-pad,cssVar('--ink-soft'),1.5);
+      line(chart,pad,16,pad,H-pad,cssVar('--ink-soft'),1.5);
+      txt(chart,W/2,H-10,"crank angle \u03B8\u2082 (0\u2013360\u00B0)",cssVar('--ink-soft'),11,"middle");
+      txt(chart,14,H/2,"I\u2091",cssVar('--ink-soft'),12,"middle","700");
+      var vals=[], maxv=0, minv=1e9;
+      for(var d=0; d<=360; d+=3){
+        var v=Ie(d*Math.PI/180, mp); vals.push({d:d,v:v});
+        if(v>maxv)maxv=v; if(v<minv)minv=v;
+      }
+      var span=(maxv-minv)||1;
+      function X(d){ return pad+(d/360)*(W-12-pad); }
+      function Y(v){ return (H-pad)-((v-minv)/span)*(H-pad-22); }
+      var path="";
+      vals.forEach(function(p,i){ path+=(i?"L":"M")+X(p.d).toFixed(1)+","+Y(p.v).toFixed(1)+" "; });
+      chart.appendChild(el("path",{d:path,fill:"none",stroke:cssVar('--accent'),"stroke-width":2.5}));
+      // current marker
+      var cv=Ie(th2cur,mp);
+      var cx=X(th2cur*180/Math.PI), cy=Y(cv);
+      line(chart,cx,16,cx,H-pad,cssVar('--accent-2'),1,"4 4");
+      circle(chart,cx,cy,5,cssVar('--accent-2'),2,cssVar('--panel'));
+      txt(chart,W-14,Y(maxv)+4,"max",cssVar('--ink-soft'),10,"end");
+      txt(chart,W-14,Y(minv)+4,"min",cssVar('--ink-soft'),10,"end");
+      return {cur:cv,max:maxv,min:minv};
+    }
+    function render(){
+      var th2=(+$("ieTh").value)*Math.PI/180;
+      var mp=+$("iePiston").value;
+      $("ieThv").textContent=degTxt(+$("ieTh").value);
+      $("iePistonv").textContent=mp.toFixed(1);
+      drawMech(th2);
+      var r=drawChart(th2,mp);
+      var ratio=((r.max-r.min)/r.max*100);
+      $("ieOut").innerHTML="Equivalent inertia now: <b>I\u2091 = "+r.cur.toFixed(2)+"</b>. "+
+        "Over a full turn it ranges "+r.min.toFixed(2)+" \u2192 "+r.max.toFixed(2)+
+        " (a <b>"+ratio.toFixed(0)+"%</b> swing). A heavier piston deepens the swing \u2014 that variation is what the dI\u2091/dS\u1D62 term captures and what a flywheel exists to smooth.";
+    }
+    ["ieTh","iePiston"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 3 · FORWARD-EULER FLYWHEEL SIMULATOR
+     Shaft: I_total * omega_dot = T_motor - T_load(theta)
+     T_load = baseLoad + pulse * max(0, sin(theta))^8  (once-per-rev spike)
+     Integrated by forward Euler. Plots omega over several revs; reports C_f.
+     ============================================================ */
+  (function(){
+    var chart=$("flyChart"); if(!chart) return;
+    var Ibase=0.6, Tmotor=40, baseLoad=10;
+    var running=false, raf=null;
+    var state=null;
+    function loadTorque(theta, pulse){
+      var s=Math.sin(theta); var sp=(s>0)? Math.pow(s,8):0;
+      return baseLoad + pulse*sp;
+    }
+    function simulate(flywheel, pulse, dtMs){
+      var Itot=Ibase+flywheel;
+      var dt=dtMs/1000;                 // slider 1..40 -> 0.001..0.040 s
+      var theta=0, omega=8.0, t=0;
+      var pts=[], loadPts=[];
+      var revs=4, tEnd=revs*2*Math.PI/8.0*1.4; // enough time for ~4 revs
+      var omax=-1e9, omin=1e9, n=0, lastRevTheta=0;
+      var samples=0, maxSamples=20000;
+      while(t<tEnd && samples<maxSamples){
+        var Tl=loadTorque(theta,pulse);
+        var alpha=(Tmotor-Tl)/Itot;
+        // record
+        pts.push({t:t,w:omega});
+        loadPts.push({t:t,l:Tl});
+        // forward Euler
+        omega += alpha*dt;
+        if(omega<0.2) omega=0.2;        // keep it turning (motor governs)
+        theta += omega*dt;
+        t+=dt; samples++;
+      }
+      // measure C_f over the LAST full revolution of data
+      // find time window for last 2*pi of theta: approximate using last 1/revs of points
+      var startIdx=Math.floor(pts.length*0.6);
+      for(var i=startIdx;i<pts.length;i++){
+        var w=pts[i].w; if(w>omax)omax=w; if(w<omin)omin=w;
+      }
+      var wavg=(omax+omin)/2;
+      var Cf=(wavg>0)?((omax-omin)/wavg):0;
+      return {pts:pts,loadPts:loadPts,omax:omax,omin:omin,Cf:Cf,Itot:Itot,dt:dt,pulse:pulse};
+    }
+    function draw(res, progress){
+      clear(chart);
+      var W=640,H=300, pad=46;
+      // axes
+      line(chart,pad,H-pad,W-14,H-pad,cssVar('--ink-soft'),1.5);
+      line(chart,pad,14,pad,H-pad,cssVar('--ink-soft'),1.5);
+      txt(chart,W/2,H-10,"time \u2192 (several revolutions)",cssVar('--ink-soft'),11,"middle");
+      txt(chart,16,H/2,"\u03C9",cssVar('--accent'),13,"middle","700");
+      var pts=res.pts; if(!pts.length) return;
+      var tEnd=pts[pts.length-1].t;
+      var wmax=0,wmin=1e9, lmax=0;
+      pts.forEach(function(p){ if(p.w>wmax)wmax=p.w; if(p.w<wmin)wmin=p.w; });
+      res.loadPts.forEach(function(p){ if(p.l>lmax)lmax=p.l; });
+      var wlo=Math.max(0,wmin-1), whi=wmax+1; var wspan=(whi-wlo)||1;
+      function X(t){ return pad+(t/tEnd)*(W-14-pad); }
+      function Yw(w){ return (H-pad)-((w-wlo)/wspan)*(H-pad-24); }
+      function Yl(l){ return (H-pad)-(l/(lmax||1))*(H-pad-24); }
+      // grid baseline for avg
+      var wavg=(res.omax+res.omin)/2;
+      line(chart,pad,Yw(wavg),W-14,Yw(wavg),cssVar('--panel-line'),1,"5 5");
+      txt(chart,W-16,Yw(wavg)-4,"\u03C9 avg",cssVar('--ink-soft'),10,"end");
+      var lim=Math.floor(pts.length*(progress==null?1:progress));
+      // load pulse (faint)
+      var lp="";
+      for(var j=0;j<lim;j++){ lp+=(j?"L":"M")+X(res.loadPts[j].t).toFixed(1)+","+Yl(res.loadPts[j].l).toFixed(1)+" "; }
+      chart.appendChild(el("path",{d:lp,fill:"none",stroke:cssVar('--accent-2'),"stroke-width":1.4,opacity:.55}));
+      // omega
+      var wp="";
+      for(var i=0;i<lim;i++){ wp+=(i?"L":"M")+X(pts[i].t).toFixed(1)+","+Yw(pts[i].w).toFixed(1)+" "; }
+      chart.appendChild(el("path",{d:wp,fill:"none",stroke:cssVar('--accent'),"stroke-width":2.5}));
+    }
+    function report(res){
+      $("flyOut").innerHTML =
+        "Total inertia I = base + flywheel = <b>"+res.Itot.toFixed(2)+"</b> &middot; step \u0394t = <b>"+(res.dt*1000).toFixed(0)+" ms</b>. "+
+        "Speed swings <b>"+res.omin.toFixed(2)+" \u2192 "+res.omax.toFixed(2)+"</b> rad/s, so the coefficient of variation is "+
+        "<b>C_f = "+res.Cf.toFixed(3)+"</b>. "+
+        (res.Cf>0.15 ? "That is a rough-running machine \u2014 add flywheel inertia to smooth it."
+                     : "Nice and smooth \u2014 the flywheel is doing its job.")+
+        " Bigger \u0394t makes the Euler trace coarser and can overshoot; smaller \u0394t hugs the true curve at more compute cost.";
+    }
+    function runAnimated(){
+      var res=simulate(+$("flyFly").value, +$("flyLoad").value, +$("flyDt").value);
+      state=res;
+      if(reduceMotion){ draw(res,1); report(res); setBtn(false); return; }
+      var p=0;
+      function frame(){
+        p+=0.03;
+        draw(res, Math.min(1,p));
+        if(p<1){ raf=requestAnimationFrame(frame); }
+        else { report(res); setBtn(false); }
+      }
+      cancelAnimationFrame(raf); frame();
+    }
+    function setBtn(on){
+      running=on;
+      var b=$("flyRun");
+      b.setAttribute("aria-pressed", on?"true":"false");
+      b.innerHTML = on ? "\u25A0 Running\u2026" : "\u25B6 Run simulation";
+    }
+    function staticShow(){
+      var res=simulate(+$("flyFly").value, +$("flyLoad").value, +$("flyDt").value);
+      state=res; draw(res,1); report(res);
+    }
+    function syncLabels(){
+      $("flyFlyv").textContent=(+$("flyFly").value).toFixed(1);
+      $("flyLoadv").textContent=$("flyLoad").value;
+      $("flyDtv").textContent=$("flyDt").value+" ms";
+    }
+    $("flyRun").addEventListener("click",function(){
+      if(running){ cancelAnimationFrame(raf); setBtn(false); return; }
+      setBtn(true); runAnimated();
+    });
+    $("flyReset").addEventListener("click",function(){
+      cancelAnimationFrame(raf); setBtn(false);
+      $("flyFly").value=0.5; $("flyLoad").value=55; $("flyDt").value=12;
+      syncLabels(); staticShow();
+    });
+    ["flyFly","flyLoad","flyDt"].forEach(function(id){
+      $(id).addEventListener("input",function(){ syncLabels(); if(!running) staticShow(); });
+    });
+    syncLabels(); staticShow();
+  })();
+
+  /* ============================================================
+     TOOL 4 · MECHANICAL ADVANTAGE & EFFICIENCY (lever)
+     Fulcrum at fraction p of beam. effort arm = p, load arm = (1-p).
+     Ma_ideal = effortArm/loadArm.  L_actual = eta*Ma*D.
+     ============================================================ */
+  (function(){
+    var stage=$("maStage"); if(!stage) return;
+    var W=620,H=280, bx0=60, bx1=560, by=150;
+    function render(){
+      clear(stage);
+      var p=(+$("maFul").value)/100;     // fulcrum fraction from left
+      var eta=(+$("maEff").value)/100;
+      var D=+$("maDrive").value;
+      $("maFulv").textContent=Math.round(p*100)+"%";
+      $("maEffv").textContent=Math.round(eta*100)+"%";
+      $("maDrivev").textContent=D;
+      var fx=bx0+(bx1-bx0)*p;
+      var effortArm=fx-bx0, loadArm=bx1-fx;
+      var Ma=effortArm/loadArm;            // ideal: long effort arm -> big advantage
+      var Lideal=Ma*D, Lact=eta*Ma*D;
+      // beam (slight tilt for life)
+      var tilt=6;
+      var lY=by+tilt, rY=by-tilt;
+      // fulcrum triangle
+      stage.appendChild(el("polygon",{points:(fx)+","+(by-2)+" "+(fx-22)+","+(by+44)+" "+(fx+22)+","+(by+44),fill:cssVar('--ink-soft')}));
+      groundHatch(stage,fx,by+44,80);
+      // beam
+      line(stage,bx0,lY,bx1,rY,cssVar('--accent'),8);
+      // effort (down arrow) left end
+      arrow(stage,bx0,lY-70,bx0,lY-12,cssVar('--accent-2'),3);
+      txt(stage,bx0,lY-78,"D = "+D,cssVar('--accent-2'),13,"middle","700");
+      txt(stage,bx0,lY+24,"effort",cssVar('--ink-soft'),11,"middle");
+      // load (up arrow it must lift) right end - size reflects L_act
+      var loadH=Math.max(14,Math.min(90, Lact*0.6));
+      arrow(stage,bx1,rY+12+loadH,bx1,rY+12,cssVar('--good'),3);
+      txt(stage,bx1,rY+24+loadH+14,"L = "+Lact.toFixed(0),cssVar('--good'),13,"middle","700");
+      txt(stage,bx1,rY-12,"load",cssVar('--ink-soft'),11,"middle");
+      // arm braces
+      line(stage,bx0,lY+40,fx,by+40,cssVar('--ink-soft'),1,"4 3");
+      txt(stage,(bx0+fx)/2,by+58,"effort arm",cssVar('--ink-soft'),10,"middle");
+      line(stage,fx,by+40,bx1,rY+40,cssVar('--ink-soft'),1,"4 3");
+      txt(stage,(fx+bx1)/2,by+58,"load arm",cssVar('--ink-soft'),10,"middle");
+      txt(stage,W/2,26,"Lever \u2014 move the fulcrum to change leverage",cssVar('--ink'),13,"middle","700");
+      var lost=Lideal-Lact;
+      $("maOut").innerHTML =
+        "Ideal mechanical advantage <b>M\u2090 = effort arm / load arm = "+Ma.toFixed(2)+"</b>. "+
+        "Ideal load it could raise: <b>"+Lideal.toFixed(1)+"</b>. "+
+        "At \u03B7 = "+Math.round(eta*100)+"%, the <b>actual</b> load is L = \u03B7&middot;M\u2090&middot;D = <b>"+Lact.toFixed(1)+"</b> "+
+        "\u2014 friction ate <b>"+lost.toFixed(1)+"</b> ("+Math.round((1-eta)*100)+"%). "+
+        (Ma>1 ? "M\u2090 &gt; 1: this lever multiplies force (and divides distance)." 
+              : "M\u2090 &lt; 1: this lever multiplies distance/speed at the cost of force.");
+    }
+    ["maFul","maEff","maDrive"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     GENERIC STEPPER BUILDER for worked examples
+     ============================================================ */
+  function buildStepper(prefix, steps){
+    var dots=$(prefix+"dots"), body=$(prefix+"body");
+    var prev=$(prefix+"Prev"), next=$(prefix+"Next"), count=$(prefix+"count");
+    if(!dots) return;
+    var idx=0;
+    function render(){
+      clear(dots);
+      steps.forEach(function(s,i){
+        var b=document.createElement("button");
+        b.type="button"; b.className="stepdot"+(i===idx?" active":(i<idx?" done":""));
+        b.textContent=(i+1);
+        b.setAttribute("aria-label","Go to step "+(i+1));
+        b.setAttribute("role","listitem");
+        b.addEventListener("click",function(){ idx=i; render(); });
+        dots.appendChild(b);
+      });
+      body.innerHTML="<h4 style='margin-top:.2em'>"+steps[idx].t+"</h4>"+steps[idx].h;
+      count.textContent="Step "+(idx+1)+" of "+steps.length;
+      prev.disabled=(idx===0); next.disabled=(idx===steps.length-1);
+      prev.style.opacity=prev.disabled?".5":"1";
+      next.style.opacity=next.disabled?".5":"1";
+    }
+    prev.addEventListener("click",function(){ if(idx>0){idx--; render();} });
+    next.addEventListener("click",function(){ if(idx<steps.length-1){idx++; render();} });
+    render();
+  }
+
+  buildStepper("ex71",[
+    {t:"Set up the loop", h:"<p>Treat the four&#8209;bar with the standard vector loop r\u20D7\u2082 + r\u20D7\u2083 \u2212 r\u20D7\u2084 \u2212 r\u20D7\u2081 = 0\u20D7. Take \u03B8\u2082 as the input S\u1D62; \u03B8\u2083 and \u03B8\u2084 are the outputs. Solve the position problem, then differentiate the loop to get the basic first&#8209;order coefficients h\u2083 = d\u03B8\u2083/d\u03B8\u2082 and h\u2084 = d\u03B8\u2084/d\u03B8\u2082 (Chapters 2 &amp; 4).</p>"},
+    {t:"Coefficients of the mass center G\u2083", h:"<p>G\u2083 sits on the coupler, located by r\u20D7\u2082 then r\u20D7\u2032\u2083 at offset angle \u03C6\u2083. Its position components differentiate (Eqs. 7.11\u20137.12) into the mass&#8209;center coefficients:</p><div class='eqn'>f<sub>g3x</sub> = \u2212r\u2082 sin\u03B8\u2082 \u2212 r\u2032\u2083 sin(\u03B8\u2083+\u03C6\u2083)h\u2083</div><div class='eqn'>f<sub>g3y</sub> = r\u2082 cos\u03B8\u2082 + r\u2032\u2083 cos(\u03B8\u2083+\u03C6\u2083)h\u2083</div><p>These say how fast G\u2083 moves in x and y per unit of input \u2014 built entirely from the basic coefficients.</p>"},
+    {t:"Project onto the \u201cup\u201d direction", h:"<p>The elevation coefficient is the part of G\u2083\u2019s motion along the vertical \u00FB\u2091 (at angle \u03B8\u2091). Project the velocity coefficients onto that direction (Eq. 7.9):</p><div class='eqn'>f<sub>e3</sub> = f<sub>g3x</sub> cos\u03B8\u2091 + f<sub>g3y</sub> sin\u03B8\u2091</div><div class='analogy'><span class='h'>Think of it like\u2026</span><p>\u2026reading only the <em>vertical speedometer</em>. G\u2083 moves on a 2&#8209;D path, but gravity only cares about the up&ndash;down part. The dot product with \u00FB\u2091 keeps exactly that component.</p></div>"},
+    {t:"Use it in the PE term", h:"<p>Done. The coupler\u2019s contribution to the potential&#8209;energy rate is simply</p><div class='eqn'>dU<sub>e3</sub>/dt = m\u2083 g f<sub>e3</sub> S\u0307\u1D62</div><p>If bodies 2 and 4 also rise/fall, repeat for each (hence the subscript: f<sub>e3</sub>). Add all the elevation terms into dU/dt of the power equation. <b>Takeaway:</b> any \u201cgeneralized\u201d coefficient you need for the power equation comes from the same differentiate&#8209;the&#8209;loop machinery you already know.</p>"}
+  ]);
+
+  buildStepper("ex72",[
+    {t:"Why a second loop?", h:"<p>The spring connects a moving point on body 3 to a fixed point on the frame. Its stretch r<sub>s</sub> isn\u2019t one of the basic loop variables, so we need its kinematic coefficient f<sub>s</sub> = dr<sub>s</sub>/d\u03B8\u2082. The clean way: write an <em>additional</em> vector loop that spans the spring.</p>"},
+    {t:"Write the spring loop", h:"<p>With r\u20D7\u2086 spanning the spring, the second loop (Fig. 7.6) is r\u20D7\u2087 + r\u20D7\u2086 \u2212 r\u20D7\u2032\u2083 \u2212 r\u20D7\u2082 = 0\u20D7. Its x and y components (Eqs. 7.17\u20137.18) are:</p><div class='eqn'>r\u2087cos\u03B8\u2087 + r\u2086cos\u03B8\u2086 \u2212 r\u2032\u2083cos(\u03B8\u2083+\u03C6\u2083) \u2212 r\u2082cos\u03B8\u2082 = 0</div><div class='eqn'>r\u2087sin\u03B8\u2087 + r\u2086sin\u03B8\u2086 \u2212 r\u2032\u2083sin(\u03B8\u2083+\u03C6\u2083) \u2212 r\u2082sin\u03B8\u2082 = 0</div><p>Solve these two for the two unknowns r\u2086 (the spring length) and \u03B8\u2086, given the already&#8209;known \u03B8\u2083.</p>"},
+    {t:"Differentiate for the coefficients", h:"<p>Differentiate both component equations with respect to \u03B8\u2082. That yields two linear equations in the two unknown coefficients f\u2086 (= f<sub>s</sub>, the spring\u2019s) and h\u2086:</p><div class='eqn'>[ cos\u03B8\u2086  \u2212r\u2086 sin\u03B8\u2086 ; sin\u03B8\u2086  r\u2086 cos\u03B8\u2086 ] [ f\u2086 ; h\u2086 ] = [ \u2212r\u2032\u2083 sin(\u03B8\u2083+\u03C6\u2083)h\u2083 \u2212 r\u2082 sin\u03B8\u2082 ; r\u2032\u2083 cos(\u03B8\u2083+\u03C6\u2083)h\u2083 + r\u2082 cos\u03B8\u2082 ]</div><p>The right&#8209;hand side uses the basic coefficient h\u2083 you already found.</p>"},
+    {t:"Solve &amp; use it", h:"<p>Solve the 2&times;2 system (Cramer\u2019s rule or elimination) for f<sub>s</sub> = f\u2086. Then the spring\u2019s contribution to the power equation is</p><div class='eqn'>dU<sub>s</sub>/dt = F<sub>s</sub> f<sub>s</sub> S\u0307\u1D62</div><div class='real-world'><span class='h'>In the real world</span><p>This is the math behind a self&#8209;supporting car hood or hatchback. Engineers pick the spring\u2019s F<sub>s</sub> and mounting geometry so F<sub>s</sub>f<sub>s</sub> cancels the lid\u2019s mg&middot;f<sub>e</sub> through the whole swing \u2014 the lid floats to any position.</p></div>"}
+  ]);
+
+  buildStepper("ex710",[
+    {t:"Steps 1\u20132: geometry &amp; driver point", h:"<p>The wrench has no internal degrees of freedom \u2014 the \u201cloop\u201d r\u20D7\u2082 \u2212 r\u20D7\u2082 = 0\u20D7 is trivial, so there are no S<sub>k</sub> outputs and no nontrivial coefficients. Take \u03B8\u2082 as the input. The driving force acts at the handle point A = r\u20D7\u2082, whose coefficients are (Eq. 7.48):</p><div class='eqn'>f<sub>ax</sub> = \u2212r\u2082 sin\u03B8\u2082 , &nbsp; f<sub>ay</sub> = r\u2082 cos\u03B8\u2082</div>"},
+    {t:"Steps 3\u20134: the two velocities", h:"<p><b>Step 3 \u2014</b> the load torque acts on body 2, whose angular velocity is \u03C9\u20D7\u2082 = [0,0,1]\u02B7 \u03B8\u0307\u2082. <b>Step 4 \u2014</b> the driver point A moves with velocity v\u20D7<sub>a</sub> = [f<sub>ax</sub>, f<sub>ay</sub>, 0]\u02B7 \u03B8\u0307\u2082 (Eqs. 7.49\u20137.50). Both are expressed through the single input speed \u03B8\u0307\u2082.</p>"},
+    {t:"Step 5: write the power", h:"<p>Total power is driver power plus load power, P = F\u20D7<sub>driver</sub>&middot;v\u20D7<sub>a</sub> + T\u20D7<sub>load</sub>&middot;\u03C9\u20D7\u2082 (Eq. 7.51). With F\u20D7<sub>driver</sub> perpendicular to the handle (Eq. 7.52) and T\u20D7<sub>load</sub> opposing rotation (Eq. 7.53), substitute the coefficients (Eq. 7.48):</p><div class='eqn'>P = (\u2212F<sub>driver</sub> r\u2082 + T<sub>load</sub>) \u03B8\u0307\u2082 &nbsp;(7.54)</div>"},
+    {t:"Step 6: set P = 0, solve M\u2090", h:"<p>For the idealized balance, set P = 0. The input speed \u03B8\u0307\u2082 cancels, leaving:</p><div class='eqn'>M\u2090 = T<sub>load</sub> / F<sub>driver</sub> = r\u2082</div><p>The mechanical advantage of a wrench is just its length \u2014 exactly what intuition said. <b>Takeaway:</b> the procedure looks long for an obvious answer, but it <em>proves</em> the method and generalizes to linkages where M\u2090 is far from obvious and can even go to zero or infinity.</p><div class='analogy'><span class='h'>Think of it like\u2026</span><p>\u2026a longer wrench breaking a stuck bolt. Double the handle length, double M\u2090 \u2014 the same hand force delivers twice the torque. A \u201Ccheater bar\u201D is mechanical advantage you can hold.</p></div>"}
+  ]);
+
+  /* ============================================================
+     SELF-CHECK QUIZ
+     ============================================================ */
+  (function(){
+    var mount=$("quizMount"); if(!mount) return;
+    var bank=[
+      {q:"The power equation P = dT/dt + dU/dt + P_f is best described as:",
+       opts:["A force balance on one link","An energy balance converted to rates for the whole machine","A position constraint","The definition of a kinematic coefficient"],
+       correct:1, fb:"It is the machine\u2019s energy balance (W = \u0394T + \u0394U + W_f) differentiated in time \u2014 power in equals the rate energy goes into motion, storage, and heat."},
+      {q:"In the kinetic term, \u03A3A turns out to be:",
+       opts:["The friction torque","The equivalent inertia I_e felt at the input","The spring stiffness","The input speed"],
+       correct:1, fb:"\u03A3A = I_e, the single inertia the input shaft feels from the whole machine; \u03A3B = \u00BD dI_e/dS_i, the rate it changes."},
+      {q:"Why does the kinetic term have a second piece, \u00BD(dI_e/dS_i)S\u0307\u1D62\u00B3, beyond I_e\u00B7S\u0307\u1D62S\u0308\u1D62?",
+       opts:["Because friction adds energy","Because the equivalent inertia changes as the mechanism moves","Because springs store energy","It is a typo in the textbook"],
+       correct:1, fb:"I_e depends on geometry, which changes through the cycle. That change pumps energy in/out even at constant input acceleration \u2014 like a skater\u2019s arms moving in and out."},
+      {q:"Power dissipated by a linear (viscous) damper scales with:",
+       opts:["The input speed to the first power","The input speed squared","The position only","The mass"],
+       correct:1, fb:"P_f = c f_c\u00B2 S\u0307\u1D62\u00B2 \u2014 it grows with the square of speed, like air drag on your hand out a car window."},
+      {q:"In the FORWARD dynamics problem (FDP), what is known and what is sought?",
+       opts:["Motion known, driver sought","Driver known, motion sought","Both known","Neither is known"],
+       correct:1, fb:"FDP: the driver/power is given and you integrate the (nonlinear) equation to find the motion S_i(t). The inverse problem (IDP) is the reverse."},
+      {q:"Why must the FDP equation be solved numerically?",
+       opts:["It is linear and trivial","It is nonlinear \u2014 it contains products of S_i and S\u0307_i","It has no initial conditions","Computers are faster"],
+       correct:1, fb:"Products like I_e(S_i)\u00B7S\u0307_i\u00B7S\u0308_i and S\u0307_i\u00B3 make it nonlinear, so there\u2019s no closed-form solution; Euler\u2019s method marches it forward step by step."},
+      {q:"For an angular input, a sensible Euler time step keeps the per-step change:",
+       opts:["\u0394\u03B8_i \u2264 90\u00B0","\u0394\u03B8_i \u2264 5\u00B0","\u0394\u03B8_i = exactly one revolution","As large as possible"],
+       correct:1, fb:"The textbook rule: \u0394\u03B8_i \u2264 5\u00B0 per step (or \u0394r_i \u2264 2% of the longest link). Smaller \u0394t is more accurate but costs more computation."},
+      {q:"A flywheel reduces the coefficient of variation C_f because it:",
+       opts:["Adds friction to slow the machine","Raises the equivalent inertia, storing energy on fast strokes and releasing it on slow ones","Removes the load","Increases the motor torque"],
+       correct:1, fb:"Extra inertia acts as an energy buffer \u2014 like a heavy potter\u2019s wheel \u2014 averaging out torque pulses so \u03C9 wobbles less between \u03C9_max and \u03C9_min."},
+      {q:"Mechanical advantage is defined as M_a = L/D. Efficiency \u03B7 relates to it by:",
+       opts:["\u03B7 = D/L","\u03B7 = M_a,actual / M_a,ideal","\u03B7 = M_a + 1","\u03B7 has no relation to M_a"],
+       correct:1, fb:"Any inefficiency shows up as reduced mechanical advantage, so \u03B7 = M_a,actual / M_a,ideal and L_actual = \u03B7 M_a D."},
+      {q:"At a toggle (e.g. a vise-grip locking up), the mechanical advantage tends toward:",
+       opts:["Zero","Infinity","Exactly 1","The efficiency \u03B7"],
+       correct:1, fb:"As the links line up, a small driver force produces a huge load \u2014 M_a \u2192 \u221E. Clamps and presses park their working stroke near this high-M_a configuration."}
+    ];
+    var answered=0, correctCount=0;
+    function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+    function updateScore(){ $("quizScore").textContent=correctCount+" / "+answered; }
+    function build(){
+      mount.innerHTML=""; answered=0; correctCount=0; updateScore();
+      bank.forEach(function(item,qi){
+        var order=shuffle(item.opts.map(function(_,i){return i;}));
+        var wrap=document.createElement("div"); wrap.className="q";
+        var stem=document.createElement("p"); stem.className="stem"; stem.textContent=(qi+1)+". "+item.q; wrap.appendChild(stem);
+        var opts=document.createElement("div"); opts.className="opts"; opts.setAttribute("role","group");
+        opts.setAttribute("aria-label","Answer choices for question "+(qi+1));
+        var done=false;
+        order.forEach(function(origIdx){
+          var lbl=document.createElement("label"); lbl.className="opt";
+          var inp=document.createElement("input"); inp.type="radio"; inp.name="q"+qi;
+          var span=document.createElement("span"); span.textContent=item.opts[origIdx];
+          lbl.appendChild(inp); lbl.appendChild(span);
+          inp.addEventListener("change",function(){
+            if(done) return; done=true; answered++;
+            var isRight=(origIdx===item.correct);
+            if(isRight){ correctCount++; lbl.classList.add("correct"); }
+            else{
+              lbl.classList.add("incorrect");
+              Array.prototype.forEach.call(opts.querySelectorAll(".opt"),function(o){
+                if(o.querySelector("span").textContent===item.opts[item.correct]) o.classList.add("correct");
+              });
+            }
+            Array.prototype.forEach.call(opts.querySelectorAll("input"),function(x){ x.disabled=true; });
+            fb.className="fb show "+(isRight?"right":"wrong");
+            fb.textContent=(isRight?"Correct. ":"Not quite. ")+item.fb;
+            updateScore();
+          });
+          opts.appendChild(lbl);
+        });
+        wrap.appendChild(opts);
+        var fb=document.createElement("div"); fb.className="fb"; wrap.appendChild(fb);
+        mount.appendChild(wrap);
+      });
+    }
+    $("quizReset").addEventListener("click",build);
+    build();
+  })();
+
+  /* ============================================================
+     GLOSSARY (build + filter)
+     ============================================================ */
+  (function(){
+    var list=$("glossList"); if(!list) return;
+    var terms=[
+      ["Power equation","The energy balance of a machine expressed as rates: P = dT/dt + dU/dt + P_f. The central tool of Chapter 7.","\u00A7 7.1 Develop"],
+      ["Energy balance","W = \u0394T + \u0394U + W_f \u2014 net work input equals the changes in kinetic and potential energy plus energy lost to friction.","\u00A7 7.1 Develop"],
+      ["Kinetic energy (T)","\u00BD m v_g\u00B2 + \u00BD I_g \u03C9\u00B2 \u2014 the energy of a rigid body\u2019s translation and rotation.","\u00A7 0 Foundations"],
+      ["Equivalent inertia (I_e)","The single inertia the input shaft \u201Cfeels\u201D from the whole machine; \u03A3A in the kinetic term. Depends on geometry, so it varies through a cycle.","KE term"],
+      ["Rate of equivalent inertia (dI_e/dS_i)","How fast I_e changes with the input; its half appears as \u03A3B, the source of the S\u0307_i\u00B3 kinetic term.","KE term"],
+      ["Kinematic coefficient of elevation (f_e)","dH/dS_i \u2014 how fast a body\u2019s mass center rises per unit input; gives the gravity term mg f_e S\u0307_i.","PE term / Ex 7.1"],
+      ["Kinematic coefficient of a spring (f_s)","dr_s/dS_i \u2014 how fast a spring stretches per unit input; gives the spring term F_s f_s S\u0307_i. Found from an extra vector loop.","PE term / Ex 7.2"],
+      ["Viscous damping","A friction model where force is proportional to speed (F_c = c r\u0307_c); power lost grows with speed squared.","Friction term"],
+      ["Coulomb friction","Dry rubbing friction; power lost = friction force/torque \u00D7 rubbing velocity, with a form that depends on joint type.","Friction term"],
+      ["Inverse dynamics problem (IDP)","Motion is known; solve (linearly) for the one unknown force or torque \u2014 e.g. sizing a motor.","\u00A7 7.2 IDP"],
+      ["Forward dynamics problem (FDP)","Driver is known; integrate the nonlinear power equation to find the resulting motion S_i(t).","\u00A7 7.3 FDP"],
+      ["Prime mover","Whatever supplies the power to the input \u2014 a motor, engine, solenoid, or hydraulic cylinder.","\u00A7 7.2 IDP"],
+      ["Euler\u2019s method","A numerical integrator that assumes constant acceleration over a small step \u0394t, then updates velocity and position; repeated step by step.","\u00A7 7.3 Euler"],
+      ["Time step (\u0394t)","The integration interval. Keep \u0394\u03B8_i \u2264 5\u00B0 (or \u0394r_i \u2264 2% of the longest link). Smaller = more accurate but costlier.","\u00A7 7.3 Euler"],
+      ["Coefficient of variation (C_f)","(\u03C9_max \u2212 \u03C9_min)/\u03C9_avg \u2014 a measure of steady-state speed fluctuation; smaller means smoother.","\u00A7 7.3 Flywheels"],
+      ["Flywheel","A cylindrical mass added to a shaft to raise I_e, buffering energy and reducing C_f.","\u00A7 7.3 Flywheels"],
+      ["Mechanical advantage (M_a)","M_a = L/D \u2014 the leverage of a mechanism: load overcome per unit driver effort. Can vary with position; toggles drive it to \u221E.","\u00A7 7.4 MA"],
+      ["Driver (D) and load (L)","D is the supplied force/torque; L is the resisting force/torque. Their ratio defines mechanical advantage.","\u00A7 7.4 MA"],
+      ["Efficiency (\u03B7)","\u03B7 = M_a,actual / M_a,ideal; any friction loss appears as reduced mechanical advantage, so L_actual = \u03B7 M_a D.","\u00A7 7.5 Efficiency"],
+      ["Toggle position","A configuration where the links align and M_a spikes toward infinity \u2014 exploited by clamps, vise-grips, and presses.","\u00A7 7.4 MA"],
+      ["Work\u2013energy\u2013power","Work = force \u00D7 distance; energy = stored work; power = rate of doing work (P = F\u00B7v = T\u03C9). The rate view is what makes Ch. 7 dynamic.","\u00A7 0 Foundations"]
+    ];
+    terms.sort(function(a,b){ return a[0].toLowerCase().localeCompare(b[0].toLowerCase()); });
+    function render(filter){
+      list.innerHTML=""; var f=(filter||"").trim().toLowerCase(), n=0;
+      terms.forEach(function(t){
+        if(f && t[0].toLowerCase().indexOf(f)<0 && t[1].toLowerCase().indexOf(f)<0) return;
+        n++;
+        var item=document.createElement("div"); item.className="gloss-item";
+        var dt=document.createElement("dt"); dt.textContent=t[0];
+        var dd=document.createElement("dd"); dd.textContent=t[1];
+        var tg=document.createElement("span"); tg.className="tag"; tg.textContent=t[2];
+        item.appendChild(dt); item.appendChild(dd); item.appendChild(tg);
+        list.appendChild(item);
+      });
+      $("glossEmpty").hidden = (n>0);
+      $("glossCount").textContent = f ? (n+" of "+terms.length+" terms shown") : (terms.length+" terms");
+    }
+    $("glossInput").addEventListener("input",function(){ render(this.value); });
+    render("");
+  })();
+
+  /* ============================================================
+     EXTERNAL RESOURCES (build cards)
+     ============================================================ */
+  (function(){
+    var data={
+      resFound:[
+        ["Work, energy & power (overview)","The foundational relationships P = F\u00B7v = T\u03C9 and energy as stored work that underlie the whole power equation.","en.wikipedia.org","https://en.wikipedia.org/wiki/Power_(physics)"],
+        ["Kinetic energy of rigid bodies","Translational + rotational kinetic energy \u2014 the T = \u00BDmv\u00B2 + \u00BDI\u03C9\u00B2 that seeds the KE term.","en.wikipedia.org","https://en.wikipedia.org/wiki/Kinetic_energy"],
+        ["Hooke\u2019s law & spring energy","Linear-spring force and the stored energy that becomes the dU_s/dt term.","en.wikipedia.org","https://en.wikipedia.org/wiki/Hooke%27s_law"]
+      ],
+      resCore:[
+        ["Power & efficiency in rigid bodies (LibreTexts)","A worked engineering treatment of power input/output and efficiency with example problems, parallel to \u00A77.1 and \u00A77.5.","eng.libretexts.org","https://eng.libretexts.org/Bookshelves/Mechanical_Engineering/Mechanics_Map_(Moore_et_al.)/13:_Work_and_Energy_in_Rigid_Bodies/13.02:_Power_and_Efficiency_in_Rigid_Bodies"],
+        ["Flywheel energy storage","How added rotational inertia buffers energy and smooths speed \u2014 the physics behind C_f reduction.","en.wikipedia.org","https://en.wikipedia.org/wiki/Flywheel"],
+        ["Mechanical advantage","Ideal vs. actual leverage, with examples (levers, gears, linkages) matching \u00A77.4.","en.wikipedia.org","https://en.wikipedia.org/wiki/Mechanical_advantage"]
+      ],
+      resVisual:[
+        ["Euler method (numerical integration)","The first-order explicit integrator used in \u00A77.3, with error and stability discussion.","en.wikipedia.org","https://en.wikipedia.org/wiki/Euler_method"],
+        ["Euler integration walkthrough (x-engineer)","A clear, example-driven explanation of integrating ODEs from physical models by Euler\u2019s method.","x-engineer.org","https://x-engineer.org/euler-integration/"],
+        ["Mechanical efficiency","Defining efficiency as the ratio of useful output to input \u2014 the \u03B7 discount of \u00A77.5.","en.wikipedia.org","https://en.wikipedia.org/wiki/Mechanical_efficiency"]
+      ]
+    };
+    Object.keys(data).forEach(function(mountId){
+      var mount=$(mountId); if(!mount) return;
+      data[mountId].forEach(function(r){
+        var a=document.createElement("a");
+        a.className="res-link"; a.href=r[3]; a.target="_blank"; a.rel="noopener noreferrer";
+        var name=document.createElement("span"); name.className="name";
+        name.appendChild(document.createTextNode(r[0]+" "));
+        var ext=document.createElement("span"); ext.className="ext"; ext.textContent="\u2197 new tab";
+        name.appendChild(ext);
+        var desc=document.createElement("span"); desc.className="desc"; desc.textContent=r[1];
+        var hs=document.createElement("span"); hs.className="host"; hs.textContent=r[2];
+        a.appendChild(name); a.appendChild(desc); a.appendChild(hs);
+        a.setAttribute("aria-label", r[0]+" \u2014 opens "+r[2]+" in a new tab");
+        mount.appendChild(a);
+      });
+    });
+  })();
+
+  /* ============================================================
+     NAV ACTIVE STATE + READING PROGRESS + ARROW-KEY NAV
+     ============================================================ */
+  (function(){
+    var links=Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+    var sections=links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+    var prog=$("readprog"), pct=$("readpct");
+    function onScroll(){
+      var y=window.scrollY+90;
+      var active=sections[0];
+      sections.forEach(function(s){ if(s.offsetTop<=y) active=s; });
+      if(active) links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href")==="#"+active.id); });
+      var doc=document.documentElement;
+      var max=doc.scrollHeight - doc.clientHeight;
+      var p=max>0?Math.min(100,Math.round(window.scrollY/max*100)):0;
+      if(prog){ prog.value=p; if(pct) pct.textContent=p+"%"; }
+    }
+    window.addEventListener("scroll",onScroll,{passive:true});
+    window.addEventListener("resize",onScroll);
+    onScroll();
+    var tw=$("tocWrap");
+    if(tw){
+      tw.addEventListener("keydown",function(e){
+        if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
+        var i=links.indexOf(document.activeElement); if(i<0) return;
+        e.preventDefault();
+        var ni=e.key==="ArrowRight"?Math.min(links.length-1,i+1):Math.max(0,i-1);
+        links[ni].focus();
+      });
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>

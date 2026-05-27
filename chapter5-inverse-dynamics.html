@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 5 · Machine Dynamics I: The Inverse Dynamics Problem — Kinematics &amp; Dynamics of Machines</title>
+<meta name="description" content="An interactive lecture on the inverse dynamics problem (IDP): finding the forces and torques that produce a known motion. Covers planar kinetics, moments about an arbitrary point, free-body-diagram notation, the partially three-dimensional nature of planar machines, the Newton–Euler equations, static vs. inertia force analysis, and force analysis of friction- and positive-drive rolling contacts, with worked examples, analogies, and real-world applications.">
+<style>
+  /* ============================================================
+     THEME TOKENS  — engineering-blueprint / technical drafting
+     (locked ENGI 216 design standard — identical to Chapters 1–4)
+     ============================================================ */
+  :root{
+    --ink:        #10243a;   /* deep drafting ink */
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;   /* drafting paper */
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;   /* textbook cyan */
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;   /* rust / annotation orange */
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --analogy-bg: #e2f1f5;   /* pale cyan wash */
+    --rw-bg:      #f6e7dc;   /* pale rust wash */
+    --rw-h:       #9c4416;   /* rust heading, AA on --rw-bg */
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --analogy-bg: #0f2a33;   /* deep cyan wash */
+      --rw-bg:      #33210f;   /* deep rust wash */
+      --rw-h:       #e8853f;   /* rust heading on dark */
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- layout ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+    border-bottom:3px solid var(--accent);
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:2; }
+  header.site::after{
+    content:""; position:absolute; inset:0; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-dk); background:#f3f1e7;
+    padding:5px 12px; border-radius:30px; font-weight:700; margin-bottom:14px;
+  }
+  @media (prefers-color-scheme: dark){ .chip{ background:#cfe7ef; color:#06384a; } }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; margin:.1em 0 .15em;
+    font-size:clamp(1.7rem, 4.6vw, 3rem); line-height:1.08; color:#fff;
+  }
+  header.site .sub{ font-size:clamp(1rem,2.2vw,1.2rem); color:#d6e6ee; max-width:60ch; }
+  .meta-row{ margin-top:18px; display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:.78rem; color:#bcd2dd; }
+  .meta-row span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- sticky nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50;
+    background:var(--panel); border-bottom:1px solid var(--panel-line);
+    box-shadow:0 2px 8px rgba(16,36,58,.06);
+  }
+  nav.toc .wrap{ max-width:var(--maxw); margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:8px 12px; }
+  nav.toc a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink-soft);
+    font-family:var(--mono); font-size:.76rem; font-weight:600; letter-spacing:.02em;
+    padding:8px 12px; border-radius:7px; white-space:nowrap; min-height:36px; display:inline-flex; align-items:center;
+  }
+  nav.toc a:hover{ background:var(--paper-2); color:var(--ink); }
+  nav.toc a:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  nav.toc a.active{ background:var(--accent); color:#fff; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:10px 18px 60px; }
+
+  section{ padding:40px 0 12px; scroll-margin-top:64px; border-top:1px dashed var(--panel-line); }
+  section:first-of-type{ border-top:none; }
+
+  .sec-tag{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h2{ font-family:var(--serif); font-size:clamp(1.45rem,3.4vw,2.1rem); line-height:1.12; margin:.18em 0 .5em; color:var(--ink); }
+  h3{ font-family:var(--sans); font-weight:700; font-size:1.18rem; margin:1.5em 0 .4em; color:var(--ink); letter-spacing:.005em; }
+  h4{ font-family:var(--mono); font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:1.2em 0 .4em; }
+  p{ margin:.6em 0 1em; }
+  a{ color:var(--accent-dk); }
+
+  .lead{ font-size:1.12rem; color:var(--ink); }
+
+  /* ---------- cards & panels ---------- */
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:20px 22px; margin:16px 0; box-shadow:var(--shadow);
+  }
+  .card.tool{ border-top:3px solid var(--accent); }
+  .tool-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .tool-label::before{ content:"▸ INTERACTIVE"; }
+  .tool-label span{ color:var(--ink-soft); }
+
+  .defn{
+    border-left:4px solid var(--accent); background:var(--paper-2);
+    padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0;
+  }
+  .defn strong{ color:var(--accent-dk); }
+
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* Analogy callout — cyan, "think of it like…" */
+  .analogy{
+    border-left:4px solid var(--accent); background:var(--analogy-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .analogy .h{ display:block; font-weight:700; color:var(--accent-dk); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .analogy::before{
+    content:"\01F4A1"; /* light bulb */
+    position:absolute; left:13px; top:11px; font-size:1.15rem; line-height:1;
+  }
+  .analogy p{ margin:.3em 0 0; }
+  .analogy p:first-of-type{ margin-top:0; }
+
+  /* Real-world callout — rust, "in the real world" */
+  .real-world{
+    border-left:4px solid var(--accent-2); background:var(--rw-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .real-world .h{ display:block; font-weight:700; color:var(--rw-h); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .real-world::before{
+    content:"\01F527"; /* wrench */
+    position:absolute; left:13px; top:11px; font-size:1.1rem; line-height:1;
+  }
+  .real-world p{ margin:.3em 0 0; }
+  .real-world p:first-of-type{ margin-top:0; }
+
+  .eqn{
+    font-family:var(--mono); background:var(--ink); color:#e9f6fb;
+    padding:14px 18px; border-radius:8px; font-size:1.02rem; overflow-x:auto;
+    margin:14px 0; letter-spacing:.01em;
+  }
+  .eqn .lbl{ float:right; color:#8fc6d8; font-size:.8rem; }
+  .eqn .c{ color:#ffd9a8; }       /* highlighted coefficient / unknown */
+  .eqn .m{ color:#9fe6c4; }       /* highlighted secondary term */
+  @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
+
+  /* ---------- grids ---------- */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:760px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+  /* ---------- buttons & controls ---------- */
+  button, .btn{
+    font-family:var(--sans); font-size:.92rem; font-weight:600;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:10px 16px; min-height:44px; cursor:pointer; box-shadow:var(--shadow);
+    transition:transform .08s ease, background .15s ease;
+  }
+  button:hover, .btn:hover{ background:var(--accent-dk); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  button.secondary{ background:var(--panel); color:var(--accent-dk); border:1.5px solid var(--accent); box-shadow:none; }
+  button.secondary:hover{ background:var(--paper-2); }
+  button[aria-pressed="true"]{ background:var(--ink); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:8px 0; }
+  .ctrl{ display:flex; flex-direction:column; gap:4px; min-width:150px; flex:1 1 160px; }
+  .ctrl label{ font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; text-transform:uppercase; }
+  .ctrl .val{ color:var(--accent-dk); }
+  input[type="range"]{ width:100%; accent-color:var(--accent); height:32px; }
+  input[type="range"]:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  input[type="number"]{ font-family:var(--mono); padding:8px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); width:100%; min-height:40px; font-size:.95rem; }
+  input[type="number"]:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  select{ font-family:var(--sans); padding:9px 10px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); min-height:42px; font-size:.95rem; }
+  select:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+
+  /* ---------- svg stage ---------- */
+  .stage{
+    width:100%; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:8px; touch-action:none; display:block;
+  }
+  .stage-wrap{ position:relative; }
+  svg text{ font-family:var(--mono); }
+
+  /* ---------- readouts ---------- */
+  .readout{
+    margin-top:10px; padding:12px 14px; background:var(--paper-2); border-radius:8px;
+    font-family:var(--mono); display:flex; flex-wrap:wrap; gap:10px 18px;
+    font-size:.92rem; line-height:1.4;
+  }
+  .readout b{ color:var(--accent-dk); }
+  .readout .unit{ color:var(--ink-soft); font-size:.82rem; }
+  .verdict{ font-family:var(--mono); font-weight:700; padding:10px 14px; border-radius:8px; margin-top:10px; }
+  .verdict.ok{ background:var(--good-bg); color:var(--good); }
+  .verdict.no{ background:var(--bad-bg); color:var(--bad); }
+  .verdict.warn{ background:var(--warn-bg); color:var(--warn); }
+
+  /* ---------- tables ---------- */
+  table{ border-collapse:collapse; width:100%; margin:14px 0; font-size:.92rem; }
+  caption{ text-align:left; font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding-bottom:6px; }
+  th,td{ border:1px solid var(--panel-line); padding:8px 11px; text-align:left; }
+  th{ background:var(--paper-2); font-family:var(--mono); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+  td.mono, th.mono{ font-family:var(--mono); }
+
+  /* ---------- details / steps ---------- */
+  details{ border:1px solid var(--panel-line); border-radius:8px; margin:10px 0; background:var(--panel); overflow:hidden; }
+  summary{ cursor:pointer; padding:13px 16px; font-weight:700; font-family:var(--sans); list-style:none; min-height:44px; display:flex; align-items:center; gap:10px; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::before{ content:"+"; font-family:var(--mono); color:var(--accent); font-weight:700; font-size:1.2rem; width:1ch; }
+  details[open] summary::before{ content:"\2013"; }
+  summary:focus-visible{ outline:3px solid var(--accent); outline-offset:-2px; }
+  details .body{ padding:2px 16px 16px; }
+
+  /* ---------- quiz ---------- */
+  .q{ margin:14px 0; padding:16px; border:1px solid var(--panel-line); border-radius:8px; background:var(--panel); }
+  .q .stem{ font-weight:600; margin-bottom:10px; }
+  .q .opts{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1.5px solid var(--panel-line); border-radius:8px; cursor:pointer; background:var(--panel); min-height:44px; }
+  .opt:hover{ border-color:var(--accent); }
+  .opt input{ margin-top:4px; accent-color:var(--accent); width:18px; height:18px; flex:0 0 auto; }
+  .opt.correct{ border-color:var(--good); background:var(--good-bg); }
+  .opt.incorrect{ border-color:var(--bad); background:var(--bad-bg); }
+  .fb{ margin-top:10px; font-size:.92rem; padding:10px 12px; border-radius:8px; display:none; }
+  .fb.show{ display:block; }
+  .fb.right{ background:var(--good-bg); color:var(--good); }
+  .fb.wrong{ background:var(--bad-bg); color:var(--bad); }
+  .q-score{ font-family:var(--mono); font-weight:700; color:var(--accent-dk); }
+
+  /* ---------- objectives list ---------- */
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:28px; margin:.5em 0; }
+  ul.clean li::before{ content:"\25C6"; position:absolute; left:4px; color:var(--accent); font-size:.8rem; top:.25em; }
+
+  .pill{ display:inline-block; font-family:var(--mono); font-size:.72rem; padding:2px 9px; border-radius:20px; font-weight:700; letter-spacing:.04em; }
+  .pill.p1{ background:#dceefb; color:#075a76; }
+  .pill.p2{ background:#f7e6d8; color:#9a4715; }
+  @media (prefers-color-scheme: dark){ .pill.p1{ background:#0d3647; color:#9fdcef; } .pill.p2{ background:#3a2616; color:#f0b487; } }
+
+  /* ---------- legend dots ---------- */
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; font-family:var(--mono); font-size:.8rem; margin:8px 0; }
+  .legend i{ width:14px; height:14px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-2px; }
+
+  footer.site{ max-width:var(--maxw); margin:0 auto; padding:28px 18px 50px; border-top:1px dashed var(--panel-line); color:var(--ink-soft); font-size:.85rem; }
+  footer.site .program{ color:var(--accent-dk); font-weight:700; }
+
+  .visually-hidden{ position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0; }
+
+  .kbd{ font-family:var(--mono); font-size:.8rem; background:var(--paper-2); border:1px solid var(--panel-line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; }
+
+  .figref{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+
+  /* progress dock */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  /* ---------- video embeds ---------- */
+  .video-card{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent-2); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); margin:16px 0; }
+  .video-frame{ position:relative; width:100%; aspect-ratio:16/9; background:var(--ink); }
+  .video-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-meta{ padding:14px 18px; }
+  .video-meta h3{ margin:.1em 0 .3em; font-size:1.08rem; }
+  .video-tags{ display:flex; flex-wrap:wrap; gap:8px 14px; font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+  .video-tags b{ color:var(--accent-dk); }
+  .video-supports{ display:inline-block; font-family:var(--mono); font-size:.72rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:20px; padding:3px 11px; color:var(--accent-dk); font-weight:700; margin-top:8px; }
+
+  /* ---------- glossary ---------- */
+  .glossary-search{ position:relative; margin:14px 0; }
+  .glossary-search input{ width:100%; font-family:var(--sans); font-size:1rem; padding:12px 14px 12px 40px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--panel); color:var(--ink); min-height:48px; }
+  .glossary-search input:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  .glossary-search::before{ content:"\2315"; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:1.3rem; }
+  .gloss-list{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .gloss-list{ grid-template-columns:1fr; } }
+  .gloss-item{ background:var(--panel); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 15px; }
+  .gloss-item dt{ font-weight:700; color:var(--accent-dk); font-family:var(--sans); margin-bottom:3px; }
+  .gloss-item dd{ margin:0; font-size:.93rem; color:var(--ink); }
+  .gloss-item .tag{ font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); display:block; margin-top:6px; }
+  .gloss-empty{ font-family:var(--mono); color:var(--ink-soft); padding:14px; text-align:center; }
+
+  /* ---------- resources ---------- */
+  .res-group{ margin:18px 0; }
+  .res-group h3{ display:flex; align-items:center; gap:10px; }
+  .res-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .res-grid{ grid-template-columns:1fr; } }
+  .res-link{ display:block; text-decoration:none; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:14px 16px; color:var(--ink); transition:border-color .15s ease, transform .08s ease; }
+  .res-link:hover{ border-color:var(--accent); transform:translateY(-1px); }
+  .res-link:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .res-link .name{ font-weight:700; color:var(--accent-dk); display:flex; align-items:center; gap:6px; }
+  .res-link .name .ext{ font-size:.72rem; font-family:var(--mono); color:var(--ink-soft); font-weight:600; }
+  .res-link .desc{ font-size:.88rem; color:var(--ink); margin-top:4px; }
+  .res-link .host{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin-top:6px; display:block; }
+
+  /* ---------- formula / quick-reference card ---------- */
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:var(--radius); padding:0; overflow:hidden; box-shadow:var(--shadow); }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--mono); font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:18px; }
+  .rc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:680px){ .rc-grid{ grid-template-columns:1fr; } }
+  .rc-block h4{ margin:0 0 6px; color:var(--accent-dk); }
+  .rc-eq{ font-family:var(--mono); background:var(--paper-2); border-radius:6px; padding:9px 12px; margin:6px 0; font-size:.92rem; }
+  .rc-list{ list-style:none; padding:0; margin:0; font-size:.9rem; }
+  .rc-list li{ padding:3px 0; border-bottom:1px dotted var(--panel-line); }
+  .rc-list li:last-child{ border-bottom:none; }
+  .rc-list .k{ font-family:var(--mono); color:var(--accent-dk); font-weight:700; }
+  @media print{
+    nav.toc, .progress-dock, .card.tool, .video-frame, button{ display:none !important; }
+    body{ background:#fff; color:#000; }
+  }
+
+  /* ---------- references ---------- */
+  .refs{ font-size:.88rem; color:var(--ink-soft); }
+  .refs li{ margin:.5em 0; }
+  .ext-note{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+
+  /* ---------- step walkthrough ---------- */
+  .stepper{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .stepdot{ font-family:var(--mono); font-size:.74rem; font-weight:700; padding:6px 10px; border-radius:20px; border:1.5px solid var(--panel-line); background:var(--panel); color:var(--ink-soft); min-height:34px; }
+  .stepdot.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stepdot.done{ border-color:var(--good); color:var(--good); }
+  .step-body{ min-height:64px; }
+  .step-nav{ display:flex; gap:10px; margin-top:12px; align-items:center; flex-wrap:wrap; }
+  .step-count{ font-family:var(--mono); font-size:.8rem; color:var(--ink-soft); margin-left:auto; }
+
+  /* ---------- FBD vector-notation key chips ---------- */
+  .veckey{ display:flex; flex-wrap:wrap; gap:10px; margin:10px 0; }
+  .veckey .vk{ display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:.8rem; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:6px 12px; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Chapter 5</span>
+    <h1>Machine Dynamics I: The Inverse Dynamics Problem</h1>
+    <p class="sub">Given the motion, find the forces &amp; torques &middot; planar kinetics &middot; moments about any point &middot; free-body-diagram notation &middot; the partially 3-D nature of planar machines &middot; Newton&ndash;Euler equations &middot; static vs. inertia force analysis &middot; force analysis of rolling contacts.</p>
+    <div class="meta-row">
+      <span>&#9719; ~3 hour lecture</span>
+      <span>&#9670; 9 interactive tools</span>
+      <span>&#9998; 3 worked examples + self-check</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Chapter sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#foundations">0 · Foundations</a>
+    <a href="#idpfdp">IDP vs FDP</a>
+    <a href="#kinetics">5.1 · Planar Kinetics</a>
+    <a href="#moments">Moments about A</a>
+    <a href="#fbd">FBD Notation</a>
+    <a href="#threed">5.2 · Partially 3-D</a>
+    <a href="#newtoneuler">Newton&ndash;Euler</a>
+    <a href="#staticinertia">5.3 · Static vs Inertia</a>
+    <a href="#rolling">5.4 · Rolling Contacts</a>
+    <a href="#examples">Worked Examples</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#videos">Videos</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+    <a href="#recap">Recap</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START / ROADMAP ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Chapter Roadmap</span>
+  <h2 id="start-h">Where this chapter fits</h2>
+  <p class="lead">Through Chapters&nbsp;2&ndash;4 you became fluent in <strong>kinematics</strong>: positions, velocities, and accelerations of a mechanism, with no mention of <em>why</em> it moves. Chapter&nbsp;5 turns the corner into <strong>dynamics</strong> &mdash; the relationship between motion and the <strong>forces and torques</strong> that cause or accompany it. We start with the most common engineering question of all: <em>&ldquo;If I want this machine to move exactly like this, how big a motor do I need, and how hard are the bearings being pushed?&rdquo;</em></p>
+
+  <p>That is the <strong>Inverse Dynamics Problem (IDP)</strong>: the state of motion is <em>known</em> (you already solved it in earlier chapters), and you work <em>backward</em> to the forces and torques that must be present. It is the workhorse of machine design &mdash; sizing motors, selecting bearings, checking that links won&rsquo;t bend or break. Everything in this chapter is Newton&rsquo;s Laws applied carefully to one link at a time.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>reading a detective story backward</strong>. In a forward dynamics problem you&rsquo;re handed the forces and asked &ldquo;what happens?&rdquo; &mdash; you watch the crime unfold. In the <em>inverse</em> problem you already know exactly what happened (the full motion), and your job is to deduce <em>who pushed whom, and how hard</em>. The motion is the evidence; the forces are the culprits you reconstruct. Engineers love the inverse problem because the &ldquo;evidence&rdquo; (the motion) is usually what the customer specifies, and the &ldquo;culprits&rdquo; (motor torque, bearing loads) are exactly what they need to buy and build.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:.2em">What you&rsquo;ll be able to do</h3>
+    <ul class="clean">
+      <li><strong>State</strong> the difference between the inverse and forward dynamics problems, and identify which one a real design task is asking.</li>
+      <li><strong>Write</strong> the planar force and moment equations for a link &mdash; both about its mass center <i>G</i> and about an arbitrary point <i>A</i>.</li>
+      <li><strong>Draw</strong> free body diagrams using the standard notation (squiggly, dashed, and solid vectors) that encodes what is known and unknown.</li>
+      <li><strong>Explain</strong> why a &ldquo;planar&rdquo; machine is really <strong>partially three-dimensional</strong>, and how that makes a four-bar force analysis statically indeterminate.</li>
+      <li><strong>Apply</strong> the Newton&ndash;Euler equations and recognize how they collapse for planar motion.</li>
+      <li><strong>Decide</strong> when to do a <strong>static</strong> force analysis versus an <strong>inertia</strong> force analysis.</li>
+      <li><strong>Analyze</strong> the forces in friction-drive and positive-drive (gear) rolling contacts, including the role of <strong>preload</strong> and the <strong>pressure angle</strong>.</li>
+    </ul>
+  </div>
+
+  <h3>The 30-second picture</h3>
+  <p>Every link in a moving machine obeys two vector statements &mdash; one for translation, one for rotation. Hold these in your head; the entire chapter is bookkeeping built on top of them:</p>
+  <div class="eqn" role="img" aria-label="Sum of forces equals m times the acceleration of the mass center. Sum of moments about G equals I sub g times angular acceleration.">
+    &Sigma;F&#8407; = <span class="c">m&middot;a&#8407;<sub>g</sub></span> &nbsp;&nbsp;&middot;&nbsp;&nbsp; &Sigma;M<sub>g</sub> = <span class="m">I<sub>g</sub>&middot;&alpha;</span>
+    <span class="lbl">force &rarr; translation · moment &rarr; rotation</span>
+  </div>
+  <p>In the <strong>inverse</strong> problem the right-hand sides are <em>known numbers</em> (you computed <i>a&#8407;<sub>g</sub></i> and <i>&alpha;</i> kinematically). The unknowns are hiding inside &Sigma;F&#8407; and &Sigma;M &mdash; the bearing reactions and the driving torque. Solve the linear system and you&rsquo;ve sized the machine.</p>
+</section>
+
+<!-- ============ FOUNDATIONS ============ -->
+<section id="foundations" aria-labelledby="found-h">
+  <span class="sec-tag">Foundations</span>
+  <h2 id="found-h">0 · The mechanics you&rsquo;ll lean on</h2>
+  <p>This chapter is Newtonian rigid-body dynamics applied to linkages. Before the machine-specific material, let&rsquo;s sharpen five ideas from statics and dynamics. If they&rsquo;re second nature, skim; if not, firm them up now &mdash; everything that follows is built on them.</p>
+
+  <h3>Newton&rsquo;s second law, for a rigid body</h3>
+  <p>A particle obeys <i>F&#8407;</i>&nbsp;=&nbsp;<i>m&nbsp;a&#8407;</i>. A rigid <em>body</em> needs <strong>two</strong> statements: the net force drives the acceleration of its <strong>mass center</strong> <i>G</i>, and the net moment about <i>G</i> drives its <strong>angular</strong> acceleration.</p>
+  <div class="eqn" role="img" aria-label="Sum F equals m a sub g and sum M sub g equals I sub g alpha">&Sigma;F&#8407; = m&nbsp;a&#8407;<sub>g</sub> &nbsp;&nbsp;&nbsp; &Sigma;M<sub>g</sub> = I<sub>g</sub>&nbsp;&alpha;</div>
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>steering a canoe</strong>. Push on the dead center of the canoe and it slides straight &mdash; pure translation, the <i>F&nbsp;=&nbsp;ma</i> part. Push on one end and it both slides <em>and</em> spins &mdash; you&rsquo;ve added a moment. A rigid body always tracks both effects at once: where the mass center goes, and how the body turns about it. Two equations, because there are two independent things a body can do.</p>
+  </div>
+
+  <h3>Moment of a force (the cross product)</h3>
+  <p>The moment of a force <i>F&#8407;</i> about a point is <i>M&#8407;</i>&nbsp;=&nbsp;<i>r&#8407;</i>&nbsp;&times;&nbsp;<i>F&#8407;</i>, where <i>r&#8407;</i> points from the reference point to anywhere on the force&rsquo;s line of action. In the plane this collapses to a single signed scalar:</p>
+  <div class="eqn" role="img" aria-label="M equals r sub x F sub y minus r sub y F sub x">M = r<sub>x</sub>F<sub>y</sub> &minus; r<sub>y</sub>F<sub>x</sub> &nbsp; <span class="m">(the Z-component &mdash; the only one that survives in planar motion)</span></div>
+  <p>This is exactly why, although the machine looks two-dimensional, the <em>moments</em> live along the <strong>Z</strong> axis (out of the page). Hold that thought &mdash; it is the seed of &sect;5.2.</p>
+
+  <h3>Mass moment of inertia <i>I<sub>g</sub></i></h3>
+  <p><i>I<sub>g</sub></i> measures how a body&rsquo;s mass is spread out about an axis through <i>G</i>: mass far from the axis resists angular acceleration far more than mass near it. It is the rotational analog of mass.</p>
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>figure skater&rsquo;s spin</strong>. Arms out, the same muscles produce a slow spin; arms tucked in, a fast one. The skater didn&rsquo;t change mass &mdash; only how far that mass sits from the spin axis, i.e. <i>I<sub>g</sub></i>. In a machine, a chunky flywheel and a slender rod can weigh the same yet have wildly different <i>I<sub>g</sub></i>, and therefore need wildly different torques to spin up.</p>
+  </div>
+
+  <h3>Two-force and three-force members</h3>
+  <p>A pinned link carrying loads at only <strong>two</strong> points (and no torque) is a <strong>two-force member</strong>: its force must act <em>along the line connecting the two pins</em>. This single fact removes unknowns from a free body diagram instantly &mdash; the direction of that link&rsquo;s force is already known. You&rsquo;ll use it in Example&nbsp;5.3 to recognize link&nbsp;4.</p>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Connecting rods, tie rods, and the struts of a bridge truss are all two-force members. The reason a car&rsquo;s tie rod is a slim straight bar is precisely this: engineers know its force runs end-to-end, so the part only ever sees pure tension or compression &mdash; the cheapest, lightest loading to design against.</p>
+  </div>
+
+  <h3>Solving a determinate linear system</h3>
+  <p>An IDP ends as a set of simultaneous linear equations: so many scalar equilibrium equations, so many unknown force/torque components. The problem is <strong>solvable (determinate)</strong> only when the count of independent equations equals the count of unknowns. Counting them is a recurring move in this chapter &mdash; and when the counts <em>don&rsquo;t</em> match, that mismatch is itself telling you something physical (see &sect;5.2).</p>
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>This &ldquo;count the equations, count the unknowns&rdquo; discipline is the same check a structural engineer runs before trusting a truss analysis, and the same logic a solver like MATLAB or ANSYS applies internally before it will invert a stiffness matrix. Get the count wrong and the math either has no answer or infinitely many &mdash; both useless for buying a real motor.</p>
+  </div>
+</section>
+
+<!-- ============ IDP vs FDP ============ -->
+<section id="idpfdp" aria-labelledby="idp-h">
+  <span class="sec-tag">Two Kinds of Problem</span>
+  <h2 id="idp-h">Inverse vs. forward dynamics</h2>
+  <p>As hinted back in Chapter&nbsp;1, every dynamics problem is one of two types. The whole of Chapter&nbsp;5 lives in the first row of this table; later chapters and most simulation software live in the second.</p>
+
+  <table>
+    <caption>The two dynamics problems</caption>
+    <thead>
+      <tr><th>Problem type</th><th>Known (given)</th><th>To be determined</th><th>Typical use</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Inverse Dynamics Problem (IDP)</strong></td><td class="mono">state of motion</td><td class="mono">forces &amp; torques</td><td>sizing a motor, selecting bearings, stress-checking links</td></tr>
+      <tr><td><strong>Forward Dynamics Problem (FDP)</strong></td><td class="mono">forces &amp; torques</td><td class="mono">state of motion</td><td>simulation / prediction &mdash; &ldquo;what will it do?&rdquo;</td></tr>
+    </tbody>
+  </table>
+
+  <p>Notice the columns are simply <em>swapped</em>. That symmetry is real, but the two problems feel very different to solve. The IDP is <strong>algebraic</strong>: plug the known accelerations into Newton&rsquo;s laws and solve a linear system &mdash; which is exactly why this chapter is tractable by hand. The FDP is generally a set of coupled <strong>differential equations</strong> that you integrate forward in time, which is why it usually goes to a computer.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>thermostat versus a weather forecast</strong>. The IDP is the thermostat: you decide the temperature you <em>want</em> (the motion), and it computes how much heat (force/torque) to deliver right now &mdash; a direct calculation. The FDP is the forecast: given today&rsquo;s conditions (the forces), predict tomorrow&rsquo;s weather (the resulting motion) &mdash; you must march the equations forward through time, and small errors compound.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A robot arm uses <em>both</em>, constantly. Its controller solves an IDP thousands of times a second &mdash; &ldquo;to follow this trajectory, command these joint torques&rdquo; (this is literally called <em>inverse dynamics control</em>). Meanwhile the engineers who designed it ran FDP simulations beforehand &mdash; &ldquo;if the motors saturate, will the arm overshoot and hit something?&rdquo; Same machine, two complementary questions.</p>
+  </div>
+
+  <!-- TOOL 1: IDP / FDP flip card -->
+  <div class="card tool" id="flipTool">
+    <div class="tool-label">Tool 1 <span>&middot; The known / unknown flipper</span></div>
+    <h3 style="margin-top:.3em">See the columns swap</h3>
+    <p>Pick which quantity you&rsquo;re <em>given</em>. The diagram re-labels every box as a known (solid) or an unknown (squiggly), and tells you which problem you&rsquo;re solving and how it&rsquo;s typically solved. This is the single most important distinction in the chapter &mdash; make it muscle memory.</p>
+    <div class="controls">
+      <div class="ctrl" style="flex:1 1 240px">
+        <label for="flipMode">I am given&hellip;</label>
+        <select id="flipMode">
+          <option value="idp" selected>the MOTION (solve for forces) — IDP</option>
+          <option value="fdp">the FORCES (solve for motion) — FDP</option>
+        </select>
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="flipStage" class="stage" viewBox="0 0 640 250" role="img" aria-label="A box diagram showing motion on the left and forces on the right, connected by Newton's laws, with the known side drawn solid and the unknown side drawn squiggly."></svg>
+    </div>
+    <div class="readout" id="flipOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============ 5.1 PLANAR KINETICS ============ -->
+<section id="kinetics" aria-labelledby="kin-h">
+  <span class="sec-tag">Section 5.1</span>
+  <h2 id="kin-h">5.1 · Review of planar kinetics</h2>
+  <p>Start with one link, isolated. Newton&rsquo;s second law gives the force balance, and the moment balance about the mass center <i>G</i> gives the rotation balance. In the textbook these are Equations&nbsp;5.1 and 5.4:</p>
+  <div class="eqn" role="img" aria-label="Sum of external forces equals m times a sub g. Equation 5.1.">
+    &Sigma;F&#8407; = &Sigma;F&#8407;<sub>e<sub>i</sub></sub> = m&nbsp;a&#8407;<sub>g</sub>
+    <span class="lbl">(5.1)</span>
+  </div>
+  <div class="eqn" role="img" aria-label="Sum of moments about G equals I sub g times alpha. Equation 5.4.">
+    &Sigma;M&#8407;<sub>g</sub> = I<sub>g</sub>&nbsp;&alpha;&#8407;
+    <span class="lbl">(5.4)</span>
+  </div>
+  <p>Because the links move in the <i>XY</i> plane, the force and acceleration vectors have only <i>X</i> and <i>Y</i> components &mdash; their <i>Z</i> component is zero:</p>
+  <div class="eqn" role="img" aria-label="F sub e i is a column vector F e i x, F e i y, 0. a sub g is a column vector a g x, a g y, 0.">
+    F&#8407;<sub>e<sub>i</sub></sub> = [ F<sub>e<sub>ix</sub></sub> ; F<sub>e<sub>iy</sub></sub> ; 0 ] &nbsp;&nbsp; a&#8407;<sub>g</sub> = [ a<sub>g<sub>x</sub></sub> ; a<sub>g<sub>y</sub></sub> ; 0 ]
+  </div>
+  <p>So Equation&nbsp;5.1 is really <strong>two</strong> scalar equations (one in <i>X</i>, one in <i>Y</i>). The moment of each force about <i>G</i> is the cross product <i>r&#8407;<sub>(e/g)</sub></i>&nbsp;&times;&nbsp;<i>F&#8407;<sub>e<sub>i</sub></sub></i>, and the only surviving component is along <i>Z</i> (Equation&nbsp;5.5):</p>
+  <div class="eqn" role="img" aria-label="M sub g equals r e over g cross F e i, which has only a Z component equal to r x F y minus r y F x. Equation 5.5.">
+    M<sub>g</sub> = r<sub>(e/g)<sub>x</sub></sub>F<sub>e<sub>iy</sub></sub> &minus; r<sub>(e/g)<sub>y</sub></sub>F<sub>e<sub>ix</sub></sub>
+    <span class="lbl">(5.5)</span>
+  </div>
+
+  <div class="callout">
+    <span class="h">The tally that matters</span>
+    <p style="margin:.4em 0 0">Each planar link hands you <strong>three</strong> scalar equilibrium equations: &Sigma;F<sub>x</sub>, &Sigma;F<sub>y</sub>, and &Sigma;M<sub>z</sub>. Memorize that number &mdash; the entire static-determinacy bookkeeping of this chapter is built by multiplying &ldquo;3 per link&rdquo; and comparing to the count of unknown force/torque components.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>household budget that has to balance in three ledgers at once</strong>. Money in must equal money out horizontally (&Sigma;F<sub>x</sub>), vertically (&Sigma;F<sub>y</sub>), and in &ldquo;spin&rdquo; (&Sigma;M). A link in steady motion is paying its inertia &ldquo;bills&rdquo; &mdash; <i>m&nbsp;a<sub>g</sub></i> and <i>I<sub>g</sub>&alpha;</i> &mdash; and the external forces are the income that must cover them, in all three ledgers simultaneously.</p>
+  </div>
+
+  <!-- TOOL 2: single-link planar kinetics -->
+  <div class="card tool" id="linkTool">
+    <div class="tool-label">Tool 2 <span>&middot; One link, three equations</span></div>
+    <h3 style="margin-top:.3em">Watch the inertia &ldquo;demand&rdquo; build up</h3>
+    <p>A single link of mass <i>m</i> and inertia <i>I<sub>g</sub></i> is driven through a known motion. Slide its mass-center acceleration and angular acceleration and watch the <strong>required</strong> net force <i>m&nbsp;a<sub>g</sub></i> and net moment <i>I<sub>g</sub>&alpha;</i> grow. In an IDP these are the numbers the bearings and motor must supply.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="lkAg">mass-center accel a<sub>g</sub> (m/s&sup2;) &mdash; <span class="val" id="lkAgv">6.0</span></label>
+        <input type="range" id="lkAg" min="0" max="20" step="0.5" value="6">
+      </div>
+      <div class="ctrl">
+        <label for="lkDir">accel direction (&deg;) &mdash; <span class="val" id="lkDirv">35</span></label>
+        <input type="range" id="lkDir" min="0" max="360" step="5" value="35">
+      </div>
+      <div class="ctrl">
+        <label for="lkAlpha">angular accel &alpha; (rad/s&sup2;) &mdash; <span class="val" id="lkAlphav">4.0</span></label>
+        <input type="range" id="lkAlpha" min="-12" max="12" step="0.5" value="4">
+      </div>
+      <div class="ctrl">
+        <label for="lkMass">mass m (kg) &mdash; <span class="val" id="lkMassv">2.0</span></label>
+        <input type="range" id="lkMass" min="0.5" max="8" step="0.5" value="2">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="lkStage" class="stage" viewBox="0 0 640 320" role="img" aria-label="A floating link with its mass center marked; an acceleration arrow and the resulting required-force arrow are drawn, plus a curved moment arrow scaled by I g alpha."></svg>
+    </div>
+    <div class="readout" id="lkOut" aria-live="polite"></div>
+    <p style="margin:.6em 0 0; font-size:.92rem; color:var(--ink-soft)">Set <span class="kbd">a<sub>g</sub> = 0</span> and <span class="kbd">&alpha; = 0</span> and both demands vanish &mdash; that is the special case of a <strong>static</strong> force analysis (&sect;5.3), where the link isn&rsquo;t accelerating at all.</p>
+  </div>
+</section>
+
+<!-- ============ MOMENTS ABOUT ARBITRARY POINT ============ -->
+<section id="moments" aria-labelledby="mom-h">
+  <span class="sec-tag">Section 5.1 · continued</span>
+  <h2 id="mom-h">Moments about an arbitrary point</h2>
+  <p>You are <em>not</em> forced to sum moments about the mass center. Often summing about a different point &mdash; usually a pin joint where unknown reactions live &mdash; makes those unknowns vanish from the moment equation, leaving fewer unknowns to juggle. Summing about an arbitrary point <i>A</i> (textbook Equation&nbsp;5.10):</p>
+  <div class="eqn" role="img" aria-label="Sum of moments about A equals I sub g alpha plus the Z component of r g over a cross m a sub g. Equation 5.10.">
+    &Sigma;M<sub>a</sub> = I<sub>g</sub>&alpha; + <span class="m">( r&#8407;<sub>g/a</sub> &times; m&nbsp;a&#8407;<sub>g</sub> )<sub>z</sub></span>
+    <span class="lbl">(5.10)</span>
+  </div>
+  <p>The extra term is the moment of the inertia force <i>m&nbsp;a&#8407;<sub>g</sub></i> about <i>A</i>. If you sum about <i>G</i> itself, then <i>r&#8407;<sub>g/a</sub></i>&nbsp;=&nbsp;0 and the term disappears &mdash; recovering Equation&nbsp;5.4. Choosing <i>A</i> wisely is a tactical decision, not a new law.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>choosing where to stand when you photograph a crowd</strong>. The crowd is the same; but stand in the right spot and a distracting lamppost lines up perfectly behind someone and disappears from the shot. Summing moments about a clever point <i>A</i> &ldquo;hides&rdquo; an unknown bearing reaction the same way &mdash; the physics is unchanged, but your equation is suddenly far cleaner.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Practicing engineers almost never sum moments about the mass center first. They sum about a pin &mdash; the reaction force there passes through the point, so it contributes zero moment and drops out. One well-chosen reference point can turn a messy three-unknown equation into a one-line solve for the driving torque. It&rsquo;s the single most useful trick in hand force-analysis.</p>
+  </div>
+
+  <!-- TOOL 3: pick-your-pivot -->
+  <div class="card tool" id="pivotTool">
+    <div class="tool-label">Tool 3 <span>&middot; Pick your pivot</span></div>
+    <h3 style="margin-top:.3em">Make an unknown disappear</h3>
+    <p>A link is pinned at <i>A</i> (left) and carries an unknown reaction there, plus a known applied force at the far end. Choose which point to sum moments about. Sum about <i>A</i> and the unknown pin reaction contributes <strong>zero</strong> moment &mdash; the equation solves immediately. Sum about <i>G</i> and the reaction stays in, so you need a second equation.</p>
+    <div class="controls">
+      <div class="ctrl" style="flex:1 1 240px">
+        <label for="pvPoint">Sum moments about&hellip;</label>
+        <select id="pvPoint">
+          <option value="A" selected>pin A (smart choice)</option>
+          <option value="G">mass center G</option>
+          <option value="B">far end B</option>
+        </select>
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="pvStage" class="stage" viewBox="0 0 640 280" role="img" aria-label="A horizontal link pinned at A on the left, mass center G in the middle, applied force at end B; the chosen pivot is highlighted and the moment arms drawn."></svg>
+    </div>
+    <div class="readout" id="pvOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============ FBD NOTATION ============ -->
+<section id="fbd" aria-labelledby="fbd-h">
+  <span class="sec-tag">Notation</span>
+  <h2 id="fbd-h">Reading a free body diagram</h2>
+  <p>An IDP free body diagram (FBD) is not just a picture of forces &mdash; it is a <strong>bookkeeping language</strong>. The <em>style</em> of each arrow tells you instantly what is known and what you still have to solve for. The textbook&rsquo;s convention (Figure&nbsp;5.4):</p>
+
+  <div class="veckey" aria-hidden="true">
+    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20"><line x1="4" y1="10" x2="42" y2="10" stroke="#c2541d" stroke-width="2.5"/><polygon points="52,10 42,5 42,15" fill="#c2541d"/></svg> solid</span>
+    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20"><line x1="4" y1="10" x2="42" y2="10" stroke="#0a7ea4" stroke-width="2.5" stroke-dasharray="5 4"/><polygon points="52,10 42,5 42,15" fill="#0a7ea4"/></svg> dashed</span>
+    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20"><path d="M4,10 q5,-7 10,0 q5,7 10,0 q5,-7 10,0" fill="none" stroke="#10243a" stroke-width="2.2"/><polygon points="52,10 42,5 42,15" fill="#10243a"/></svg> squiggly</span>
+  </div>
+
+  <table>
+    <caption>Free-body-diagram vector notation (Figure 5.4)</caption>
+    <thead><tr><th>Arrow style</th><th>Magnitude</th><th>Direction</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">squiggly (wavy)</td><td>unknown</td><td>unknown</td><td>a pin/bearing reaction &mdash; you know <em>nothing</em> yet (two unknown components)</td></tr>
+      <tr><td class="mono">dashed</td><td>unknown</td><td><strong>known</strong></td><td>e.g. a two-force member, or a gear normal force along a known line (one unknown)</td></tr>
+      <tr><td class="mono">solid</td><td><strong>known</strong></td><td><strong>known</strong></td><td>a fully specified applied load (zero unknowns)</td></tr>
+      <tr><td class="mono">dashed arc</td><td>unknown</td><td>known (sense)</td><td>a torque of unknown magnitude, e.g. the driving torque you&rsquo;re solving for</td></tr>
+    </tbody>
+  </table>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>a treasure map&rsquo;s symbol key</strong>. A solid line is a road you&rsquo;ve already walked (fully known). A dashed line is a path whose direction is marked but whose length you must pace out (direction known, magnitude unknown). A squiggly line is &ldquo;here be dragons&rdquo; &mdash; you don&rsquo;t even know which way it points. Before doing <em>any</em> algebra, the arrow styles let you literally <em>count the dragons</em> (the unknowns) on the page.</p>
+  </div>
+
+  <!-- TOOL 4: FBD notation classifier -->
+  <div class="card tool" id="fbdTool">
+    <div class="tool-label">Tool 4 <span>&middot; Classify the vector</span></div>
+    <h3 style="margin-top:.3em">Pick the right arrow, count the unknowns</h3>
+    <p>For each force scenario, choose how it should be drawn. The diagram redraws the arrow in the correct style and keeps a running tally of how many scalar unknowns this link contributes &mdash; the very count you&rsquo;ll compare against &ldquo;3 equations per link.&rdquo;</p>
+    <div class="controls">
+      <div class="ctrl" style="flex:1 1 320px">
+        <label for="fbdCase">Force scenario</label>
+        <select id="fbdCase">
+          <option value="pin">unknown pin/bearing reaction</option>
+          <option value="tfm">force from a two-force member (line known)</option>
+          <option value="applied">a fully specified applied load</option>
+          <option value="torque">the unknown driving torque</option>
+        </select>
+      </div>
+      <div class="ctrl" style="flex:1 1 260px">
+        <label for="fbdStyle">Draw it as&hellip;</label>
+        <select id="fbdStyle">
+          <option value="squiggly">squiggly vector</option>
+          <option value="dashed">dashed vector</option>
+          <option value="solid">solid vector</option>
+          <option value="arc">dashed arc (torque)</option>
+        </select>
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="fbdStage" class="stage" viewBox="0 0 640 240" role="img" aria-label="A force or torque drawn in the selected arrow style on a small link, with a verdict on whether the style matches the scenario."></svg>
+    </div>
+    <div class="readout" id="fbdOut" aria-live="polite"></div>
+    <div id="fbdVerdict" class="verdict" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ============ 5.2 PARTIALLY 3-D ============ -->
+<section id="threed" aria-labelledby="td-h">
+  <span class="sec-tag">Section 5.2</span>
+  <h2 id="td-h">5.2 · Why a &ldquo;planar&rdquo; machine is partially three-dimensional</h2>
+  <p>Here is a subtlety that trips up almost everyone. For a planar mechanism, each link&rsquo;s mass center moves only in <i>X</i> and <i>Y</i>, and each link spins only about <i>Z</i>. So the <em>force</em> analysis ought to be purely 2-D&hellip; and yet the chapter insists it is three-dimensional. Where does the third dimension sneak in?</p>
+
+  <div class="defn">
+    <p style="margin:.2em 0"><strong>Partially three-dimensional planar mechanism.</strong> A mechanism whose links all move in <em>parallel</em> <i>XY</i> planes &mdash; not the <em>same</em> plane. Their mass centers are offset along <i>Z</i> (Figure&nbsp;5.11). The motion is planar; the <em>geometry of the forces</em> is not.</p>
+  </div>
+
+  <p>Real links are stacked side-by-side on their shared pins, like the leaves of a hinge. Each link&rsquo;s mass center sits at a slightly different <i>Z</i>. When a pin transmits force between two links lying in different <i>Z</i>-planes, that force &mdash; combined with its <i>Z</i> offset &mdash; produces moments about the <i>X</i> and <i>Y</i> axes, not just <i>Z</i>. The machine moves in a plane, but it must be held together in 3-D.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>door hinge</strong>. The door swings in one flat arc &mdash; pure planar motion. But the hinge has several knuckles stacked along the pin, each at a different height. The pin doesn&rsquo;t just resist the door swinging; it also resists the door <em>twisting</em> and <em>sagging</em> out of plane, because the knuckles push on it at different heights. Those out-of-plane reactions are the &ldquo;extra&rdquo; three-dimensional part of a problem that <em>looks</em> two-dimensional.</p>
+  </div>
+
+  <h3>The consequence: a four-bar is statically indeterminate</h3>
+  <p>Carry the full 3-D force bookkeeping through a general four-bar (Figure&nbsp;5.15) and the counts don&rsquo;t balance. The textbook tallies:</p>
+  <table>
+    <caption>Counting unknowns vs. equations in a 3-D four-bar force analysis</caption>
+    <thead><tr><th>Quantity</th><th>Count</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>unknown force components</td><td class="mono">8</td><td>Eq. 5.30</td></tr>
+      <tr><td>unknown moment components</td><td class="mono">8</td><td>Eq. 5.31</td></tr>
+      <tr><td>unknown torque component</td><td class="mono">1</td><td>Eq. 5.32</td></tr>
+      <tr><td><strong>total unknowns</strong></td><td class="mono"><strong>17</strong></td><td></td></tr>
+      <tr><td>scalar equilibrium equations</td><td class="mono">15</td><td>5 per link &times; 3 links</td></tr>
+      <tr><td><strong>shortfall</strong></td><td class="mono"><strong>2</strong></td><td>more unknowns than equations</td></tr>
+    </tbody>
+  </table>
+  <p>Two more unknowns than equations &rArr; the problem is <strong>statically indeterminate</strong>. The resolution is physical: although the four joint axes are <em>nominally</em> all along <i>Z</i>, manufacturing tolerances leave tiny <strong>angular misalignments</strong> between them. Supplying those known misalignments provides the two missing pieces of information and closes the gap.</p>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>This is exactly why a four-bar linkage built with cheap, sloppy bearings can bind, overheat, or wear unevenly &mdash; the indeterminate out-of-plane loads are real, and they go wherever the misalignment sends them. It&rsquo;s also why precision machinery uses self-aligning bearings or spherical joints: by <em>allowing</em> the small misalignment instead of fighting it, the designer keeps those parasitic 3-D moments from ever building up.</p>
+  </div>
+
+  <!-- TOOL 5: parallel-plane offset -->
+  <div class="card tool" id="offTool">
+    <div class="tool-label">Tool 5 <span>&middot; The out-of-plane offset</span></div>
+    <h3 style="margin-top:.3em">Slide the links apart in Z</h3>
+    <p>Two links share a pin but sit in parallel planes a distance <i>z</i> apart. Drag the offset and watch the in-plane force, acting across that <i>Z</i> gap, generate an out-of-plane moment <i>z&nbsp;&times;&nbsp;F</i>. At <i>z</i>&nbsp;=&nbsp;0 it&rsquo;s a clean 2-D problem; grow <i>z</i> and the 3-D moment that drives indeterminacy appears.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="ofZ">plane offset z (mm) &mdash; <span class="val" id="ofZv">14</span></label>
+        <input type="range" id="ofZ" min="0" max="40" step="1" value="14">
+      </div>
+      <div class="ctrl">
+        <label for="ofF">pin force F (N) &mdash; <span class="val" id="ofFv">60</span></label>
+        <input type="range" id="ofF" min="0" max="120" step="5" value="60">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="ofStage" class="stage" viewBox="0 0 640 300" role="img" aria-label="A perspective sketch of two links on a shared pin, separated along Z; the in-plane force times the Z offset is shown as an out-of-plane moment that grows with the offset."></svg>
+    </div>
+    <div class="readout" id="ofOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============ NEWTON-EULER ============ -->
+<section id="newtoneuler" aria-labelledby="ne-h">
+  <span class="sec-tag">Section 5.2 · continued</span>
+  <h2 id="ne-h">The Newton&ndash;Euler equations</h2>
+  <p>The fully general (spatial) equations of motion for a rigid body are the <strong>Newton&ndash;Euler</strong> equations (Figure&nbsp;5.12, Equations&nbsp;5.16 and 5.18):</p>
+  <div class="eqn" role="img" aria-label="Sum F equals m a sub g, equation 5.16. Sum M sub g equals I alpha plus omega cross I omega, equation 5.18.">
+    &Sigma;F&#8407; = m&nbsp;a&#8407;<sub>g</sub>
+    <span class="lbl">(5.16)</span>
+  </div>
+  <div class="eqn" role="img" aria-label="Sum of moments about G equals the inertia matrix I times alpha plus omega cross quantity I omega. Equation 5.18.">
+    &Sigma;M&#8407;<sub>g</sub> = <span class="c">I</span>&nbsp;&alpha;&#8407; + <span class="m">&omega;&#8407; &times; ( I&nbsp;&omega;&#8407; )</span>
+    <span class="lbl">(5.18)</span>
+  </div>
+  <p>Here <span style="font-family:var(--mono)">I</span> is the 3&times;3 <strong>inertia matrix</strong> (Equation&nbsp;5.17), whose diagonal entries are the familiar moments of inertia and whose off-diagonal entries are the <strong>products of inertia</strong>:</p>
+  <div class="eqn" role="img" aria-label="The inertia matrix I has diagonal entries I x x, I y y, I z z and off-diagonal negative products of inertia I x y, I x z, I y z.">
+    I = [ I<sub>xx</sub> &nbsp;&minus;I<sub>xy</sub> &nbsp;&minus;I<sub>xz</sub> ;<br>
+    &nbsp;&nbsp;&minus;I<sub>yx</sub> &nbsp;&nbsp;I<sub>yy</sub> &nbsp;&minus;I<sub>yz</sub> ;<br>
+    &nbsp;&nbsp;&minus;I<sub>zx</sub> &nbsp;&minus;I<sub>zy</sub> &nbsp;&nbsp;I<sub>zz</sub> ]
+    <span class="lbl">(5.17)</span>
+  </div>
+  <p>The term <i>&omega;&#8407;&nbsp;&times;&nbsp;(I&omega;&#8407;)</i> is the <strong>gyroscopic</strong> term &mdash; the reason a spinning top precesses. It looks intimidating, but for a planar machine it almost entirely evaporates.</p>
+
+  <h3>Collapse to planar motion</h3>
+  <p>A link in planar motion has a <strong>plane of symmetry parallel to the plane of motion</strong> (Figure&nbsp;5.13). That symmetry forces the products of inertia <i>I<sub>xz</sub></i> and <i>I<sub>yz</sub></i> to zero, and the angular velocity points purely along <i>Z</i>. Equation&nbsp;5.18 collapses dramatically (Equation&nbsp;5.20):</p>
+  <div class="eqn" role="img" aria-label="Sum of moments about G equals a column vector zero, zero, I z z alpha, where the gyroscopic term equals zero, giving M equals I sub g alpha. Equation 5.20.">
+    &Sigma;M&#8407;<sub>g</sub> = [ 0 ; 0 ; I<sub>zz</sub>&alpha; ] + <span class="m">( &omega;&#8407; &times; I&omega;&#8407; = 0 )</span> = [ 0 ; 0 ; I<sub>g</sub>&alpha; ]
+    <span class="lbl">(5.20)</span>
+  </div>
+  <p>The whole spatial mouthful reduces to the friendly scalar <strong>&Sigma;M = I<sub>g</sub>&alpha;</strong> you already used in &sect;5.1. That is <em>why</em> we could start there: planar symmetry quietly did the hard work.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;a <strong>perfectly balanced car tire versus a wobbly one</strong>. A balanced, symmetric tire spins about its axle with zero shake &mdash; no gyroscopic surprises (the products of inertia are zero). An out-of-balance tire has mass off the symmetry plane, so spinning it produces a wobble that fights the axle &mdash; that&rsquo;s the <i>&omega;&times;I&omega;</i> term made physical. Planar machine links are the balanced tire: symmetric about their plane, so the wobble term is exactly zero.</p>
+  </div>
+
+  <h3>Composite bodies</h3>
+  <p>A link made by welding several shapes together (Figure&nbsp;5.14) may <em>not</em> be symmetric about a single plane, so the clean collapse (Eq.&nbsp;5.22) needs the correction terms of Equations&nbsp;5.28 and 5.29, summing each sub-shape&rsquo;s contribution. The principle is unchanged &mdash; just more bookkeeping for an asymmetric part.</p>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>The gyroscopic term you got to drop here is the <em>entire</em> design problem for helicopter rotors, ship stabilizers, and reaction wheels on satellites. Planar-machine designers get to ignore it; aerospace designers build their careers on it. Knowing <em>why</em> it vanished here tells you exactly when you&rsquo;re no longer allowed to ignore it.</p>
+  </div>
+</section>
+
+<!-- ============ 5.3 STATIC vs INERTIA ============ -->
+<section id="staticinertia" aria-labelledby="si-h">
+  <span class="sec-tag">Section 5.3</span>
+  <h2 id="si-h">5.3 · Static force analysis vs. inertia force analysis</h2>
+  <p>In any IDP the known loads fall into two buckets: <strong>externally applied</strong> forces and torques (weights, springs, the load the machine is working against) and <strong>inertia loads</strong> (the <i>m&nbsp;a<sub>g</sub></i> and <i>I<sub>g</sub>&alpha;</i> terms). Frequently one bucket dominates the other, and you can simplify by neglecting the smaller one. That gives two limiting analyses:</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:.2em">Static force analysis</h3>
+      <p style="margin:.3em 0">External loads dominate; inertia is negligible. Formally, <strong>set every mass and inertia to zero</strong> (all <i>m</i>&rsquo;s and <i>I</i>&rsquo;s &rarr; 0), so <i>m&nbsp;a<sub>g</sub></i>&nbsp;=&nbsp;0 and <i>I<sub>g</sub>&alpha;</i>&nbsp;=&nbsp;0. Every link is in ordinary static equilibrium.</p>
+      <p style="margin:.3em 0"><strong>Use when:</strong> the machine moves slowly, or the working load dwarfs the part weights.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:.2em">Inertia force analysis</h3>
+      <p style="margin:.3em 0">Inertia dominates; some external loads (often weight, sometimes the load torque) are negligible by comparison. The <i>m&nbsp;a<sub>g</sub></i> and <i>I<sub>g</sub>&alpha;</i> terms are the main event.</p>
+      <p style="margin:.3em 0"><strong>Use when:</strong> the machine runs fast, with light parts and large accelerations.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="h">Both are still the IDP</span>
+    <p style="margin:.4em 0 0">Neither is a new method &mdash; they&rsquo;re just the full IDP with one bucket of terms dropped because it&rsquo;s small. When in doubt, keep everything: a <strong>full dynamic</strong> analysis carries both buckets and is always correct. The simplifications are about effort, not principle.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>weighing a letter on a postal scale versus a kitchen scale during an earthquake</strong>. Sitting still, the only thing that matters is the letter&rsquo;s weight &mdash; that&rsquo;s static analysis. But if you&rsquo;re jiggling the scale violently up and down, the reading is dominated by how fast you&rsquo;re shaking it (the inertia), and the actual weight barely registers &mdash; that&rsquo;s inertia analysis. Same object; which effect dominates depends entirely on how hard it&rsquo;s being accelerated.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A hand-cranked can opener turns slowly &mdash; pure static analysis sizes it fine. The connecting rod in a 7000-rpm motorcycle engine is the opposite extreme: at top speed the inertia force flinging the rod around is <em>thousands</em> of times its own weight, so gravity is rounding error and the analysis is all inertia. The same chapter of theory covers both; only the dominant bucket changes.</p>
+  </div>
+
+  <!-- TOOL 6: dominance slider -->
+  <div class="card tool" id="domTool">
+    <div class="tool-label">Tool 6 <span>&middot; Which bucket dominates?</span></div>
+    <h3 style="margin-top:.3em">Spin a crank from slow to fast</h3>
+    <p>A slider-crank part of mass <i>m</i> is driven at angular speed &omega;. Its inertia force scales with <i>m&nbsp;r&nbsp;&omega;&sup2;</i>, while its weight <i>mg</i> stays put. Slide the speed and watch the bar chart tip from &ldquo;static regime&rdquo; to &ldquo;inertia regime,&rdquo; and see the recommendation switch.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="domRpm">crank speed (rpm) &mdash; <span class="val" id="domRpmv">300</span></label>
+        <input type="range" id="domRpm" min="0" max="6000" step="50" value="300">
+      </div>
+      <div class="ctrl">
+        <label for="domR">crank radius r (m) &mdash; <span class="val" id="domRv">0.05</span></label>
+        <input type="range" id="domR" min="0.01" max="0.2" step="0.01" value="0.05">
+      </div>
+      <div class="ctrl">
+        <label for="domM">part mass m (kg) &mdash; <span class="val" id="domMv">0.4</span></label>
+        <input type="range" id="domM" min="0.05" max="3" step="0.05" value="0.4">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="domStage" class="stage" viewBox="0 0 640 280" role="img" aria-label="Two bars compare the inertia force m r omega squared against the weight m g; their ratio decides whether a static or inertia analysis is appropriate."></svg>
+    </div>
+    <div class="readout" id="domOut" aria-live="polite"></div>
+    <div id="domVerdict" class="verdict" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ============ 5.4 ROLLING CONTACTS ============ -->
+<section id="rolling" aria-labelledby="rc-h">
+  <span class="sec-tag">Section 5.4</span>
+  <h2 id="rc-h">5.4 · Force analysis of rolling contacts</h2>
+  <p>Back in Chapter&nbsp;3 you met two ways for one body to roll on another. Now we analyze the <em>forces</em> at the contact. The two kinds behave very differently:</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin-top:0">Friction drive</h4>
+      <p style="margin:.3em 0">Two smooth wheels pressed together. Motion is transmitted only by <strong>static friction</strong> at the contact. The no-slip condition holds <em>only</em> while there&rsquo;s enough normal force.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">Positive drive</h4>
+      <p style="margin:.3em 0">Gear teeth (involute profile) interlock. Motion is transmitted by the teeth pushing on each other &mdash; no reliance on friction, so it can never slip.</p>
+    </div>
+  </div>
+
+  <h3>Compliance: why a single contact point is a fiction</h3>
+  <p>In theory two rolling bodies touch at a single point. In practice the arms that carry them have length errors. Too long and the bodies <strong>overlap</strong> (can&rsquo;t even assemble); too short and there&rsquo;s a <strong>gap</strong> &mdash; no normal force, so no friction, so no drive. The fix is <strong>compliance</strong>: a built-in spring (link&nbsp;4 in Figure&nbsp;5.28) that takes up the slack and presses the wheels together regardless of small length errors.</p>
+
+  <div class="defn">
+    <p style="margin:.2em 0"><strong>Preload.</strong> The normal force <i>F<sup>n</sup><sub>23</sub></i> created by the compliant element. It must be large enough to guarantee the no-slip condition through static friction:</p>
+  </div>
+  <div class="eqn" role="img" aria-label="The tangential friction force F t 23 must be less than or equal to the static friction coefficient times the normal force F n 23.">
+    F<sup>t</sup><sub>23</sub> &le; &mu;<sub>static</sub>&nbsp;F<sup>n</sup><sub>23</sub>
+    <span class="lbl">no-slip condition for a friction drive</span>
+  </div>
+  <p>If the tangential (drive) force ever exceeds <i>&mu;&nbsp;F<sup>n</sup></i>, the wheels slip and the drive fails. The preload spring is what keeps <i>F<sup>n</sup></i> high enough.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>pinching a sheet of paper to pull it from a stack</strong>. Pinch too lightly (low preload) and your fingers just slide &mdash; the paper stays put. Pinch hard enough and friction grips, and the paper comes with your hand. The harder the pull you need (tangential force), the harder you must pinch (normal preload). A friction drive&rsquo;s spring is doing the pinching for you, automatically and constantly.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Older record players and tape decks used a spring-loaded rubber idler wheel &mdash; a friction drive with built-in compliance &mdash; to spin the platter at a steady speed. When the spring weakened or the rubber hardened, the preload dropped, the wheel slipped, and the music slowed and wowed. That audible failure <em>is</em> the no-slip condition being violated.</p>
+  </div>
+
+  <h3>Positive drive: the pressure angle</h3>
+  <p>Gears with involute teeth give a positive drive with three elegant properties (Figure&nbsp;5.30): the common normal&rsquo;s direction never changes (the <strong>pressure angle</strong> &Phi; is constant), the virtual contact point (the <strong>pitch point</strong> <i>P</i>) doesn&rsquo;t move, and the common normal always passes through <i>P</i>. The contact force therefore splits cleanly into a tangential part (which does the driving) and a normal part, related by the pressure angle (Equation&nbsp;5.43):</p>
+  <div class="eqn" role="img" aria-label="The tangent of the pressure angle phi equals F n 32 over F t 32, so F n 32 equals F t 32 times tangent phi. Equation 5.43.">
+    tan&Phi; = F<sup>n</sup><sub>32</sub> / F<sup>t</sup><sub>32</sub> &nbsp;&rarr;&nbsp; <span class="c">F<sup>n</sup><sub>32</sub> = F<sup>t</sup><sub>32</sub>&nbsp;tan&Phi;</span>
+    <span class="lbl">(5.43)</span>
+  </div>
+  <p>The tangential component is the useful, torque-producing force. The normal component is &ldquo;along for the ride&rdquo; &mdash; it does no work but it <em>does</em> push the gears apart and load their bearings. A larger pressure angle means a larger separating force for the same drive.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like&hellip;</span>
+    <p>&hellip;<strong>pushing a child on a swing from slightly the wrong angle</strong>. If you push perfectly along the swing&rsquo;s motion, every bit of your effort adds speed (all tangential). Push at an angle and only part of your effort drives the swing; the rest just shoves the child sideways against the chains &mdash; wasted, and hard on the hardware. The pressure angle &Phi; is exactly that &ldquo;wrong angle&rdquo; baked into the gear geometry: tan&Phi; sets how much of the tooth force is the useless sideways shove.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Standard industrial gears use a 20&deg; pressure angle &mdash; a deliberate compromise. A smaller angle wastes less force on separation and runs quieter, but makes thin, weak teeth that chip. A larger angle gives stout, strong teeth but heavier bearing loads and more noise. That single number on a gear catalog is a force-analysis decision straight out of Equation&nbsp;5.43.</p>
+  </div>
+
+  <!-- TOOL 7: pressure-angle resolver -->
+  <div class="card tool" id="paTool">
+    <div class="tool-label">Tool 7 <span>&middot; Pressure-angle force splitter</span></div>
+    <h3 style="margin-top:.3em">Split the gear-tooth force</h3>
+    <p>A drive (tangential) force <i>F<sup>t</sup></i> acts at the pitch point. The pressure angle &Phi; decides how big the accompanying separating (normal) force is, via Eq.&nbsp;5.43. Slide both and watch the total tooth force tilt, and the wasted separating component grow with &Phi;.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="paPhi">pressure angle &Phi; (&deg;) &mdash; <span class="val" id="paPhiv">20</span></label>
+        <input type="range" id="paPhi" min="0" max="45" step="1" value="20">
+      </div>
+      <div class="ctrl">
+        <label for="paFt">tangential (drive) force F<sup>t</sup> (N) &mdash; <span class="val" id="paFtv">100</span></label>
+        <input type="range" id="paFt" min="0" max="200" step="5" value="100">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="paStage" class="stage" viewBox="0 0 640 320" role="img" aria-label="Two pitch circles meeting at the pitch point P; the tooth force is drawn and resolved into a tangential drive component and a normal separating component set by the pressure angle."></svg>
+    </div>
+    <div class="readout" id="paOut" aria-live="polite"></div>
+  </div>
+
+  <!-- TOOL 8: friction-drive no-slip -->
+  <div class="card tool" id="slipTool">
+    <div class="tool-label">Tool 8 <span>&middot; Friction-drive no-slip checker</span></div>
+    <h3 style="margin-top:.3em">Will it grip, or slip?</h3>
+    <p>A friction drive must satisfy <i>F<sup>t</sup></i>&nbsp;&le;&nbsp;<i>&mu;&nbsp;F<sup>n</sup></i>. Set the preload <i>F<sup>n</sup></i>, the friction coefficient &mu;, and the demanded drive force <i>F<sup>t</sup></i>. The tool shows the available friction ceiling against the demand and declares grip or slip &mdash; the live form of Figure&nbsp;5.29.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="slFn">preload F<sup>n</sup> (N) &mdash; <span class="val" id="slFnv">120</span></label>
+        <input type="range" id="slFn" min="0" max="300" step="5" value="120">
+      </div>
+      <div class="ctrl">
+        <label for="slMu">static friction &mu; &mdash; <span class="val" id="slMuv">0.30</span></label>
+        <input type="range" id="slMu" min="0.05" max="0.9" step="0.01" value="0.30">
+      </div>
+      <div class="ctrl">
+        <label for="slFt">demanded drive F<sup>t</sup> (N) &mdash; <span class="val" id="slFtv">30</span></label>
+        <input type="range" id="slFt" min="0" max="200" step="5" value="30">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="slStage" class="stage" viewBox="0 0 640 260" role="img" aria-label="A bar showing the available friction ceiling mu times F n against the demanded tangential force, with a grip-or-slip verdict."></svg>
+    </div>
+    <div class="readout" id="slOut" aria-live="polite"></div>
+    <div id="slVerdict" class="verdict" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ============ WORKED EXAMPLES ============ -->
+<section id="examples" aria-labelledby="ex-h">
+  <span class="sec-tag">Worked Examples</span>
+  <h2 id="ex-h">Two examples, fully reasoned</h2>
+  <p>These follow Examples&nbsp;5.3 and 5.4 in the text: the rear-windshield-wiper drive mechanism. The point is not to grind out numbers but to practice the chapter&rsquo;s central skill &mdash; <strong>drawing the free body diagrams and verifying the problem is solvable by counting unknowns against equations.</strong></p>
+
+  <!-- Example 5.3 stepper -->
+  <div class="card tool" id="ex53">
+    <div class="tool-label">Example 5.3 <span>&middot; Positive-drive wiper mechanism &mdash; count the unknowns</span></div>
+    <h3 style="margin-top:.3em">Find the driving torque T&#8407;<sub>2</sub></h3>
+    <p>A motor drives crank link&nbsp;2; through a positive-drive rolling contact (gears, pressure angle 20&deg;) between links&nbsp;3 and 5, it moves the wiper on gear&nbsp;5. The load torque <i>T&#8407;<sub>5</sub></i> is known. We want the driving torque <i>T&#8407;<sub>2</sub></i>. Step through the reasoning:</p>
+    <div class="stepper" id="ex53dots" role="tablist" aria-label="Example 5.3 steps"></div>
+    <div class="step-body card" id="ex53body" aria-live="polite" style="background:var(--paper-2); box-shadow:none"></div>
+    <div class="step-nav">
+      <button class="secondary" id="ex53prev">&larr; Previous</button>
+      <button id="ex53next">Next step &rarr;</button>
+      <span class="step-count" id="ex53count"></span>
+    </div>
+  </div>
+
+  <!-- Example 5.4 -->
+  <div class="card" id="ex54">
+    <h3 style="margin-top:.2em">Example 5.4 &middot; What if it were a friction drive instead?</h3>
+    <p>Same mechanism, but suppose the contact between 3 and 5 were a <strong>friction</strong> drive rather than gears. What changes in the force/moment bookkeeping?</p>
+    <details>
+      <summary>The free body diagrams are identical &mdash; so what actually changes?</summary>
+      <div class="body">
+        <p>The FBDs and the count of unknowns are exactly the same as Example&nbsp;5.3. The difference is one equation:</p>
+        <ul class="clean">
+          <li>In the <strong>positive drive</strong>, the extra equation tying the contact force together is the pressure-angle relation <i>F<sup>n</sup><sub>35</sub></i>&nbsp;=&nbsp;<i>F<sup>t</sup><sub>35</sub></i>&nbsp;tan&Phi; (Eq.&nbsp;5.48) &mdash; giving 10 equations in 10 unknowns.</li>
+          <li>In a <strong>friction drive</strong>, Equation&nbsp;5.48 no longer applies. Instead the force in the arm, <i>F&#8407;<sub>4</sub></i>, is a <strong>known preload</strong>. That removes one unknown, reducing the system to <strong>9 equations in 9 unknowns</strong>.</li>
+        </ul>
+        <p>Both are determinate &mdash; just balanced differently. The text notes the practical punchline: a friction drive would realistically <em>not</em> be used in this mechanism, and in general friction drives are less common than positive drives. The wiper&rsquo;s gears are the right call.</p>
+      </div>
+    </details>
+    <div class="callout">
+      <span class="h">The transferable lesson</span>
+      <p style="margin:.4em 0 0">Whenever you change a joint&rsquo;s <em>type</em>, you change which extra equation closes the system &mdash; not the free body diagram. Always re-run the count: a determinate problem has equations&nbsp;=&nbsp;unknowns, every time.</p>
+    </div>
+  </div>
+
+  <!-- Example 5.5 — fully numeric slider-crank IDP -->
+  <div class="card" id="ex55intro">
+    <h3 style="margin-top:.2em">Example 5.5 &middot; A fully numeric IDP: the slider-crank engine</h3>
+    <p>Examples 5.3 and 5.4 taught the <em>setup</em>. Now we carry one all the way to numbers &mdash; the analysis that actually sizes a motor. We take the classic <strong>slider-crank</strong> (the heart of every piston engine and compressor) and run the complete inverse dynamics pipeline: position &rarr; velocity &rarr; acceleration &rarr; inertia loads &rarr; force solve.</p>
+    <div class="grid2">
+      <div>
+        <h4 style="margin-top:.6em">Given (the machine)</h4>
+        <table>
+          <caption>Geometry &amp; inertia</caption>
+          <tbody>
+            <tr><td>crank length <i>r<sub>2</sub></i> (OA)</td><td class="mono">0.10 m</td></tr>
+            <tr><td>rod length <i>r<sub>3</sub></i> (AB)</td><td class="mono">0.30 m</td></tr>
+            <tr><td>crank mass <i>m<sub>2</sub></i></td><td class="mono">1.2 kg</td></tr>
+            <tr><td>rod mass <i>m<sub>3</sub></i></td><td class="mono">2.5 kg</td></tr>
+            <tr><td>slider mass <i>m<sub>4</sub></i></td><td class="mono">1.8 kg</td></tr>
+            <tr><td>crank inertia <i>I<sub>g2</sub></i></td><td class="mono">0.004 kg&middot;m&sup2;</td></tr>
+            <tr><td>rod inertia <i>I<sub>g3</sub></i></td><td class="mono">0.019 kg&middot;m&sup2;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h4 style="margin-top:.6em">Given (the motion &mdash; this is an IDP)</h4>
+        <table>
+          <caption>State of motion at the instant</caption>
+          <tbody>
+            <tr><td>crank angle <i>&theta;<sub>2</sub></i></td><td class="mono">60&deg;</td></tr>
+            <tr><td>crank speed <i>&omega;<sub>2</sub></i></td><td class="mono">200 rad/s (&asymp;1910 rpm)</td></tr>
+            <tr><td>crank accel <i>&alpha;<sub>2</sub></i></td><td class="mono">0 (constant speed)</td></tr>
+            <tr><td>gravity</td><td class="mono">neglected (inertia analysis)</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:.92rem; color:var(--ink-soft); margin:.3em 0 0">Mass centers: crank and rod at their midpoints; slider mass at pin B. The slider rides on the horizontal axis (<i>y<sub>B</sub></i>&nbsp;=&nbsp;0).</p>
+      </div>
+    </div>
+    <p><strong>Find:</strong> the driving torque <i>T<sub>2</sub></i> the motor must supply, and the pin reactions at the ground bearing O, the crank&ndash;rod pin A, and the rod&ndash;slider pin B.</p>
+  </div>
+
+  <div class="card tool" id="ex55">
+    <div class="tool-label">Example 5.5 <span>&middot; Step through the full numeric solve</span></div>
+    <h3 style="margin-top:.3em">From given motion to motor torque</h3>
+    <p>Each step shows the actual numbers. The logic is the universal IDP pipeline: solve the kinematics first (you know how), turn it into inertia loads, then apply &Sigma;F&nbsp;=&nbsp;<i>m&nbsp;a<sub>g</sub></i> and &Sigma;M&nbsp;=&nbsp;<i>I<sub>g</sub>&alpha;</i> to every link and solve the linear system.</p>
+    <div class="stepper" id="ex55dots" role="tablist" aria-label="Example 5.5 steps"></div>
+    <div class="step-body card" id="ex55body" aria-live="polite" style="background:var(--paper-2); box-shadow:none"></div>
+    <div class="step-nav">
+      <button class="secondary" id="ex55prev">&larr; Previous</button>
+      <button id="ex55next">Next step &rarr;</button>
+      <span class="step-count" id="ex55count"></span>
+    </div>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>This is exactly the calculation an engine designer runs &mdash; except they sweep <i>&theta;<sub>2</sub></i> through all 360&deg; to find the <em>worst-case</em> bearing load and the <em>peak</em> torque, which set the bearing size and the flywheel. Notice the scale: at ~1910 rpm the bearing forces reach <strong>several kilonewtons</strong> on parts weighing a couple of kilograms &mdash; the inertia force is hundreds of times the weight. That is why gravity was safely dropped, and why high-revving engines live or die by how light their reciprocating parts are.</p>
+  </div>
+
+  <!-- TOOL 9: live slider-crank IDP solver -->
+  <div class="card tool" id="scTool">
+    <div class="tool-label">Tool 9 <span>&middot; Live slider-crank IDP solver</span></div>
+    <h3 style="margin-top:.3em">Sweep the crank and watch the loads</h3>
+    <p>The same mechanism as Example 5.5, solved live at every crank angle. Drag <i>&theta;<sub>2</sub></i> and the speed; the linkage redraws and the driving torque and three pin reactions update. Spin it slowly to find where the torque peaks and where a bearing sees its worst load &mdash; the numbers a designer actually sizes against.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="scTheta">crank angle &theta;<sub>2</sub> (&deg;) &mdash; <span class="val" id="scThetav">60</span></label>
+        <input type="range" id="scTheta" min="0" max="360" step="1" value="60">
+      </div>
+      <div class="ctrl">
+        <label for="scW">crank speed &omega;<sub>2</sub> (rad/s) &mdash; <span class="val" id="scWv">200</span></label>
+        <input type="range" id="scW" min="0" max="400" step="10" value="200">
+      </div>
+      <div class="ctrl" style="flex:0 0 auto; justify-content:flex-end">
+        <label>&nbsp;</label>
+        <button id="scPlay" aria-pressed="false">&#9654; Animate</button>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="stage-wrap">
+        <svg id="scStage" class="stage" viewBox="0 0 440 300" role="img" aria-label="A slider-crank: ground pin O at left, crank to pin A, connecting rod to slider B on the horizontal axis; inertia-force arrows are drawn on each link."></svg>
+      </div>
+      <div class="stage-wrap">
+        <svg id="scChart" class="stage" viewBox="0 0 440 300" role="img" aria-label="A plot of the required driving torque versus crank angle over one full revolution, with the current angle marked."></svg>
+      </div>
+    </div>
+    <div class="readout" id="scOut" aria-live="polite"></div>
+    <p style="margin:.6em 0 0; font-size:.92rem; color:var(--ink-soft)">Set <span class="kbd">&omega;<sub>2</sub> = 0</span> and every inertia load collapses to zero &mdash; with no external load left, the torque and reactions vanish. That is the <strong>static</strong> limit (&sect;5.3) of this very machine.</p>
+  </div>
+</section>
+
+<!-- ============ SELF-CHECK QUIZ ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Self-Check</span>
+  <h2 id="quiz-h">Check your understanding</h2>
+  <p>Eight questions spanning the chapter. Pick an answer to lock it in and read the explanation. <span class="q-score">Score: <span id="quizScore">0 / 0</span></span></p>
+  <div id="quizMount"></div>
+  <div style="margin-top:14px"><button id="quizReset" class="secondary">Reset &amp; reshuffle</button></div>
+</section>
+
+<!-- ============ VIDEOS ============ -->
+<section id="videos" aria-labelledby="vid-h">
+  <span class="sec-tag">Video Lectures</span>
+  <h2 id="vid-h">Watch &amp; reinforce</h2>
+  <p>Four videos that reinforce the chapter. The first two ground the force-analysis fundamentals (inertia forces, free body diagrams, equilibrium); the third works dynamic force analysis on a linkage; the fourth digs into gear-tooth forces and the pressure angle behind &sect;5.4.</p>
+  <p class="ext-note">Videos are hosted on YouTube and play in-page; an internet connection is required to view them.</p>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/V9xsb29BL3Y?rel=0"
+        title="Dynamic force analysis of mechanisms — inertia forces and free body diagrams"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Force analysis fundamentals &mdash; inertia forces &amp; FBDs</h3>
+      <p style="margin:.3em 0 .2em">Grounds the planar-kinetics machinery of &sect;5.1: how inertia forces and torques enter a free body diagram and how the per-link equilibrium equations are assembled. Watch this before the single-link tool to see the <i>m&nbsp;a<sub>g</sub></i> and <i>I<sub>g</sub>&alpha;</i> terms in action.</p>
+      <div class="video-tags"><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 5.1 Planar Kinetics</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/ZASVKAlegfQ?rel=0"
+        title="Static force analysis and equilibrium of machine members"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Static force analysis &amp; equilibrium of members</h3>
+      <p style="margin:.3em 0 .2em">Develops the static-equilibrium side of &sect;5.3 &mdash; two-force and three-force members, summing moments about a chosen point, and the &ldquo;count equations vs. unknowns&rdquo; discipline used throughout the worked examples.</p>
+      <div class="video-tags"><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 5.3 Static vs. Inertia &amp; Moments about A</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="h">Notation bridge</span>
+    <p style="margin:.4em 0 0">Speakers vary: some call the inverse problem &ldquo;inverse dynamics,&rdquo; others &ldquo;dynamic force analysis&rdquo; or simply &ldquo;the kinetics problem.&rdquo; Some introduce inertia loads via <strong>D&rsquo;Alembert&rsquo;s principle</strong> &mdash; moving <i>m&nbsp;a<sub>g</sub></i> to the other side as a fictitious &ldquo;inertia force&rdquo; so the link looks like a statics problem. That is the same physics as our &Sigma;F&nbsp;=&nbsp;<i>m&nbsp;a<sub>g</sub></i>; just rearranged.</p>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/8KIkRq3KXg0?rel=0"
+        title="Dynamic force analysis of a four-bar / slider-crank linkage worked example"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Dynamic force analysis on a linkage &mdash; worked example</h3>
+      <p style="margin:.3em 0 .2em">Carries an IDP through a real linkage end-to-end: from the known accelerations to the joint reactions and the required input torque. Mirrors the reasoning of Example&nbsp;5.3 &mdash; watch how the unknowns are set up and counted before any solving begins.</p>
+      <div class="video-tags"><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports Worked Examples &amp; &sect; 5.2</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/z4-vL6lxR8U?rel=0"
+        title="Gear tooth forces and the pressure angle"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Gear-tooth forces &amp; the pressure angle</h3>
+      <p style="margin:.3em 0 .2em">Zooms into the positive-drive contact of &sect;5.4: how a gear-tooth force splits into a tangential (driving) component and a normal (separating) component through the pressure angle &mdash; the live form of Equation&nbsp;5.43 and the pressure-angle tool.</p>
+      <div class="video-tags"><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports &sect; 5.4 Rolling Contacts</span>
+    </div>
+  </div>
+  <p>After watching, return to the <a href="#paTool">pressure-angle force splitter</a> and the <a href="#slipTool">no-slip checker</a> and reproduce the force splits each video implies.</p>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rcc-h">
+  <span class="sec-tag">Quick Reference</span>
+  <h2 id="rcc-h">Chapter 5 formula card</h2>
+  <p>Everything at a glance &mdash; good for review and exam prep. Use your browser&rsquo;s print function to save just this card (interactive tools and navigation are hidden when printing).</p>
+  <div class="refcard">
+    <div class="rc-head"><span>ENGI 216 · CH 5 · INVERSE DYNAMICS PROBLEM</span><span>given motion &rarr; find forces</span></div>
+    <div class="rc-body">
+      <div class="rc-grid">
+        <div class="rc-block">
+          <h4>Planar equations of motion</h4>
+          <div class="rc-eq">&Sigma;F&#8407; = m a&#8407;<sub>g</sub> &nbsp;(Eq 5.1)</div>
+          <div class="rc-eq">&Sigma;M<sub>g</sub> = I<sub>g</sub>&alpha; &nbsp;(Eq 5.4 / 5.20)</div>
+          <div class="rc-eq">M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> &minus; r<sub>y</sub>F<sub>x</sub></div>
+          <h4>Moment about arbitrary point A</h4>
+          <div class="rc-eq">&Sigma;M<sub>a</sub> = I<sub>g</sub>&alpha; + (r&#8407;<sub>g/a</sub> &times; m a&#8407;<sub>g</sub>)<sub>z</sub> &nbsp;(5.10)</div>
+          <h4>Newton&ndash;Euler (spatial)</h4>
+          <div class="rc-eq">&Sigma;M<sub>g</sub> = I&alpha; + &omega; &times; (I&omega;) &nbsp;(5.18)</div>
+          <div class="rc-eq">planar: gyroscopic term &rarr; 0</div>
+        </div>
+        <div class="rc-block">
+          <h4>FBD vector notation</h4>
+          <div class="rc-eq">squiggly = mag &amp; dir unknown</div>
+          <div class="rc-eq">dashed = dir known, mag unknown</div>
+          <div class="rc-eq">solid = fully known · arc = unknown torque</div>
+          <h4>Friction drive (no-slip)</h4>
+          <div class="rc-eq">F<sup>t</sup><sub>23</sub> &le; &mu;<sub>static</sub> F<sup>n</sup><sub>23</sub> · F<sup>n</sup> = preload</div>
+          <h4>Positive drive (gears)</h4>
+          <div class="rc-eq">F<sup>n</sup><sub>32</sub> = F<sup>t</sup><sub>32</sub> tan&Phi; &nbsp;(5.43); &Phi; const</div>
+          <h4>Determinacy</h4>
+          <div class="rc-eq">3 scalar eqns / planar link; eqns = unknowns</div>
+        </div>
+      </div>
+      <h4 style="margin-top:14px">Decision guide</h4>
+      <ul class="rc-list">
+        <li><span class="k">IDP</span> motion known &rarr; solve for forces &amp; torques (this chapter)</li>
+        <li><span class="k">FDP</span> forces known &rarr; solve for motion (simulation)</li>
+        <li><span class="k">Static analysis</span> drop inertia (m, I &rarr; 0) when slow / heavy load</li>
+        <li><span class="k">Inertia analysis</span> drop weight/some loads when fast / light parts</li>
+        <li><span class="k">4-bar in 3-D</span> 17 unknowns vs 15 eqns &rarr; indeterminate; misalignments close it</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Glossary</span>
+  <h2 id="gl-h">Key terms</h2>
+  <p>Search or scroll. <span id="glossCount" class="ext-note"></span></p>
+  <div class="glossary-search">
+    <label for="glossInput" class="visually-hidden">Search glossary terms</label>
+    <input type="text" id="glossInput" placeholder="Search terms (e.g. preload, pressure angle, indeterminate)…" autocomplete="off">
+  </div>
+  <dl class="gloss-list" id="glossList"></dl>
+  <p class="gloss-empty" id="glossEmpty" hidden>No terms match your search.</p>
+</section>
+
+<!-- ============ EXTERNAL RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">External Resources</span>
+  <h2 id="res-h">Go deeper</h2>
+  <p>Curated links for supplementary and foundational study. All open in a new tab (indicated on each card).</p>
+  <div class="res-group">
+    <h3>Foundations &amp; refreshers</h3>
+    <div class="res-grid" id="resFound"></div>
+  </div>
+  <div class="res-group">
+    <h3>Force analysis of machines</h3>
+    <div class="res-grid" id="resCore"></div>
+  </div>
+  <div class="res-group">
+    <h3>Rolling contacts &amp; gears</h3>
+    <div class="res-grid" id="resVisual"></div>
+  </div>
+</section>
+
+<!-- ============ RECAP ============ -->
+<section id="recap" aria-labelledby="recap-h">
+  <span class="sec-tag">Objectives Recap</span>
+  <h2 id="recap-h">What you should now be able to do</h2>
+  <div class="card">
+    <ul class="clean">
+      <li><strong>Distinguish</strong> the inverse dynamics problem (motion&nbsp;&rarr;&nbsp;forces) from the forward problem (forces&nbsp;&rarr;&nbsp;motion), and identify which a design task is asking.</li>
+      <li><strong>Write</strong> the three planar equilibrium equations per link, summing moments about <i>G</i> or about a strategically chosen arbitrary point <i>A</i>.</li>
+      <li><strong>Encode</strong> known and unknown loads with the standard FBD notation, and count unknowns against equations to test determinacy.</li>
+      <li><strong>Explain</strong> why a planar machine is partially three-dimensional and why a 3-D four-bar force analysis is statically indeterminate (17 vs. 15) until misalignments are specified.</li>
+      <li><strong>Apply</strong> the Newton&ndash;Euler equations and show how planar symmetry kills the gyroscopic term, recovering &Sigma;M&nbsp;=&nbsp;<i>I<sub>g</sub>&alpha;</i>.</li>
+      <li><strong>Choose</strong> between static and inertia force analysis based on which loads dominate.</li>
+      <li><strong>Analyze</strong> friction-drive (preload, no-slip <i>F<sup>t</sup>&nbsp;&le;&nbsp;&mu;F<sup>n</sup></i>) and positive-drive (<i>F<sup>n</sup>&nbsp;=&nbsp;F<sup>t</sup>&nbsp;tan&Phi;</i>) rolling contacts.</li>
+    </ul>
+  </div>
+
+  <h3>References &amp; attribution</h3>
+  <ul class="refs">
+    <li>Stani&scaron;i&cacute;, M. M. <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis.</em> Cengage Learning, 2015 &mdash; Chapter&nbsp;5 (source for equations 5.1&ndash;5.48 and Examples 5.3, 5.4).</li>
+    <li>Equation numbers in dark callouts (e.g. 5.10, 5.18, 5.43) follow the textbook&rsquo;s numbering for cross-reference.</li>
+    <li>Videos are independently produced and hosted on YouTube; they are embedded for educational reinforcement and credited to their creators on each card.</li>
+    <li>Interactive tools, analogies, and real-world examples were built for this ENGI&nbsp;216 module and are original to it.</li>
+  </ul>
+</section>
+
+</main>
+
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Lecture progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+    <span class="ext-note" id="readpct" aria-live="off">0%</span>
+  </div>
+</div>
+
+<footer class="site">
+  <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · <span class="year">2026</span></p>
+  <p class="ext-note">Chapter 5 of 8 · Engineering-blueprint module series · Self-contained, offline-capable except for YouTube video embeds.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var n = document.createElementNS(SVGNS, tag);
+    if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); }
+    return n;
+  }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#000";
+  }
+  function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+  function txt(stage,x,y,s,color,size,anchor,weight){
+    var t=el("text",{x:x,y:y,fill:color||cssVar('--ink'),"font-size":size||12,"text-anchor":anchor||"middle"});
+    if(weight) t.setAttribute("font-weight",weight);
+    t.textContent=s; stage.appendChild(t); return t;
+  }
+  function circle(stage,cx,cy,r,stroke,w,fill){
+    stage.appendChild(el("circle",{cx:cx,cy:cy,r:r,fill:fill||"none",stroke:stroke,"stroke-width":w||2}));
+  }
+  function line(stage,x1,y1,x2,y2,color,w,dash){
+    var o={x1:x1,y1:y1,x2:x2,y2:y2,stroke:color,"stroke-width":w||2};
+    if(dash) o["stroke-dasharray"]=dash;
+    stage.appendChild(el("line",o));
+  }
+  function pin(stage,x,y){
+    stage.appendChild(el("circle",{cx:x,cy:y,r:5,fill:cssVar('--panel'),stroke:cssVar('--ink'),"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:x,cy:y,r:1.6,fill:cssVar('--ink')}));
+  }
+  function groundHatch(stage,x,y,w){
+    line(stage,x-w/2,y,x+w/2,y,cssVar('--ink-soft'),2);
+    var g=el("g",{stroke:cssVar('--ink-soft'),"stroke-width":1.4});
+    for(var i=-w/2;i<=w/2;i+=8){ g.appendChild(el("line",{x1:x+i,y1:y,x2:x+i-7,y2:y+9})); }
+    stage.appendChild(g);
+  }
+  function arrow(stage,x1,y1,x2,y2,color,w,dash){
+    line(stage,x1,y1,x2,y2,color,w||2.5,dash);
+    var a=Math.atan2(y2-y1,x2-x1), h=9;
+    var p=el("polygon",{points:[
+      x2+","+y2,
+      (x2-h*Math.cos(a-0.4))+","+(y2-h*Math.sin(a-0.4)),
+      (x2-h*Math.cos(a+0.4))+","+(y2-h*Math.sin(a+0.4))
+    ].join(" "), fill:color});
+    stage.appendChild(p);
+  }
+  // squiggly (wavy) vector — for unknown-magnitude-unknown-direction forces
+  function squiggle(stage,x1,y1,x2,y2,color,w){
+    var dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1){ return; }
+    var ux=dx/len, uy=dy/len, nx=-uy, ny=ux;
+    var amp=4, waves=Math.max(3,Math.round(len/14));
+    var pts=[], seg=len/waves;
+    for(var i=0;i<=waves;i++){
+      var d=i*seg, off=(i%2===0?0:(i%4===1?amp:-amp));
+      // smooth-ish zigzag
+      var ph=Math.sin(i/waves*Math.PI*waves)*0; // keep deterministic
+      var s=(i%2===0)?0:((Math.floor(i/2)%2===0)?amp:-amp);
+      pts.push((x1+ux*d+nx*s)+","+(y1+uy*d+ny*s));
+    }
+    var pl=el("polyline",{points:pts.join(" "),fill:"none",stroke:color,"stroke-width":w||2.4,"stroke-linejoin":"round"});
+    stage.appendChild(pl);
+    var a=Math.atan2(dy,dx), h=9;
+    stage.appendChild(el("polygon",{points:[
+      x2+","+y2,(x2-h*Math.cos(a-0.4))+","+(y2-h*Math.sin(a-0.4)),(x2-h*Math.cos(a+0.4))+","+(y2-h*Math.sin(a+0.4))
+    ].join(" "),fill:color}));
+  }
+  // curved (arc) moment arrow
+  function momentArc(stage,cx,cy,r,a0,a1,color,w,dash){
+    var x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
+    var x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    var large=Math.abs(a1-a0)>Math.PI?1:0;
+    var sweep=a1>a0?1:0;
+    var p=el("path",{d:"M "+x0+" "+y0+" A "+r+" "+r+" 0 "+large+" "+sweep+" "+x1+" "+y1,
+      fill:"none",stroke:color,"stroke-width":w||2.4});
+    if(dash) p.setAttribute("stroke-dasharray",dash);
+    stage.appendChild(p);
+    // arrowhead at end, tangent direction
+    var tang=a1+(sweep?Math.PI/2:-Math.PI/2);
+    var h=8;
+    stage.appendChild(el("polygon",{points:[
+      x1+","+y1,
+      (x1-h*Math.cos(tang-0.4))+","+(y1-h*Math.sin(tang-0.4)),
+      (x1-h*Math.cos(tang+0.4))+","+(y1-h*Math.sin(tang+0.4))
+    ].join(" "),fill:color}));
+  }
+
+  /* ============================================================
+     TOOL 1 · IDP / FDP FLIPPER
+     ============================================================ */
+  (function(){
+    var stage=$("flipStage"); if(!stage) return;
+    function box(x,y,w,h,label,known){
+      var col = known? cssVar('--accent') : cssVar('--accent-2');
+      var fill= known? cssVar('--analogy-bg') : cssVar('--rw-bg');
+      stage.appendChild(el("rect",{x:x,y:y,width:w,height:h,rx:10,fill:fill,stroke:col,"stroke-width":known?2.5:2.5,"stroke-dasharray":known?"":"1 0"}));
+      txt(stage,x+w/2,y+h/2-6,label,cssVar('--ink'),15,"middle","700");
+      txt(stage,x+w/2,y+h/2+16,known?"KNOWN":"UNKNOWN",col,12,"middle","700");
+    }
+    function render(){
+      clear(stage);
+      var mode=$("flipMode").value;
+      var motionKnown = (mode==="idp");
+      box(40,80,200,90,"MOTION", motionKnown);
+      box(400,80,200,90,"FORCES & TORQUES", !motionKnown);
+      // connector through Newton's laws
+      if(motionKnown){ arrow(stage,242,125,398,125,cssVar('--good'),3); }
+      else{ arrow(stage,398,125,242,125,cssVar('--good'),3); }
+      txt(stage,320,108,"Newton's Laws",cssVar('--ink-soft'),13,"middle","700");
+      txt(stage,320,150,"\u03A3F = m a\u20D7g , \u03A3M = Ig\u03B1",cssVar('--ink-soft'),12,"middle");
+      txt(stage,320,40,motionKnown?"INVERSE DYNAMICS PROBLEM (IDP)":"FORWARD DYNAMICS PROBLEM (FDP)",cssVar('--accent-dk'),16,"middle","700");
+      txt(stage,320,210,motionKnown?"solve algebraically \u2192 size motors & bearings":"integrate in time \u2192 predict / simulate motion",cssVar('--ink-soft'),12,"middle");
+      $("flipOut").innerHTML = motionKnown
+        ? "You know the <b>motion</b> and solve <em>backward</em> for the forces. This is an <b>algebraic</b> solve \u2014 plug the known accelerations into Newton's laws and solve the linear system. <b>This whole chapter lives here.</b>"
+        : "You know the <b>forces</b> and solve <em>forward</em> for the motion. This is a set of coupled <b>differential equations</b> integrated in time \u2014 usually a job for a computer.";
+    }
+    $("flipMode").addEventListener("change",render);
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 2 · SINGLE-LINK PLANAR KINETICS
+     ============================================================ */
+  (function(){
+    var stage=$("lkStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var ag=+$("lkAg").value, dir=(+$("lkDir").value)*Math.PI/180, alpha=+$("lkAlpha").value, m=+$("lkMass").value;
+      $("lkAgv").textContent=ag.toFixed(1); $("lkDirv").textContent=Math.round(+$("lkDir").value);
+      $("lkAlphav").textContent=alpha.toFixed(1); $("lkMassv").textContent=m.toFixed(1);
+      var Ig=0.12*m; // illustrative inertia (kg m^2)
+      var Gx=320, Gy=170;
+      // a floating blob "link"
+      var blob=el("path",{d:"M "+(Gx-90)+" "+(Gy-30)+" q 20 -45 90 -28 q 70 16 78 40 q 8 40 -40 52 q -70 16 -120 -8 q -30 -22 -8 -48 z",
+        fill:cssVar('--panel'),stroke:cssVar('--ink-soft'),"stroke-width":2});
+      stage.appendChild(blob);
+      // mass center
+      stage.appendChild(el("circle",{cx:Gx,cy:Gy,r:6,fill:cssVar('--ink')}));
+      stage.appendChild(el("circle",{cx:Gx,cy:Gy,r:11,fill:"none",stroke:cssVar('--ink'),"stroke-width":1.4}));
+      txt(stage,Gx+16,Gy-12,"G",cssVar('--ink'),13,"start","700");
+      // acceleration arrow (cyan) and required force (rust) — colinear, force = m*a
+      var aScale=5.5;
+      var axe=Gx+ag*aScale*Math.cos(dir), aye=Gy-ag*aScale*Math.sin(dir);
+      arrow(stage,Gx,Gy,axe,aye,cssVar('--accent'),3);
+      txt(stage,axe+8*Math.cos(dir),aye-8*Math.sin(dir),"a\u20D7g",cssVar('--accent-dk'),12,"middle","700");
+      // required net force m*ag (slightly thicker, rust), shown offset for clarity
+      var F=m*ag;
+      var fScale=2.6;
+      var ox=-26*Math.sin(dir), oy=-26*Math.cos(dir);
+      arrow(stage,Gx+ox,Gy+oy, Gx+ox+F*fScale*Math.cos(dir), Gy+oy-F*fScale*Math.sin(dir), cssVar('--accent-2'),3.4);
+      txt(stage, Gx+ox+F*fScale*Math.cos(dir)+10, Gy+oy-F*fScale*Math.sin(dir), "\u03A3F = m a\u20D7g", cssVar('--rw-h'),12,"start","700");
+      // moment arc scaled by Ig*alpha
+      var Mz=Ig*alpha;
+      var arcR=46;
+      if(Math.abs(alpha)>0.05){
+        var a0=-Math.PI*0.65, a1=a0+(alpha>0? 1.7 : -1.7)*Math.min(1,Math.abs(alpha)/12)-(alpha>0?0:0);
+        momentArc(stage,Gx,Gy,arcR,a0,a1,cssVar('--good'),3.2);
+        txt(stage,Gx,Gy-arcR-10,(alpha>0?"\u21BA":"\u21BB")+" \u03A3M = Ig\u03B1",cssVar('--good'),12,"middle","700");
+      }
+      $("lkOut").innerHTML =
+        "Required net force <b>\u03A3F = m\u00B7a_g = "+m.toFixed(1)+" \u00D7 "+ag.toFixed(1)+" = "+F.toFixed(1)+" N</b> "+
+        "<span class='unit'>(direction "+Math.round(+$('lkDir').value)+"\u00B0)</span> &nbsp;|&nbsp; "+
+        "Required net moment <b>\u03A3M = Ig\u00B7\u03B1 = "+Ig.toFixed(3)+" \u00D7 "+alpha.toFixed(1)+" = "+Mz.toFixed(2)+" N\u00B7m</b>. "+
+        "In an IDP, the bearings and motor must supply exactly these.";
+    }
+    ["lkAg","lkDir","lkAlpha","lkMass"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 3 · PICK YOUR PIVOT
+     ============================================================ */
+  (function(){
+    var stage=$("pvStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var pick=$("pvPoint").value;
+      var Ax=120, Ay=150, Bx=520, By=150, Gx=(Ax+Bx)/2, Gy=150;
+      // ground at A
+      groundHatch(stage,Ax,Ay+0,40);
+      // the link
+      line(stage,Ax,Ay,Bx,By,cssVar('--ink-soft'),6);
+      pin(stage,Ax,Ay);
+      stage.appendChild(el("circle",{cx:Gx,cy:Gy,r:5,fill:cssVar('--ink')}));
+      txt(stage,Ax,Ay+34,"A (pin)",cssVar('--ink'),12,"middle","700");
+      txt(stage,Gx,Gy+28,"G",cssVar('--ink'),12,"middle","700");
+      txt(stage,Bx,By+28,"B",cssVar('--ink'),12,"middle","700");
+      // unknown pin reaction at A (squiggly)
+      squiggle(stage,Ax,Ay,Ax-46,Ay-40,cssVar('--accent-2'),2.6);
+      txt(stage,Ax-52,Ay-46,"R\u20D7A (unknown)",cssVar('--rw-h'),11,"end","700");
+      // known applied force at B (solid)
+      arrow(stage,Bx,By,Bx,By-66,cssVar('--accent'),3.2);
+      txt(stage,Bx+8,By-60,"F (known)",cssVar('--accent-dk'),11,"start","700");
+      // highlight chosen pivot + moment-arm cue
+      var P = pick==="A"?{x:Ax,y:Ay}: pick==="G"?{x:Gx,y:Gy}:{x:Bx,y:By};
+      stage.appendChild(el("circle",{cx:P.x,cy:P.y,r:15,fill:"none",stroke:cssVar('--good'),"stroke-width":2.5,"stroke-dasharray":"4 3"}));
+      txt(stage,P.x,P.y-22,"\u2211M here",cssVar('--good'),11,"middle","700");
+      var msg;
+      if(pick==="A"){
+        msg="<b>Smart.</b> R\u20D7A passes through A, so it contributes <b>zero</b> moment. The moment equation contains only the known force F \u2014 you solve for the unknown torque/force directly, in one line.";
+      } else if(pick==="G"){
+        msg="Summing about G keeps R\u20D7A's moment arm (A\u2013G) in the equation, so the unknown reaction stays in. You'll need the \u03A3F equations as well to finish \u2014 more work.";
+      } else {
+        msg="Summing about B removes F's moment (it passes through B) but keeps R\u20D7A in. Useful if F is the nuisance unknown, but here R\u20D7A is what we wanted to drop.";
+      }
+      $("pvOut").innerHTML=msg;
+    }
+    $("pvPoint").addEventListener("change",render);
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 4 · FBD NOTATION CLASSIFIER
+     ============================================================ */
+  (function(){
+    var stage=$("fbdStage"); if(!stage) return;
+    var correctStyle={pin:"squiggly",tfm:"dashed",applied:"solid",torque:"arc"};
+    var unknownsFor={pin:2,tfm:1,applied:0,torque:1};
+    var labelFor={pin:"unknown pin / bearing reaction",tfm:"two-force-member force",applied:"specified applied load",torque:"unknown driving torque"};
+    function render(){
+      clear(stage);
+      var cse=$("fbdCase").value, sty=$("fbdStyle").value;
+      var Cx=300, Cy=120;
+      // little link
+      stage.appendChild(el("rect",{x:Cx-70,y:Cy-16,width:140,height:32,rx:8,fill:cssVar('--panel'),stroke:cssVar('--ink-soft'),"stroke-width":2}));
+      pin(stage,Cx-70,Cy); pin(stage,Cx+70,Cy);
+      var col=cssVar('--accent-2');
+      // draw the vector/arc in chosen style
+      if(sty==="squiggly"){ squiggle(stage,Cx-70,Cy,Cx-150,Cy-40,col,2.6); }
+      else if(sty==="dashed"){ arrow(stage,Cx-70,Cy,Cx-150,Cy-40,cssVar('--accent'),2.8,"6 5"); }
+      else if(sty==="solid"){ arrow(stage,Cx-70,Cy,Cx-150,Cy-40,cssVar('--accent'),3); }
+      else if(sty==="arc"){ momentArc(stage,Cx,Cy,40,-Math.PI*0.7,Math.PI*0.2,cssVar('--good'),3,"5 4"); }
+      txt(stage,Cx,Cy+44,"scenario: "+labelFor[cse],cssVar('--ink-soft'),12,"middle");
+      var ok = (sty===correctStyle[cse]);
+      var v=$("fbdVerdict");
+      v.style.display="block";
+      v.className="verdict "+(ok?"ok":"no");
+      v.textContent = ok
+        ? "\u2713 Correct style. This adds "+unknownsFor[cse]+" unknown"+(unknownsFor[cse]===1?"":"s")+" to the link's tally."
+        : "\u2717 Mismatch. A "+labelFor[cse]+" should be drawn as a "+correctStyle[cse]+(correctStyle[cse]==="arc"?" (torque)":" vector")+".";
+      $("fbdOut").innerHTML="Recall the key: <b>squiggly</b> = mag &amp; direction unknown (2 unknowns) &middot; <b>dashed</b> = direction known, mag unknown (1) &middot; <b>solid</b> = fully known (0) &middot; <b>dashed arc</b> = unknown torque (1).";
+    }
+    ["fbdCase","fbdStyle"].forEach(function(id){ $(id).addEventListener("change",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 5 · OUT-OF-PLANE OFFSET
+     ============================================================ */
+  (function(){
+    var stage=$("ofStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var z=+$("ofZ").value, F=+$("ofF").value;
+      $("ofZv").textContent=z; $("ofFv").textContent=F;
+      var ox=180, oy=160, dzx=2.4, dzy=-1.4;
+      line(stage,ox,oy-80,ox,oy+80,cssVar('--ink'),5);
+      txt(stage,ox,oy+98,"shared pin (Z axis)",cssVar('--ink-soft'),11,"middle");
+      var L1y=oy;
+      stage.appendChild(el("rect",{x:ox,y:L1y-12,width:150,height:24,rx:6,fill:cssVar('--analogy-bg'),stroke:cssVar('--accent'),"stroke-width":2}));
+      txt(stage,ox+160,L1y+4,"link 2 (z=0)",cssVar('--accent-dk'),11,"start","700");
+      var sx=ox+z*dzx, sy=oy+z*dzy;
+      stage.appendChild(el("rect",{x:sx,y:sy-12,width:150,height:24,rx:6,fill:cssVar('--rw-bg'),stroke:cssVar('--accent-2'),"stroke-width":2}));
+      txt(stage,sx+160,sy+4,"link 3 (z="+z+" mm)",cssVar('--rw-h'),11,"start","700");
+      if(z>0){
+        arrow(stage,ox,oy-40,sx,sy-40,cssVar('--ink-soft'),1.6,"4 3");
+        txt(stage,(ox+sx)/2,(oy+sy)/2-50,"z",cssVar('--ink-soft'),12,"middle","700");
+      }
+      arrow(stage,sx+75,sy,sx+75,sy-60,cssVar('--accent-2'),3);
+      txt(stage,sx+82,sy-56,"F = "+F+" N",cssVar('--rw-h'),11,"start","700");
+      var Mxy = F*(z/1000);
+      momentArc(stage,470,90,34,-Math.PI*0.7,Math.PI*0.5,cssVar('--good'),3);
+      txt(stage,470,40,"M_out = F\u00B7z",cssVar('--good'),12,"middle","700");
+      txt(stage,470,150,"= "+Mxy.toFixed(2)+" N\u00B7m",cssVar('--good'),12,"middle","700");
+      $("ofOut").innerHTML = z===0
+        ? "<b>z = 0:</b> both links share one plane. The force produces <b>no out-of-plane moment</b> \u2014 a clean 2-D problem, exactly the idealization."
+        : "The in-plane force F acts across a Z gap of "+z+" mm, producing an <b>out-of-plane moment F\u00B7z = "+Mxy.toFixed(2)+" N\u00B7m</b> about the X/Y axes. These are the 'extra' 3-D moments that make a real four-bar statically indeterminate.";
+    }
+    ["ofZ","ofF"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 6 · STATIC vs INERTIA DOMINANCE
+     ============================================================ */
+  (function(){
+    var stage=$("domStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var rpm=+$("domRpm").value, r=+$("domR").value, m=+$("domM").value;
+      $("domRpmv").textContent=rpm; $("domRv").textContent=r.toFixed(2); $("domMv").textContent=m.toFixed(2);
+      var w=rpm*2*Math.PI/60;
+      var Fin=m*r*w*w, Fg=m*9.81;
+      var ratio = Fg>0? Fin/Fg : 0;
+      var baseY=210, x1=200, x2=440, bw=80, maxBar=150;
+      var maxV=Math.max(Fin,Fg,1);
+      var hIn=Math.min(maxBar, maxBar*Fin/maxV), hG=Math.min(maxBar, maxBar*Fg/maxV);
+      stage.appendChild(el("rect",{x:x1-bw/2,y:baseY-hIn,width:bw,height:hIn,rx:4,fill:cssVar('--accent-2')}));
+      stage.appendChild(el("rect",{x:x2-bw/2,y:baseY-hG,width:bw,height:hG,rx:4,fill:cssVar('--accent')}));
+      line(stage,80,baseY,560,baseY,cssVar('--ink-soft'),2);
+      txt(stage,x1,baseY+20,"inertia  m r \u03C9\u00B2",cssVar('--rw-h'),12,"middle","700");
+      txt(stage,x2,baseY+20,"weight  m g",cssVar('--accent-dk'),12,"middle","700");
+      txt(stage,x1,baseY-hIn-8,Fin.toFixed(1)+" N",cssVar('--rw-h'),12,"middle","700");
+      txt(stage,x2,baseY-hG-8,Fg.toFixed(1)+" N",cssVar('--accent-dk'),12,"middle","700");
+      txt(stage,320,40,"inertia / weight ratio = "+ratio.toFixed(1)+"\u00D7",cssVar('--ink'),15,"middle","700");
+      var v=$("domVerdict"); v.style.display="block";
+      var regime, cls, advice;
+      if(ratio<0.5){ regime="STATIC regime"; cls="ok"; advice="Inertia is small \u2014 a <b>static</b> force analysis (set m,I\u21920) is justified."; }
+      else if(ratio<5){ regime="MIXED \u2014 keep both"; cls="warn"; advice="Neither term dominates \u2014 do the <b>full dynamic</b> analysis (carry both buckets)."; }
+      else { regime="INERTIA regime"; cls="no"; advice="Inertia dwarfs weight \u2014 an <b>inertia</b> force analysis dominates; gravity is rounding error."; }
+      v.className="verdict "+cls; v.innerHTML=regime;
+      $("domOut").innerHTML = "Spinning at "+rpm+" rpm ( \u03C9 = "+w.toFixed(1)+" rad/s ): inertia force \u2248 <b>"+Fin.toFixed(1)+" N</b> vs weight <b>"+Fg.toFixed(1)+" N</b>. "+advice;
+    }
+    ["domRpm","domR","domM"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 7 · PRESSURE-ANGLE FORCE SPLITTER
+     ============================================================ */
+  (function(){
+    var stage=$("paStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var phi=(+$("paPhi").value), Ft=+$("paFt").value;
+      $("paPhiv").textContent=phi; $("paFtv").textContent=Ft;
+      var phr=phi*Math.PI/180;
+      var Fn=Ft*Math.tan(phr);
+      var Ftot=Math.sqrt(Ft*Ft+Fn*Fn);
+      var Px=300, Py=180, R=86;
+      circle(stage,Px-R,Py,R,cssVar('--accent'),2);
+      circle(stage,Px+R,Py,R,cssVar('--accent'),2);
+      txt(stage,Px-R,Py-R-8,"pitch circle 2",cssVar('--accent-dk'),11,"middle");
+      txt(stage,Px+R,Py+R+18,"pitch circle 3",cssVar('--accent-dk'),11,"middle");
+      stage.appendChild(el("circle",{cx:Px,cy:Py,r:5,fill:cssVar('--ink')}));
+      txt(stage,Px,Py+22,"P (pitch point)",cssVar('--ink'),11,"middle","700");
+      var sc=0.62;
+      arrow(stage,Px,Py,Px+Ft*sc,Py,cssVar('--accent-2'),3.2);
+      txt(stage,Px+Ft*sc+6,Py+4,"F\u1D57 (drive) "+Ft.toFixed(0)+" N",cssVar('--rw-h'),11,"start","700");
+      arrow(stage,Px,Py,Px,Py-Fn*sc,cssVar('--accent'),3.2);
+      txt(stage,Px-6,Py-Fn*sc-4,"F\u207F (sep) "+Fn.toFixed(0)+" N",cssVar('--accent-dk'),11,"end","700");
+      arrow(stage,Px,Py,Px+Ft*sc,Py-Fn*sc,cssVar('--ink'),3.4);
+      txt(stage,Px+Ft*sc+6,Py-Fn*sc-2,"F total "+Ftot.toFixed(0)+" N",cssVar('--ink'),11,"start","700");
+      momentArc(stage,Px,Py,34,-phr,0,cssVar('--good'),2);
+      txt(stage,Px+46,Py-14,"\u03A6="+phi+"\u00B0",cssVar('--good'),12,"start","700");
+      $("paOut").innerHTML="Eq 5.43: F\u207F = F\u1D57 tan\u03A6 = "+Ft.toFixed(0)+" \u00D7 tan("+phi+"\u00B0) = <b>"+Fn.toFixed(1)+" N</b> separating force. "+
+        "Total tooth force <b>"+Ftot.toFixed(1)+" N</b>. The separating part does <b>no useful work</b> but loads the bearings \u2014 it grows with \u03A6.";
+    }
+    ["paPhi","paFt"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 8 · FRICTION-DRIVE NO-SLIP CHECKER
+     ============================================================ */
+  (function(){
+    var stage=$("slStage"); if(!stage) return;
+    function render(){
+      clear(stage);
+      var Fn=+$("slFn").value, mu=+$("slMu").value, Ft=+$("slFt").value;
+      $("slFnv").textContent=Fn; $("slMuv").textContent=mu.toFixed(2); $("slFtv").textContent=Ft;
+      var ceil=mu*Fn;
+      var ok = Ft<=ceil;
+      var baseY=180, maxBar=120, x1=210, x2=430, bw=90;
+      var maxV=Math.max(ceil,Ft,1);
+      var hC=Math.min(maxBar,maxBar*ceil/maxV), hD=Math.min(maxBar,maxBar*Ft/maxV);
+      stage.appendChild(el("rect",{x:x1-bw/2,y:baseY-hC,width:bw,height:hC,rx:4,fill:cssVar('--accent')}));
+      stage.appendChild(el("rect",{x:x2-bw/2,y:baseY-hD,width:bw,height:hD,rx:4,fill:ok?cssVar('--good'):cssVar('--bad')}));
+      line(stage,90,baseY,560,baseY,cssVar('--ink-soft'),2);
+      txt(stage,x1,baseY+20,"available  \u03BC F\u207F",cssVar('--accent-dk'),12,"middle","700");
+      txt(stage,x2,baseY+20,"demanded  F\u1D57",cssVar('--ink'),12,"middle","700");
+      txt(stage,x1,baseY-hC-8,ceil.toFixed(1)+" N",cssVar('--accent-dk'),12,"middle","700");
+      txt(stage,x2,baseY-hD-8,Ft.toFixed(1)+" N",ok?cssVar('--good'):cssVar('--bad'),12,"middle","700");
+      line(stage,x1-bw/2,baseY-hC,x2+bw/2,baseY-hC,cssVar('--accent-2'),1.6,"5 4");
+      var v=$("slVerdict"); v.style.display="block"; v.className="verdict "+(ok?"ok":"no");
+      v.innerHTML = ok ? "\u2713 GRIP \u2014 no slip ( F\u1D57 \u2264 \u03BC F\u207F )" : "\u2717 SLIP \u2014 drive fails ( F\u1D57 > \u03BC F\u207F )";
+      $("slOut").innerHTML = "No-slip needs F\u1D57 \u2264 \u03BC F\u207F = "+mu.toFixed(2)+" \u00D7 "+Fn+" = <b>"+ceil.toFixed(1)+" N</b>. "+
+        "Demand is <b>"+Ft+" N</b>. "+(ok? "There is margin \u2014 raise demand or drop preload to find the edge." : "Increase the preload F\u207F (stiffer compliance spring) or \u03BC to restore grip.");
+    }
+    ["slFn","slMu","slFt"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     EXAMPLE 5.3 · STEP WALKTHROUGH
+     ============================================================ */
+  (function(){
+    var dots=$("ex53dots"); if(!dots) return;
+    var steps=[
+      {t:"Set up the position problem",
+       h:"The wiper drive is a one-DOF mechanism: motor crank (2), arm/gear (3 &amp; 4), output gear (5), tied by a vector loop r\u20D7\u2082 + r\u20D7\u2083 \u2212 r\u20D7\u2084 \u2212 r\u20D7\u2081 = 0 plus a rolling-contact constraint. Three position equations, four unknown angles \u2192 one DOF. The input \u03B8\u2082 is given; solve the rest (you did this back in Ch. 3/4)."},
+      {t:"Choose the analysis: static, neglect gravity",
+       h:"We perform a <b>static</b> force analysis and neglect gravity (the load torque dominates). Use the same coordinate frame as the vector loop. This drops the inertia terms and lets us count cleanly."},
+      {t:"Recognize the two-force member",
+       h:"Link 4 (the arm carrying the rolling contact) is loaded at only two points and carries no torque \u2192 it's a <b>two-force member</b>. Its force F\u20D7\u2084 acts along the line between its pins \u2014 <b>direction known</b>, drawn dashed. That single recognition removes unknowns before any algebra."},
+      {t:"Draw the free body diagrams (Fig 5.33)",
+       h:"Isolate links 2, 3, and 5. The two gear-force components F\u20D7\u207F\u2083\u2085 and F\u20D7\u1D57\u2083\u2085 have <b>known directions</b> (set by the pitch geometry) \u2014 dashed. Pin reactions F\u20D7\u2081\u2085, F\u20D7\u2081\u2082, F\u20D7\u2083\u2082 are fully unknown \u2014 squiggly. T\u20D7\u2082 is the unknown torque \u2014 dashed arc. T\u20D7\u2085 is the known load."},
+      {t:"Count the unknowns",
+       h:"Magnitudes of F\u2084, F\u207F\u2083\u2085, F\u1D57\u2083\u2085 (3) + mag &amp; dir of F\u2081\u2085, F\u2081\u2082, F\u2083\u2082 (6) + magnitude of T\u2082 (1) = <b>10 unknowns</b>. T\u2085 is known."},
+      {t:"Count the equations",
+       h:"Links 2, 3, 5 each give 2 force + 1 moment = 3 scalar equations \u2192 <b>9 equations</b>. Link 4 gives none new (we already used its three to recognize it as a two-force member). We're one equation short."},
+      {t:"Close it with the pressure-angle relation",
+       h:"The missing equation is the positive-drive relation applied here: <b>F\u207F\u2083\u2085 = F\u1D57\u2083\u2085 tan\u03A6</b> (Eq 5.48), with \u03A6 = 20\u00B0 the known pressure angle. Now it's <b>10 equations in 10 unknowns</b> \u2014 determinate. Solve the linear system for T\u20D7\u2082 (and every bearing load along the way)."}
+    ];
+    var i=0;
+    function build(){
+      dots.innerHTML="";
+      steps.forEach(function(s,k){
+        var d=document.createElement("span"); d.className="stepdot"+(k===i?" active":(k<i?" done":""));
+        d.textContent=(k+1); d.setAttribute("role","tab"); d.setAttribute("aria-selected",k===i?"true":"false");
+        d.addEventListener("click",function(){ i=k; render(); });
+        dots.appendChild(d);
+      });
+    }
+    function render(){
+      build();
+      $("ex53body").innerHTML="<b>Step "+(i+1)+": "+steps[i].t+"</b><p style='margin:.5em 0 0'>"+steps[i].h+"</p>";
+      $("ex53count").textContent="Step "+(i+1)+" of "+steps.length;
+      $("ex53prev").disabled=(i===0); $("ex53next").disabled=(i===steps.length-1);
+    }
+    $("ex53prev").addEventListener("click",function(){ if(i>0){ i--; render(); } });
+    $("ex53next").addEventListener("click",function(){ if(i<steps.length-1){ i++; render(); } });
+    render();
+  })();
+
+  /* ============================================================
+     SLIDER-CRANK IDP SOLVER (shared math for Ex 5.5 + Tool 9)
+     Geometry: O at origin; crank r2 to A; rod r3 to slider B on x-axis.
+     Returns full kinematics, inertia loads, and the force solution.
+     ============================================================ */
+  var SC = {
+    r2:0.10, r3:0.30, m2:1.2, m3:2.5, m4:1.8, Ig2:0.004, Ig3:0.019
+  };
+  function solveSliderCrank(th2, w2, a2){
+    var r2=SC.r2,r3=SC.r3,m2=SC.m2,m3=SC.m3,m4=SC.m4,Ig2=SC.Ig2,Ig3=SC.Ig3;
+    var Ax=r2*Math.cos(th2), Ay=r2*Math.sin(th2);
+    var s3=-Ay/r3;
+    if(Math.abs(s3)>1) return null;
+    var th3=Math.asin(s3);
+    var Bx=Ax+r3*Math.cos(th3), By=Ay+r3*Math.sin(th3);
+    var c3=Math.cos(th3);
+    if(Math.abs(c3)<1e-9) return null;
+    var w3=-(r2*Math.cos(th2)*w2)/(r3*c3);
+    var vB=-r2*Math.sin(th2)*w2 - r3*Math.sin(th3)*w3;
+    var a3=( r2*Math.sin(th2)*w2*w2 - r2*Math.cos(th2)*a2 + r3*Math.sin(th3)*w3*w3 )/(r3*c3);
+    var aB=( -r2*Math.cos(th2)*w2*w2 - r2*Math.sin(th2)*a2 - r3*Math.cos(th3)*w3*w3 - r3*Math.sin(th3)*a3 );
+    // mass-center accelerations
+    var aG2x=-(r2/2)*Math.cos(th2)*w2*w2-(r2/2)*Math.sin(th2)*a2;
+    var aG2y=-(r2/2)*Math.sin(th2)*w2*w2+(r2/2)*Math.cos(th2)*a2;
+    var aAx=-r2*Math.cos(th2)*w2*w2-r2*Math.sin(th2)*a2;
+    var aAy=-r2*Math.sin(th2)*w2*w2+r2*Math.cos(th2)*a2;
+    var aG3x=aAx+(-(r3/2)*Math.cos(th3)*w3*w3-(r3/2)*Math.sin(th3)*a3);
+    var aG3y=aAy+(-(r3/2)*Math.sin(th3)*w3*w3+(r3/2)*Math.cos(th3)*a3);
+    var aG4x=aB, aG4y=0;
+    // positions
+    var O=[0,0], A=[Ax,Ay], B=[Bx,By];
+    var G2=[(r2/2)*Math.cos(th2),(r2/2)*Math.sin(th2)];
+    var G3=[A[0]+(r3/2)*Math.cos(th3), A[1]+(r3/2)*Math.sin(th3)];
+    // linear system M X = b ; X=[F12x,F12y,F32x,F32y,F43x,F43y,N,T2]
+    var M=[], b=[];
+    for(var i=0;i<8;i++){ M.push([0,0,0,0,0,0,0,0]); b.push(0); }
+    // Link2 Fx
+    M[0][0]=1; M[0][2]=1; b[0]=m2*aG2x;
+    // Link2 Fy
+    M[1][1]=1; M[1][3]=1; b[1]=m2*aG2y;
+    // Link2 M about G2
+    var rOg2=[O[0]-G2[0],O[1]-G2[1]], rAg2=[A[0]-G2[0],A[1]-G2[1]];
+    M[2][7]=1; M[2][0]=-rOg2[1]; M[2][1]=rOg2[0]; M[2][2]=-rAg2[1]; M[2][3]=rAg2[0]; b[2]=Ig2*a2;
+    // Link3 Fx
+    M[3][2]=-1; M[3][4]=1; b[3]=m3*aG3x;
+    // Link3 Fy
+    M[4][3]=-1; M[4][5]=1; b[4]=m3*aG3y;
+    // Link3 M about G3
+    var rAg3=[A[0]-G3[0],A[1]-G3[1]], rBg3=[B[0]-G3[0],B[1]-G3[1]];
+    M[5][2]=rAg3[1]; M[5][3]=-rAg3[0]; M[5][4]=-rBg3[1]; M[5][5]=rBg3[0]; b[5]=Ig3*a3;
+    // Link4 Fx
+    M[6][4]=-1; b[6]=m4*aG4x;
+    // Link4 Fy
+    M[7][5]=-1; M[7][6]=1; b[7]=m4*aG4y;
+    var X=gauss(M,b);
+    if(!X) return null;
+    return {
+      th3:th3,w3:w3,a3:a3,vB:vB,aB:aB,
+      Ax:Ax,Ay:Ay,Bx:Bx,By:By,
+      aG2:[aG2x,aG2y],aG3:[aG3x,aG3y],aG4:[aG4x,aG4y],
+      F12:[X[0],X[1]],F32:[X[2],X[3]],F43:[X[4],X[5]],N:X[6],T2:X[7],
+      mag:function(v){return Math.sqrt(v[0]*v[0]+v[1]*v[1]);}
+    };
+  }
+  // simple Gaussian elimination with partial pivoting (8x8)
+  function gauss(Ain,bin){
+    var n=bin.length, A=[],b=bin.slice();
+    for(var i=0;i<n;i++) A.push(Ain[i].slice());
+    for(var col=0;col<n;col++){
+      var piv=col, mx=Math.abs(A[col][col]);
+      for(var r=col+1;r<n;r++){ if(Math.abs(A[r][col])>mx){ mx=Math.abs(A[r][col]); piv=r; } }
+      if(mx<1e-12) return null;
+      if(piv!==col){ var tA=A[piv];A[piv]=A[col];A[col]=tA; var tb=b[piv];b[piv]=b[col];b[col]=tb; }
+      for(var r2i=col+1;r2i<n;r2i++){
+        var f=A[r2i][col]/A[col][col];
+        for(var c=col;c<n;c++) A[r2i][c]-=f*A[col][c];
+        b[r2i]-=f*b[col];
+      }
+    }
+    var x=new Array(n).fill(0);
+    for(var i2=n-1;i2>=0;i2--){
+      var s=b[i2];
+      for(var j=i2+1;j<n;j++) s-=A[i2][j]*x[j];
+      x[i2]=s/A[i2][i2];
+    }
+    return x;
+  }
+
+  /* ============================================================
+     EXAMPLE 5.5 · NUMERIC STEP WALKTHROUGH
+     ============================================================ */
+  (function(){
+    var dots=$("ex55dots"); if(!dots) return;
+    var S=solveSliderCrank(Math.PI/3, 200, 0); // 60 deg, 200 rad/s
+    function f(x,d){ return (x>=0?"":"\u2212")+Math.abs(x).toFixed(d===undefined?1:d); }
+    var steps=[
+      {t:"Position analysis (kinematics first)",
+       h:"With \u03B8\u2082 = 60\u00B0: A = (r\u2082cos\u03B8\u2082, r\u2082sin\u03B8\u2082) = (0.050, 0.087) m. Since the slider runs on the x-axis, sin\u03B8\u2083 = \u2212A_y/r\u2083 gives <b>\u03B8\u2083 = "+f(S.th3*180/Math.PI,2)+"\u00B0</b>, and the slider sits at <b>B_x = "+(S.Bx).toFixed(3)+" m</b>. The IDP always starts by reconstructing the geometry you solved in Ch. 2\u20134."},
+      {t:"Velocity analysis",
+       h:"Differentiate the loop once. The y-equation gives <b>\u03C9\u2083 = "+f(S.w3,2)+" rad/s</b>; the x-equation gives the slider velocity <b>v_B = "+f(S.vB,2)+" m/s</b>. (At 200 rad/s the piston is already moving ~20 m/s.)"},
+      {t:"Acceleration analysis",
+       h:"Differentiate again. With \u03B1\u2082 = 0 the rod still has a large angular acceleration <b>\u03B1\u2083 = "+f(S.a3,0)+" rad/s\u00B2</b>, and the slider decelerates hard: <b>a_B = "+f(S.aB,0)+" m/s\u00B2</b> (\u2248 "+f(S.aB/9.81,0)+" g). Constant crank speed does NOT mean zero acceleration elsewhere \u2014 a classic trap."},
+      {t:"Mass-center accelerations",
+       h:"Locate each G's acceleration: a_G2 = ("+f(S.aG2[0],0)+", "+f(S.aG2[1],0)+"), a_G3 = ("+f(S.aG3[0],0)+", "+f(S.aG3[1],0)+"), a_G4 = ("+f(S.aG4[0],0)+", 0) m/s\u00B2. These feed straight into the inertia loads."},
+      {t:"Inertia loads (the 'demands')",
+       h:"Each link's required net force is m\u00B7a_G: link\u20092 \u2248 "+f(SC.m2*S.mag(S.aG2),0)+" N, link\u20093 \u2248 "+f(SC.m3*S.mag(S.aG3),0)+" N, link\u20094 \u2248 "+f(SC.m4*Math.abs(S.aG4[0]),0)+" N. The rod's inertia torque is I_g3\u00B7\u03B1\u2083 \u2248 "+f(SC.Ig3*S.a3,0)+" N\u00B7m. These are the right-hand sides of Newton's laws."},
+      {t:"Assemble & solve the force system",
+       h:"Write \u03A3F\u2093, \u03A3F_y, \u03A3M for links 2, 3, 4 (the slider has no moment equation \u2014 it can't rotate). That's 8 equations in 8 unknowns: the pin reactions F\u2081\u2082, F\u2083\u2082, F\u2084\u2083, the wall normal N, and the driving torque T\u2082. Solve the linear system."},
+      {t:"Results \u2014 the numbers that size the machine",
+       h:"<b>Driving torque T\u2082 = "+f(S.T2,1)+" N\u00B7m.</b> Pin reactions: ground bearing |F\u2081\u2082| = <b>"+f(S.mag(S.F12),0)+" N</b>, crank\u2013rod pin |F\u2083\u2082| = <b>"+f(S.mag(S.F32),0)+" N</b>, rod\u2013slider pin |F\u2084\u2083| = <b>"+f(S.mag(S.F43),0)+" N</b>. The motor must deliver ~490 N\u00B7m at this instant, and the ground bearing carries ~8.6 kN \u2014 on a 1.2 kg crank. Inertia rules."}
+    ];
+    var i=0;
+    function build(){
+      dots.innerHTML="";
+      steps.forEach(function(s,k){
+        var d=document.createElement("span"); d.className="stepdot"+(k===i?" active":(k<i?" done":""));
+        d.textContent=(k+1); d.setAttribute("role","tab"); d.setAttribute("aria-selected",k===i?"true":"false");
+        d.addEventListener("click",function(){ i=k; render(); });
+        dots.appendChild(d);
+      });
+    }
+    function render(){
+      build();
+      $("ex55body").innerHTML="<b>Step "+(i+1)+": "+steps[i].t+"</b><p style='margin:.5em 0 0'>"+steps[i].h+"</p>";
+      $("ex55count").textContent="Step "+(i+1)+" of "+steps.length;
+      $("ex55prev").disabled=(i===0); $("ex55next").disabled=(i===steps.length-1);
+    }
+    $("ex55prev").addEventListener("click",function(){ if(i>0){ i--; render(); } });
+    $("ex55next").addEventListener("click",function(){ if(i<steps.length-1){ i++; render(); } });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 9 · LIVE SLIDER-CRANK IDP SOLVER
+     ============================================================ */
+  (function(){
+    var stage=$("scStage"), chart=$("scChart"); if(!stage) return;
+    var spinning=false, raf=null;
+    function mapper(){
+      // model x in [-0.12, 0.42], y in [-0.16,0.16] -> stage 440x300
+      var W=440,H=300,pad=34;
+      var minx=-0.12,maxx=0.42,miny=-0.16,maxy=0.16;
+      var sx=(W-2*pad)/(maxx-minx), sy=(H-2*pad)/(maxy-miny);
+      var s=Math.min(sx,sy);
+      return function(x,y){ return {X:pad+(x-minx)*s, Y:H/2-(y)* s}; };
+    }
+    function drawLinkage(th2,w2){
+      clear(stage);
+      var S=solveSliderCrank(th2,w2,0);
+      var map=mapper();
+      var O=map(0,0);
+      // slider track
+      var t0=map(-0.12,0), t1=map(0.42,0);
+      line(stage,t0.X,t0.Y,t1.X,t1.Y,cssVar('--ink-soft'),1.5,"5 5");
+      if(!S){ pin(stage,O.X,O.Y); txt(stage,220,150,"singular position",cssVar('--accent-2'),13,"middle","700"); return null; }
+      var A=map(S.Ax,S.Ay), B=map(S.Bx,S.By);
+      groundHatch(stage,O.X,O.Y+0,30);
+      line(stage,O.X,O.Y,A.X,A.Y,cssVar('--accent'),5);    // crank
+      line(stage,A.X,A.Y,B.X,B.Y,cssVar('--accent-2'),5);  // rod
+      // slider block
+      stage.appendChild(el("rect",{x:B.X-16,y:B.Y-12,width:32,height:24,rx:3,fill:cssVar('--good'),opacity:.85}));
+      pin(stage,O.X,O.Y); pin(stage,A.X,A.Y); pin(stage,B.X,B.Y);
+      txt(stage,O.X-6,O.Y+20,"O",cssVar('--ink'),12,"end","700");
+      txt(stage,A.X,A.Y-12,"A",cssVar('--ink'),12,"middle","700");
+      txt(stage,B.X,B.Y+26,"B",cssVar('--ink'),12,"middle","700");
+      return S;
+    }
+    function drawChart(th2cur,w2){
+      clear(chart);
+      var W=440,H=300,pad=40;
+      line(chart,pad,H-pad,W-12,H-pad,cssVar('--ink-soft'),1.5);
+      line(chart,pad,12,pad,H-pad,cssVar('--ink-soft'),1.5);
+      txt(chart,W/2,H-10,"crank angle \u03B8\u2082 (0\u2013360\u00B0)",cssVar('--ink-soft'),11,"middle");
+      txt(chart,pad-4,18,"T\u2082",cssVar('--accent-dk'),11,"end","700");
+      var pts=[], maxAbs=1;
+      for(var d=0; d<=360; d+=3){
+        var th=d*Math.PI/180;
+        var s=solveSliderCrank(th,w2,0);
+        var v=s?s.T2:null;
+        pts.push({d:d,v:v});
+        if(v!==null && isFinite(v)) maxAbs=Math.max(maxAbs,Math.abs(v));
+      }
+      var x0=pad,x1=W-12,y0=14,y1=H-pad, midY=(y0+y1)/2;
+      line(chart,x0,midY,x1,midY,cssVar('--ink-soft'),1,"3 4");
+      function px(d){ return x0+(d/360)*(x1-x0); }
+      function py(v){ return midY - (v/maxAbs)*((y1-y0)/2-6); }
+      var run=[];
+      function flush(){ if(run.length>1){ chart.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:run.join(" ")})); } run=[]; }
+      pts.forEach(function(p){ if(p.v===null||!isFinite(p.v)){ flush(); return; } run.push(px(p.d)+","+py(p.v)); });
+      flush();
+      var cx=px(th2cur*180/Math.PI);
+      line(chart,cx,y0,cx,y1,cssVar('--accent-2'),1.6);
+      txt(chart,cx,y0+10,"\u03B8\u2082",cssVar('--accent-2'),11,"middle","700");
+      txt(chart,x1-2,py(maxAbs)+12,"peak \u2248 "+Math.round(maxAbs)+" N\u00B7m",cssVar('--accent-dk'),10,"end");
+    }
+    function render(){
+      var th2=(+$("scTheta").value)*Math.PI/180, w2=+$("scW").value;
+      $("scThetav").textContent=Math.round(+$("scTheta").value);
+      $("scWv").textContent=Math.round(w2);
+      var S=drawLinkage(th2,w2);
+      drawChart(th2,w2);
+      if(!S){ $("scOut").innerHTML="Singular configuration \u2014 the rod is vertical and the model can't resolve the slider. Nudge \u03B8\u2082."; return; }
+      function f(x){ return (x>=0?"":"\u2212")+Math.abs(x).toFixed(0); }
+      $("scOut").innerHTML =
+        "Driving torque <b>T\u2082 = "+S.T2.toFixed(1)+" N\u00B7m</b> &nbsp;|&nbsp; "+
+        "ground pin <b>|F\u2081\u2082| = "+f(S.mag(S.F12))+" N</b> &nbsp;|&nbsp; "+
+        "pin A <b>|F\u2083\u2082| = "+f(S.mag(S.F32))+" N</b> &nbsp;|&nbsp; "+
+        "pin B <b>|F\u2084\u2083| = "+f(S.mag(S.F43))+" N</b> &nbsp;|&nbsp; "+
+        "slider accel <b>a_B = "+f(S.aB)+" m/s\u00B2</b>.";
+    }
+    function step(){ if(!spinning) return; var c=+$("scTheta").value; c=(c+2)%360; $("scTheta").value=c; render(); raf=requestAnimationFrame(step); }
+    $("scPlay").addEventListener("click",function(){
+      if(reduceMotion){ var c=(+$("scTheta").value+15)%360; $("scTheta").value=c; render(); return; }
+      spinning=!spinning; this.setAttribute("aria-pressed",spinning?"true":"false");
+      this.textContent=spinning?"\u275A\u275A Pause":"\u25B6 Animate";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    ["scTheta","scW"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     SELF-CHECK QUIZ
+     ============================================================ */
+  (function(){
+    var mount=$("quizMount"); if(!mount) return;
+    var bank=[
+      {q:"In the inverse dynamics problem (IDP), what is known and what is found?",
+       opts:["Forces are known; motion is found","Motion is known; forces and torques are found","Both are unknown","Neither \u2014 it's purely kinematic"],
+       correct:1, fb:"The IDP gives the state of motion and works backward to the forces and torques \u2014 exactly what you need to size a motor or bearings."},
+      {q:"How many scalar equilibrium equations does a single planar link provide?",
+       opts:["One (\u03A3M only)","Two (\u03A3Fx, \u03A3Fy)","Three (\u03A3Fx, \u03A3Fy, \u03A3Mz)","Six"],
+       correct:2, fb:"A planar link gives \u03A3Fx, \u03A3Fy, and \u03A3Mz \u2014 three scalar equations. This '3 per link' is the backbone of every determinacy count."},
+      {q:"Why sum moments about an arbitrary point A instead of the mass center G?",
+       opts:["It's more accurate","A well-chosen A makes an unknown reaction drop out (zero moment arm), simplifying the solve","It's required by Newton's laws","To include gravity"],
+       correct:1, fb:"If A sits on a pin, that reaction passes through A and contributes zero moment \u2014 it vanishes from the equation, leaving fewer unknowns."},
+      {q:"On a free body diagram, a force with KNOWN direction but UNKNOWN magnitude is drawn as:",
+       opts:["A squiggly vector","A dashed vector","A solid vector","A dashed arc"],
+       correct:1, fb:"Dashed = direction known, magnitude unknown (e.g. a two-force member or a gear normal force along a known line). It carries one unknown."},
+      {q:"Why is a planar machine called 'partially three-dimensional'?",
+       opts:["Its links move in 3-D","Its links move in parallel XY planes, so pin forces across the Z offsets create out-of-plane moments","It uses 3-D printing","Gravity acts in Z"],
+       correct:1, fb:"Links sit in parallel planes offset along Z. In-plane forces acting across those offsets generate X/Y moments \u2014 the motion is planar but the forces are 3-D."},
+      {q:"A general four-bar force analysis in 3-D has 17 unknowns and 15 equations. This means it is:",
+       opts:["Over-determined","Statically indeterminate \u2014 resolved by specifying the joint misalignments","Impossible","Always wrong"],
+       correct:1, fb:"Two more unknowns than equations = statically indeterminate. The known angular misalignments between joint axes supply the missing two equations."},
+      {q:"For a link in planar motion, the gyroscopic term \u03C9 \u00D7 (I\u03C9) in the Newton\u2013Euler equation:",
+       opts:["Dominates","Vanishes, because planar symmetry zeros the relevant products of inertia","Equals the weight","Equals I_g \u03B1"],
+       correct:1, fb:"Planar symmetry (a symmetry plane parallel to the motion plane) zeros I_xz and I_yz, so \u03C9 \u00D7 (I\u03C9) = 0 and \u03A3M collapses to I_g\u03B1."},
+      {q:"In a positive-drive (gear) contact, the normal and tangential tooth forces are related by:",
+       opts:["F\u207F = \u03BC F\u1D57","F\u207F = F\u1D57 tan\u03A6, where \u03A6 is the pressure angle","F\u207F = F\u1D57","They are unrelated"],
+       correct:1, fb:"Eq 5.43: F\u207F = F\u1D57 tan\u03A6. The tangential part drives; the normal part is a separating force that loads the bearings and does no work."},
+      {q:"A friction drive maintains its no-slip condition only while:",
+       opts:["F\u1D57 \u2265 \u03BC F\u207F","F\u1D57 \u2264 \u03BC_static F\u207F (the preload provides enough normal force)","\u03A6 = 0","The gears mesh"],
+       correct:1, fb:"No-slip requires F\u1D57 \u2264 \u03BC_static F\u207F. A compliant element supplies the preload F\u207F so the static friction ceiling stays above the demanded drive force."}
+    ];
+    var answered=0, correctCount=0;
+    function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+    function updateScore(){ $("quizScore").textContent=correctCount+" / "+answered; }
+    function build(){
+      mount.innerHTML=""; answered=0; correctCount=0; updateScore();
+      bank.forEach(function(item,qi){
+        var order=shuffle(item.opts.map(function(_,i){return i;}));
+        var wrap=document.createElement("div"); wrap.className="q";
+        var stem=document.createElement("p"); stem.className="stem"; stem.textContent=(qi+1)+". "+item.q; wrap.appendChild(stem);
+        var opts=document.createElement("div"); opts.className="opts"; opts.setAttribute("role","group");
+        opts.setAttribute("aria-label","Answer choices for question "+(qi+1));
+        var done=false;
+        var fb=document.createElement("div"); fb.className="fb";
+        order.forEach(function(origIdx){
+          var lbl=document.createElement("label"); lbl.className="opt";
+          var inp=document.createElement("input"); inp.type="radio"; inp.name="q"+qi;
+          var span=document.createElement("span"); span.textContent=item.opts[origIdx];
+          lbl.appendChild(inp); lbl.appendChild(span);
+          inp.addEventListener("change",function(){
+            if(done) return; done=true; answered++;
+            var isRight=(origIdx===item.correct);
+            if(isRight){ correctCount++; lbl.classList.add("correct"); }
+            else{
+              lbl.classList.add("incorrect");
+              Array.prototype.forEach.call(opts.querySelectorAll(".opt"),function(o){
+                if(o.querySelector("span").textContent===item.opts[item.correct]) o.classList.add("correct");
+              });
+            }
+            Array.prototype.forEach.call(opts.querySelectorAll("input"),function(x){ x.disabled=true; });
+            fb.className="fb show "+(isRight?"right":"wrong");
+            fb.textContent=(isRight?"Correct. ":"Not quite. ")+item.fb;
+            updateScore();
+          });
+          opts.appendChild(lbl);
+        });
+        wrap.appendChild(opts); wrap.appendChild(fb);
+        mount.appendChild(wrap);
+      });
+    }
+    $("quizReset").addEventListener("click",build);
+    build();
+  })();
+
+  /* ============================================================
+     GLOSSARY (build + filter)
+     ============================================================ */
+  (function(){
+    var list=$("glossList"); if(!list) return;
+    var terms=[
+      ["Inverse dynamics problem (IDP)","Given the state of motion, find the forces and torques that produce it \u2014 the focus of Chapter 5 and the basis of motor and bearing sizing.","\u00A7 IDP vs FDP"],
+      ["Forward dynamics problem (FDP)","Given the forces and torques, find the resulting motion. Generally coupled differential equations integrated in time \u2014 a simulation task.","\u00A7 IDP vs FDP"],
+      ["Planar kinetics","The force/moment analysis of bodies moving in a plane: \u03A3F = m a_g (two scalar equations) and \u03A3M = I_g\u03B1 (one).","\u00A7 5.1 Planar Kinetics"],
+      ["Mass center (G)","The point at which a body's mass effectively acts; \u03A3F drives its acceleration a_g, and moments are naturally summed about it.","\u00A7 5.1 Planar Kinetics"],
+      ["Mass moment of inertia (I_g)","The rotational analog of mass: how a body's mass is distributed about an axis through G. Sets the torque needed for a given \u03B1.","\u00A7 0 Foundations"],
+      ["Moment about an arbitrary point","Summing moments about a point A other than G; a clever A makes an unknown reaction drop out (Eq 5.10).","Moments about A"],
+      ["Two-force member","A link loaded at only two points with no torque; its force must act along the line joining those points \u2014 direction known.","\u00A7 0 / Ex 5.3"],
+      ["Free body diagram (FBD)","An isolated-link sketch whose arrow styles encode what is known vs. unknown \u2014 a bookkeeping language for the IDP.","FBD Notation"],
+      ["Squiggly vector","FBD notation for a force of unknown magnitude AND unknown direction (e.g. a pin reaction) \u2014 two scalar unknowns.","FBD Notation"],
+      ["Dashed vector","FBD notation for a force of known direction but unknown magnitude (e.g. a two-force member or gear normal) \u2014 one unknown.","FBD Notation"],
+      ["Solid vector","FBD notation for a fully known applied load \u2014 zero unknowns.","FBD Notation"],
+      ["Dashed arc","FBD notation for a torque of unknown magnitude but known sense \u2014 e.g. the driving torque being solved for.","FBD Notation"],
+      ["Partially three-dimensional planar mechanism","A planar mechanism whose links move in parallel XY planes (offset along Z), making the force analysis three-dimensional even though the motion is planar.","\u00A7 5.2 Partially 3-D"],
+      ["Statically indeterminate","A force problem with more unknowns than independent equations (the 3-D four-bar: 17 vs 15); resolved by supplying joint misalignments.","\u00A7 5.2 Partially 3-D"],
+      ["Newton\u2013Euler equations","The general spatial equations of motion: \u03A3F = m a_g (5.16) and \u03A3M = I\u03B1 + \u03C9 \u00D7 (I\u03C9) (5.18).","Newton\u2013Euler"],
+      ["Inertia matrix","The 3\u00D73 matrix of moments and products of inertia (Eq 5.17) that maps angular acceleration to moment in the Newton\u2013Euler equation.","Newton\u2013Euler"],
+      ["Products of inertia","Off-diagonal inertia-matrix terms (I_xy, I_xz, I_yz); planar symmetry zeros I_xz and I_yz, collapsing the equations.","Newton\u2013Euler"],
+      ["Gyroscopic term","The \u03C9 \u00D7 (I\u03C9) term that causes precession; it vanishes for a symmetric planar link, recovering \u03A3M = I_g\u03B1.","Newton\u2013Euler"],
+      ["Static force analysis","An IDP simplification in which inertia is negligible \u2014 all masses and inertias set to zero (Eq applies when the machine is slow or the load is heavy).","\u00A7 5.3 Static vs Inertia"],
+      ["Inertia force analysis","An IDP simplification in which inertia loads dominate and some external loads (weight, load torque) are neglected \u2014 for fast, light machines.","\u00A7 5.3 Static vs Inertia"],
+      ["D'Alembert's principle","Treating the inertia term \u2212m a_g as a fictitious 'inertia force' so a dynamics problem looks like a statics problem; an equivalent reframing.","Videos / \u00A7 5.3"],
+      ["Rolling contact","Two bodies transmitting motion at a contact; either a friction drive (relies on static friction) or a positive drive (interlocking gear teeth).","\u00A7 5.4 Rolling Contacts"],
+      ["Friction drive","A rolling contact that transmits force only through static friction; needs sufficient normal force to avoid slipping.","\u00A7 5.4 Rolling Contacts"],
+      ["Positive drive","A rolling contact using interlocking gear teeth (involute profile); cannot slip and does not rely on friction.","\u00A7 5.4 Rolling Contacts"],
+      ["Compliance","A built-in spring element that compensates for arm-length errors and presses rolling bodies together so they neither overlap nor gap.","\u00A7 5.4 Rolling Contacts"],
+      ["Preload (F\u207F)","The normal force created by a compliant element, large enough to enforce the no-slip condition F\u1D57 \u2264 \u03BC F\u207F.","\u00A7 5.4 Rolling Contacts"],
+      ["No-slip condition","The requirement F\u1D57 \u2264 \u03BC_static F\u207F for a friction drive to transmit force without slipping.","\u00A7 5.4 Rolling Contacts"],
+      ["Pressure angle (\u03A6)","The constant angle of the common normal in a positive drive; sets the split F\u207F = F\u1D57 tan\u03A6 between separating and driving force (Eq 5.43).","\u00A7 5.4 Rolling Contacts"],
+      ["Pitch point (P)","The fixed virtual contact point of a positive-drive gear pair; the common normal always passes through it.","\u00A7 5.4 Rolling Contacts"]
+    ];
+    terms.sort(function(a,b){ return a[0].toLowerCase().localeCompare(b[0].toLowerCase()); });
+    function render(filter){
+      list.innerHTML=""; var f=(filter||"").trim().toLowerCase(), n=0;
+      terms.forEach(function(t){
+        if(f && t[0].toLowerCase().indexOf(f)<0 && t[1].toLowerCase().indexOf(f)<0) return;
+        n++;
+        var item=document.createElement("div"); item.className="gloss-item";
+        var dt=document.createElement("dt"); dt.textContent=t[0];
+        var dd=document.createElement("dd"); dd.textContent=t[1];
+        var tg=document.createElement("span"); tg.className="tag"; tg.textContent=t[2];
+        item.appendChild(dt); item.appendChild(dd); item.appendChild(tg);
+        list.appendChild(item);
+      });
+      $("glossEmpty").hidden = (n>0);
+      $("glossCount").textContent = f ? (n+" of "+terms.length+" terms shown") : (terms.length+" terms");
+    }
+    $("glossInput").addEventListener("input",function(){ render(this.value); });
+    render("");
+  })();
+
+  /* ============================================================
+     EXTERNAL RESOURCES (build cards)
+     ============================================================ */
+  (function(){
+    var data={
+      resFound:[
+        ["Newton's laws of motion","The foundation of every equation in this chapter \u2014 force, mass, and acceleration for particles and rigid bodies.","en.wikipedia.org","https://en.wikipedia.org/wiki/Newton%27s_laws_of_motion"],
+        ["Moment of inertia","How a body's mass distribution resists angular acceleration \u2014 the I_g in \u03A3M = I_g\u03B1.","en.wikipedia.org","https://en.wikipedia.org/wiki/Moment_of_inertia"],
+        ["Free body diagram","Isolating a body and drawing every force and torque on it \u2014 the core skill behind \u00A7 5.1 and the worked examples.","en.wikipedia.org","https://en.wikipedia.org/wiki/Free_body_diagram"]
+      ],
+      resCore:[
+        ["Dynamic force analysis (mechref)","University of Illinois reference deriving joint and input forces from known motion \u2014 the IDP carried through a real linkage.","mechref.org","https://www.mechref.org/md/Dynamic_Force_Analysis/"],
+        ["D'Alembert's principle","Reframing inertia as a fictitious force so a dynamics problem becomes a statics problem \u2014 the 'inertia force analysis' viewpoint of \u00A7 5.3.","en.wikipedia.org","https://en.wikipedia.org/wiki/D%27Alembert%27s_principle"],
+        ["Statically indeterminate","Why a system with more unknowns than equations can't be solved by statics alone \u2014 the 3-D four-bar situation of \u00A7 5.2.","en.wikipedia.org","https://en.wikipedia.org/wiki/Statically_indeterminate"]
+      ],
+      resVisual:[
+        ["Gear (pressure angle & involute)","The geometry behind positive-drive contacts, the pitch point, and the 20\u00B0 pressure angle of Eq 5.43.","en.wikipedia.org","https://en.wikipedia.org/wiki/Gear"],
+        ["Involute gear","Why involute tooth profiles give a constant pressure angle and a stationary pitch point \u2014 the three properties of \u00A7 5.4.","en.wikipedia.org","https://en.wikipedia.org/wiki/Involute_gear"],
+        ["Friction & the no-slip condition","Static friction and the F\u1D57 \u2264 \u03BC F\u207F limit that governs whether a friction drive grips or slips.","en.wikipedia.org","https://en.wikipedia.org/wiki/Friction"]
+      ]
+    };
+    Object.keys(data).forEach(function(mountId){
+      var mount=$(mountId); if(!mount) return;
+      data[mountId].forEach(function(r){
+        var a=document.createElement("a");
+        a.className="res-link"; a.href=r[3]; a.target="_blank"; a.rel="noopener noreferrer";
+        var name=document.createElement("span"); name.className="name";
+        name.appendChild(document.createTextNode(r[0]+" "));
+        var ext=document.createElement("span"); ext.className="ext"; ext.textContent="\u2197 new tab";
+        name.appendChild(ext);
+        var desc=document.createElement("span"); desc.className="desc"; desc.textContent=r[1];
+        var hs=document.createElement("span"); hs.className="host"; hs.textContent=r[2];
+        a.appendChild(name); a.appendChild(desc); a.appendChild(hs);
+        a.setAttribute("aria-label", r[0]+" \u2014 opens "+r[2]+" in a new tab");
+        mount.appendChild(a);
+      });
+    });
+  })();
+
+  /* ============================================================
+     NAV ACTIVE STATE + READING PROGRESS + ARROW-KEY NAV
+     ============================================================ */
+  (function(){
+    var links=Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+    var sections=links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+    var prog=$("readprog"), pct=$("readpct");
+    function onScroll(){
+      var y=window.scrollY+90;
+      var active=sections[0];
+      sections.forEach(function(s){ if(s.offsetTop<=y) active=s; });
+      if(active) links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href")==="#"+active.id); });
+      var doc=document.documentElement;
+      var max=doc.scrollHeight - doc.clientHeight;
+      var p=max>0?Math.min(100,Math.round(window.scrollY/max*100)):0;
+      if(prog){ prog.value=p; if(pct) pct.textContent=p+"%"; }
+    }
+    window.addEventListener("scroll",onScroll,{passive:true});
+    window.addEventListener("resize",onScroll);
+    onScroll();
+    var tw=$("tocWrap");
+    if(tw){
+      tw.addEventListener("keydown",function(e){
+        if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
+        var i=links.indexOf(document.activeElement); if(i<0) return;
+        e.preventDefault();
+        var ni=e.key==="ArrowRight"?Math.min(links.length-1,i+1):Math.max(0,i-1);
+        links[ni].focus();
+      });
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
