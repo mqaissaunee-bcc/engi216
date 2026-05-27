@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 8 · Part I · Mechanism Synthesis: Four-Bar Linkages — Kinematics &amp; Dynamics of Machines</title>
+<meta name="description" content="An interactive lecture on mechanism synthesis for four-bar linkages: Freudenstein's equation, point-matching and derivative-matching methods, the kinematic-coefficient ladder, and worked examples including the bridge-lifter. WCAG 2.1 AA accessible, single-file HTML5.">
+<style>
+  /* ============================================================
+     THEME TOKENS  — engineering-blueprint / technical drafting
+     (locked ENGI 216 design standard — identical to Chapters 1–7)
+     ============================================================ */
+  :root{
+    --ink:        #10243a;   /* deep drafting ink */
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;   /* drafting paper */
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;   /* textbook cyan */
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;   /* rust / annotation orange */
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --analogy-bg: #e2f1f5;   /* pale cyan wash */
+    --rw-bg:      #f6e7dc;   /* pale rust wash */
+    --rw-h:       #9c4416;   /* rust heading, AA on --rw-bg */
+    --beyond-bg:  #efeaf3;   /* pale purple wash, "beyond Stanišić" */
+    --beyond-h:   #553478;
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --analogy-bg: #0f2a33;
+      --rw-bg:      #33210f;
+      --rw-h:       #e8853f;
+      --beyond-bg:  #241b30;
+      --beyond-h:   #c9b4e3;
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- layout ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+    border-bottom:3px solid var(--accent);
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:2; }
+  header.site::after{
+    content:""; position:absolute; inset:0; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-dk); background:#f3f1e7;
+    padding:5px 12px; border-radius:30px; font-weight:700; margin-bottom:14px;
+  }
+  @media (prefers-color-scheme: dark){ .chip{ background:#cfe7ef; color:#06384a; } }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; margin:.1em 0 .15em;
+    font-size:clamp(1.7rem, 4.6vw, 3rem); line-height:1.08; color:#fff;
+  }
+  header.site .sub{ font-size:clamp(1rem,2.2vw,1.2rem); color:#d6e6ee; max-width:62ch; }
+  .meta-row{ margin-top:18px; display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:.78rem; color:#bcd2dd; }
+  .meta-row span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- sticky nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50;
+    background:var(--panel); border-bottom:1px solid var(--panel-line);
+    box-shadow:0 2px 8px rgba(16,36,58,.06);
+  }
+  nav.toc .wrap{ max-width:var(--maxw); margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:8px 12px; }
+  nav.toc a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink-soft);
+    font-family:var(--mono); font-size:.76rem; font-weight:600; letter-spacing:.02em;
+    padding:8px 12px; border-radius:7px; white-space:nowrap; min-height:36px; display:inline-flex; align-items:center;
+  }
+  nav.toc a:hover{ background:var(--paper-2); color:var(--ink); }
+  nav.toc a:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  nav.toc a.active{ background:var(--accent); color:#fff; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:10px 18px 60px; }
+
+  section{ padding:40px 0 12px; scroll-margin-top:64px; border-top:1px dashed var(--panel-line); }
+  section:first-of-type{ border-top:none; }
+
+  .sec-tag{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h2{ font-family:var(--serif); font-size:clamp(1.45rem,3.4vw,2.1rem); line-height:1.12; margin:.18em 0 .5em; color:var(--ink); }
+  h3{ font-family:var(--sans); font-weight:700; font-size:1.18rem; margin:1.5em 0 .4em; color:var(--ink); letter-spacing:.005em; }
+  h4{ font-family:var(--mono); font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:1.2em 0 .4em; }
+  p{ margin:.6em 0 1em; }
+  a{ color:var(--accent-dk); }
+
+  .lead{ font-size:1.12rem; color:var(--ink); }
+
+  /* ---------- cards & panels ---------- */
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:20px 22px; margin:16px 0; box-shadow:var(--shadow);
+  }
+  .card.tool{ border-top:3px solid var(--accent); }
+  .tool-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .tool-label::before{ content:"▸ INTERACTIVE"; }
+  .tool-label span{ color:var(--ink-soft); }
+
+  .defn{
+    border-left:4px solid var(--accent); background:var(--paper-2);
+    padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0;
+  }
+  .defn strong{ color:var(--accent-dk); }
+
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* Analogy callout — cyan, "think of it like…" */
+  .analogy{
+    border-left:4px solid var(--accent); background:var(--analogy-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .analogy .h{ display:block; font-weight:700; color:var(--accent-dk); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .analogy::before{
+    content:"\01F4A1"; /* light bulb */
+    position:absolute; left:13px; top:11px; font-size:1.15rem; line-height:1;
+  }
+  .analogy p{ margin:.3em 0 0; }
+  .analogy p:first-of-type{ margin-top:0; }
+
+  /* Real-world callout — rust, "in the real world" */
+  .real-world{
+    border-left:4px solid var(--accent-2); background:var(--rw-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .real-world .h{ display:block; font-weight:700; color:var(--rw-h); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .real-world::before{
+    content:"\01F527"; /* wrench */
+    position:absolute; left:13px; top:11px; font-size:1.1rem; line-height:1;
+  }
+  .real-world p{ margin:.3em 0 0; }
+  .real-world p:first-of-type{ margin-top:0; }
+
+  /* Beyond-the-textbook callout — purple, "beyond Stanišić" */
+  .beyond{
+    border-left:4px solid var(--beyond-h); background:var(--beyond-bg);
+    padding:12px 16px 12px 44px; border-radius:0 8px 8px 0; margin:16px 0; position:relative;
+  }
+  .beyond .h{ display:block; font-weight:700; color:var(--beyond-h); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25em; }
+  .beyond::before{
+    content:"\01F4D6"; /* open book */
+    position:absolute; left:13px; top:11px; font-size:1.1rem; line-height:1;
+  }
+  .beyond p{ margin:.3em 0 0; }
+  .beyond p:first-of-type{ margin-top:0; }
+
+  .eqn{
+    font-family:var(--mono); background:var(--ink); color:#e9f6fb;
+    padding:14px 18px; border-radius:8px; font-size:1.02rem; overflow-x:auto;
+    margin:14px 0; letter-spacing:.01em;
+  }
+  .eqn .lbl{ float:right; color:#8fc6d8; font-size:.8rem; }
+  .eqn .c{ color:#ffd9a8; }
+  .eqn .m{ color:#9fe6c4; }
+  @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
+
+  /* ---------- grids ---------- */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:760px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+  /* ---------- buttons & controls ---------- */
+  button, .btn{
+    font-family:var(--sans); font-size:.92rem; font-weight:600;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:10px 16px; min-height:44px; cursor:pointer; box-shadow:var(--shadow);
+    transition:transform .08s ease, background .15s ease;
+  }
+  button:hover, .btn:hover{ background:var(--accent-dk); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  button.secondary{ background:var(--panel); color:var(--accent-dk); border:1.5px solid var(--accent); box-shadow:none; }
+  button.secondary:hover{ background:var(--paper-2); }
+  button[aria-pressed="true"]{ background:var(--ink); }
+
+  .controls{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:8px 0; }
+  .ctrl{ display:flex; flex-direction:column; gap:4px; min-width:150px; flex:1 1 160px; }
+  .ctrl label{ font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; color:var(--ink-soft); font-weight:600; text-transform:uppercase; }
+  .ctrl .val{ color:var(--accent-dk); }
+  input[type="range"]{ width:100%; accent-color:var(--accent); height:32px; }
+  input[type="range"]:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  input[type="number"]{ font-family:var(--mono); padding:8px; border:1.5px solid var(--panel-line); border-radius:6px; background:var(--panel); color:var(--ink); width:100%; min-height:40px; font-size:.95rem; }
+  input[type="number"]:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+
+  /* ---------- svg stage ---------- */
+  .stage{
+    width:100%; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:8px; touch-action:none; display:block;
+  }
+  .stage-wrap{ position:relative; }
+  svg text{ font-family:var(--mono); }
+
+  /* ---------- readouts ---------- */
+  .readout{
+    margin-top:10px; padding:12px 14px; background:var(--paper-2); border-radius:8px;
+    font-family:var(--mono); display:flex; flex-wrap:wrap; gap:10px 18px;
+    font-size:.92rem; line-height:1.4;
+  }
+  .readout b{ color:var(--accent-dk); }
+  .readout .unit{ color:var(--ink-soft); font-size:.82rem; }
+  .verdict{ font-family:var(--mono); font-weight:700; padding:10px 14px; border-radius:8px; margin-top:10px; }
+  .verdict.ok{ background:var(--good-bg); color:var(--good); }
+  .verdict.no{ background:var(--bad-bg); color:var(--bad); }
+  .verdict.warn{ background:var(--warn-bg); color:var(--warn); }
+
+  /* ---------- tables ---------- */
+  table{ border-collapse:collapse; width:100%; margin:14px 0; font-size:.92rem; }
+  caption{ text-align:left; font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding-bottom:6px; }
+  th,td{ border:1px solid var(--panel-line); padding:8px 11px; text-align:left; }
+  th{ background:var(--paper-2); font-family:var(--mono); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+  td.mono, th.mono{ font-family:var(--mono); }
+
+  /* ---------- details / steps ---------- */
+  details{ border:1px solid var(--panel-line); border-radius:8px; margin:10px 0; background:var(--panel); overflow:hidden; }
+  summary{ cursor:pointer; padding:13px 16px; font-weight:700; font-family:var(--sans); list-style:none; min-height:44px; display:flex; align-items:center; gap:10px; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::before{ content:"+"; font-family:var(--mono); color:var(--accent); font-weight:700; font-size:1.2rem; width:1ch; }
+  details[open] summary::before{ content:"–"; }
+  summary:focus-visible{ outline:3px solid var(--accent); outline-offset:-2px; }
+  details .body{ padding:2px 16px 16px; }
+
+  /* ---------- quiz ---------- */
+  .q{ margin:14px 0; padding:16px; border:1px solid var(--panel-line); border-radius:8px; background:var(--panel); }
+  .q .stem{ font-weight:600; margin-bottom:10px; }
+  .q .opts{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1.5px solid var(--panel-line); border-radius:8px; cursor:pointer; background:var(--panel); min-height:44px; }
+  .opt:hover{ border-color:var(--accent); }
+  .opt input{ margin-top:4px; accent-color:var(--accent); width:18px; height:18px; flex:0 0 auto; }
+  .opt.correct{ border-color:var(--good); background:var(--good-bg); }
+  .opt.incorrect{ border-color:var(--bad); background:var(--bad-bg); }
+  .fb{ margin-top:10px; font-size:.92rem; padding:10px 12px; border-radius:8px; display:none; }
+  .fb.show{ display:block; }
+  .fb.right{ background:var(--good-bg); color:var(--good); }
+  .fb.wrong{ background:var(--bad-bg); color:var(--bad); }
+  .q-score{ font-family:var(--mono); font-weight:700; color:var(--accent-dk); }
+
+  /* ---------- objectives list ---------- */
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:28px; margin:.5em 0; }
+  ul.clean li::before{ content:"◆"; position:absolute; left:4px; color:var(--accent); font-size:.8rem; top:.25em; }
+
+  .pill{ display:inline-block; font-family:var(--mono); font-size:.72rem; padding:2px 9px; border-radius:20px; font-weight:700; letter-spacing:.04em; }
+  .pill.p1{ background:#dceefb; color:#075a76; }
+  .pill.p2{ background:#f7e6d8; color:#9a4715; }
+  @media (prefers-color-scheme: dark){ .pill.p1{ background:#0d3647; color:#9fdcef; } .pill.p2{ background:#3a2616; color:#f0b487; } }
+
+  /* ---------- legend dots ---------- */
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; font-family:var(--mono); font-size:.8rem; margin:8px 0; }
+  .legend i{ width:14px; height:14px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-2px; }
+
+  footer.site{ max-width:var(--maxw); margin:0 auto; padding:28px 18px 50px; border-top:1px dashed var(--panel-line); color:var(--ink-soft); font-size:.85rem; }
+  footer.site .program{ color:var(--accent-dk); font-weight:700; }
+
+  .visually-hidden{ position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0; }
+
+  .kbd{ font-family:var(--mono); font-size:.8rem; background:var(--paper-2); border:1px solid var(--panel-line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; }
+
+  .figref{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+
+  /* progress dock */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  /* ---------- video embeds ---------- */
+  .video-card{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent-2); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); margin:16px 0; }
+  .video-frame{ position:relative; width:100%; aspect-ratio:16/9; background:var(--ink); }
+  .video-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-meta{ padding:14px 18px; }
+  .video-meta h3{ margin:.1em 0 .3em; font-size:1.08rem; }
+  .video-tags{ display:flex; flex-wrap:wrap; gap:8px 14px; font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
+  .video-tags b{ color:var(--accent-dk); }
+  .video-supports{ display:inline-block; font-family:var(--mono); font-size:.72rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:20px; padding:3px 11px; color:var(--accent-dk); font-weight:700; margin-top:8px; }
+  .ext-note{ font-family:var(--mono); font-size:.78rem; color:var(--ink-soft); }
+
+  /* ---------- glossary ---------- */
+  .glossary-search{ position:relative; margin:14px 0; }
+  .glossary-search input{ width:100%; font-family:var(--sans); font-size:1rem; padding:12px 14px 12px 40px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--panel); color:var(--ink); min-height:48px; }
+  .glossary-search input:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  .glossary-search::before{ content:"⌕"; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:1.3rem; }
+  .gloss-list{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .gloss-list{ grid-template-columns:1fr; } }
+  .gloss-item{ background:var(--panel); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 15px; }
+  .gloss-item dt{ font-weight:700; color:var(--accent-dk); font-family:var(--sans); margin-bottom:3px; }
+  .gloss-item dd{ margin:0; font-size:.93rem; color:var(--ink); }
+  .gloss-item .tag{ font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); display:block; margin-top:6px; }
+  .gloss-empty{ font-family:var(--mono); color:var(--ink-soft); padding:14px; text-align:center; }
+
+  /* ---------- resources ---------- */
+  .res-group{ margin:18px 0; }
+  .res-group h3{ display:flex; align-items:center; gap:10px; }
+  .res-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .res-grid{ grid-template-columns:1fr; } }
+  .res-link{ display:block; text-decoration:none; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:14px 16px; color:var(--ink); transition:border-color .15s ease, transform .08s ease; }
+  .res-link:hover{ border-color:var(--accent); transform:translateY(-1px); }
+  .res-link:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .res-link .name{ font-weight:700; color:var(--accent-dk); display:flex; align-items:center; gap:6px; }
+  .res-link .name .ext{ font-size:.72rem; font-family:var(--mono); color:var(--ink-soft); font-weight:600; }
+  .res-link .desc{ font-size:.88rem; color:var(--ink); margin-top:4px; }
+  .res-link .host{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin-top:6px; display:block; }
+
+  /* ---------- formula / quick-reference card ---------- */
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:var(--radius); padding:0; overflow:hidden; box-shadow:var(--shadow); }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--mono); font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:18px; }
+  .rc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:680px){ .rc-grid{ grid-template-columns:1fr; } }
+  .rc-block h4{ margin:0 0 6px; color:var(--accent-dk); }
+  .rc-eq{ font-family:var(--mono); background:var(--paper-2); border-radius:6px; padding:9px 12px; margin:6px 0; font-size:.92rem; }
+  .rc-list{ list-style:none; padding:0; margin:0; font-size:.9rem; }
+  .rc-list li{ padding:3px 0; border-bottom:1px dotted var(--panel-line); }
+  .rc-list li:last-child{ border-bottom:none; }
+  .rc-list .k{ font-family:var(--mono); color:var(--accent-dk); font-weight:700; }
+
+  /* sequel / "what's next" card */
+  .sequel{ background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%); color:#f3f1e7; border-radius:var(--radius); padding:20px 24px; margin:24px 0; box-shadow:var(--shadow); border:1px solid var(--ink); }
+  .sequel .h{ font-family:var(--mono); font-size:.78rem; letter-spacing:.18em; text-transform:uppercase; color:#9fdcef; margin-bottom:6px; display:block; }
+  .sequel h3{ color:#fff; margin:.1em 0 .4em; font-family:var(--serif); font-size:1.3rem; }
+  .sequel p{ color:#d6e6ee; margin:.3em 0; }
+  .sequel a.btn-next{ display:inline-block; margin-top:10px; background:var(--accent); color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-weight:700; font-family:var(--sans); }
+  .sequel a.btn-next:hover{ background:var(--accent-dk); }
+  .sequel a.btn-next:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+
+  @media print{
+    nav.toc, .progress-dock, .card.tool, .video-frame, button{ display:none !important; }
+    body{ background:#fff; color:#000; }
+    .refcard{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">Engi 216 · Chapter 8 · Part I of II</span>
+    <h1>Mechanism Synthesis I: Four-Bar Linkages</h1>
+    <p class="sub">Freudenstein's equation, point-matching, and derivative-matching — the analytical machinery for designing a four-bar to do exactly what you want.</p>
+    <div class="meta-row">
+      <span>📐 Week 1 of 2</span>
+      <span>⏱ ~3 hours lecture-equivalent</span>
+      <span>🔧 5 interactive tools</span>
+      <span>🎬 4 embedded videos</span>
+      <span>♿ WCAG 2.1 AA</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Section navigation">
+  <div class="wrap">
+    <a href="#start">Start</a>
+    <a href="#foundations">Foundations</a>
+    <a href="#freudenstein">Freudenstein</a>
+    <a href="#pointmatch">Point-Matching</a>
+    <a href="#derivmatch">Derivative-Matching</a>
+    <a href="#procedure">Procedure</a>
+    <a href="#examples">Examples</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#videos">Videos</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+    <a href="#recap">Recap</a>
+    <a href="#whatsnext">What's Next</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START / OBJECTIVES ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Welcome</span>
+  <h2 id="start-h">From analysis to design</h2>
+  <p class="lead">For seven chapters we've taken mechanisms <em>as given</em> and asked what they do — positions, velocities, accelerations, forces, energies. This chapter flips the question. We start with a desired behavior — "input angle &phi; should produce output angle &psi; according to this function" — and we work backward to find the link lengths that deliver it. That's <strong>synthesis</strong>, and the cleanest analytical handle on it is <strong>Freudenstein's equation</strong>.</p>
+
+  <div class="defn">
+    <strong>Mechanism synthesis.</strong> The design of a mechanism (its dimensions, geometry, and configuration) to produce a specified motion. Three classical flavors: <em>function generation</em> (input-output relationship), <em>path generation</em> (a point traces a curve), and <em>motion generation</em> (a body passes through prescribed poses). This chapter is about function generation.
+  </div>
+
+  <h3>What you'll be able to do after this module</h3>
+  <ul class="clean">
+    <li>State and use <strong>Freudenstein's equation</strong> (Eq. 8.5) for the four-bar mechanism.</li>
+    <li>Design a four-bar by <strong>point-matching</strong>: pick three precision points, solve a 3&times;3 linear system, get link lengths.</li>
+    <li>Design a four-bar by <strong>derivative-matching</strong>: pick one design position, match a value and its first three derivatives via the kinematic-coefficient ladder.</li>
+    <li>Recognize when one method is the right tool versus the other.</li>
+    <li>Recreate Stanišić's Example 8.1 (bridge-lifter) and Example 8.2 (rolling-gear) end-to-end.</li>
+  </ul>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>Synthesis is the difference between <em>reading a recipe</em> and <em>writing one</em>. Analysis is "I have this linkage — what does it do?" Synthesis is "I want this behavior — what linkage do I build?" Freudenstein's equation is the kitchen scale that lets you write the recipe in numbers instead of guesses.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>The function generators in this chapter live in places you don't think to look: an automotive <strong>windshield-wiper linkage</strong> that wipes wide and pauses at each end, a <strong>bascule bridge</strong> that lifts a span to clear a sailboat's mast, an <strong>aircraft landing-gear retraction mechanism</strong> that folds up exactly into its bay, and a <strong>prosthetic knee</strong> whose four-bar geometry mimics a natural gait. Every one of those started as someone solving Freudenstein's equation for three precision points.</p>
+  </div>
+</section>
+
+<!-- ============ FOUNDATIONS ============ -->
+<section id="foundations" aria-labelledby="found-h">
+  <span class="sec-tag">Foundations</span>
+  <h2 id="found-h">What you need before we start</h2>
+  <p>This chapter sits on top of the four-bar vector loop you learned in Chapter 2 and the angular convention from Chapter 4. A quick refresh, then we're synthesizing.</p>
+
+  <h3>The four-bar vector loop, one more time</h3>
+  <p>Four links, four joints. Link 1 is ground (length <i>r<sub>1</sub></i>, lying along the +X axis from <i>O<sub>2</sub></i> to <i>O<sub>4</sub></i>). Link 2 is the input lever, rotating about <i>O<sub>2</sub></i>. Link 3 is the coupler. Link 4 is the output lever, rotating about <i>O<sub>4</sub></i>. The closure condition is the loop equation:</p>
+
+  <div class="eqn" role="math" aria-label="r 2 vector plus r 3 vector minus r 4 vector minus r 1 vector equals zero">
+    <span class="lbl">(8.1)</span>
+    r&#8407;<sub>2</sub> + r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub> &minus; r&#8407;<sub>1</sub> = 0&#8407;
+  </div>
+
+  <h3>What the angles mean</h3>
+  <ul class="clean">
+    <li><strong>&theta;<sub>2</sub></strong> — orientation of link 2 (input lever), measured from +X to <i>r<sub>2</sub></i>.</li>
+    <li><strong>&theta;<sub>4</sub></strong> — orientation of link 4 (output lever), measured from +X to <i>r<sub>4</sub></i>.</li>
+    <li><strong>&phi;</strong> — input <em>rotation</em>: how far link 2 has turned from some chosen initial position &theta;<sub>2<sub>i</sub></sub>. So <strong>&phi; = &theta;<sub>2</sub> &minus; &theta;<sub>2<sub>i</sub></sub></strong>.</li>
+    <li><strong>&psi;</strong> — output <em>rotation</em>: how far link 4 has turned from its initial position &theta;<sub>4<sub>i</sub></sub>. So <strong>&psi; = &theta;<sub>4</sub> &minus; &theta;<sub>4<sub>i</sub></sub></strong>.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="h">Watch the bookkeeping</span>
+    <p style="margin:.4em 0 0">&theta;<sub>2</sub> and &theta;<sub>4</sub> are <em>positions</em> — absolute angles in the global frame. &phi; and &psi; are <em>rotations</em> — changes from an arbitrary starting pose you get to pick. The function you want to generate, <i>f</i>(&phi;,&psi;)&nbsp;=&nbsp;0, lives in the &phi;-&psi; space. Freudenstein's equation lives in the &theta;<sub>2</sub>-&theta;<sub>4</sub> space. Most of the work in synthesis is shuttling between the two.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>&theta;<sub>2</sub> and &theta;<sub>4</sub> are <em>compass bearings</em>; &phi; and &psi; are <em>turn signals</em>. The compass tells you where you're pointing; the turn signal tells you how much you've changed direction from where you started. The relationship "turn left twice as far as you steer right" is a statement about turn signals — once you also know which way the car started, you can convert it to compass bearings.</p>
+  </div>
+
+  <h3>The three flavors of synthesis</h3>
+  <div class="grid3">
+    <div class="card">
+      <h4 style="margin-top:0">Function generation</h4>
+      <p style="margin:.4em 0 0">Input rotation &phi; and output rotation &psi; are tied by some function <i>f</i>(&phi;,&psi;)&nbsp;=&nbsp;0. This is Chapter 8.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">Path generation</h4>
+      <p style="margin:.4em 0 0">A specific point (usually on the coupler) is required to trace a specific curve.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">Motion generation</h4>
+      <p style="margin:.4em 0 0">An entire body (with both position and orientation) must pass through a sequence of poses.</p>
+    </div>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p><strong>Function generation</strong> shows up wherever an input rotation must compute an output rotation: a steering linkage (Ackermann) where inner and outer wheels must turn by related-but-different angles, a film-projector intermittent feed, a watch's chronograph reset. <strong>Path generation</strong> is famously the Hoekens straight-line linkage. <strong>Motion generation</strong> is what positions an excavator bucket to dump its load at a specific angle. Different flavor, same Freudenstein-style algebra.</p>
+  </div>
+
+  <div class="beyond">
+    <span class="h">Beyond Stanišić · A bit of history</span>
+    <p><strong>Ferdinand Freudenstein (1926–2006)</strong>, an MIT-trained mechanical engineer at Columbia, wrote the 1955 paper that bears his name. Before Freudenstein, kinematic synthesis was largely a graphical art — compasses, French curves, and a great deal of patience. The equation we're about to derive lets you replace all of that with a 3&times;3 linear solve. Roth (2007) calls him "the father of modern kinematic synthesis." His machinery still underlies essentially every commercial linkage-design tool sold today.</p>
+  </div>
+</section>
+
+<!-- ============ FREUDENSTEIN ============ -->
+<section id="freudenstein" aria-labelledby="freud-h">
+  <span class="sec-tag">§ 8.1 · The Key Equation</span>
+  <h2 id="freud-h">Freudenstein's equation for the four-bar</h2>
+  <p>The vector loop in Eq. 8.1, written in components and rearranged to eliminate the coupler angle &theta;<sub>3</sub>, gives the cleanest possible algebraic statement of the four-bar input-output relationship. Here is the derivation in five steps, then the result you'll spend the rest of the chapter using.</p>
+
+  <details>
+    <summary>Show the derivation (5 steps)</summary>
+    <div class="body">
+      <p><strong>Step 1.</strong> Write Eq. 8.1 in scalar form by taking the X and Y components.</p>
+      <div class="eqn">r<sub>2</sub> cos&theta;<sub>2</sub> + r<sub>3</sub> cos&theta;<sub>3</sub> &minus; r<sub>4</sub> cos&theta;<sub>4</sub> &minus; r<sub>1</sub> = 0</div>
+      <div class="eqn">r<sub>2</sub> sin&theta;<sub>2</sub> + r<sub>3</sub> sin&theta;<sub>3</sub> &minus; r<sub>4</sub> sin&theta;<sub>4</sub> = 0</div>
+
+      <p><strong>Step 2.</strong> Isolate the coupler terms.</p>
+      <div class="eqn">r<sub>3</sub> cos&theta;<sub>3</sub> = r<sub>1</sub> + r<sub>4</sub> cos&theta;<sub>4</sub> &minus; r<sub>2</sub> cos&theta;<sub>2</sub></div>
+      <div class="eqn">r<sub>3</sub> sin&theta;<sub>3</sub> = r<sub>4</sub> sin&theta;<sub>4</sub> &minus; r<sub>2</sub> sin&theta;<sub>2</sub></div>
+
+      <p><strong>Step 3.</strong> Square both and add. The coupler angle &theta;<sub>3</sub> vanishes via cos² + sin² = 1.</p>
+      <div class="eqn">r<sub>3</sub>² = (r<sub>1</sub> + r<sub>4</sub> cos&theta;<sub>4</sub> &minus; r<sub>2</sub> cos&theta;<sub>2</sub>)² + (r<sub>4</sub> sin&theta;<sub>4</sub> &minus; r<sub>2</sub> sin&theta;<sub>2</sub>)²</div>
+
+      <p><strong>Step 4.</strong> Expand and collect. After grouping like terms (and using the cos(A&minus;B) identity on the cross-product), you land at:</p>
+      <div class="eqn">r<sub>1</sub>² + r<sub>2</sub>² &minus; r<sub>3</sub>² + r<sub>4</sub>² + 2r<sub>1</sub>r<sub>4</sub> cos&theta;<sub>4</sub> &minus; 2r<sub>1</sub>r<sub>2</sub> cos&theta;<sub>2</sub> &minus; 2r<sub>2</sub>r<sub>4</sub> cos(&theta;<sub>2</sub> &minus; &theta;<sub>4</sub>) = 0</div>
+
+      <p><strong>Step 5.</strong> Divide through by 2r<sub>2</sub>r<sub>4</sub> and group the link-length terms into three dimensionless ratios. That gives the final form.</p>
+    </div>
+  </details>
+
+  <h3>The equation itself</h3>
+  <div class="eqn" role="math" aria-label="R 3 plus R 2 times cosine theta 4 minus R 1 times cosine theta 2 equals cosine of theta 2 minus theta 4">
+    <span class="lbl">(8.5) · Freudenstein</span>
+    <span class="c">R<sub>3</sub></span> + <span class="c">R<sub>2</sub></span> cos&theta;<sub>4</sub> &minus; <span class="c">R<sub>1</sub></span> cos&theta;<sub>2</sub> = cos(&theta;<sub>2</sub> &minus; &theta;<sub>4</sub>)
+  </div>
+
+  <p>Where the three <em>Freudenstein ratios</em> are dimensionless combinations of the four link lengths:</p>
+
+  <div class="eqn" role="math" aria-label="R 1 equals r 1 over r 4, R 2 equals r 1 over r 2, R 3 equals r 2 squared minus r 3 squared plus r 4 squared plus r 1 squared all over 2 r 2 r 4">
+    <span class="lbl">(8.4)</span>
+    R<sub>1</sub> = r<sub>1</sub> / r<sub>4</sub> &nbsp;&nbsp; R<sub>2</sub> = r<sub>1</sub> / r<sub>2</sub> &nbsp;&nbsp; R<sub>3</sub> = (r<sub>2</sub>² &minus; r<sub>3</sub>² + r<sub>4</sub>² + r<sub>1</sub>²) / (2 r<sub>2</sub> r<sub>4</sub>)
+  </div>
+
+  <div class="callout">
+    <span class="h">Why this is a big deal</span>
+    <p style="margin:.4em 0 0">Eq. 8.5 has three unknowns (the <em>R</em>s) and is <em>linear</em> in them. That means three input-output pairs — three precision points — give you exactly three equations in three unknowns. A 3&times;3 linear solve is high-school algebra. Compare with trying to solve the original loop equation for four link lengths directly: that's a nonlinear nightmare. Freudenstein's gift is the change of variables.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>The Freudenstein ratios R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub> are like the <strong>Cartesian coordinates of a recipe</strong>. The four link lengths are the <em>ingredients</em>; the ratios are <em>proportions</em>. Two recipes with the same proportions taste the same — and two four-bars with the same Freudenstein ratios produce the same input-output curve. That "scale doesn't matter" property is exactly what we'll lose when we get to the crank-slider in Part II.</p>
+  </div>
+
+  <!-- TOOL 1: Freudenstein explorer -->
+  <div class="card tool" id="freudTool">
+    <div class="tool-label">Tool 1 <span>· Freudenstein explorer</span></div>
+    <h3 style="margin-top:.3em">Drive the input, watch the output</h3>
+    <p>Pick four link lengths. The tool computes R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub>, draws the four-bar, then sweeps the crank through 360° to plot &theta;<sub>4</sub> vs. &theta;<sub>2</sub> — exactly the curve any synthesis method is trying to match.</p>
+    <div class="controls" role="group" aria-label="Link lengths">
+      <div class="ctrl"><label for="freud-r1">r<sub>1</sub> (ground): <span class="val" id="freud-r1v">10.0</span></label><input type="range" id="freud-r1" min="4" max="14" step="0.1" value="10"></div>
+      <div class="ctrl"><label for="freud-r2">r<sub>2</sub> (crank): <span class="val" id="freud-r2v">3.0</span></label><input type="range" id="freud-r2" min="1" max="9" step="0.1" value="3"></div>
+      <div class="ctrl"><label for="freud-r3">r<sub>3</sub> (coupler): <span class="val" id="freud-r3v">9.0</span></label><input type="range" id="freud-r3" min="3" max="16" step="0.1" value="9"></div>
+      <div class="ctrl"><label for="freud-r4">r<sub>4</sub> (rocker): <span class="val" id="freud-r4v">8.0</span></label><input type="range" id="freud-r4" min="3" max="14" step="0.1" value="8"></div>
+      <div class="ctrl"><label for="freud-th2">&theta;<sub>2</sub>: <span class="val" id="freud-th2v">60°</span></label><input type="range" id="freud-th2" min="0" max="360" step="1" value="60"></div>
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <div>
+        <svg id="freudStage" class="stage" viewBox="0 0 420 320" role="img" aria-label="A four-bar linkage drawn at the current crank angle, with link labels.">
+        </svg>
+        <p class="figref">Live mechanism · ground is hatched at the bottom · pin joints shown as circles</p>
+      </div>
+      <div>
+        <svg id="freudChart" class="stage" viewBox="0 0 420 320" role="img" aria-label="A plot of output angle theta 4 against input angle theta 2 for the linkage shown.">
+        </svg>
+        <p class="figref">Input-output curve · the line shows &theta;<sub>4</sub>(&theta;<sub>2</sub>) over a full crank revolution</p>
+      </div>
+    </div>
+    <div class="readout" id="freud-readout">—</div>
+    <div class="callout" style="margin-top:12px">
+      <span class="h">Try this</span>
+      <p style="margin:.4em 0 0">Double all four link lengths simultaneously. The mechanism gets bigger on screen but the input-output curve doesn't move — the Freudenstein ratios are unchanged. This is the property that lets us assume one link length later. (In Part II's crank-slider, this won't be true.)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ POINT-MATCHING ============ -->
+<section id="pointmatch" aria-labelledby="pm-h">
+  <span class="sec-tag">§ 8.1.1 · Method 1</span>
+  <h2 id="pm-h">Point-matching: hit three targets exactly</h2>
+  <p>Suppose you want the linkage to satisfy three specific input-output pairs — three pairs of (&phi;, &psi;) that the customer hands you. These are called <strong>precision points</strong>. Point-matching finds a four-bar that hits all three exactly. Between them, the actual curve drifts away from the desired curve — but at the three points themselves, you're spot on.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>Point-matching is <strong>Lagrange interpolation for mechanisms</strong>. Give a polynomial three (x, y) points and it picks the unique quadratic that hits them; give Freudenstein three (&theta;<sub>2</sub>, &theta;<sub>4</sub>) points and it picks the unique R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub> that hit them. The fit is exact at the sample points, and you live with whatever happens between them.</p>
+  </div>
+
+  <h3>The setup</h3>
+  <p>You're given three (&phi;<sub>k</sub>, &psi;<sub>k</sub>) pairs for k = 1, 2, 3. To use Eq. 8.5, you need to translate them into (&theta;<sub>2</sub>, &theta;<sub>4</sub>) pairs. That requires two free choices on your part: the starting angles &theta;<sub>2<sub>i</sub></sub> and &theta;<sub>4<sub>i</sub></sub>. With those picked, Eqs. 8.6 and 8.7 do the conversion:</p>
+  <div class="eqn"><span class="lbl">(8.6, 8.7)</span> &theta;<sub>2,k</sub> = &phi;<sub>k</sub> + &theta;<sub>2<sub>i</sub></sub> &nbsp;&nbsp;&nbsp; &theta;<sub>4,k</sub> = &psi;<sub>k</sub> + &theta;<sub>4<sub>i</sub></sub></div>
+
+  <h3>The system</h3>
+  <p>Now write Eq. 8.5 three times — once for each precision point — and collect into matrix form:</p>
+
+  <div class="eqn" role="math" aria-label="A 3 by 3 matrix times the column vector of R 1 R 2 R 3 equals a column vector of cosines of theta 2 minus theta 4 at each precision point.">
+    <span class="lbl">(8.9)</span>
+    <pre style="margin:0; font:inherit; color:inherit">
+[ &minus;cos&theta;<sub>2,1</sub>   cos&theta;<sub>4,1</sub>   1 ] [R<sub>1</sub>]   [ cos(&theta;<sub>2,1</sub> &minus; &theta;<sub>4,1</sub>) ]
+[ &minus;cos&theta;<sub>2,2</sub>   cos&theta;<sub>4,2</sub>   1 ] [R<sub>2</sub>] = [ cos(&theta;<sub>2,2</sub> &minus; &theta;<sub>4,2</sub>) ]
+[ &minus;cos&theta;<sub>2,3</sub>   cos&theta;<sub>4,3</sub>   1 ] [R<sub>3</sub>]   [ cos(&theta;<sub>2,3</sub> &minus; &theta;<sub>4,3</sub>) ]</pre>
+  </div>
+
+  <h3>The recipe</h3>
+  <ol>
+    <li>Take the three desired (&phi;<sub>k</sub>, &psi;<sub>k</sub>) precision points.</li>
+    <li>Choose &theta;<sub>2<sub>i</sub></sub> and &theta;<sub>4<sub>i</sub></sub> (your <em>free choices</em> — these reshape the resulting design).</li>
+    <li>Convert (&phi;, &psi;) &rarr; (&theta;<sub>2</sub>, &theta;<sub>4</sub>) for each k.</li>
+    <li>Build the 3&times;3 system (8.9) and solve for R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub>.</li>
+    <li>Assume one link length (typically <i>r<sub>1</sub></i>, the ground, since it's set by your application).</li>
+    <li>Back out the other three from Eq. 8.4: r<sub>4</sub> = r<sub>1</sub>/R<sub>1</sub>, r<sub>2</sub> = r<sub>1</sub>/R<sub>2</sub>, and finally r<sub>3</sub> from R<sub>3</sub>'s definition.</li>
+  </ol>
+
+  <div class="callout">
+    <span class="h">Sign warning</span>
+    <p style="margin:.4em 0 0">If a back-solve for r<sub>2</sub> or r<sub>4</sub> gives a negative number, that doesn't mean failure. It means the vector for that link points opposite to the direction you assumed when you set &theta;<sub>2</sub> or &theta;<sub>4</sub>. Flip the assumed direction and the design is still valid.</p>
+  </div>
+
+  <!-- TOOL 2: Point-matching solver -->
+  <div class="card tool" id="pmTool">
+    <div class="tool-label">Tool 2 <span>· Point-matching solver</span></div>
+    <h3 style="margin-top:.3em">Three precision points in, four link lengths out</h3>
+    <p>Enter three (&phi;, &psi;) pairs in degrees and pick &theta;<sub>2<sub>i</sub></sub>, &theta;<sub>4<sub>i</sub></sub>. The tool builds System 8.9, solves it, computes the link lengths assuming <i>r<sub>1</sub></i>&nbsp;=&nbsp;10, then draws the resulting mechanism and overlays the desired vs. actual input-output curve. Pre-loaded with Stanišić's Example 8.1 (bridge-lifter, &psi; = &phi;/2).</p>
+    <table aria-label="Precision points">
+      <caption>Precision points · (&phi;, &psi;) in degrees</caption>
+      <thead><tr><th>k</th><th>&phi;<sub>k</sub> (°)</th><th>&psi;<sub>k</sub> (°)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><input type="number" id="pm-phi1" value="45" step="1" aria-label="phi 1"></td><td><input type="number" id="pm-psi1" value="22.5" step="0.5" aria-label="psi 1"></td></tr>
+        <tr><td>2</td><td><input type="number" id="pm-phi2" value="90" step="1" aria-label="phi 2"></td><td><input type="number" id="pm-psi2" value="45" step="0.5" aria-label="psi 2"></td></tr>
+        <tr><td>3</td><td><input type="number" id="pm-phi3" value="135" step="1" aria-label="phi 3"></td><td><input type="number" id="pm-psi3" value="67.5" step="0.5" aria-label="psi 3"></td></tr>
+      </tbody>
+    </table>
+    <div class="controls" role="group" aria-label="Initial-angle free choices">
+      <div class="ctrl"><label for="pm-th2i">&theta;<sub>2<sub>i</sub></sub> (°): <span class="val" id="pm-th2iv">20</span></label><input type="range" id="pm-th2i" min="-90" max="170" step="1" value="20"></div>
+      <div class="ctrl"><label for="pm-th4i">&theta;<sub>4<sub>i</sub></sub> (°): <span class="val" id="pm-th4iv">40</span></label><input type="range" id="pm-th4i" min="-90" max="170" step="1" value="40"></div>
+    </div>
+    <div class="controls">
+      <button id="pm-solve" type="button">Solve &amp; draw</button>
+      <button id="pm-loadex" type="button" class="secondary">↺ Load Example 8.1</button>
+    </div>
+    <div class="readout" id="pm-readout" aria-live="polite">Press <b>Solve &amp; draw</b>.</div>
+    <div class="grid2" style="margin-top:8px">
+      <div>
+        <svg id="pmStage" class="stage" viewBox="0 0 420 320" role="img" aria-label="The designed four-bar drawn at one of the precision points.">
+        </svg>
+        <p class="figref">Designed four-bar at precision point #2</p>
+      </div>
+      <div>
+        <svg id="pmChart" class="stage" viewBox="0 0 420 320" role="img" aria-label="A plot of the actual psi versus phi curve from the designed mechanism, with the desired curve and the three precision points overlaid.">
+        </svg>
+        <p class="figref">Desired curve (dashed) vs. actual mechanism output (solid) · precision points marked</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="beyond">
+    <span class="h">Beyond Stanišić · Chebyshev spacing of precision points</span>
+    <p>Where should the precision points <em>go</em> across the input range? Pafnuty Chebyshev (1854) showed that for any function being approximated by a polynomial, the points that <strong>minimize the worst-case error</strong> are not evenly spaced — they cluster slightly near the ends of the interval. For three precision points spanning &phi;&nbsp;&isin;&nbsp;[&phi;<sub>min</sub>, &phi;<sub>max</sub>], the Chebyshev locations are:</p>
+    <p style="font-family:var(--mono); font-size:.95rem">&phi;<sub>k</sub> = &phi;̄ &minus; (&Delta;&phi;/2) cos((2k&minus;1)&pi;/6) &nbsp;&nbsp; for k = 1, 2, 3</p>
+    <p>For &phi;&nbsp;&isin;&nbsp;[0°, 180°], that's approximately {12°, 90°, 168°} — versus Stanišić's evenly-spaced {45°, 90°, 135°}. In Example 8.1 the difference shrinks the maximum structural error by roughly half. Stanišić doesn't cover this; most other textbooks do, and any commercial synthesis tool uses it by default.</p>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>A <strong>windshield-wiper four-bar</strong> is point-matched to three precision points: blade-fully-left, blade-vertical, blade-fully-right. Choose well and the wiper sweeps cleanly with a pause at each extreme; choose poorly and the blade flies off the windshield at the ends. The classical "Watt's linkage" used in 19th-century steam engines is itself a function-generator designed graphically before Freudenstein existed.</p>
+  </div>
+</section>
+
+<!-- ============ DERIVATIVE-MATCHING ============ -->
+<section id="derivmatch" aria-labelledby="dm-h">
+  <span class="sec-tag">§ 8.1.2 · Method 2</span>
+  <h2 id="dm-h">Derivative-matching: hit one position perfectly</h2>
+  <p>Point-matching nails three points and lets the curve drift between them. The alternative is to nail <em>one</em> point — and not just the position, but the <em>slope, curvature, and rate-of-change-of-curvature</em> at that point. That's <strong>derivative-matching</strong>: match a value of &theta;<sub>4</sub> together with its first three derivatives with respect to &theta;<sub>2</sub>.</p>
+
+  <div class="analogy">
+    <span class="h">Think of it like…</span>
+    <p>Derivative-matching is <strong>Taylor series for mechanisms</strong>. A Taylor series matches the value, slope, curvature, and so on at a single point — and the result is highly accurate <em>near that point</em>, with error growing as you move away. Same trade here. Point-matching is interpolation (great at three spots, mediocre between); derivative-matching is local approximation (perfect at one spot, very good in its neighborhood).</p>
+  </div>
+
+  <h3>The kinematic coefficients of synthesis</h3>
+  <p>Define three derivatives of the output angle &theta;<sub>4</sub> with respect to the input angle &theta;<sub>2</sub>:</p>
+  <div class="eqn" role="math" aria-label="h sub 4 equals derivative of theta 4 over theta 2; h prime sub 4 equals second derivative; h double prime sub 4 equals third derivative."><span class="lbl">(8.12)</span>
+    h<sub>4</sub> = d&theta;<sub>4</sub>/d&theta;<sub>2</sub> &nbsp;&nbsp;&nbsp; h&prime;<sub>4</sub> = d²&theta;<sub>4</sub>/d&theta;<sub>2</sub>² &nbsp;&nbsp;&nbsp; h&Prime;<sub>4</sub> = d³&theta;<sub>4</sub>/d&theta;<sub>2</sub>³
+  </div>
+
+  <p>These are the <em>kinematic coefficients</em> you met in Chapter 4. They are purely geometric — they depend only on the link lengths and the current angles, not on time or speed. From Eq. 8.8 (&phi; = &theta;<sub>2</sub> &minus; &theta;<sub>2<sub>i</sub></sub>, &psi; = &theta;<sub>4</sub> &minus; &theta;<sub>4<sub>i</sub></sub>), the &phi;-&psi; derivatives and the &theta;<sub>2</sub>-&theta;<sub>4</sub> derivatives are identical:</p>
+  <div class="eqn">h<sub>4</sub> = d&psi;/d&phi; &nbsp;&nbsp;&nbsp; h&prime;<sub>4</sub> = d²&psi;/d&phi;² &nbsp;&nbsp;&nbsp; h&Prime;<sub>4</sub> = d³&psi;/d&phi;³</div>
+
+  <p>So if the customer says "I want &psi; = f(&phi;)," differentiate that function three times, evaluate at the design position &phi;<sub>des</sub>, and you've got the three target values to match.</p>
+
+  <h3>The reduced equation</h3>
+  <p>Differentiating Freudenstein's equation three times, eliminating intermediate derivatives, and reorganizing the algebra (the textbook spends 14 equations on this) lands at a remarkably tidy result: a <em>quadratic in</em> tan&theta;<sub>2</sub>.</p>
+
+  <div class="eqn" role="math" aria-label="lambda 1 times tangent squared of theta 2 plus lambda 2 times tangent of theta 2 plus lambda 3 equals zero">
+    <span class="lbl">(8.26)</span>
+    <span class="c">&lambda;<sub>1</sub></span> tan²&theta;<sub>2</sub> + <span class="c">&lambda;<sub>2</sub></span> tan&theta;<sub>2</sub> + <span class="c">&lambda;<sub>3</sub></span> = 0
+  </div>
+
+  <div class="callout">
+    <span class="h">Pay attention to what just happened</span>
+    <p style="margin:.4em 0 0">Three derivative conditions, plus one position, plus one assumed link length is <em>five</em> conditions. We have <em>five</em> unknowns: R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub>, &theta;<sub>2<sub>i</sub></sub>, &theta;<sub>4<sub>i</sub></sub> (the last two come from your choice of &theta;<sub>2<sub>des</sub></sub>). The system is square. The price of the squeeze is that we now need to compute a tower of intermediate quantities.</p>
+  </div>
+
+  <h3>The supplementary tower</h3>
+  <p>The three &lambda;'s are built out of nine "intermediate" quantities (D<sub>1</sub>, D<sub>2</sub>, D<sub>3</sub>, E<sub>1</sub>, E<sub>2</sub>, E<sub>3</sub>, F<sub>1</sub>, F<sub>2</sub>, F<sub>3</sub>), which themselves are built out of twelve constants (a<sub>i</sub>, b<sub>i</sub>, c<sub>i</sub>, d<sub>i</sub> for i = 1, 2, 3) that depend on the three target kinematic coefficients.</p>
+
+  <h4>Table 8.3 — the a/b/c/d constants</h4>
+  <table aria-label="Table 8.3: definitions of a i, b i, c i, d i in terms of the kinematic coefficients h 4, h prime 4, h double prime 4">
+    <caption>Table 8.3 · Definitions of a<sub>i</sub>, b<sub>i</sub>, c<sub>i</sub>, d<sub>i</sub> from the target kinematic coefficients</caption>
+    <thead><tr><th>i</th><th>a<sub>i</sub></th><th>b<sub>i</sub></th><th>c<sub>i</sub></th><th>d<sub>i</sub></th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="mono">&minus;h<sub>4</sub></td><td class="mono">0</td><td class="mono">&minus;(1 &minus; h<sub>4</sub>)</td><td class="mono">0</td></tr>
+      <tr><td>2</td><td class="mono">&minus;h&prime;<sub>4</sub></td><td class="mono">&minus;h<sub>4</sub>²</td><td class="mono">h&prime;<sub>4</sub></td><td class="mono">&minus;(1 &minus; h<sub>4</sub>)²</td></tr>
+      <tr><td>3</td><td class="mono">h&Prime;<sub>4</sub> &minus; h<sub>4</sub>³</td><td class="mono">3h<sub>4</sub>h&prime;<sub>4</sub></td><td class="mono">&minus;h&Prime;<sub>4</sub> &minus; (1 &minus; h<sub>4</sub>)³</td><td class="mono">&minus;3h&prime;<sub>4</sub>(1 &minus; h<sub>4</sub>)</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Eq. 8.18 — the D, E, F intermediates</h4>
+  <p>Each row of Table 8.3 gives an (a<sub>i</sub>, b<sub>i</sub>, c<sub>i</sub>, d<sub>i</sub>), and at the chosen design angle &theta;<sub>4<sub>des</sub></sub> these combine into:</p>
+  <div class="eqn"><span class="lbl">(8.18)</span> E<sub>i</sub> = a<sub>i</sub> sin&theta;<sub>4</sub> + b<sub>i</sub> cos&theta;<sub>4</sub> &nbsp;&nbsp; D<sub>i</sub> = c<sub>i</sub> cos&theta;<sub>4</sub> + d<sub>i</sub> sin&theta;<sub>4</sub> &nbsp;&nbsp; F<sub>i</sub> = &minus;c<sub>i</sub> sin&theta;<sub>4</sub> + d<sub>i</sub> cos&theta;<sub>4</sub></div>
+
+  <h4>Eq. 8.27 — the lambdas</h4>
+  <div class="eqn"><span class="lbl">(8.27)</span>
+    &lambda;<sub>1</sub> = D<sub>2</sub>(E<sub>3</sub> &minus; E<sub>1</sub>) + E<sub>2</sub>(D<sub>1</sub> &minus; D<sub>3</sub>)
+    <br>&lambda;<sub>2</sub> = E<sub>2</sub>(F<sub>1</sub> &minus; F<sub>3</sub>) &minus; D<sub>1</sub>E<sub>3</sub> + E<sub>1</sub>D<sub>3</sub> + F<sub>2</sub>(E<sub>3</sub> &minus; E<sub>1</sub>)
+    <br>&lambda;<sub>3</sub> = E<sub>1</sub>F<sub>3</sub> &minus; F<sub>1</sub>E<sub>3</sub>
+  </div>
+
+  <h4>Eqs. 8.20, 8.21, 8.22, 8.23 — finishing the ratios</h4>
+  <p>Once you've solved Eq. 8.26 for tan&theta;<sub>2</sub> and picked one of the two &theta;<sub>2<sub>des</sub></sub> roots, R<sub>1</sub> and R<sub>2</sub> follow from a Cramer-style ratio, and R<sub>3</sub> drops out of Freudenstein's equation evaluated at the design pair:</p>
+  <div class="eqn"><span class="lbl">(8.20)</span> R<sub>1</sub> = G<sub>1</sub> / G &nbsp;&nbsp;&nbsp; R<sub>2</sub> = G<sub>2</sub> / G</div>
+  <div class="eqn"><span class="lbl">(8.21)</span> G = E<sub>2</sub> sin&theta;<sub>2</sub> &minus; E<sub>1</sub> cos&theta;<sub>2</sub></div>
+  <div class="eqn"><span class="lbl">(8.22)</span> G<sub>1</sub> = (D<sub>1</sub>sin&theta;<sub>2</sub> + F<sub>1</sub>cos&theta;<sub>2</sub>)E<sub>2</sub> &minus; (D<sub>2</sub>sin&theta;<sub>2</sub> + F<sub>2</sub>cos&theta;<sub>2</sub>)E<sub>1</sub></div>
+  <div class="eqn"><span class="lbl">(8.23)</span> G<sub>2</sub> = (D<sub>2</sub>sin&theta;<sub>2</sub> + F<sub>2</sub>cos&theta;<sub>2</sub>)sin&theta;<sub>2</sub> &minus; (D<sub>1</sub>sin&theta;<sub>2</sub> + F<sub>1</sub>cos&theta;<sub>2</sub>)cos&theta;<sub>2</sub></div>
+
+  <div class="callout">
+    <span class="h">Don't memorize this — manage it</span>
+    <p style="margin:.4em 0 0">Nobody, including the textbook author, recommends that you commit Eqs. 8.18 through 8.27 to memory. The whole point of the design <em>procedure</em> on the next section is to give you a checklist that walks through these in order. Treat the formulas like a spreadsheet: row by row, you'll know exactly which one to use next.</p>
+  </div>
+</section>
+
+<!-- ============ PROCEDURE ============ -->
+<section id="procedure" aria-labelledby="proc-h">
+  <span class="sec-tag">§ 8.1.3 · The Checklist</span>
+  <h2 id="proc-h">The 11-step derivative-matching procedure</h2>
+  <p>Stanišić's design procedure organizes the whole derivative-matching computation into eleven steps. Walk through them in order, with a calculator (or, more pragmatically, MATLAB — see the <a href="matlab-for-engi216.html">MATLAB module</a>), and you'll always land at four link lengths.</p>
+
+  <div class="card">
+    <ol>
+      <li><strong>Pick a design position.</strong> Choose (&phi;<sub>des</sub>, &psi;<sub>des</sub>) satisfying the desired <i>f</i>(&phi;,&psi;)&nbsp;=&nbsp;0. This is the point where the three derivatives will be matched exactly.</li>
+      <li><strong>Compute the three kinematic-coefficient targets</strong> h<sub>4</sub>, h&prime;<sub>4</sub>, h&Prime;<sub>4</sub> by differentiating the desired function three times and evaluating at &phi;<sub>des</sub>.</li>
+      <li><strong>Fill in Table 8.3</strong> using the three target h's.</li>
+      <li><strong>Assume a design value of &theta;<sub>4</sub></strong>, called &theta;<sub>4<sub>des</sub></sub>. This is a <em>free choice</em>. Then compute D<sub>i</sub>, E<sub>i</sub>, F<sub>i</sub> for i = 1, 2, 3 from Eq. 8.18.</li>
+      <li><strong>Compute &lambda;<sub>1</sub>, &lambda;<sub>2</sub>, &lambda;<sub>3</sub></strong> from Eq. 8.27.</li>
+      <li><strong>Solve the quadratic</strong> Eq. 8.26 for tan&theta;<sub>2</sub>. You get two solutions.</li>
+      <li><strong>Pick a &theta;<sub>2</sub> from each tan-root.</strong> Each tan-root gives two angles (180° apart) but they collapse to the same mechanism, so you get effectively two distinct designs. Choose one as &theta;<sub>2<sub>des</sub></sub>.</li>
+      <li><strong>Compute G, G<sub>1</sub>, G<sub>2</sub></strong> from Eqs. 8.21–8.23.</li>
+      <li><strong>Compute R<sub>1</sub>, R<sub>2</sub></strong> from Eq. 8.20, and <strong>R<sub>3</sub></strong> from Eq. 8.5 evaluated at (&theta;<sub>2<sub>des</sub></sub>, &theta;<sub>4<sub>des</sub></sub>).</li>
+      <li><strong>Assume one link length</strong> (typically r<sub>1</sub> set by your application). Back out the other three via Eq. 8.4.</li>
+      <li><strong>Compute the initial angles</strong> &theta;<sub>2<sub>i</sub></sub> = &theta;<sub>2<sub>des</sub></sub> &minus; &phi;<sub>des</sub> and &theta;<sub>4<sub>i</sub></sub> = &theta;<sub>4<sub>des</sub></sub> &minus; &psi;<sub>des</sub>. Mechanism is now fully defined.</li>
+    </ol>
+  </div>
+
+  <!-- TOOL 3: Derivative-matching solver -->
+  <div class="card tool" id="dmTool">
+    <div class="tool-label">Tool 3 <span>· Derivative-matching designer</span></div>
+    <h3 style="margin-top:.3em">Enter three targets, watch the 11-step procedure run live</h3>
+    <p>Set the three target kinematic coefficients and the two free choices (&theta;<sub>4<sub>des</sub></sub> and which tan-root to keep). The tool runs every step of the procedure, prints the intermediate quantities (so you can verify by hand), and draws the resulting mechanism with its &psi;(&phi;) curve next to the desired curve. Defaults are Example 8.2 (rolling-gear): h<sub>4</sub> = &minus;1, h&prime;<sub>4</sub> = 0, h&Prime;<sub>4</sub> = 0.</p>
+    <div class="controls">
+      <div class="ctrl"><label for="dm-h">h<sub>4</sub>: <span class="val" id="dm-hv">−1.000</span></label><input type="range" id="dm-h" min="-3" max="3" step="0.01" value="-1"></div>
+      <div class="ctrl"><label for="dm-hp">h&prime;<sub>4</sub>: <span class="val" id="dm-hpv">0.000</span></label><input type="range" id="dm-hp" min="-2" max="2" step="0.01" value="0"></div>
+      <div class="ctrl"><label for="dm-hpp">h&Prime;<sub>4</sub>: <span class="val" id="dm-hppv">0.000</span></label><input type="range" id="dm-hpp" min="-2" max="2" step="0.01" value="0"></div>
+      <div class="ctrl"><label for="dm-th4">&theta;<sub>4<sub>des</sub></sub> (°): <span class="val" id="dm-th4v">135</span></label><input type="range" id="dm-th4" min="20" max="340" step="1" value="135"></div>
+    </div>
+    <div class="controls">
+      <span style="font-family:var(--mono); font-size:.8rem; color:var(--ink-soft)">Pick the tan-root:</span>
+      <button id="dm-root1" type="button" class="secondary" aria-pressed="true">root +√</button>
+      <button id="dm-root2" type="button" class="secondary" aria-pressed="false">root −√</button>
+      <button id="dm-ex" type="button" class="secondary">↺ Load Example 8.2</button>
+    </div>
+    <div class="readout" id="dm-readout" aria-live="polite">—</div>
+    <div class="grid2" style="margin-top:8px">
+      <div>
+        <svg id="dmStage" class="stage" viewBox="0 0 420 320" role="img" aria-label="The four-bar designed by derivative matching, drawn at the design position.">
+        </svg>
+        <p class="figref">Designed four-bar at design position (&phi;<sub>des</sub>, &psi;<sub>des</sub>)</p>
+      </div>
+      <div>
+        <svg id="dmChart" class="stage" viewBox="0 0 420 320" role="img" aria-label="A plot of the actual psi against phi for the derivative-matched design, with the desired curve overlaid.">
+        </svg>
+        <p class="figref">Actual &psi;(&phi;) (solid) vs. target (dashed) · the curves should be tangent to high order at the design point</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="real-world">
+    <span class="h">In the real world</span>
+    <p>Derivative-matching is the right tool when you care most about behavior <em>near a specific operating point</em>. A <strong>prosthetic knee</strong>'s four-bar must reproduce natural knee kinematics most accurately at the stance phase — the position where the user's weight is on it. A <strong>landing-gear retraction linkage</strong> must lock up smoothly at the retracted position, so its second derivative (effectively the rate at which the locking force ramps up) is what matters there. In both cases, you pick that operating point and derivative-match it.</p>
+  </div>
+</section>
+
+<!-- ============ WORKED EXAMPLES ============ -->
+<section id="examples" aria-labelledby="ex-h">
+  <span class="sec-tag">Worked Examples</span>
+  <h2 id="ex-h">From the textbook, step by step</h2>
+  <p>Stanišić's Examples 8.1 and 8.2 are the canonical worked problems for this chapter. Read through each, run the corresponding interactive tool above with the same numbers, and you'll have seen both methods end-to-end.</p>
+
+  <h3>Example 8.1 — A bridge-lifter (point-matching)</h3>
+
+  <div class="real-world">
+    <span class="h">The problem</span>
+    <p>Design a four-bar mechanism to replace a 2:1 gear pair, so that the output rotates exactly half as far as the input over the working range. This is the linkage that lifts a bascule bridge to clear a sailboat's mast: a slow input rotation through a large arc moves the bridge deck through a smaller arc, with the linkage providing the torque multiplication that gears would otherwise.</p>
+  </div>
+
+  <p><strong>Desired function:</strong> &psi; = &phi;/2, equivalently <i>f</i>(&phi;,&psi;) = &psi; &minus; &phi;/2 = 0, over the range 0°&nbsp;&le;&nbsp;&phi;&nbsp;&le;&nbsp;180° (so 0°&nbsp;&le;&nbsp;&psi;&nbsp;&le;&nbsp;90°).</p>
+
+  <details open>
+    <summary>Step 1 · Choose three precision points</summary>
+    <div class="body">
+      <p>Take three evenly-spaced &phi; values across the range and apply &psi; = &phi;/2:</p>
+      <table>
+        <thead><tr><th>k</th><th>&phi; (°)</th><th>&psi; (°)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>45</td><td>22.5</td></tr>
+          <tr><td>2</td><td>90</td><td>45.0</td></tr>
+          <tr><td>3</td><td>135</td><td>67.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 2 · Convert to (&theta;<sub>2</sub>, &theta;<sub>4</sub>) using free choices</summary>
+    <div class="body">
+      <p>Free choices: &theta;<sub>2<sub>i</sub></sub> = 20°, &theta;<sub>4<sub>i</sub></sub> = 40°. Using Eqs. 8.6 and 8.7:</p>
+      <table>
+        <thead><tr><th>k</th><th>&theta;<sub>2</sub> (°)</th><th>&theta;<sub>4</sub> (°)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>65</td><td>62.5</td></tr>
+          <tr><td>2</td><td>110</td><td>85.0</td></tr>
+          <tr><td>3</td><td>155</td><td>107.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 3 · Build &amp; solve the 3&times;3 system (Eq. 8.11)</summary>
+    <div class="body">
+      <div class="eqn">
+<pre style="margin:0; font:inherit; color:inherit">
+[ &minus;0.423   0.462   1 ] [R<sub>1</sub>]   [ 0.999 ]
+[  0.342   0.087   1 ] [R<sub>2</sub>] = [ 0.906 ]
+[  0.906  &minus;0.301   1 ] [R<sub>3</sub>]   [ 0.676 ]</pre>
+      </div>
+      <p>Solving:</p>
+      <p style="font-family:var(--mono)">R<sub>1</sub> = 0.5880 &nbsp;&nbsp; R<sub>2</sub> = 1.4475 &nbsp;&nbsp; R<sub>3</sub> = 0.5790</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 4 · Assume r<sub>1</sub> = 10 ft and back out the rest</summary>
+    <div class="body">
+      <p>From Eq. 8.4:</p>
+      <p style="font-family:var(--mono)">
+        r<sub>4</sub> = r<sub>1</sub>/R<sub>1</sub> = 10 / 0.588 ≈ 17.0 ft <br>
+        r<sub>2</sub> = r<sub>1</sub>/R<sub>2</sub> = 10 / 1.4475 ≈ 6.91 ft <br>
+        r<sub>3</sub> from R<sub>3</sub>'s definition: r<sub>3</sub>² = r<sub>2</sub>² + r<sub>4</sub>² + r<sub>1</sub>² &minus; 2r<sub>2</sub>r<sub>4</sub>R<sub>3</sub> &nbsp;&rArr;&nbsp; r<sub>3</sub> ≈ 17.3 ft
+      </p>
+      <p>(Stanišić's slightly rounded values: r<sub>1</sub> = 10, r<sub>2</sub> = 6.866, r<sub>3</sub> = 17.278, r<sub>4</sub> = 16.886 ft.)</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 5 · Verify with Tool 2</summary>
+    <div class="body">
+      <p>Open <a href="#pmTool">the point-matching solver</a> above (or click the "Load Example 8.1" button) and verify these numbers and the matching curve. The actual mechanism approximately tracks &psi; = &phi;/2 throughout 20° &lt; &phi; &lt; 180°, with exact agreement at the three precision points.</p>
+    </div>
+  </details>
+
+  <div class="callout">
+    <span class="h">Design takeaway</span>
+    <p style="margin:.4em 0 0">There are an <em>infinity to the fifth power</em> of valid choices here — three precision points (each free to slide along the desired curve) plus the two starting angles. The set of valid four-bars satisfying the same function generation problem is enormous. The skill of mechanism design is picking the choices that <em>also</em> give good transmission angles, reasonable link lengths, and a compact footprint. The bridge-lifter shown in Figure 8.6 of the textbook is one good choice out of infinitely many.</p>
+  </div>
+
+  <h3>Example 8.2 — A rolling-gear function (derivative-matching)</h3>
+
+  <p><strong>Desired function:</strong> &psi; = &minus;&phi; + 10°, over the range &minus;100°&nbsp;&lt;&nbsp;&phi;&nbsp;&lt;&nbsp;10° (so 0°&nbsp;&lt;&nbsp;&psi;&nbsp;&lt;&nbsp;110°). This corresponds to a pair of externally rolling gears with equal pitch radii — R&nbsp;=&nbsp;&minus;10.</p>
+
+  <details open>
+    <summary>Step 1 · Pick design position and compute h-coefficients</summary>
+    <div class="body">
+      <p>Choose &psi;<sub>des</sub> = 55° (so &phi;<sub>des</sub> = &minus;45° from the desired equation). Differentiate &psi; = &minus;&phi; + 10°:</p>
+      <p style="font-family:var(--mono)">h<sub>4</sub> = d&psi;/d&phi; = &minus;1 &nbsp;&nbsp; h&prime;<sub>4</sub> = d²&psi;/d&phi;² = 0 &nbsp;&nbsp; h&Prime;<sub>4</sub> = d³&psi;/d&phi;³ = 0</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 2 · Fill in Table 8.3</summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>i</th><th>a<sub>i</sub></th><th>b<sub>i</sub></th><th>c<sub>i</sub></th><th>d<sub>i</sub></th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>1</td><td>0</td><td>&minus;2</td><td>0</td></tr>
+          <tr><td>2</td><td>0</td><td>&minus;1</td><td>0</td><td>&minus;4</td></tr>
+          <tr><td>3</td><td>1</td><td>0</td><td>&minus;8</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 3 · Choose &theta;<sub>4<sub>des</sub></sub> = 135° and compute D/E/F</summary>
+    <div class="body">
+      <p style="font-family:var(--mono)">
+        E<sub>1</sub> = 0.7071, E<sub>2</sub> = 0.7071, E<sub>3</sub> = 0.7071<br>
+        D<sub>1</sub> = 1.4141, D<sub>2</sub> = &minus;2.828, D<sub>3</sub> = 5.656<br>
+        F<sub>1</sub> = 1.4141, F<sub>2</sub> = 2.828, F<sub>3</sub> = 5.656
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 4 · &lambda;'s and the quadratic</summary>
+    <div class="body">
+      <p style="font-family:var(--mono)">&lambda;<sub>1</sub> = &minus;3, &lambda;<sub>2</sub> = 0, &lambda;<sub>3</sub> = 3</p>
+      <p>Eq. 8.26 becomes: &minus;3 tan²&theta;<sub>2</sub> + 3 = 0 &nbsp;&rArr;&nbsp; tan²&theta;<sub>2</sub> = 1, so tan&theta;<sub>2</sub> = &plusmn;1.</p>
+      <p>Each &plusmn; gives two angles 180° apart that produce the same mechanism. Effective candidates: &theta;<sub>2<sub>des</sub></sub> = 45° or &minus;45°. Take &theta;<sub>2<sub>des</sub></sub> = &minus;45°.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 5 · Compute G, R's, then link lengths</summary>
+    <div class="body">
+      <p style="font-family:var(--mono)">
+        G = &minus;1, G<sub>1</sub> = &minus;2.828, G<sub>2</sub> = &minus;2.828<br>
+        R<sub>1</sub> = G<sub>1</sub>/G = 2.828 &nbsp;&nbsp; R<sub>2</sub> = G<sub>2</sub>/G = 2.828 &nbsp;&nbsp; R<sub>3</sub> = 3.0 (from Eq. 8.5)
+      </p>
+      <p>With r<sub>1</sub> = 10 inches:</p>
+      <p style="font-family:var(--mono)">
+        r<sub>4</sub> = 10 / 2.828 ≈ 3.54 in<br>
+        r<sub>2</sub> = 10 / 2.828 ≈ 3.54 in<br>
+        r<sub>3</sub> = √(r<sub>1</sub>² + r<sub>2</sub>² + r<sub>4</sub>² &minus; 2 R<sub>3</sub> r<sub>2</sub> r<sub>4</sub>) ≈ 7.07 in
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Step 6 · Verify with Tool 3</summary>
+    <div class="body">
+      <p>The mechanism's local slope at the design position is exactly d&psi;/d&phi; = &minus;1 (matching the linear target), and because both h&prime; and h&Prime; are zero there, the curvature and the rate-of-change-of-curvature are also matched. The result is a near-perfect linear &psi;(&phi;) over a remarkably wide range — that's the payoff of matching three derivatives, not just one. Open <a href="#dmTool">Tool 3</a> and click "Load Example 8.2" to see it live.</p>
+    </div>
+  </details>
+
+  <div class="analogy">
+    <span class="h">Why the rolling-gear analogy?</span>
+    <p>Two external gears with equal pitch radii produce exactly &psi; = &minus;&phi; (same magnitude, opposite direction). The +10° is just a phase offset that comes from picking which tooth is meshed at &phi; = 0. So this whole exercise is asking: <em>can a four-bar mimic a pair of equal external gears?</em> Yes — over a useful range, derivative-matching makes it indistinguishable. That's how you replace a gear pair with a linkage when noise, lubrication, or wear rule out gears (think medical devices and surgical robotics).</p>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Self-Check</span>
+  <h2 id="quiz-h">Check your understanding</h2>
+  <p>Eight questions spanning Part I of Chapter 8. Pick an answer to see instant feedback; questions and choices reshuffle each time. Running score: <span class="q-score" id="quizScore">0 / 0</span></p>
+  <div id="quizMount"></div>
+  <div class="controls" style="margin-top:14px">
+    <button id="quizReset" type="button" class="secondary">&#8635; Reset &amp; reshuffle</button>
+  </div>
+</section>
+
+<!-- ============ VIDEOS ============ -->
+<section id="videos" aria-labelledby="vid-h">
+  <span class="sec-tag">Video Lectures</span>
+  <h2 id="vid-h">Watch &amp; reinforce</h2>
+  <p>Four short videos covering Freudenstein's equation derivation, the graphical/animated meaning of three-position synthesis, a fully-worked numerical example, and a hands-on synthesis software demo. Watch these in order for the most natural progression.</p>
+  <p class="ext-note">Videos are hosted on YouTube and play in-page; an internet connection is required to view them.</p>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/Mu_oxmPMgrU?rel=0"
+        title="Freudenstein's Equation | Theory of Machines"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Freudenstein's equation — the derivation</h3>
+      <p style="margin:.3em 0 .2em">A clean walk through the algebra that takes the four-bar vector loop and produces Eq. 8.5 — exactly the five-step process collapsed in the "Show the derivation" disclosure above. Watch this if our derivation moved too fast.</p>
+      <div class="video-tags"><span>Source: <b>Theory of Machines (lecture)</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports § 8.1 · Freudenstein</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/xedaz3NVmpM?rel=0"
+        title="Two and Three Position Synthesis of a Four-Bar Linkage"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Two- and three-position synthesis — graphical and animated</h3>
+      <p style="margin:.3em 0 .2em">The same problem we solve algebraically, solved <em>geometrically</em> with compass and straightedge — then animated to show the mechanism actually moving through its precision points. A useful sanity check that the algebra and the geometry are talking about the same thing.</p>
+      <div class="video-tags"><span>Source: <b>lecture channel</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports § 8.1.1 · Point-matching</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/NX5eUWIOhJU?rel=0"
+        title="Freudenstein equation synthesis of mechanism — worked example"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>Freudenstein synthesis — a fully numerical example</h3>
+      <p style="margin:.3em 0 .2em">Numbers, not symbols. The instructor takes three precision points, builds the 3&times;3 system, solves it, and reports link lengths — the same procedure as our Tool 2, but done by hand so you see exactly what each entry of the matrix is.</p>
+      <div class="video-tags"><span>Source: <b>lecture channel</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports § 8.1.1 · Point-matching (worked)</span>
+    </div>
+  </div>
+
+  <div class="video-card">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/by4-J-YeR9o?rel=0"
+        title="Four-bar Linkage Synthesis in MotionGen"
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <div class="video-meta">
+      <h3>MotionGen — synthesis as a software tool</h3>
+      <p style="margin:.3em 0 .2em">A quick demo of MotionGen, a free synthesis app from Stony Brook's mechanism design lab. Frames our hand calculations as what software does behind the scenes — and shows how three- four- and five-position synthesis live on the same conceptual axis (more precision points &rArr; tighter fit &rArr; less freedom to optimize transmission).</p>
+      <div class="video-tags"><span>Source: <b>MotionGen / Stony Brook</b></span><span>Platform: <b>YouTube</b></span></div>
+      <span class="video-supports">Supports § 8.1.1 · Beyond three points</span>
+    </div>
+  </div>
+
+  <p>After watching, return to <a href="#pmTool">Tool 2</a> and <a href="#dmTool">Tool 3</a> and re-run Examples 8.1 and 8.2 by hand — you should arrive at the same numbers shown in both the videos and our solutions above.</p>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rc-h">
+  <span class="sec-tag">Quick Reference</span>
+  <h2 id="rc-h">Chapter 8 · Part I formula card</h2>
+  <p>Everything at a glance — good for review and exam prep. Use your browser's print function to save just this card (interactive tools and navigation are hidden when printing).</p>
+
+  <div class="refcard">
+    <div class="rc-head">
+      <span>Chapter 8 · Part I · Four-Bar Synthesis</span>
+      <span>ENGI 216 · Freudenstein</span>
+    </div>
+    <div class="rc-body">
+      <div class="rc-grid">
+        <div class="rc-block">
+          <h4>Freudenstein's equation</h4>
+          <div class="rc-eq">R<sub>3</sub> + R<sub>2</sub>cos&theta;<sub>4</sub> &minus; R<sub>1</sub>cos&theta;<sub>2</sub> = cos(&theta;<sub>2</sub>&minus;&theta;<sub>4</sub>)</div>
+          <div class="rc-eq">R<sub>1</sub> = r<sub>1</sub>/r<sub>4</sub>, &nbsp; R<sub>2</sub> = r<sub>1</sub>/r<sub>2</sub></div>
+          <div class="rc-eq">R<sub>3</sub> = (r<sub>2</sub>²&minus;r<sub>3</sub>²+r<sub>4</sub>²+r<sub>1</sub>²)/(2 r<sub>2</sub> r<sub>4</sub>)</div>
+        </div>
+        <div class="rc-block">
+          <h4>Angle bookkeeping</h4>
+          <div class="rc-eq">&phi; = &theta;<sub>2</sub> &minus; &theta;<sub>2<sub>i</sub></sub></div>
+          <div class="rc-eq">&psi; = &theta;<sub>4</sub> &minus; &theta;<sub>4<sub>i</sub></sub></div>
+          <div class="rc-eq">d&phi; = d&theta;<sub>2</sub>, &nbsp; d&psi; = d&theta;<sub>4</sub></div>
+        </div>
+        <div class="rc-block">
+          <h4>Point-matching (3&times;3 system)</h4>
+          <div class="rc-eq">Build Eq. 8.9 from 3 precision (&theta;<sub>2,k</sub>, &theta;<sub>4,k</sub>)</div>
+          <div class="rc-eq">Solve for (R<sub>1</sub>, R<sub>2</sub>, R<sub>3</sub>)</div>
+          <div class="rc-eq">Assume r<sub>1</sub>, back out r<sub>2</sub>, r<sub>3</sub>, r<sub>4</sub></div>
+        </div>
+        <div class="rc-block">
+          <h4>Derivative-matching (quadratic)</h4>
+          <div class="rc-eq">&lambda;<sub>1</sub>tan²&theta;<sub>2</sub> + &lambda;<sub>2</sub>tan&theta;<sub>2</sub> + &lambda;<sub>3</sub> = 0</div>
+          <div class="rc-eq">R<sub>1</sub> = G<sub>1</sub>/G, &nbsp; R<sub>2</sub> = G<sub>2</sub>/G</div>
+          <div class="rc-eq">R<sub>3</sub> from Eq. 8.5 at (&theta;<sub>2<sub>des</sub></sub>, &theta;<sub>4<sub>des</sub></sub>)</div>
+        </div>
+        <div class="rc-block">
+          <h4>Kinematic-coefficient targets</h4>
+          <div class="rc-eq">h<sub>4</sub> = d&psi;/d&phi; (at design pt)</div>
+          <div class="rc-eq">h&prime;<sub>4</sub> = d²&psi;/d&phi;²</div>
+          <div class="rc-eq">h&Prime;<sub>4</sub> = d³&psi;/d&phi;³</div>
+        </div>
+        <div class="rc-block">
+          <h4>Free choices (what you pick)</h4>
+          <ul class="rc-list">
+            <li><span class="k">Point-matching:</span> the 3 precision points, &theta;<sub>2<sub>i</sub></sub>, &theta;<sub>4<sub>i</sub></sub>, one r</li>
+            <li><span class="k">Derivative-matching:</span> &phi;<sub>des</sub>, &theta;<sub>4<sub>des</sub></sub>, tan-root, one r</li>
+            <li><span class="k">Scale:</span> in 4-bar synthesis, scale is free</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Glossary</span>
+  <h2 id="gl-h">Terms in this chapter</h2>
+  <p>Twelve key terms. Type in the search box to filter.</p>
+  <div class="glossary-search">
+    <label for="glossSearch" class="visually-hidden">Search glossary</label>
+    <input id="glossSearch" type="text" placeholder="Search terms…" autocomplete="off">
+  </div>
+  <dl class="gloss-list" id="glossList"></dl>
+  <p class="gloss-empty" id="glossEmpty" style="display:none">No terms match your search.</p>
+</section>
+
+<!-- ============ RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">External Resources</span>
+  <h2 id="res-h">Go deeper</h2>
+  <p>Hand-picked open resources. All links open in a new tab (indicated by the ↗ marker) so you don't lose your place in this module.</p>
+
+  <div class="res-group">
+    <h3>📜 Historical &amp; foundational</h3>
+    <div class="res-grid" id="res-foundational"></div>
+  </div>
+  <div class="res-group">
+    <h3>📐 Tutorials &amp; lectures</h3>
+    <div class="res-grid" id="res-tutorials"></div>
+  </div>
+  <div class="res-group">
+    <h3>🛠 Synthesis software</h3>
+    <div class="res-grid" id="res-software"></div>
+  </div>
+  <div class="res-group">
+    <h3>🔬 Research &amp; advanced</h3>
+    <div class="res-grid" id="res-research"></div>
+  </div>
+</section>
+
+<!-- ============ RECAP ============ -->
+<section id="recap" aria-labelledby="recap-h">
+  <span class="sec-tag">Wrap-Up</span>
+  <h2 id="recap-h">Objectives recap</h2>
+  <p>Before moving to Part II (Crank-Slider), check that each of these is solid. If any one isn't, jump back to the linked section.</p>
+  <ul class="clean">
+    <li>I can write down <strong>Freudenstein's equation</strong> from memory and explain what each ratio means. <span style="font-family:var(--mono); font-size:.78rem; color:var(--ink-soft)">→ <a href="#freudenstein">§ Freudenstein</a></span></li>
+    <li>I can take three (&phi;, &psi;) precision points, pick &theta;<sub>2<sub>i</sub></sub> and &theta;<sub>4<sub>i</sub></sub>, build the 3&times;3 system, solve it, and extract four link lengths. <span style="font-family:var(--mono); font-size:.78rem; color:var(--ink-soft)">→ <a href="#pointmatch">§ Point-matching</a></span></li>
+    <li>I can compute h<sub>4</sub>, h&prime;<sub>4</sub>, h&Prime;<sub>4</sub> from a desired &psi;(&phi;) and walk the 11-step <strong>derivative-matching procedure</strong> to a design. <span style="font-family:var(--mono); font-size:.78rem; color:var(--ink-soft)">→ <a href="#procedure">§ Procedure</a></span></li>
+    <li>I can explain <strong>when</strong> to use point-matching vs. derivative-matching, in terms of how the resulting curve behaves (Lagrange interpolation vs. Taylor approximation). <span style="font-family:var(--mono); font-size:.78rem; color:var(--ink-soft)">→ <a href="#derivmatch">§ Derivative-matching</a></span></li>
+    <li>I can reproduce Examples 8.1 and 8.2 from the textbook, end-to-end. <span style="font-family:var(--mono); font-size:.78rem; color:var(--ink-soft)">→ <a href="#examples">§ Examples</a></span></li>
+    <li>I know that in 4-bar synthesis, scale is free — the same ratios produce the same input-output curve at any size. <span style="font-family:var(--mono); font-size:.78rem; color:var(--ink-soft)">→ <a href="#freudTool">§ Tool 1</a></span></li>
+  </ul>
+
+  <h3>References &amp; attribution</h3>
+  <ul class="clean">
+    <li>Stanišić, M. M. <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em>, Chapter 8 · § 8.1, Cengage Learning, 2015. All equation numbers in this module match the textbook.</li>
+    <li>Freudenstein, F. (1955). "Approximate Synthesis of Four-Bar Linkages." <em>Transactions of the ASME</em>, 77, pp. 853–861.</li>
+    <li>Roth, B. (2007). "Ferdinand Freudenstein (1926–2006)," in <em>Distinguished Figures in Mechanism and Machine Science</em>.</li>
+    <li>Ghosal, A. "The Freudenstein Equation and Design of Four-link Mechanisms," <em>Resonance</em>, Indian Academy of Sciences, accessed via mecheng.iisc.ac.in.</li>
+    <li>Chebyshev, P. L. (1854). On the original Chebyshev nodes; cited via standard numerical-analysis texts.</li>
+    <li>Interactive tools: original work for this module, built on the four-bar solver introduced in the Chapter 4 module.</li>
+  </ul>
+</section>
+
+<!-- ============ WHAT'S NEXT ============ -->
+<section id="whatsnext" aria-labelledby="next-h">
+  <span class="sec-tag">Coming Next Week</span>
+  <h2 id="next-h">Part II — Mechanism Synthesis: Crank-Slider</h2>
+  <div class="sequel">
+    <span class="h">→ Continue to Part II</span>
+    <h3>Mechanism Synthesis II: Crank-Slider Linkages</h3>
+    <p>Same conceptual machinery — Freudenstein's equation, point-matching, derivative-matching — applied to the crank-slider. The single big twist: scale matters now. The dimensionless ratios become dimensioned quantities, and doubling all link lengths actually changes the input-output curve. Part II opens with a "where we left off" recap so you can pick up cleanly even after a week away.</p>
+    <a class="btn-next" href="chapter8-mechanism-synthesis-ii-crank-slider.html">Open Part II →</a>
+  </div>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="true">
+  <div class="wrap">
+    <label for="progBar">Reading progress</label>
+    <progress id="progBar" value="0" max="100"></progress>
+  </div>
+</div>
+
+<footer class="site">
+  <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · 2026</p>
+  <p>Chapter 8, Part I of II. Aligned to Stanišić, <em>Mechanisms and Machines</em>, § 8.1.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     SHARED HELPERS
+     ============================================================ */
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var n = document.createElementNS(SVGNS, tag);
+    if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); }
+    return n;
+  }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#000";
+  }
+  function clear(node){ while(node && node.firstChild) node.removeChild(node.firstChild); }
+  function txt(stage,x,y,s,color,size,anchor,weight){
+    var t=el("text",{x:x,y:y,fill:color||cssVar('--ink'),"font-size":size||12,"text-anchor":anchor||"middle"});
+    if(weight) t.setAttribute("font-weight",weight);
+    t.textContent=s; stage.appendChild(t); return t;
+  }
+  function circle(stage,cx,cy,r,stroke,w,fill){
+    stage.appendChild(el("circle",{cx:cx,cy:cy,r:r,fill:fill||"none",stroke:stroke,"stroke-width":w||2}));
+  }
+  function line(stage,x1,y1,x2,y2,color,w,dash){
+    var o={x1:x1,y1:y1,x2:x2,y2:y2,stroke:color,"stroke-width":w||2};
+    if(dash) o["stroke-dasharray"]=dash;
+    stage.appendChild(el("line",o));
+  }
+  function pathd(stage,d,color,w,fill,dash){
+    var o={d:d,fill:fill||"none",stroke:color,"stroke-width":w||2};
+    if(dash) o["stroke-dasharray"]=dash;
+    stage.appendChild(el("path",o));
+  }
+  function pin(stage,x,y){
+    stage.appendChild(el("circle",{cx:x,cy:y,r:5,fill:cssVar('--panel'),stroke:cssVar('--ink'),"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:x,cy:y,r:1.6,fill:cssVar('--ink')}));
+  }
+  function groundHatch(stage,x,y,w,below){
+    line(stage,x-w/2,y,x+w/2,y,cssVar('--ink-soft'),2);
+    var g=el("g",{stroke:cssVar('--ink-soft'),"stroke-width":1.4});
+    var dir = below===false ? -1 : 1;
+    for(var i=-w/2;i<=w/2;i+=8){
+      g.appendChild(el("line",{x1:x+i,y1:y,x2:x+i-7,y2:y+9*dir}));
+    }
+    stage.appendChild(g);
+  }
+  function deg(r){ return r*180/Math.PI; }
+  function rad(d){ return d*Math.PI/180; }
+  function wrap360(d){ d=d%360; if(d<0) d+=360; return d; }
+
+  /* ============================================================
+     FOUR-BAR SOLVER (shared)
+     Ground from O2=(0,0) along +x to O4=(r1,0). Returns null if
+     the linkage cannot assemble at this θ2.
+     ============================================================ */
+  function solveFourbar(r1,r2,r3,r4,th2,branch){
+    var ax=r2*Math.cos(th2), ay=r2*Math.sin(th2);
+    var o4x=r1, o4y=0;
+    var dx=o4x-ax, dy=o4y-ay;
+    var d=Math.sqrt(dx*dx+dy*dy);
+    if(d>r3+r4 || d<Math.abs(r3-r4) || d===0) return null;
+    var aa=(r3*r3 - r4*r4 + d*d)/(2*d);
+    var h2=r3*r3 - aa*aa;
+    if(h2<0) h2=0;
+    var hh=Math.sqrt(h2);
+    var xm=ax + aa*dx/d, ym=ay + aa*dy/d;
+    var sgn = (branch==='-') ? -1 : 1;
+    var bx=xm + sgn*hh*(-dy)/d, by=ym + sgn*hh*(dx)/d;
+    var th3=Math.atan2(by-ay, bx-ax);
+    var th4=Math.atan2(by-o4y, bx-o4x);
+    return {ax:ax,ay:ay,bx:bx,by:by,o4x:o4x,o4y:o4y,th3:th3,th4:th4};
+  }
+
+  // Build a coord mapper that fits a bounding box into the SVG with padding.
+  function makeMapper(W,H,pad,xmin,xmax,ymin,ymax){
+    var sx=(W-2*pad)/(xmax-xmin), sy=(H-2*pad)/(ymax-ymin);
+    var s=Math.min(sx,sy);
+    var cx=(xmin+xmax)/2, cy=(ymin+ymax)/2;
+    return function(x,y){ return { X: W/2 + (x-cx)*s, Y: H/2 - (y-cy)*s }; };
+  }
+
+  // Draw a fully-labeled four-bar onto stage at the given configuration.
+  function drawFourbar(stage, r1, r2, r3, r4, sol, opts){
+    opts = opts || {};
+    var W=420, H=320, pad=28;
+    var span = Math.max(r1+r2+r4, r3) + 2;
+    var m = makeMapper(W,H,pad, -r2-3, r1+r4+3, -span*0.55, span*0.55);
+
+    // ground line
+    var o2=m(0,0), o4=m(r1,0);
+    line(stage, o2.X-30, o2.Y, o4.X+30, o4.Y, cssVar('--ink-soft'), 1.2, "5 4");
+
+    if(!sol){
+      txt(stage, W/2, H/2, "Linkage cannot assemble at this θ₂", cssVar('--bad'), 13, 'middle', '700');
+      groundHatch(stage, o2.X, o2.Y, 28);
+      groundHatch(stage, o4.X, o4.Y, 28);
+      pin(stage, o2.X, o2.Y);
+      pin(stage, o4.X, o4.Y);
+      return;
+    }
+
+    var A=m(sol.ax, sol.ay), B=m(sol.bx, sol.by);
+
+    // links
+    line(stage, o2.X, o2.Y, A.X, A.Y, cssVar('--accent'), 4);          // r2 (crank)
+    line(stage, A.X, A.Y, B.X, B.Y, cssVar('--ink'), 3.5);             // r3 (coupler)
+    line(stage, o4.X, o4.Y, B.X, B.Y, cssVar('--accent-2'), 4);        // r4 (rocker)
+
+    // ground hatches & pins
+    groundHatch(stage, o2.X, o2.Y, 28);
+    groundHatch(stage, o4.X, o4.Y, 28);
+    pin(stage, o2.X, o2.Y); pin(stage, o4.X, o4.Y);
+    pin(stage, A.X, A.Y); pin(stage, B.X, B.Y);
+
+    // labels
+    txt(stage, o2.X-6, o2.Y+18, "O₂", cssVar('--ink-soft'), 12, 'end', '700');
+    txt(stage, o4.X+6, o4.Y+18, "O₄", cssVar('--ink-soft'), 12, 'start', '700');
+    txt(stage, (o2.X+A.X)/2 - 12, (o2.Y+A.Y)/2 + 4, "r₂", cssVar('--accent-dk'), 12, 'middle', '700');
+    txt(stage, (A.X+B.X)/2, (A.Y+B.Y)/2 - 8, "r₃", cssVar('--ink'), 12, 'middle', '700');
+    txt(stage, (o4.X+B.X)/2 + 14, (o4.Y+B.Y)/2 + 4, "r₄", cssVar('--rw-h'), 12, 'middle', '700');
+    txt(stage, (o2.X+o4.X)/2, o2.Y+24, "r₁ (ground)", cssVar('--ink-soft'), 11, 'middle');
+
+    // angle arcs
+    if(opts.showAngles !== false){
+      // theta_2 arc
+      var arcR=18;
+      pathd(stage, "M "+(o2.X+arcR)+" "+o2.Y+" A "+arcR+" "+arcR+" 0 0 0 "+(o2.X+arcR*Math.cos(Math.atan2(-(A.Y-o2.Y),A.X-o2.X)))+" "+(o2.Y+arcR*Math.sin(Math.atan2(-(A.Y-o2.Y),A.X-o2.X))), cssVar('--accent'), 1.5, 'none');
+      txt(stage, o2.X+arcR+9, o2.Y-4, "θ₂", cssVar('--accent-dk'), 11, 'start', '700');
+      // theta_4 arc
+      pathd(stage, "M "+(o4.X+arcR)+" "+o4.Y+" A "+arcR+" "+arcR+" 0 0 0 "+(o4.X+arcR*Math.cos(Math.atan2(-(B.Y-o4.Y),B.X-o4.X)))+" "+(o4.Y+arcR*Math.sin(Math.atan2(-(B.Y-o4.Y),B.X-o4.X))), cssVar('--accent-2'), 1.5, 'none');
+      txt(stage, o4.X+arcR+9, o4.Y-4, "θ₄", cssVar('--rw-h'), 11, 'start', '700');
+    }
+  }
+
+  // Sweep through 0..2π and produce an array of {th2, th4} samples.
+  function sweepFourbar(r1,r2,r3,r4,branch,N){
+    N = N || 361;
+    var pts=[];
+    var prevTh4 = null;
+    for(var i=0;i<N;i++){
+      var th2 = i*2*Math.PI/(N-1);
+      var s = solveFourbar(r1,r2,r3,r4,th2,branch);
+      if(s){
+        // unwrap th4 to keep continuous
+        var t4 = s.th4;
+        if(prevTh4!==null){
+          while(t4 - prevTh4 > Math.PI) t4 -= 2*Math.PI;
+          while(t4 - prevTh4 < -Math.PI) t4 += 2*Math.PI;
+        }
+        prevTh4 = t4;
+        pts.push({th2:th2, th4:t4, ok:true});
+      } else {
+        pts.push({th2:th2, th4:null, ok:false});
+        prevTh4 = null;
+      }
+    }
+    return pts;
+  }
+
+  // Plot helper. Draws axes, optional desired curve, optional actual curve, optional precision points.
+  function plotCurve(stage, opts){
+    var W=420, H=320;
+    var pad={l:50, r:18, t:22, b:38};
+    var xmin = opts.xmin, xmax = opts.xmax;
+    var ymin = opts.ymin, ymax = opts.ymax;
+    function X(x){ return pad.l + (x-xmin)/(xmax-xmin)*(W-pad.l-pad.r); }
+    function Y(y){ return H - pad.b - (y-ymin)/(ymax-ymin)*(H-pad.t-pad.b); }
+
+    // axes
+    line(stage, pad.l, H-pad.b, W-pad.r, H-pad.b, cssVar('--ink-soft'), 1.2);
+    line(stage, pad.l, H-pad.b, pad.l, pad.t, cssVar('--ink-soft'), 1.2);
+
+    // grid x
+    var i;
+    for(i=0;i<=4;i++){
+      var xv = xmin + (xmax-xmin)*i/4;
+      line(stage, X(xv), H-pad.b, X(xv), H-pad.b+5, cssVar('--ink-soft'), 1);
+      txt(stage, X(xv), H-pad.b+18, Math.round(xv)+"°", cssVar('--ink-soft'), 10, 'middle');
+    }
+    // grid y
+    for(i=0;i<=4;i++){
+      var yv = ymin + (ymax-ymin)*i/4;
+      line(stage, pad.l-5, Y(yv), pad.l, Y(yv), cssVar('--ink-soft'), 1);
+      txt(stage, pad.l-8, Y(yv)+4, Math.round(yv)+"°", cssVar('--ink-soft'), 10, 'end');
+    }
+
+    // x axis label
+    txt(stage, W/2, H-6, opts.xlabel||"φ (input)", cssVar('--ink'), 11, 'middle', '700');
+    // y axis label
+    var ylab = opts.ylabel||"ψ (output)";
+    var ylabT = el("text", {x:14, y:H/2, fill:cssVar('--ink'), "font-size":11, "text-anchor":"middle", "font-weight":"700", transform:"rotate(-90 14 "+(H/2)+")"});
+    ylabT.textContent = ylab; stage.appendChild(ylabT);
+
+    // desired curve
+    if(opts.desired){
+      var d = "";
+      for(i=0;i<opts.desired.length;i++){
+        var p = opts.desired[i];
+        if(p.x<xmin||p.x>xmax||p.y<ymin||p.y>ymax) { d = ""; continue; }
+        d += (d===""?"M ":"L ")+X(p.x)+" "+Y(p.y)+" ";
+      }
+      pathd(stage, d, cssVar('--ink-soft'), 1.5, 'none', '5 4');
+    }
+    // actual curve
+    if(opts.actual){
+      var d2 = "", started=false;
+      for(i=0;i<opts.actual.length;i++){
+        var q = opts.actual[i];
+        if(q.y===null){ started=false; continue; }
+        if(q.x<xmin||q.x>xmax){ continue; }
+        var Yv = Y(q.y);
+        if(Yv < pad.t-2 || Yv > H-pad.b+2){ started=false; continue; }
+        d2 += (started?"L ":"M ")+X(q.x)+" "+Yv+" ";
+        started=true;
+      }
+      pathd(stage, d2, cssVar('--accent'), 2.2, 'none');
+    }
+    // precision points
+    if(opts.points){
+      for(i=0;i<opts.points.length;i++){
+        var pp = opts.points[i];
+        if(pp.x<xmin||pp.x>xmax||pp.y<ymin||pp.y>ymax) continue;
+        circle(stage, X(pp.x), Y(pp.y), 5, cssVar('--accent-2'), 2, cssVar('--paper'));
+        circle(stage, X(pp.x), Y(pp.y), 2, cssVar('--accent-2'), 0, cssVar('--accent-2'));
+      }
+    }
+    if(opts.designPt){
+      circle(stage, X(opts.designPt.x), Y(opts.designPt.y), 6, cssVar('--good'), 2.5, cssVar('--paper'));
+      circle(stage, X(opts.designPt.x), Y(opts.designPt.y), 2.5, cssVar('--good'), 0, cssVar('--good'));
+    }
+
+    // legend
+    var ly = pad.t-6;
+    if(opts.legend){
+      var lx = pad.l + 6;
+      line(stage, lx, ly, lx+18, ly, cssVar('--ink-soft'), 1.5, '5 4');
+      txt(stage, lx+22, ly+4, "desired", cssVar('--ink-soft'), 10, 'start');
+      line(stage, lx+85, ly, lx+103, ly, cssVar('--accent'), 2.2);
+      txt(stage, lx+107, ly+4, "actual", cssVar('--accent-dk'), 10, 'start', '700');
+      if(opts.legend.points){
+        circle(stage, lx+165, ly, 4, cssVar('--accent-2'), 2, cssVar('--paper'));
+        txt(stage, lx+173, ly+4, "precision pts", cssVar('--accent-2'), 10, 'start');
+      }
+      if(opts.legend.design){
+        circle(stage, lx+250, ly, 4, cssVar('--good'), 2.5, cssVar('--paper'));
+        txt(stage, lx+258, ly+4, "design pt", cssVar('--good'), 10, 'start');
+      }
+    }
+  }
+
+  /* ============================================================
+     TOOL 1 · FREUDENSTEIN EXPLORER
+     ============================================================ */
+  (function(){
+    var stage = $("freudStage"); if(!stage) return;
+    var chart = $("freudChart");
+    function render(){
+      var r1=+$("freud-r1").value, r2=+$("freud-r2").value,
+          r3=+$("freud-r3").value, r4=+$("freud-r4").value,
+          th2=rad(+$("freud-th2").value);
+      $("freud-r1v").textContent=r1.toFixed(1);
+      $("freud-r2v").textContent=r2.toFixed(1);
+      $("freud-r3v").textContent=r3.toFixed(1);
+      $("freud-r4v").textContent=r4.toFixed(1);
+      $("freud-th2v").textContent=Math.round(deg(th2))+"°";
+      clear(stage); clear(chart);
+      var sol = solveFourbar(r1,r2,r3,r4,th2);
+      drawFourbar(stage, r1,r2,r3,r4, sol);
+
+      // Freudenstein ratios
+      var R1=r1/r4, R2=r1/r2, R3=(r2*r2 - r3*r3 + r4*r4 + r1*r1)/(2*r2*r4);
+
+      // sweep input and produce curve
+      var sw = sweepFourbar(r1,r2,r3,r4,'+',361);
+      var actual = sw.map(function(p){
+        return { x: deg(p.th2), y: p.th4===null ? null : deg(p.th4) };
+      });
+      // estimate plot bounds
+      var ys=actual.map(function(p){return p.y;}).filter(function(v){return v!==null;});
+      var ymin=Math.min.apply(null,ys), ymax=Math.max.apply(null,ys);
+      if(!isFinite(ymin)) { ymin=-180; ymax=180; }
+      var ypad=10;
+      plotCurve(chart, {
+        xmin:0, xmax:360,
+        ymin:Math.floor((ymin-ypad)/30)*30, ymax:Math.ceil((ymax+ypad)/30)*30,
+        actual: actual, legend: {},
+        xlabel:"θ₂ (input)", ylabel:"θ₄ (output)"
+      });
+
+      var msg = "R<sub>1</sub> = <b>"+R1.toFixed(3)+"</b> · R<sub>2</sub> = <b>"+R2.toFixed(3)+"</b> · R<sub>3</sub> = <b>"+R3.toFixed(3)+"</b>";
+      if(sol) msg += " &nbsp; θ<sub>4</sub> at current θ<sub>2</sub>: <b>"+deg(sol.th4).toFixed(1)+"°</b>";
+      else msg += " &nbsp; <span style='color:var(--bad)'>linkage cannot assemble at θ₂="+Math.round(deg(th2))+"°</span>";
+      // Grashof check
+      var L = Math.max(r1,r2,r3,r4), S=Math.min(r1,r2,r3,r4);
+      var P=0,Q=0;
+      [r1,r2,r3,r4].forEach(function(v){ if(v!==L && v!==S){ if(P===0)P=v; else Q=v; } });
+      // handle duplicates
+      var arr=[r1,r2,r3,r4].slice().sort(function(a,b){return a-b;});
+      var grash = (arr[0]+arr[3]) <= (arr[1]+arr[2]);
+      msg += " &nbsp; "+(grash?"<span style='color:var(--good)'>Grashof</span>":"<span style='color:var(--warn)'>non-Grashof</span>");
+      $("freud-readout").innerHTML = msg;
+    }
+    ["freud-r1","freud-r2","freud-r3","freud-r4","freud-th2"].forEach(function(id){
+      $(id).addEventListener("input", render);
+    });
+    render();
+    window.addEventListener("resize", function(){ /* layout handles itself */ });
+  })();
+
+  /* ============================================================
+     LINEAR ALGEBRA · 3x3 solve via Cramer's rule
+     ============================================================ */
+  function det3(M){
+    return M[0][0]*(M[1][1]*M[2][2]-M[1][2]*M[2][1])
+         - M[0][1]*(M[1][0]*M[2][2]-M[1][2]*M[2][0])
+         + M[0][2]*(M[1][0]*M[2][1]-M[1][1]*M[2][0]);
+  }
+  function solve3(A, b){
+    var D = det3(A);
+    if(Math.abs(D) < 1e-12) return null;
+    function colSub(j){
+      return A.map(function(row,i){
+        return row.map(function(v,jj){ return jj===j ? b[i] : v; });
+      });
+    }
+    return [det3(colSub(0))/D, det3(colSub(1))/D, det3(colSub(2))/D];
+  }
+
+  /* ============================================================
+     SYNTHESIS · point-matching for a four-bar
+     Given three (φ,ψ) precision points (degrees), θ2i and θ4i (degrees),
+     and an assumed r1, return {r1,r2,r3,r4,th2i,th4i, R1,R2,R3, system,
+     thetaPairs} or {error:"..."}.
+     ============================================================ */
+  function synthesizePointMatching(phi, psi, th2i_deg, th4i_deg, r1){
+    var th2 = phi.map(function(p){ return rad(p + th2i_deg); });
+    var th4 = psi.map(function(p){ return rad(p + th4i_deg); });
+    var A = [], B = [];
+    for(var k=0;k<3;k++){
+      A.push([ -Math.cos(th2[k]), Math.cos(th4[k]), 1 ]);
+      B.push( Math.cos(th2[k]-th4[k]) );
+    }
+    var x = solve3(A,B);
+    if(!x) return { error:"Singular system — precision points or initial angles produce a degenerate matrix. Try different choices." };
+    var R1=x[0], R2=x[1], R3=x[2];
+    if(Math.abs(R1)<1e-9 || Math.abs(R2)<1e-9){
+      return { error:"R₁ or R₂ came out essentially zero, which would require an infinite link length. Try different choices." };
+    }
+    // Back-solve link lengths from Eq 8.4.
+    var r4 = r1/R1;
+    var r2v = r1/R2;
+    // R3 = (r2² - r3² + r4² + r1²)/(2 r2 r4)  ⇒ r3² = r2² + r4² + r1² - 2 r2 r4 R3
+    var r3sq = r2v*r2v + r4*r4 + r1*r1 - 2*r2v*r4*R3;
+    var r3 = (r3sq >= 0) ? Math.sqrt(r3sq) : NaN;
+    // pick absolute values for plotting (the textbook notes negative means flip vector direction)
+    var r2_abs = Math.abs(r2v), r4_abs = Math.abs(r4);
+    var sign = { r2: r2v<0?"neg":"pos", r4: r4<0?"neg":"pos" };
+    return {
+      r1:r1, r2:r2v, r3:r3, r4:r4, r2_abs:r2_abs, r4_abs:r4_abs,
+      th2i: rad(th2i_deg), th4i: rad(th4i_deg),
+      R1:R1, R2:R2, R3:R3,
+      A:A, B:B,
+      thetaPairs: th2.map(function(t,i){ return {th2:t, th4:th4[i]}; }),
+      sign: sign,
+      bad_r3: isNaN(r3)
+    };
+  }
+
+  /* ============================================================
+     TOOL 2 · POINT-MATCHING SOLVER
+     ============================================================ */
+  (function(){
+    var stage=$("pmStage"), chart=$("pmChart"); if(!stage||!chart) return;
+    function loadEx(){
+      $("pm-phi1").value=45; $("pm-psi1").value=22.5;
+      $("pm-phi2").value=90; $("pm-psi2").value=45;
+      $("pm-phi3").value=135; $("pm-psi3").value=67.5;
+      $("pm-th2i").value=20; $("pm-th4i").value=40;
+      $("pm-th2iv").textContent="20"; $("pm-th4iv").textContent="40";
+      render();
+    }
+    function render(){
+      $("pm-th2iv").textContent = (+$("pm-th2i").value).toFixed(0);
+      $("pm-th4iv").textContent = (+$("pm-th4i").value).toFixed(0);
+      var phi=[+$("pm-phi1").value, +$("pm-phi2").value, +$("pm-phi3").value];
+      var psi=[+$("pm-psi1").value, +$("pm-psi2").value, +$("pm-psi3").value];
+      var th2i=+$("pm-th2i").value, th4i=+$("pm-th4i").value;
+      var r1 = 10; // standard
+      clear(stage); clear(chart);
+      var result = synthesizePointMatching(phi, psi, th2i, th4i, r1);
+
+      if(result.error){
+        $("pm-readout").innerHTML = "<span style='color:var(--bad)'>"+result.error+"</span>";
+        return;
+      }
+      if(result.bad_r3){
+        $("pm-readout").innerHTML = "<span style='color:var(--bad)'>Synthesis produced r₃² &lt; 0. The coupler cannot close. Try different precision points or starting angles.</span>";
+        return;
+      }
+
+      // Draw the mechanism at the middle precision point.
+      var th2_mid = result.thetaPairs[1].th2;
+      var r2u = Math.abs(result.r2), r4u = Math.abs(result.r4);
+      // Try both branches; pick the one whose θ4 matches the precision point.
+      var solP = solveFourbar(r1, r2u, result.r3, r4u, th2_mid, '+');
+      var solM = solveFourbar(r1, r2u, result.r3, r4u, th2_mid, '-');
+      var target = result.thetaPairs[1].th4;
+      function angDiff(a,b){ return Math.atan2(Math.sin(a-b), Math.cos(a-b)); }
+      var sol;
+      if(solP && solM){
+        sol = Math.abs(angDiff(solP.th4, target)) < Math.abs(angDiff(solM.th4, target)) ? solP : solM;
+      } else { sol = solP || solM; }
+      drawFourbar(stage, r1, r2u, result.r3, r4u, sol);
+
+      // Sweep both branches and pick the one that hits the precision points
+      var swP = sweepFourbar(r1, r2u, result.r3, r4u, '+', 361);
+      var swM = sweepFourbar(r1, r2u, result.r3, r4u, '-', 361);
+      function residual(sw){
+        var total=0, ok=true;
+        for(var k=0;k<3;k++){
+          // find sample closest in th2 to the precision point
+          var t2 = result.thetaPairs[k].th2;
+          var best=Infinity, bestY=null;
+          for(var i=0;i<sw.length;i++){
+            var p=sw[i];
+            var d=Math.abs(angDiff(p.th2, t2));
+            if(d<best && p.ok){ best=d; bestY=p.th4; }
+          }
+          if(bestY===null) ok=false;
+          else total += Math.abs(angDiff(bestY, result.thetaPairs[k].th4));
+        }
+        return ok?total:Infinity;
+      }
+      var sw = residual(swP) <= residual(swM) ? swP : swM;
+
+      // Build φ-ψ samples by subtracting initial angles
+      var th2i_rad = rad(th2i), th4i_rad = rad(th4i);
+      var actual = sw.map(function(p){
+        if(!p.ok) return {x:null, y:null};
+        var phiv = deg(p.th2) - th2i;
+        // unwrap nicely
+        while(phiv > 360) phiv -= 360;
+        while(phiv < -360) phiv += 360;
+        var psiv = deg(p.th4) - th4i;
+        return {x: phiv, y: psiv};
+      });
+      // sort by x for clean plotting
+      actual.sort(function(a,b){
+        if(a.x===null) return 1; if(b.x===null) return -1; return a.x-b.x;
+      });
+
+      // Compose a "desired" curve. We don't know the actual function in general,
+      // so we use a straight line through the three given precision points only
+      // when they themselves are collinear; otherwise we just plot them as points.
+      // For Example 8.1 (ψ=φ/2) this is linear; we'll fit a line through the points.
+      var pts = phi.map(function(p,i){ return {x:phi[i], y:psi[i]}; });
+      var n=3;
+      var mx=(phi[0]+phi[1]+phi[2])/3, my=(psi[0]+psi[1]+psi[2])/3;
+      var num=0, den=0;
+      for(var i=0;i<n;i++){ num+=(phi[i]-mx)*(psi[i]-my); den+=(phi[i]-mx)*(phi[i]-mx); }
+      var slope = den===0 ? 0 : num/den;
+      var intercept = my - slope*mx;
+      var desired=[];
+      var pmin=Math.min.apply(null,phi)-20, pmax=Math.max.apply(null,phi)+20;
+      for(var x=pmin; x<=pmax; x+=2){ desired.push({x:x, y:slope*x+intercept}); }
+
+      var allY = actual.map(function(p){return p.y;}).filter(function(v){return v!==null;}).concat(psi);
+      var allX = actual.map(function(p){return p.x;}).filter(function(v){return v!==null;}).concat(phi);
+      var xmin=Math.min.apply(null,allX), xmax=Math.max.apply(null,allX);
+      var ymin=Math.min.apply(null,allY), ymax=Math.max.apply(null,allY);
+      var xrange = xmax-xmin, yrange=ymax-ymin;
+      var xpad=Math.max(20, xrange*0.08), ypad=Math.max(10, yrange*0.1);
+      plotCurve(chart, {
+        xmin:Math.floor((xmin-xpad)/15)*15, xmax:Math.ceil((xmax+xpad)/15)*15,
+        ymin:Math.floor((ymin-ypad)/15)*15, ymax:Math.ceil((ymax+ypad)/15)*15,
+        desired: desired, actual: actual, points: pts,
+        legend:{points:true},
+        xlabel:"φ (input rotation)", ylabel:"ψ (output rotation)"
+      });
+
+      var signNote = "";
+      if(result.sign.r2==="neg") signNote += " &nbsp; <span style='color:var(--warn)'>r₂ came out negative — flip θ₂ assumption.</span>";
+      if(result.sign.r4==="neg") signNote += " &nbsp; <span style='color:var(--warn)'>r₄ came out negative — flip θ₄ assumption.</span>";
+
+      $("pm-readout").innerHTML =
+        "R<sub>1</sub> = <b>"+result.R1.toFixed(4)+"</b> &nbsp; R<sub>2</sub> = <b>"+result.R2.toFixed(4)+"</b> &nbsp; R<sub>3</sub> = <b>"+result.R3.toFixed(4)+"</b><br>"+
+        "Assuming r<sub>1</sub> = 10: &nbsp;&nbsp; "+
+        "r<sub>2</sub> = <b>"+result.r2.toFixed(3)+"</b> &nbsp; "+
+        "r<sub>3</sub> = <b>"+result.r3.toFixed(3)+"</b> &nbsp; "+
+        "r<sub>4</sub> = <b>"+result.r4.toFixed(3)+"</b>"+signNote;
+    }
+    $("pm-solve").addEventListener("click", render);
+    $("pm-loadex").addEventListener("click", loadEx);
+    ["pm-th2i","pm-th4i"].forEach(function(id){
+      $(id).addEventListener("input", function(){
+        $("pm-th2iv").textContent = (+$("pm-th2i").value).toFixed(0);
+        $("pm-th4iv").textContent = (+$("pm-th4i").value).toFixed(0);
+      });
+    });
+    // initial render at default values
+    render();
+  })();
+
+  /* ============================================================
+     SYNTHESIS · derivative-matching for a four-bar (Eqs 8.12 – 8.27)
+     Inputs: h, hp, hpp (target derivatives), th4_des (radians), root sign (+/-)
+     Returns the same flavor of result object as point-matching.
+     ============================================================ */
+  function synthesizeDerivativeMatching(h, hp, hpp, th4_des, rootSign, r1, phi_des, psi_des){
+    // Table 8.3 — a_i, b_i, c_i, d_i for i=1,2,3
+    var a = [ -h,       -hp,             hpp - h*h*h ];
+    var b = [  0,       -h*h,            3*h*hp ];
+    var c = [ -(1-h),    hp,             -hpp - (1-h)*(1-h)*(1-h) ];
+    var d = [  0,       -(1-h)*(1-h),    -3*hp*(1-h) ];
+
+    var s4 = Math.sin(th4_des), c4 = Math.cos(th4_des);
+    // Eq 8.18 — E, D, F
+    var E = [0,0,0], D = [0,0,0], F = [0,0,0];
+    for(var i=0;i<3;i++){
+      E[i] = a[i]*s4 + b[i]*c4;
+      D[i] = c[i]*c4 + d[i]*s4;
+      F[i] = -c[i]*s4 + d[i]*c4;
+    }
+
+    // Eq 8.27 — lambdas
+    var lam1 = D[1]*(E[2]-E[0]) + E[1]*(D[0]-D[2]);
+    var lam2 = E[1]*(F[0]-F[2]) - D[0]*E[2] + E[0]*D[2] + F[1]*(E[2]-E[0]);
+    var lam3 = E[0]*F[2] - F[0]*E[2];
+
+    // Eq 8.26 — quadratic in tan(θ2): lam1 t^2 + lam2 t + lam3 = 0
+    var t1, t2;
+    if(Math.abs(lam1) < 1e-12){
+      // degenerate to linear
+      if(Math.abs(lam2) < 1e-12) return { error: "λ₁ = λ₂ = 0; quadratic is degenerate. Try a different θ₄_des." };
+      t1 = -lam3/lam2; t2 = t1;
+    } else {
+      var disc = lam2*lam2 - 4*lam1*lam3;
+      if(disc < -1e-9) return { error: "Quadratic discriminant is negative — no real tan(θ₂) solution. Try a different θ₄_des or different derivative targets." };
+      if(disc < 0) disc = 0;
+      t1 = (-lam2 + Math.sqrt(disc))/(2*lam1);
+      t2 = (-lam2 - Math.sqrt(disc))/(2*lam1);
+    }
+    var t = (rootSign === '-') ? t2 : t1;
+    var th2 = Math.atan(t);  // principal value; the other (θ2 + π) gives the same mechanism
+
+    // Eq 8.21-8.23 — G, G1, G2
+    var s2 = Math.sin(th2), c2 = Math.cos(th2);
+    var G  = E[1]*s2 - E[0]*c2;
+    var G1 = (D[0]*s2 + F[0]*c2)*E[1] - (D[1]*s2 + F[1]*c2)*E[0];
+    var G2 = (D[1]*s2 + F[1]*c2)*s2 - (D[0]*s2 + F[0]*c2)*c2;
+    if(Math.abs(G) < 1e-12) return { error:"G evaluated to ≈ 0; ratios undefined. Try a different θ₂ root or θ₄_des." };
+
+    // Eq 8.20 — R1, R2
+    var R1 = G1/G, R2 = G2/G;
+    // Eq 8.5 — R3
+    var R3 = Math.cos(th2 - th4_des) - R2*Math.cos(th4_des) + R1*Math.cos(th2);
+
+    if(Math.abs(R1)<1e-9 || Math.abs(R2)<1e-9) return { error:"R₁ or R₂ ≈ 0; would require infinite link length." };
+
+    var r4 = r1/R1, r2v = r1/R2;
+    var r3sq = r2v*r2v + r4*r4 + r1*r1 - 2*r2v*r4*R3;
+    var r3 = (r3sq >= 0) ? Math.sqrt(r3sq) : NaN;
+
+    return {
+      r1:r1, r2:r2v, r3:r3, r4:r4,
+      th2_des: th2, th4_des: th4_des,
+      th2i: th2 - rad(phi_des), th4i: th4_des - rad(psi_des),
+      R1:R1, R2:R2, R3:R3,
+      lam:[lam1,lam2,lam3], a:a,b:b,c:c,d:d, E:E,D:D,F:F,
+      G:G, G1:G1, G2:G2,
+      tanRoots:[t1,t2], chosenRoot: rootSign==='-' ? '−√' : '+√',
+      bad_r3: isNaN(r3)
+    };
+  }
+
+  /* ============================================================
+     TOOL 3 · DERIVATIVE-MATCHING DESIGNER
+     ============================================================ */
+  (function(){
+    var stage=$("dmStage"), chart=$("dmChart"); if(!stage||!chart) return;
+    var rootSign = '+';
+    function setRoot(s){
+      rootSign = s;
+      $("dm-root1").setAttribute("aria-pressed", s==='+'?"true":"false");
+      $("dm-root2").setAttribute("aria-pressed", s==='-'?"true":"false");
+      render();
+    }
+    function loadEx(){
+      $("dm-h").value = -1; $("dm-hp").value=0; $("dm-hpp").value=0;
+      $("dm-th4").value = 135;
+      $("dm-hv").textContent = (-1).toFixed(3);
+      $("dm-hpv").textContent = (0).toFixed(3);
+      $("dm-hppv").textContent = (0).toFixed(3);
+      $("dm-th4v").textContent = "135";
+      // For ψ = -φ + 10°, design pt ψ_des=55° ⇒ φ_des=-45°.
+      currentDesign = { phi_des: -45, psi_des: 55, desiredFn: function(x){ return -x + 10; } };
+      // The textbook's Example 8.2 answer corresponds to the '+√' root (θ₂_des = -45°).
+      // The '-√' root produces G ≈ 0 here — the tool will display a graceful error message.
+      setRoot('+');
+    }
+    // Default to Example 8.2 design pt and function. (Could be made configurable, but
+    // the textbook gives this as the single derivative-matching example.)
+    var currentDesign = { phi_des: -45, psi_des: 55, desiredFn: function(x){ return -x + 10; } };
+
+    function render(){
+      var h = +$("dm-h").value, hp = +$("dm-hp").value, hpp = +$("dm-hpp").value;
+      var th4 = rad(+$("dm-th4").value);
+      $("dm-hv").textContent = h.toFixed(3);
+      $("dm-hpv").textContent = hp.toFixed(3);
+      $("dm-hppv").textContent = hpp.toFixed(3);
+      $("dm-th4v").textContent = (+$("dm-th4").value).toFixed(0);
+
+      clear(stage); clear(chart);
+
+      var result = synthesizeDerivativeMatching(h, hp, hpp, th4, rootSign, 10, currentDesign.phi_des, currentDesign.psi_des);
+      if(result.error){
+        $("dm-readout").innerHTML = "<span style='color:var(--bad)'>"+result.error+"</span>";
+        return;
+      }
+      if(result.bad_r3){
+        $("dm-readout").innerHTML = "<span style='color:var(--bad)'>Synthesis produced r₃² &lt; 0. The coupler cannot close. Try a different θ₄_des or tan-root.</span>";
+        return;
+      }
+
+      // Draw mechanism at design position
+      var r1 = result.r1, r2v = Math.abs(result.r2), r4v = Math.abs(result.r4), r3 = result.r3;
+      var th2 = result.th2_des;
+      // Pick branch that makes θ4 closest to design value
+      var solP = solveFourbar(r1, r2v, r3, r4v, th2, '+');
+      var solM = solveFourbar(r1, r2v, r3, r4v, th2, '-');
+      function angDiff(a,b){ return Math.atan2(Math.sin(a-b), Math.cos(a-b)); }
+      var sol;
+      if(solP && solM){
+        sol = Math.abs(angDiff(solP.th4, th4)) < Math.abs(angDiff(solM.th4, th4)) ? solP : solM;
+      } else { sol = solP || solM; }
+      drawFourbar(stage, r1, r2v, r3, r4v, sol);
+
+      // Sweep and pick the branch that better matches design
+      var swP = sweepFourbar(r1, r2v, r3, r4v, '+', 481);
+      var swM = sweepFourbar(r1, r2v, r3, r4v, '-', 481);
+      function residual(sw){
+        var best=Infinity, bestY=null;
+        for(var i=0;i<sw.length;i++){
+          if(!sw[i].ok) continue;
+          var d = Math.abs(angDiff(sw[i].th2, th2));
+          if(d<best){ best=d; bestY=sw[i].th4; }
+        }
+        return bestY===null ? Infinity : Math.abs(angDiff(bestY, th4));
+      }
+      var sw = residual(swP) <= residual(swM) ? swP : swM;
+
+      var th2i = result.th2i, th4i = result.th4i;
+      var actual = [];
+      for(var i=0;i<sw.length;i++){
+        if(!sw[i].ok){ actual.push({x:null,y:null}); continue; }
+        var phiv = deg(angDiff(sw[i].th2, th2i));
+        var psiv = deg(angDiff(sw[i].th4, th4i));
+        actual.push({x:phiv, y:psiv});
+      }
+      actual.sort(function(a,b){
+        if(a.x===null) return 1; if(b.x===null) return -1; return a.x-b.x;
+      });
+
+      var desired=[];
+      var x0 = currentDesign.phi_des - 120, x1 = currentDesign.phi_des + 120;
+      for(var x=x0; x<=x1; x+=1){
+        desired.push({x:x, y: currentDesign.desiredFn(x)});
+      }
+
+      var allY = actual.map(function(p){return p.y;}).filter(function(v){return v!==null;});
+      allY = allY.concat(desired.map(function(p){return p.y;}));
+      var allX = actual.map(function(p){return p.x;}).filter(function(v){return v!==null;});
+      allX = allX.concat(desired.map(function(p){return p.x;}));
+      var xmin=Math.min.apply(null,allX), xmax=Math.max.apply(null,allX);
+      var ymin=Math.min.apply(null,allY), ymax=Math.max.apply(null,allY);
+
+      plotCurve(chart, {
+        xmin:Math.floor(xmin/30)*30, xmax:Math.ceil(xmax/30)*30,
+        ymin:Math.floor(ymin/30)*30, ymax:Math.ceil(ymax/30)*30,
+        desired: desired, actual: actual,
+        designPt:{x: currentDesign.phi_des, y: currentDesign.psi_des},
+        legend:{design:true},
+        xlabel:"φ (input)", ylabel:"ψ (output)"
+      });
+
+      $("dm-readout").innerHTML =
+        "λ₁ = <b>"+result.lam[0].toFixed(3)+"</b> &nbsp; λ₂ = <b>"+result.lam[1].toFixed(3)+"</b> &nbsp; λ₃ = <b>"+result.lam[2].toFixed(3)+"</b><br>"+
+        "tan θ₂ roots: <b>"+result.tanRoots[0].toFixed(3)+"</b>, <b>"+result.tanRoots[1].toFixed(3)+"</b> &nbsp; · chosen: <b>"+result.chosenRoot+"</b><br>"+
+        "θ₂_des = <b>"+deg(result.th2_des).toFixed(2)+"°</b> &nbsp; · &nbsp; "+
+        "R₁ = <b>"+result.R1.toFixed(3)+"</b> &nbsp; R₂ = <b>"+result.R2.toFixed(3)+"</b> &nbsp; R₃ = <b>"+result.R3.toFixed(3)+"</b><br>"+
+        "r₁ = 10 → r₂ = <b>"+result.r2.toFixed(3)+"</b> &nbsp; r₃ = <b>"+result.r3.toFixed(3)+"</b> &nbsp; r₄ = <b>"+result.r4.toFixed(3)+"</b>";
+    }
+    ["dm-h","dm-hp","dm-hpp","dm-th4"].forEach(function(id){
+      $(id).addEventListener("input", render);
+    });
+    $("dm-root1").addEventListener("click", function(){ setRoot('+'); });
+    $("dm-root2").addEventListener("click", function(){ setRoot('-'); });
+    $("dm-ex").addEventListener("click", loadEx);
+    // start with Example 8.2 preloaded
+    loadEx();
+  })();
+
+  /* ============================================================
+     QUIZ · 8 questions across Part I
+     ============================================================ */
+  var QUIZ_BANK = [
+    {
+      stem: "What is the principal advantage of writing the four-bar input-output relationship as Freudenstein's equation (R₁, R₂, R₃) rather than directly in the link lengths (r₁, r₂, r₃, r₄)?",
+      choices: [
+        { t: "It is linear in the three R's, so three precision points give a 3×3 linear system instead of a nonlinear one.", correct: true,
+          fb: "Exactly. The change of variables to R₁, R₂, R₃ is what makes synthesis a high-school-algebra problem instead of a nonlinear optimization." },
+        { t: "It eliminates the coupler from the analysis entirely.", correct: false,
+          fb: "The coupler angle θ₃ is eliminated, but the coupler length r₃ is still present — it sits inside R₃." },
+        { t: "It allows analysis of crank-sliders without modification.", correct: false,
+          fb: "No — the crank-slider needs its own Freudenstein-style equation, with S₁, S₂, S₃ instead, which is Part II." },
+        { t: "It removes the need to choose initial angles θ₂ᵢ and θ₄ᵢ.", correct: false,
+          fb: "Those are still free choices that the designer must make before solving the system." }
+      ]
+    },
+    {
+      stem: "In point-matching with three precision points, what does it mean that scale doesn't matter for a four-bar?",
+      choices: [
+        { t: "If you multiply all four link lengths by the same constant, the input-output curve ψ(φ) is unchanged.", correct: true,
+          fb: "Right. The Freudenstein ratios R₁, R₂, R₃ are dimensionless, so scaling all r's preserves them and preserves the curve." },
+        { t: "You can use any units (cm, in, ft) without rescaling the equations.", correct: false,
+          fb: "True but irrelevant — that's just unit consistency, not the scale-invariance property." },
+        { t: "It means the linkage works equally well at any input speed.", correct: false,
+          fb: "Kinematic synthesis is speed-independent for everything in this chapter, but that's not what scale-invariance means here." },
+        { t: "It means r₁ can always be set to 1.", correct: false,
+          fb: "You can assume one link length to set the scale, but the property itself is that the curve doesn't care which scale you pick." }
+      ]
+    },
+    {
+      stem: "Point-matching is analogous to which classical mathematical technique?",
+      choices: [
+        { t: "Lagrange interpolation — exact agreement at sample points, controlled error between them.", correct: true,
+          fb: "Yes. Three precision points fully determine the three R's, just as three points determine a quadratic by Lagrange interpolation." },
+        { t: "Taylor series expansion — exact agreement of value and derivatives at one point.", correct: false,
+          fb: "That's derivative-matching, not point-matching. Point-matching is the interpolation analog." },
+        { t: "Newton's method — iterative refinement to a root.", correct: false,
+          fb: "Newton's method is iterative; point-matching is one direct linear solve." },
+        { t: "Fourier series — decomposition into harmonics.", correct: false,
+          fb: "There is a Fourier-based synthesis method, but it's a research-level extension, not the analog of point-matching itself." }
+      ]
+    },
+    {
+      stem: "In derivative-matching, what are h₄, h′₄, and h″₄?",
+      choices: [
+        { t: "The first three derivatives of ψ with respect to φ, evaluated at the design position.", correct: true,
+          fb: "Correct. These are kinematic coefficients (purely geometric, not time-dependent) of the desired function." },
+        { t: "Velocity, acceleration, and jerk of link 4.", correct: false,
+          fb: "Those are time-based derivatives. Kinematic coefficients are derivatives with respect to the input angle, not time." },
+        { t: "Three independent design choices the user picks.", correct: false,
+          fb: "The h's are computed from the desired function ψ = f(φ); they're outputs of the spec, not choices." },
+        { t: "Coefficients of the Freudenstein equation R₁, R₂, R₃.", correct: false,
+          fb: "Those are the Freudenstein ratios — different objects. The h's are the targets that determine the R's." }
+      ]
+    },
+    {
+      stem: "If a point-matching back-solve gives r₂ = −7.2, what should you do?",
+      choices: [
+        { t: "Treat the magnitude as the link length and flip the assumed direction of θ₂ — the design is still valid.", correct: true,
+          fb: "Correct. A negative back-solve means the link vector points opposite to what you assumed; the mechanism is real, just oriented differently." },
+        { t: "Conclude the synthesis has failed and try different precision points.", correct: false,
+          fb: "Not failure — just a sign convention issue. The mechanism is valid; reverse the direction of θ₂." },
+        { t: "Take the absolute value and ignore the sign entirely without changing anything else.", correct: false,
+          fb: "You take the magnitude, but you must also recognize that θ₂ now means the opposite direction." },
+        { t: "Add 180° to all the precision points and re-solve.", correct: false,
+          fb: "That's overcomplicating it; just flip the sign convention on θ₂." }
+      ]
+    },
+    {
+      stem: "Derivative-matching is to point-matching as which of these is to which?",
+      choices: [
+        { t: "Taylor series is to Lagrange interpolation.", correct: true,
+          fb: "Right. Derivative-matching locally approximates (value + derivatives at one point); point-matching interpolates (values at several points)." },
+        { t: "Lagrange interpolation is to Taylor series.", correct: false,
+          fb: "Backwards. Derivative-matching is the Taylor analog; point-matching is the Lagrange analog." },
+        { t: "Bisection is to Newton's method.", correct: false,
+          fb: "Wrong family of methods entirely — both of those are root-finders, not function-approximators." },
+        { t: "Numerical integration is to differentiation.", correct: false,
+          fb: "Unrelated. The right analogy is approximation theory: interpolation vs. local Taylor approximation." }
+      ]
+    },
+    {
+      stem: "Stanišić notes that point-matching has an 'infinity to the fifth' design space. What does that mean?",
+      choices: [
+        { t: "There are five independent free choices in the synthesis, each free over a continuum.", correct: true,
+          fb: "Yes — the three precision points (each free to slide along the desired curve) plus θ₂ᵢ and θ₄ᵢ. Five continuous degrees of freedom." },
+        { t: "There are five precision points instead of three.", correct: false,
+          fb: "Three precision points; five free choices in total." },
+        { t: "Five link lengths must be specified.", correct: false,
+          fb: "Four link lengths, of which one is assumed and three come from the R's." },
+        { t: "It is shorthand for the fifth-order polynomial that approximates the desired function.", correct: false,
+          fb: "There is no fifth-order polynomial in the synthesis — the phrase refers to design freedom, not approximation order." }
+      ]
+    },
+    {
+      stem: "In Example 8.2 (rolling-gear, ψ = −φ + 10°), why are h′₄ and h″₄ both zero?",
+      choices: [
+        { t: "Because the desired function is linear, so its second and third derivatives are zero.", correct: true,
+          fb: "Correct. Differentiating ψ = −φ + 10° gives h₄ = −1 and h′₄ = h″₄ = 0 — all higher derivatives vanish." },
+        { t: "Because rolling gears have no acceleration.", correct: false,
+          fb: "The h's aren't accelerations — they're position-derivatives with respect to the input angle. The function being linear is what kills them." },
+        { t: "Because we chose θ₄_des = 135°.", correct: false,
+          fb: "θ₄_des doesn't affect the h-targets; it's a free choice that affects the D/E/F values downstream." },
+        { t: "Because the four-bar can't have nonzero higher derivatives.", correct: false,
+          fb: "A general four-bar has all derivatives nonzero. We're matching the desired function's derivatives, which are zero here because the function is linear." }
+      ]
+    }
+  ];
+
+  (function(){
+    var mount = $("quizMount"); if(!mount) return;
+    function shuffle(arr){
+      arr = arr.slice();
+      for(var i=arr.length-1;i>0;i--){
+        var j=Math.floor(Math.random()*(i+1));
+        var tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+      }
+      return arr;
+    }
+    var answered = {};
+    var correctCount = 0;
+    function updateScore(){
+      var total = Object.keys(answered).length;
+      $("quizScore").textContent = correctCount + " / " + total;
+    }
+    function render(){
+      clear(mount);
+      answered = {}; correctCount = 0; updateScore();
+      var questions = shuffle(QUIZ_BANK);
+      questions.forEach(function(q, qi){
+        var card = document.createElement("div");
+        card.className = "q";
+        var stem = document.createElement("div");
+        stem.className = "stem";
+        stem.innerHTML = "<span style='font-family:var(--mono); color:var(--accent); margin-right:8px'>Q"+(qi+1)+".</span>" + q.stem;
+        card.appendChild(stem);
+        var opts = document.createElement("div");
+        opts.className = "opts";
+        var feedback = document.createElement("div");
+        feedback.className = "fb";
+        var shuffledChoices = shuffle(q.choices);
+        shuffledChoices.forEach(function(c, ci){
+          var lbl = document.createElement("label");
+          lbl.className = "opt";
+          var input = document.createElement("input");
+          input.type = "radio"; input.name = "q"+qi; input.value = ci;
+          var span = document.createElement("span");
+          span.textContent = c.t;
+          lbl.appendChild(input); lbl.appendChild(span);
+          input.addEventListener("change", function(){
+            if(answered[qi]) return;
+            answered[qi] = true;
+            if(c.correct){
+              lbl.classList.add("correct");
+              feedback.className = "fb show right";
+              feedback.innerHTML = "<b>Correct.</b> " + c.fb;
+              correctCount++;
+            } else {
+              lbl.classList.add("incorrect");
+              feedback.className = "fb show wrong";
+              feedback.innerHTML = "<b>Not quite.</b> " + c.fb;
+              // reveal the correct one
+              Array.prototype.forEach.call(opts.querySelectorAll(".opt"), function(o, idx){
+                if(shuffledChoices[idx].correct) o.classList.add("correct");
+              });
+            }
+            // lock further input
+            Array.prototype.forEach.call(opts.querySelectorAll("input"), function(inp){ inp.disabled = true; });
+            updateScore();
+          });
+          opts.appendChild(lbl);
+        });
+        card.appendChild(opts);
+        card.appendChild(feedback);
+        mount.appendChild(card);
+      });
+    }
+    $("quizReset").addEventListener("click", render);
+    render();
+  })();
+
+  /* ============================================================
+     GLOSSARY · 12 terms
+     ============================================================ */
+  var GLOSSARY = [
+    { term:"Synthesis", def:"The design of a mechanism (its dimensions, geometry, and configuration) to produce a specified motion. Contrast with analysis, which takes a mechanism as given and predicts its motion.", tag:"§8 — overview" },
+    { term:"Function generation", def:"A synthesis problem in which the input rotation φ and the output rotation ψ must satisfy a prescribed functional relationship f(φ, ψ) = 0. The whole of Chapter 8 is function generation.", tag:"§8 — flavors" },
+    { term:"Path generation", def:"A synthesis problem in which a specific point on the mechanism (usually on the coupler) must trace a specific curve in space. Different flavor of synthesis, similar Freudenstein-style algebra.", tag:"§8 — flavors" },
+    { term:"Motion generation", def:"A synthesis problem in which an entire rigid body must pass through a sequence of prescribed poses (position + orientation). The most general flavor.", tag:"§8 — flavors" },
+    { term:"Precision point", def:"One of the input-output pairs (φₖ, ψₖ) at which the synthesized mechanism is required to match the desired function exactly. Point-matching for the four-bar uses three precision points.", tag:"§8.1.1" },
+    { term:"Freudenstein ratio", def:"One of the three dimensionless combinations R₁ = r₁/r₄, R₂ = r₁/r₂, R₃ = (r₂² − r₃² + r₄² + r₁²)/(2 r₂ r₄) that appear in Freudenstein's equation. Linear in the system; back out to link lengths after solving.", tag:"§8.1 — Eq 8.4" },
+    { term:"Kinematic coefficient", def:"A derivative of an output position with respect to the input position (not with respect to time). For four-bar synthesis, the relevant ones are h₄ = dθ₄/dθ₂, h′₄ = d²θ₄/dθ₂², h″₄ = d³θ₄/dθ₂³. Purely geometric; depend on link lengths and pose.", tag:"§4 / §8.1.2" },
+    { term:"Design position", def:"In derivative-matching, the single (φ_des, ψ_des) pose at which the mechanism is required to match not only the value of ψ but also its first three derivatives.", tag:"§8.1.2" },
+    { term:"Point-matching", def:"Synthesis method that fits three exact precision points by solving the 3×3 system in Eq. 8.9 for (R₁, R₂, R₃). Lagrange-interpolation analog.", tag:"§8.1.1" },
+    { term:"Derivative-matching", def:"Synthesis method that fits one design position together with the first three derivatives of ψ(φ) there. Reduces to a quadratic in tan(θ₂); Taylor-series analog.", tag:"§8.1.2" },
+    { term:"Grashof condition", def:"Inequality S + L ≤ P + Q (shortest + longest ≤ the other two sums) that determines whether at least one link of a four-bar can fully rotate. Tool 1 reports this live.", tag:"§2 — Grashof" },
+    { term:"Chebyshev spacing", def:"Non-uniform placement of precision points across the input range that minimizes the worst-case approximation error. Clustered slightly toward the ends of the interval rather than evenly spaced. Standard in industrial synthesis practice; not covered in Stanišić.", tag:"§8.1.1 — extension" }
+  ];
+
+  (function(){
+    var list = $("glossList"); if(!list) return;
+    function render(filter){
+      clear(list);
+      var f = (filter||"").toLowerCase().trim();
+      var matches = GLOSSARY.filter(function(g){
+        if(!f) return true;
+        return g.term.toLowerCase().indexOf(f)>=0 || g.def.toLowerCase().indexOf(f)>=0;
+      });
+      if(matches.length===0){ $("glossEmpty").style.display="block"; return; }
+      $("glossEmpty").style.display="none";
+      matches.sort(function(a,b){ return a.term.localeCompare(b.term); });
+      matches.forEach(function(g){
+        var item = document.createElement("div");
+        item.className="gloss-item";
+        var dt = document.createElement("dt"); dt.textContent = g.term;
+        var dd = document.createElement("dd"); dd.textContent = g.def;
+        var tag = document.createElement("span"); tag.className="tag"; tag.textContent = g.tag;
+        item.appendChild(dt); item.appendChild(dd); item.appendChild(tag);
+        list.appendChild(item);
+      });
+    }
+    $("glossSearch").addEventListener("input", function(e){ render(e.target.value); });
+    render("");
+  })();
+
+  /* ============================================================
+     RESOURCES · external link cards, grouped
+     ============================================================ */
+  var RESOURCES = {
+    foundational: [
+      { name:"Freudenstein 1955 — original paper (citation)",
+        desc:"The 1955 ASME Transactions paper that introduced the equation. Often only available via library subscription; citation is provided so you can locate it.",
+        host:"asme.org",
+        url:"https://asmedigitalcollection.asme.org/" },
+      { name:"Bernie Roth — Ferdinand Freudenstein obituary",
+        desc:"A short biographical article in the IFToMM proceedings honoring Freudenstein after his 2006 death. Good context for who he was and how the field grew up around him.",
+        host:"springer.com",
+        url:"https://link.springer.com/chapter/10.1007/978-1-4020-6366-4_18" },
+      { name:"Ghosal — The Freudenstein Equation (Resonance)",
+        desc:"A clean accessible article in the Indian Academy of Sciences journal Resonance, walking through the equation and its design implications without requiring a textbook.",
+        host:"mecheng.iisc.ac.in",
+        url:"https://mecheng.iisc.ac.in/~asitava/freu.pdf" }
+    ],
+    tutorials: [
+      { name:"Norton, Design of Machinery — Chapter on linkage synthesis",
+        desc:"Norton's textbook chapter is the standard alternative treatment; useful if Stanišić's section moves too fast. Covers graphical methods alongside Freudenstein-style analytical methods.",
+        host:"mhhe.com",
+        url:"https://www.mhhe.com/norton6e" },
+      { name:"NPTEL — Kinematics of Machines (IIT Madras)",
+        desc:"Free video course from the Indian Institute of Technology system. The synthesis lectures (~ lecture 30 onward) cover Freudenstein's equation with worked examples.",
+        host:"nptel.ac.in",
+        url:"https://nptel.ac.in/courses/112106270" },
+      { name:"MIT OpenCourseWare — Mechanical Design",
+        desc:"Lecture notes and problem sets from MIT's mechanical-design courses, with explicit treatment of function-generation synthesis.",
+        host:"ocw.mit.edu",
+        url:"https://ocw.mit.edu/courses/mechanical-engineering/" }
+    ],
+    software: [
+      { name:"MotionGen — free in-browser linkage synthesis",
+        desc:"Web/mobile app from Stony Brook's CREATE Lab. Specify precision points by clicking on a canvas; it runs the synthesis. The same workflow the Tool 2 above implements algorithmically.",
+        host:"motiongen.io",
+        url:"https://motiongen.io/" },
+      { name:"GIM — geometric and kinematic simulator",
+        desc:"Free desktop tool from the University of the Basque Country. More comprehensive than MotionGen; supports analysis, synthesis, and singularity detection.",
+        host:"ehu.es",
+        url:"http://www.ehu.eus/compmech/software/" },
+      { name:"Linkage — open-source four-bar designer",
+        desc:"A free Windows program for drag-and-drop linkage design and analysis. Useful for visualizing the mechanism you've just synthesized analytically.",
+        host:"david-c-allen.github.io",
+        url:"https://david-c-allen.github.io/" },
+      { name:"PMKS+ — visual mechanism simulator (browser)",
+        desc:"A browser-based mechanism analysis tool good for verifying your synthesized linkage actually moves the way you expect.",
+        host:"designengrlab.github.io",
+        url:"https://designengrlab.github.io/PMKS_Web/" }
+    ],
+    research: [
+      { name:"Fourier-based synthesis (ASME 2025)",
+        desc:"A modern Fourier-coefficient approach to four-bar function generation with improved sampling-point selection. Direction the field is moving — beyond three precision points.",
+        host:"asmedigitalcollection.asme.org",
+        url:"https://asmedigitalcollection.asme.org/mechanicaldesign" },
+      { name:"Optimum synthesis & Ackermann steering",
+        desc:"Investigates the symmetric-embodiment four-bar function generator (the Ackermann steering linkage) and how optimization extends Freudenstein's basic method.",
+        host:"researchgate.net",
+        url:"https://www.researchgate.net/publication/245126304" },
+      { name:"Chebyshev nodes in synthesis (overview)",
+        desc:"Wikipedia's clear write-up of Chebyshev nodes and why they minimize worst-case error. The mathematics behind the 'beyond Stanišić' callout.",
+        host:"en.wikipedia.org",
+        url:"https://en.wikipedia.org/wiki/Chebyshev_nodes" }
+    ]
+  };
+
+  (function(){
+    function renderGroup(id, items){
+      var c = $(id); if(!c) return;
+      items.forEach(function(r){
+        var a = document.createElement("a");
+        a.className="res-link"; a.href = r.url; a.target = "_blank"; a.rel="noopener noreferrer";
+        a.innerHTML = '<span class="name">'+r.name+' <span class="ext">↗</span></span>'+
+                      '<span class="desc">'+r.desc+'</span>'+
+                      '<span class="host">'+r.host+'</span>';
+        c.appendChild(a);
+      });
+    }
+    renderGroup("res-foundational", RESOURCES.foundational);
+    renderGroup("res-tutorials", RESOURCES.tutorials);
+    renderGroup("res-software", RESOURCES.software);
+    renderGroup("res-research", RESOURCES.research);
+  })();
+
+  /* ============================================================
+     STICKY-NAV ACTIVE SECTION HIGHLIGHTING (scroll spy)
+     ============================================================ */
+  (function(){
+    var navLinks = document.querySelectorAll('nav.toc a');
+    if(!navLinks.length) return;
+    var sections = [];
+    navLinks.forEach(function(a){
+      var id = a.getAttribute('href').slice(1);
+      var sec = document.getElementById(id);
+      if(sec) sections.push({a:a, el:sec});
+    });
+    function update(){
+      var y = window.scrollY + 100;
+      var current = null;
+      for(var i=0;i<sections.length;i++){
+        if(sections[i].el.offsetTop <= y) current = sections[i];
+      }
+      sections.forEach(function(s){ s.a.classList.toggle('active', s===current); });
+    }
+    window.addEventListener('scroll', update, {passive:true});
+    update();
+  })();
+
+  /* ============================================================
+     READING-PROGRESS DOCK
+     ============================================================ */
+  (function(){
+    var bar = $("progBar"); if(!bar) return;
+    function update(){
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var pct = max>0 ? (h.scrollTop / max)*100 : 0;
+      bar.value = Math.max(0, Math.min(100, pct));
+    }
+    window.addEventListener("scroll", update, {passive:true});
+    window.addEventListener("resize", update);
+    update();
+  })();
+
+})();
+</script>
+</body>
+</html>
