@@ -208,6 +208,20 @@
   .eqn .m{ color:#9fe6c4; }       /* highlighted secondary term */
   @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
 
+  /* ---------- vector over-arrow (font-independent) ----------
+     U+20D7 combining arrow renders as a missing-glyph box in many fonts,
+     so vectors are drawn with a positioned U+2192 (universally supported). */
+  .vec{ position:relative; display:inline-block; }
+  .vec::after{
+    content:"\2192";                 /* → : present in virtually every font */
+    position:absolute; left:50%; top:-0.62em;
+    transform:translateX(-50%) scaleX(1.25);
+    transform-origin:center;
+    font-size:0.66em; line-height:1; font-weight:400;
+    font-family:var(--sans), sans-serif;   /* sans has a clean straight arrow */
+    pointer-events:none;
+  }
+
   /* ---------- grids ---------- */
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -460,10 +474,10 @@
   <h3>The 30-second picture</h3>
   <p>Every link in a moving machine obeys two vector statements &mdash; one for translation, one for rotation. Hold these in your head; the entire chapter is bookkeeping built on top of them:</p>
   <div class="eqn" role="img" aria-label="Sum of forces equals m times the acceleration of the mass center. Sum of moments about G equals I sub g times angular acceleration.">
-    &Sigma;F&#8407; = <span class="c">m&middot;a&#8407;<sub>g</sub></span> &nbsp;&nbsp;&middot;&nbsp;&nbsp; &Sigma;M<sub>g</sub> = <span class="m">I<sub>g</sub>&middot;&alpha;</span>
+    &Sigma;<span class="vec">F</span> = <span class="c">m&middot;<span class="vec">a</span><sub>g</sub></span> &nbsp;&nbsp;&middot;&nbsp;&nbsp; &Sigma;M<sub>g</sub> = <span class="m">I<sub>g</sub>&middot;&alpha;</span>
     <span class="lbl">force &rarr; translation · moment &rarr; rotation</span>
   </div>
-  <p>In the <strong>inverse</strong> problem the right-hand sides are <em>known numbers</em> (you computed <i>a&#8407;<sub>g</sub></i> and <i>&alpha;</i> kinematically). The unknowns are hiding inside &Sigma;F&#8407; and &Sigma;M &mdash; the bearing reactions and the driving torque. Solve the linear system and you&rsquo;ve sized the machine.</p>
+  <p>In the <strong>inverse</strong> problem the right-hand sides are <em>known numbers</em> (you computed <i><span class="vec">a</span><sub>g</sub></i> and <i>&alpha;</i> kinematically). The unknowns are hiding inside &Sigma;<span class="vec">F</span> and &Sigma;M &mdash; the bearing reactions and the driving torque. Solve the linear system and you&rsquo;ve sized the machine.</p>
 </section>
 
 <!-- ============ FOUNDATIONS ============ -->
@@ -473,15 +487,15 @@
   <p>This chapter is Newtonian rigid-body dynamics applied to linkages. Before the machine-specific material, let&rsquo;s sharpen five ideas from statics and dynamics. If they&rsquo;re second nature, skim; if not, firm them up now &mdash; everything that follows is built on them.</p>
 
   <h3>Newton&rsquo;s second law, for a rigid body</h3>
-  <p>A particle obeys <i>F&#8407;</i>&nbsp;=&nbsp;<i>m&nbsp;a&#8407;</i>. A rigid <em>body</em> needs <strong>two</strong> statements: the net force drives the acceleration of its <strong>mass center</strong> <i>G</i>, and the net moment about <i>G</i> drives its <strong>angular</strong> acceleration.</p>
-  <div class="eqn" role="img" aria-label="Sum F equals m a sub g and sum M sub g equals I sub g alpha">&Sigma;F&#8407; = m&nbsp;a&#8407;<sub>g</sub> &nbsp;&nbsp;&nbsp; &Sigma;M<sub>g</sub> = I<sub>g</sub>&nbsp;&alpha;</div>
+  <p>A particle obeys <i><span class="vec">F</span></i>&nbsp;=&nbsp;<i>m&nbsp;<span class="vec">a</span></i>. A rigid <em>body</em> needs <strong>two</strong> statements: the net force drives the acceleration of its <strong>mass center</strong> <i>G</i>, and the net moment about <i>G</i> drives its <strong>angular</strong> acceleration.</p>
+  <div class="eqn" role="img" aria-label="Sum F equals m a sub g and sum M sub g equals I sub g alpha">&Sigma;<span class="vec">F</span> = m&nbsp;<span class="vec">a</span><sub>g</sub> &nbsp;&nbsp;&nbsp; &Sigma;M<sub>g</sub> = I<sub>g</sub>&nbsp;&alpha;</div>
   <div class="analogy">
     <span class="h">Think of it like&hellip;</span>
     <p>&hellip;<strong>steering a canoe</strong>. Push on the dead center of the canoe and it slides straight &mdash; pure translation, the <i>F&nbsp;=&nbsp;ma</i> part. Push on one end and it both slides <em>and</em> spins &mdash; you&rsquo;ve added a moment. A rigid body always tracks both effects at once: where the mass center goes, and how the body turns about it. Two equations, because there are two independent things a body can do.</p>
   </div>
 
   <h3>Moment of a force (the cross product)</h3>
-  <p>The moment of a force <i>F&#8407;</i> about a point is <i>M&#8407;</i>&nbsp;=&nbsp;<i>r&#8407;</i>&nbsp;&times;&nbsp;<i>F&#8407;</i>, where <i>r&#8407;</i> points from the reference point to anywhere on the force&rsquo;s line of action. In the plane this collapses to a single signed scalar:</p>
+  <p>The moment of a force <i><span class="vec">F</span></i> about a point is <i><span class="vec">M</span></i>&nbsp;=&nbsp;<i><span class="vec">r</span></i>&nbsp;&times;&nbsp;<i><span class="vec">F</span></i>, where <i><span class="vec">r</span></i> points from the reference point to anywhere on the force&rsquo;s line of action. In the plane this collapses to a single signed scalar:</p>
   <div class="eqn" role="img" aria-label="M equals r sub x F sub y minus r sub y F sub x">M = r<sub>x</sub>F<sub>y</sub> &minus; r<sub>y</sub>F<sub>x</sub> &nbsp; <span class="m">(the Z-component &mdash; the only one that survives in planar motion)</span></div>
   <p>This is exactly why, although the machine looks two-dimensional, the <em>moments</em> live along the <strong>Z</strong> axis (out of the page). Hold that thought &mdash; it is the seed of &sect;5.2.</p>
 
@@ -563,18 +577,18 @@
   <h2 id="kin-h">5.1 · Review of planar kinetics</h2>
   <p>Start with one link, isolated. Newton&rsquo;s second law gives the force balance, and the moment balance about the mass center <i>G</i> gives the rotation balance. In the textbook these are Equations&nbsp;5.1 and 5.4:</p>
   <div class="eqn" role="img" aria-label="Sum of external forces equals m times a sub g. Equation 5.1.">
-    &Sigma;F&#8407; = &Sigma;F&#8407;<sub>e<sub>i</sub></sub> = m&nbsp;a&#8407;<sub>g</sub>
+    &Sigma;<span class="vec">F</span> = &Sigma;<span class="vec">F</span><sub>e<sub>i</sub></sub> = m&nbsp;<span class="vec">a</span><sub>g</sub>
     <span class="lbl">(5.1)</span>
   </div>
   <div class="eqn" role="img" aria-label="Sum of moments about G equals I sub g times alpha. Equation 5.4.">
-    &Sigma;M&#8407;<sub>g</sub> = I<sub>g</sub>&nbsp;&alpha;&#8407;
+    &Sigma;<span class="vec">M</span><sub>g</sub> = I<sub>g</sub>&nbsp;<span class="vec">&alpha;</span>
     <span class="lbl">(5.4)</span>
   </div>
   <p>Because the links move in the <i>XY</i> plane, the force and acceleration vectors have only <i>X</i> and <i>Y</i> components &mdash; their <i>Z</i> component is zero:</p>
   <div class="eqn" role="img" aria-label="F sub e i is a column vector F e i x, F e i y, 0. a sub g is a column vector a g x, a g y, 0.">
-    F&#8407;<sub>e<sub>i</sub></sub> = [ F<sub>e<sub>ix</sub></sub> ; F<sub>e<sub>iy</sub></sub> ; 0 ] &nbsp;&nbsp; a&#8407;<sub>g</sub> = [ a<sub>g<sub>x</sub></sub> ; a<sub>g<sub>y</sub></sub> ; 0 ]
+    <span class="vec">F</span><sub>e<sub>i</sub></sub> = [ F<sub>e<sub>ix</sub></sub> ; F<sub>e<sub>iy</sub></sub> ; 0 ] &nbsp;&nbsp; <span class="vec">a</span><sub>g</sub> = [ a<sub>g<sub>x</sub></sub> ; a<sub>g<sub>y</sub></sub> ; 0 ]
   </div>
-  <p>So Equation&nbsp;5.1 is really <strong>two</strong> scalar equations (one in <i>X</i>, one in <i>Y</i>). The moment of each force about <i>G</i> is the cross product <i>r&#8407;<sub>(e/g)</sub></i>&nbsp;&times;&nbsp;<i>F&#8407;<sub>e<sub>i</sub></sub></i>, and the only surviving component is along <i>Z</i> (Equation&nbsp;5.5):</p>
+  <p>So Equation&nbsp;5.1 is really <strong>two</strong> scalar equations (one in <i>X</i>, one in <i>Y</i>). The moment of each force about <i>G</i> is the cross product <i><span class="vec">r</span><sub>(e/g)</sub></i>&nbsp;&times;&nbsp;<i><span class="vec">F</span><sub>e<sub>i</sub></sub></i>, and the only surviving component is along <i>Z</i> (Equation&nbsp;5.5):</p>
   <div class="eqn" role="img" aria-label="M sub g equals r e over g cross F e i, which has only a Z component equal to r x F y minus r y F x. Equation 5.5.">
     M<sub>g</sub> = r<sub>(e/g)<sub>x</sub></sub>F<sub>e<sub>iy</sub></sub> &minus; r<sub>(e/g)<sub>y</sub></sub>F<sub>e<sub>ix</sub></sub>
     <span class="lbl">(5.5)</span>
@@ -627,10 +641,10 @@
   <h2 id="mom-h">Moments about an arbitrary point</h2>
   <p>You are <em>not</em> forced to sum moments about the mass center. Often summing about a different point &mdash; usually a pin joint where unknown reactions live &mdash; makes those unknowns vanish from the moment equation, leaving fewer unknowns to juggle. Summing about an arbitrary point <i>A</i> (textbook Equation&nbsp;5.10):</p>
   <div class="eqn" role="img" aria-label="Sum of moments about A equals I sub g alpha plus the Z component of r g over a cross m a sub g. Equation 5.10.">
-    &Sigma;M<sub>a</sub> = I<sub>g</sub>&alpha; + <span class="m">( r&#8407;<sub>g/a</sub> &times; m&nbsp;a&#8407;<sub>g</sub> )<sub>z</sub></span>
+    &Sigma;M<sub>a</sub> = I<sub>g</sub>&alpha; + <span class="m">( <span class="vec">r</span><sub>g/a</sub> &times; m&nbsp;<span class="vec">a</span><sub>g</sub> )<sub>z</sub></span>
     <span class="lbl">(5.10)</span>
   </div>
-  <p>The extra term is the moment of the inertia force <i>m&nbsp;a&#8407;<sub>g</sub></i> about <i>A</i>. If you sum about <i>G</i> itself, then <i>r&#8407;<sub>g/a</sub></i>&nbsp;=&nbsp;0 and the term disappears &mdash; recovering Equation&nbsp;5.4. Choosing <i>A</i> wisely is a tactical decision, not a new law.</p>
+  <p>The extra term is the moment of the inertia force <i>m&nbsp;<span class="vec">a</span><sub>g</sub></i> about <i>A</i>. If you sum about <i>G</i> itself, then <i><span class="vec">r</span><sub>g/a</sub></i>&nbsp;=&nbsp;0 and the term disappears &mdash; recovering Equation&nbsp;5.4. Choosing <i>A</i> wisely is a tactical decision, not a new law.</p>
 
   <div class="analogy">
     <span class="h">Think of it like&hellip;</span>
@@ -791,11 +805,11 @@
   <h2 id="ne-h">The Newton&ndash;Euler equations</h2>
   <p>The fully general (spatial) equations of motion for a rigid body are the <strong>Newton&ndash;Euler</strong> equations (Figure&nbsp;5.12, Equations&nbsp;5.16 and 5.18):</p>
   <div class="eqn" role="img" aria-label="Sum F equals m a sub g, equation 5.16. Sum M sub g equals I alpha plus omega cross I omega, equation 5.18.">
-    &Sigma;F&#8407; = m&nbsp;a&#8407;<sub>g</sub>
+    &Sigma;<span class="vec">F</span> = m&nbsp;<span class="vec">a</span><sub>g</sub>
     <span class="lbl">(5.16)</span>
   </div>
   <div class="eqn" role="img" aria-label="Sum of moments about G equals the inertia matrix I times alpha plus omega cross quantity I omega. Equation 5.18.">
-    &Sigma;M&#8407;<sub>g</sub> = <span class="c">I</span>&nbsp;&alpha;&#8407; + <span class="m">&omega;&#8407; &times; ( I&nbsp;&omega;&#8407; )</span>
+    &Sigma;<span class="vec">M</span><sub>g</sub> = <span class="c">I</span>&nbsp;<span class="vec">&alpha;</span> + <span class="m"><span class="vec">&omega;</span> &times; ( I&nbsp;<span class="vec">&omega;</span> )</span>
     <span class="lbl">(5.18)</span>
   </div>
   <p>Here <span style="font-family:var(--mono)">I</span> is the 3&times;3 <strong>inertia matrix</strong> (Equation&nbsp;5.17), whose diagonal entries are the familiar moments of inertia and whose off-diagonal entries are the <strong>products of inertia</strong>:</p>
@@ -805,12 +819,12 @@
     &nbsp;&nbsp;&minus;I<sub>zx</sub> &nbsp;&minus;I<sub>zy</sub> &nbsp;&nbsp;I<sub>zz</sub> ]
     <span class="lbl">(5.17)</span>
   </div>
-  <p>The term <i>&omega;&#8407;&nbsp;&times;&nbsp;(I&omega;&#8407;)</i> is the <strong>gyroscopic</strong> term &mdash; the reason a spinning top precesses. It looks intimidating, but for a planar machine it almost entirely evaporates.</p>
+  <p>The term <i><span class="vec">&omega;</span>&nbsp;&times;&nbsp;(I<span class="vec">&omega;</span>)</i> is the <strong>gyroscopic</strong> term &mdash; the reason a spinning top precesses. It looks intimidating, but for a planar machine it almost entirely evaporates.</p>
 
   <h3>Collapse to planar motion</h3>
   <p>A link in planar motion has a <strong>plane of symmetry parallel to the plane of motion</strong> (Figure&nbsp;5.13). That symmetry forces the products of inertia <i>I<sub>xz</sub></i> and <i>I<sub>yz</sub></i> to zero, and the angular velocity points purely along <i>Z</i>. Equation&nbsp;5.18 collapses dramatically (Equation&nbsp;5.20):</p>
   <div class="eqn" role="img" aria-label="Sum of moments about G equals a column vector zero, zero, I z z alpha, where the gyroscopic term equals zero, giving M equals I sub g alpha. Equation 5.20.">
-    &Sigma;M&#8407;<sub>g</sub> = [ 0 ; 0 ; I<sub>zz</sub>&alpha; ] + <span class="m">( &omega;&#8407; &times; I&omega;&#8407; = 0 )</span> = [ 0 ; 0 ; I<sub>g</sub>&alpha; ]
+    &Sigma;<span class="vec">M</span><sub>g</sub> = [ 0 ; 0 ; I<sub>zz</sub>&alpha; ] + <span class="m">( <span class="vec">&omega;</span> &times; I<span class="vec">&omega;</span> = 0 )</span> = [ 0 ; 0 ; I<sub>g</sub>&alpha; ]
     <span class="lbl">(5.20)</span>
   </div>
   <p>The whole spatial mouthful reduces to the friendly scalar <strong>&Sigma;M = I<sub>g</sub>&alpha;</strong> you already used in &sect;5.1. That is <em>why</em> we could start there: planar symmetry quietly did the hard work.</p>
@@ -1004,8 +1018,8 @@
   <!-- Example 5.3 stepper -->
   <div class="card tool" id="ex53">
     <div class="tool-label">Example 5.3 <span>&middot; Positive-drive wiper mechanism &mdash; count the unknowns</span></div>
-    <h3 style="margin-top:.3em">Find the driving torque T&#8407;<sub>2</sub></h3>
-    <p>A motor drives crank link&nbsp;2; through a positive-drive rolling contact (gears, pressure angle 20&deg;) between links&nbsp;3 and 5, it moves the wiper on gear&nbsp;5. The load torque <i>T&#8407;<sub>5</sub></i> is known. We want the driving torque <i>T&#8407;<sub>2</sub></i>. Step through the reasoning:</p>
+    <h3 style="margin-top:.3em">Find the driving torque <span class="vec">T</span><sub>2</sub></h3>
+    <p>A motor drives crank link&nbsp;2; through a positive-drive rolling contact (gears, pressure angle 20&deg;) between links&nbsp;3 and 5, it moves the wiper on gear&nbsp;5. The load torque <i><span class="vec">T</span><sub>5</sub></i> is known. We want the driving torque <i><span class="vec">T</span><sub>2</sub></i>. Step through the reasoning:</p>
     <div class="stepper" id="ex53dots" role="tablist" aria-label="Example 5.3 steps"></div>
     <div class="step-body card" id="ex53body" aria-live="polite" style="background:var(--paper-2); box-shadow:none"></div>
     <div class="step-nav">
@@ -1025,7 +1039,7 @@
         <p>The FBDs and the count of unknowns are exactly the same as Example&nbsp;5.3. The difference is one equation:</p>
         <ul class="clean">
           <li>In the <strong>positive drive</strong>, the extra equation tying the contact force together is the pressure-angle relation <i>F<sup>n</sup><sub>35</sub></i>&nbsp;=&nbsp;<i>F<sup>t</sup><sub>35</sub></i>&nbsp;tan&Phi; (Eq.&nbsp;5.48) &mdash; giving 10 equations in 10 unknowns.</li>
-          <li>In a <strong>friction drive</strong>, Equation&nbsp;5.48 no longer applies. Instead the force in the arm, <i>F&#8407;<sub>4</sub></i>, is a <strong>known preload</strong>. That removes one unknown, reducing the system to <strong>9 equations in 9 unknowns</strong>.</li>
+          <li>In a <strong>friction drive</strong>, Equation&nbsp;5.48 no longer applies. Instead the force in the arm, <i><span class="vec">F</span><sub>4</sub></i>, is a <strong>known preload</strong>. That removes one unknown, reducing the system to <strong>9 equations in 9 unknowns</strong>.</li>
         </ul>
         <p>Both are determinate &mdash; just balanced differently. The text notes the practical punchline: a friction drive would realistically <em>not</em> be used in this mechanism, and in general friction drives are less common than positive drives. The wiper&rsquo;s gears are the right call.</p>
       </div>
@@ -1229,11 +1243,11 @@
       <div class="rc-grid">
         <div class="rc-block">
           <h4>Planar equations of motion</h4>
-          <div class="rc-eq">&Sigma;F&#8407; = m a&#8407;<sub>g</sub> &nbsp;(Eq 5.1)</div>
+          <div class="rc-eq">&Sigma;<span class="vec">F</span> = m <span class="vec">a</span><sub>g</sub> &nbsp;(Eq 5.1)</div>
           <div class="rc-eq">&Sigma;M<sub>g</sub> = I<sub>g</sub>&alpha; &nbsp;(Eq 5.4 / 5.20)</div>
           <div class="rc-eq">M<sub>z</sub> = r<sub>x</sub>F<sub>y</sub> &minus; r<sub>y</sub>F<sub>x</sub></div>
           <h4>Moment about arbitrary point A</h4>
-          <div class="rc-eq">&Sigma;M<sub>a</sub> = I<sub>g</sub>&alpha; + (r&#8407;<sub>g/a</sub> &times; m a&#8407;<sub>g</sub>)<sub>z</sub> &nbsp;(5.10)</div>
+          <div class="rc-eq">&Sigma;M<sub>a</sub> = I<sub>g</sub>&alpha; + (<span class="vec">r</span><sub>g/a</sub> &times; m <span class="vec">a</span><sub>g</sub>)<sub>z</sub> &nbsp;(5.10)</div>
           <h4>Newton&ndash;Euler (spatial)</h4>
           <div class="rc-eq">&Sigma;M<sub>g</sub> = I&alpha; + &omega; &times; (I&omega;) &nbsp;(5.18)</div>
           <div class="rc-eq">planar: gyroscopic term &rarr; 0</div>
