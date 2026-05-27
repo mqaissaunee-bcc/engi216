@@ -559,7 +559,8 @@
   <div class="card tool" aria-labelledby="joint-tool-h">
     <div class="tool-label"><span>Animated joint demonstrator</span></div>
     <h3 id="joint-tool-h" style="margin-top:.3em">See each joint move</h3>
-    <p>Pick a joint type. Link 1 (ground, hatched) is fixed; link 2 (cyan) moves with the single freedom the joint permits. Drive it with the slider or press <em>Animate</em>. Watch the joint variable that changes.</p>
+    <p>Pick a joint type. Link 1 (ground, hatched) is fixed; link 2 (cyan/rust) moves with the freedom(s) the joint permits. Drive it with the slider or press <em>Animate</em>. Watch the joint variable that changes.</p>
+    <p class="ext-note" style="margin-top:-.4em"><strong>Tip for rolling vs slipping:</strong> watch the orange rim dot and the ground ticks. Rolling &mdash; the rim ticks land exactly on the ground ticks every revolution (perfect 1:1 print). Slipping &mdash; the rim ticks <em>skip past</em> the ground ticks and a dashed orange skid mark builds up behind the wheel.</p>
     <div class="controls" role="group" aria-label="Choose joint type">
       <button type="button" id="jPin" aria-pressed="true">Pin (rotation)</button>
       <button type="button" id="jSlide" aria-pressed="false" class="secondary">Sliding (translation)</button>
@@ -779,6 +780,14 @@
       <button type="button" class="secondary" id="presetCam">Cam &amp; follower</button>
       <button type="button" class="secondary" id="presetFive">5-bar (2 DOF)</button>
     </div>
+    <div class="gru-preview-wrap" style="margin-top:14px">
+      <div class="gru-preview-head" id="gruPreviewName" style="font-family:var(--mono);font-size:.78em;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-dk);margin-bottom:6px">preview &middot; four-bar linkage</div>
+      <div class="stage-wrap">
+        <svg id="gruPreview" class="stage" viewBox="0 0 600 220" role="img" aria-label="Skeleton diagram of the currently-loaded preset mechanism, with joints labeled by type." style="background:var(--panel)">
+        </svg>
+      </div>
+      <p class="ext-note" id="gruPreviewCaption" aria-live="polite" style="margin-top:6px">Click a preset above to load its link / joint counts and see the matching skeleton diagram.</p>
+    </div>
   </div>
 </section>
 
@@ -918,6 +927,44 @@
   <details>
     <summary>Example 1.1 &mdash; Degrees of freedom of a truss</summary>
     <div class="body">
+      <figure class="text-fig" style="margin:0 0 14px;padding:12px;background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius)">
+        <svg viewBox="0 0 460 280" role="img" aria-label="Figure 1.34 redraw: a triangular truss made of two pinned links (links 2 and 3) joined at the top, each also pinned to ground. Link 1 (ground) is shown twice to indicate the two ground anchors. The result is a rigid triangle of pinned bars." style="width:100%;height:auto;max-width:460px;display:block;margin:0 auto;background:var(--paper)">
+          <!-- The textbook draws ground as the SAME link 1 shown twice (one at each anchor). -->
+          <!-- We replicate that: ground hatching at two locations, a triangle of pinned links above. -->
+          <!-- Top apex (free pin), bottom-left (link 2 to ground), bottom-right (link 3 to ground) -->
+          <line x1="110" y1="220" x2="160" y2="220" stroke="var(--ground-fill)" stroke-width="2"/>
+          <line x1="270" y1="200" x2="320" y2="200" stroke="var(--ground-fill)" stroke-width="2"/>
+          <!-- ground hatching (left anchor) -->
+          <g stroke="var(--ground-fill)" stroke-width="1.4">
+            <line x1="118" y1="220" x2="112" y2="232"/><line x1="128" y1="220" x2="122" y2="232"/>
+            <line x1="138" y1="220" x2="132" y2="232"/><line x1="148" y1="220" x2="142" y2="232"/>
+            <line x1="158" y1="220" x2="152" y2="232"/>
+          </g>
+          <!-- ground hatching (right anchor) -->
+          <g stroke="var(--ground-fill)" stroke-width="1.4">
+            <line x1="278" y1="200" x2="272" y2="212"/><line x1="288" y1="200" x2="282" y2="212"/>
+            <line x1="298" y1="200" x2="292" y2="212"/><line x1="308" y1="200" x2="302" y2="212"/>
+            <line x1="318" y1="200" x2="312" y2="212"/>
+          </g>
+          <!-- the two moving links forming the triangle -->
+          <line x1="135" y1="210" x2="190" y2="65" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+          <line x1="190" y1="65" x2="295" y2="190" stroke="var(--accent-2)" stroke-width="5" stroke-linecap="round"/>
+          <!-- pins -->
+          <circle cx="135" cy="210" r="7" fill="none" stroke="var(--ground-fill)" stroke-width="2.4"/>
+          <circle cx="135" cy="210" r="2.4" fill="var(--ground-fill)"/>
+          <circle cx="295" cy="190" r="7" fill="none" stroke="var(--ground-fill)" stroke-width="2.4"/>
+          <circle cx="295" cy="190" r="2.4" fill="var(--ground-fill)"/>
+          <circle cx="190" cy="65" r="6.5" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.2"/>
+          <circle cx="190" cy="65" r="2" fill="var(--ink)"/>
+          <!-- labels -->
+          <text x="148" y="145" fill="var(--accent-dk)" font-size="15" font-weight="700">2</text>
+          <text x="252" y="120" fill="var(--accent-2)" font-size="15" font-weight="700">3</text>
+          <text x="138" y="252" fill="var(--ink-soft)" font-size="14" font-weight="700">1</text>
+          <text x="298" y="252" fill="var(--ink-soft)" font-size="14" font-weight="700">1</text>
+          <!-- figure caption -->
+          <text x="230" y="270" fill="var(--ink)" font-size="12" text-anchor="middle" font-family="var(--mono)">FIGURE 1.34 &middot; A TRUSS</text>
+        </svg>
+      </figure>
       <p><strong>Problem.</strong> Compute the theoretical degrees of freedom of the truss in Figure 1.34: two links pinned together, each also pinned to ground.</p>
       <p><strong>Count.</strong> Including ground, N = 3 links. The joints are all pins: two links to ground (2 pins) + the connection between the two moving links (1 pin) = P&#8321; = 3. No point contacts, so P&#8322; = 0.</p>
       <div class="eqn">F = 3(N&minus;1) &minus; 2P&#8321; &minus; P&#8322; = 3(3&minus;1) &minus; 2(3) &minus; 0 = 6 &minus; 6 = 0</div>
@@ -928,6 +975,60 @@
   <details>
     <summary>Example 1.3 &mdash; A statically indeterminate structure</summary>
     <div class="body">
+      <figure class="text-fig" style="margin:0 0 14px;padding:12px;background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius)">
+        <svg viewBox="0 0 460 290" role="img" aria-label="Figure 1.36 redraw: a statically indeterminate structure. Four links and five pin joints form an over-constrained planar assembly. Link 1 (ground) appears as two separate ground anchors at the bottom-left and middle-right." style="width:100%;height:auto;max-width:460px;display:block;margin:0 auto;background:var(--paper)">
+          <!-- Pin coordinates -->
+          <!-- groundA at bottom-left -->
+          <!-- joint B (link 2-top, link 3-left) up-left -->
+          <!-- joint C (link 3 middle, link 4-top) middle -->
+          <!-- joint D (link 3-right, link 1-right) right -->
+          <!-- groundB (right ground anchor, link 4 to ground) middle-right -->
+          <!-- ground hatch baselines (textbook places hatching under each ground pin) -->
+          <line x1="125" y1="245" x2="175" y2="245" stroke="var(--ground-fill)" stroke-width="2"/>
+          <g stroke="var(--ground-fill)" stroke-width="1.4">
+            <line x1="133" y1="245" x2="127" y2="257"/><line x1="143" y1="245" x2="137" y2="257"/>
+            <line x1="153" y1="245" x2="147" y2="257"/><line x1="163" y1="245" x2="157" y2="257"/>
+            <line x1="173" y1="245" x2="167" y2="257"/>
+          </g>
+          <line x1="305" y1="170" x2="355" y2="170" stroke="var(--ground-fill)" stroke-width="2"/>
+          <g stroke="var(--ground-fill)" stroke-width="1.4">
+            <line x1="313" y1="170" x2="307" y2="182"/><line x1="323" y1="170" x2="317" y2="182"/>
+            <line x1="333" y1="170" x2="327" y2="182"/><line x1="343" y1="170" x2="337" y2="182"/>
+            <line x1="353" y1="170" x2="347" y2="182"/>
+          </g>
+          <!-- LINK 2: short lever, bottom-left ground pin up to joint B -->
+          <line x1="150" y1="232" x2="190" y2="160" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+          <!-- LINK 3: top diagonal from B over to D, passing through C -->
+          <line x1="190" y1="160" x2="270" y2="80" stroke="var(--accent-2)" stroke-width="5" stroke-linecap="round"/>
+          <line x1="270" y1="80" x2="325" y2="155" stroke="var(--accent-2)" stroke-width="5" stroke-linecap="round"/>
+          <!-- LINK 4: connects C down to the right ground anchor -->
+          <line x1="270" y1="80" x2="330" y2="158" stroke="var(--good)" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+          <!-- Pins -->
+          <!-- ground pin A -->
+          <circle cx="150" cy="232" r="7" fill="none" stroke="var(--ground-fill)" stroke-width="2.4"/>
+          <circle cx="150" cy="232" r="2.4" fill="var(--ground-fill)"/>
+          <!-- joint B (link 2 to link 3) -->
+          <circle cx="190" cy="160" r="6.5" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.2"/>
+          <circle cx="190" cy="160" r="2" fill="var(--ink)"/>
+          <!-- joint C (link 3 to link 4, middle pin) -->
+          <circle cx="270" cy="80" r="6.5" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.2"/>
+          <circle cx="270" cy="80" r="2" fill="var(--ink)"/>
+          <!-- joint D (link 3 to link 1 via right ground pin) AND link 4 to ground share the same axis area -->
+          <circle cx="328" cy="155" r="6.5" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.2"/>
+          <circle cx="328" cy="155" r="2" fill="var(--ink)"/>
+          <!-- ground pin B (slightly offset to show it's a separate joint to link 4) -->
+          <circle cx="332" cy="158" r="7" fill="none" stroke="var(--ground-fill)" stroke-width="2.4"/>
+          <circle cx="332" cy="158" r="2.4" fill="var(--ground-fill)"/>
+          <!-- Labels -->
+          <text x="120" y="200" fill="var(--accent-dk)" font-size="15" font-weight="700">2</text>
+          <text x="220" y="105" fill="var(--accent-2)" font-size="15" font-weight="700">3</text>
+          <text x="297" y="135" fill="var(--good)" font-size="15" font-weight="700">4</text>
+          <text x="148" y="276" fill="var(--ink-soft)" font-size="14" font-weight="700">1</text>
+          <text x="328" y="200" fill="var(--ink-soft)" font-size="14" font-weight="700">1</text>
+          <!-- caption -->
+          <text x="230" y="285" fill="var(--ink)" font-size="12" text-anchor="middle" font-family="var(--mono)">FIGURE 1.36 &middot; A STATICALLY INDETERMINATE STRUCTURE</text>
+        </svg>
+      </figure>
       <p><strong>Problem.</strong> Compute the theoretical DOF of the structure in Figure 1.36.</p>
       <p><strong>Count.</strong> N = 4 links and P&#8321; = 5 pin joints. No point contacts, so P&#8322; = 0.</p>
       <div class="eqn">F = 3(4&minus;1) &minus; 2(5) &minus; 0 = 9 &minus; 10 = &minus;1</div>
@@ -938,6 +1039,58 @@
   <details>
     <summary>Example 1.12 &mdash; Mobility of a four-bar by lock-out</summary>
     <div class="body">
+      <figure class="text-fig" style="margin:0 0 14px;padding:12px;background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius)">
+        <svg viewBox="0 0 460 270" role="img" aria-label="Figure 1.14 redraw: an automobile hood four-bar mechanism. Link 1 is ground (two ground pins on the bottom). Links 2 and 4 are the side levers; link 3 is the coupler at the top." style="width:100%;height:auto;max-width:460px;display:block;margin:0 auto;background:var(--paper)">
+          <!-- Ground pin positions -->
+          <!-- O2 at bottom-left, O4 at bottom-right, A at upper-left, B at upper-right -->
+          <!-- ground hatches -->
+          <line x1="170" y1="215" x2="220" y2="215" stroke="var(--ground-fill)" stroke-width="2"/>
+          <g stroke="var(--ground-fill)" stroke-width="1.4">
+            <line x1="178" y1="215" x2="172" y2="227"/><line x1="188" y1="215" x2="182" y2="227"/>
+            <line x1="198" y1="215" x2="192" y2="227"/><line x1="208" y1="215" x2="202" y2="227"/>
+            <line x1="218" y1="215" x2="212" y2="227"/>
+          </g>
+          <line x1="245" y1="215" x2="295" y2="215" stroke="var(--ground-fill)" stroke-width="2"/>
+          <g stroke="var(--ground-fill)" stroke-width="1.4">
+            <line x1="253" y1="215" x2="247" y2="227"/><line x1="263" y1="215" x2="257" y2="227"/>
+            <line x1="273" y1="215" x2="267" y2="227"/><line x1="283" y1="215" x2="277" y2="227"/>
+            <line x1="293" y1="215" x2="287" y2="227"/>
+          </g>
+          <!-- The implicit ground link (link 1) -->
+          <line x1="195" y1="202" x2="270" y2="202" stroke="var(--ink-soft)" stroke-width="3" stroke-dasharray="6 4"/>
+          <!-- LINK 2: lever from O2 up to A -->
+          <line x1="195" y1="202" x2="165" y2="88" stroke="var(--accent)" stroke-width="5.5" stroke-linecap="round"/>
+          <!-- LINK 3: coupler from A across to B -->
+          <line x1="165" y1="88" x2="300" y2="70" stroke="var(--accent-2)" stroke-width="5.5" stroke-linecap="round"/>
+          <!-- LINK 4: lever from O4 up to B -->
+          <line x1="270" y1="202" x2="300" y2="70" stroke="var(--good)" stroke-width="5.5" stroke-linecap="round"/>
+          <!-- Pins -->
+          <circle cx="195" cy="202" r="7" fill="none" stroke="var(--ground-fill)" stroke-width="2.4"/>
+          <circle cx="195" cy="202" r="2.4" fill="var(--ground-fill)"/>
+          <circle cx="270" cy="202" r="7" fill="none" stroke="var(--ground-fill)" stroke-width="2.4"/>
+          <circle cx="270" cy="202" r="2.4" fill="var(--ground-fill)"/>
+          <circle cx="165" cy="88" r="6.5" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.2"/>
+          <circle cx="165" cy="88" r="2" fill="var(--ink)"/>
+          <circle cx="300" cy="70" r="6.5" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.2"/>
+          <circle cx="300" cy="70" r="2" fill="var(--ink)"/>
+          <!-- Labels -->
+          <text x="232" y="195" fill="var(--ink-soft)" font-size="14" font-weight="700">1</text>
+          <text x="145" y="148" fill="var(--accent-dk)" font-size="15" font-weight="700">2</text>
+          <text x="232" y="74" fill="var(--accent-2)" font-size="15" font-weight="700">3</text>
+          <text x="305" y="138" fill="var(--good)" font-size="15" font-weight="700">4</text>
+          <text x="190" y="246" fill="var(--ink-soft)" font-size="14" font-weight="700">1</text>
+          <text x="270" y="246" fill="var(--ink-soft)" font-size="14" font-weight="700">1</text>
+          <!-- "Hood open / closed" hint: show one alternate position as a dashed ghost -->
+          <g opacity="0.32" stroke-dasharray="4 3" stroke-width="3" fill="none" stroke-linecap="round">
+            <line x1="195" y1="202" x2="125" y2="125" stroke="var(--accent)"/>
+            <line x1="125" y1="125" x2="245" y2="115" stroke="var(--accent-2)"/>
+            <line x1="270" y1="202" x2="245" y2="115" stroke="var(--good)"/>
+          </g>
+          <text x="113" y="115" fill="var(--ink-soft)" font-size="10" font-style="italic">hood open</text>
+          <!-- caption -->
+          <text x="230" y="265" fill="var(--ink)" font-size="12" text-anchor="middle" font-family="var(--mono)">FIGURE 1.14 &middot; AUTOMOBILE HOOD FOUR-BAR</text>
+        </svg>
+      </figure>
       <p><strong>Problem.</strong> Determine the mobility of the four-bar in Figure 1.14.</p>
       <p><strong>Reasoning.</strong> Lock out (remove) the pin joint between links 1 and 2, fusing them into one link. The four-bar becomes a three-link truss &mdash; a structure. We had to remove exactly one P1 joint to reach a structure.</p>
       <div class="eqn">M = 1 &nbsp; (agrees with the F-number calculation)</div>
@@ -1246,32 +1399,116 @@
         name="r\u2093 (displacement)"; val=Math.round(t*320)+" px";
         note="Sliding joint \u00B7 P1. One DOF: relative translation r\u2093 only. No rotation permitted.";
       } else if(mode==="roll"){
-        var gy=232, R=46, travel=320, x=120+t*travel;
-        var ang2=(t*travel)/R*180/Math.PI; // rolling without slip
-        // ground
+        // Rolling without slipping. We mark the ground AND the wheel rim with
+        // matching tick marks spaced so each wheel-rim tick lands exactly on a
+        // ground tick. We also lay down a "paint trail" on the ground from the
+        // initial contact point to the current one. Because there is no slip,
+        // every wheel mark prints onto the same ground spot every revolution.
+        var gy=232, R=46, travel=320;
+        var x0=120;                            // start position (centre of wheel)
+        var x=x0+t*travel;                     // current centre
+        var arc=(x-x0);                        // arc-length rolled = ground distance
+        var ang2=arc/R;                        // wheel rotation (radians), no slip
+        // ground line
         stage.appendChild(el("line",{x1:80,y1:gy,x2:520,y2:gy,stroke:cssVar('--ink-soft'),"stroke-width":4,opacity:.6}));
+        // ground hatching (the "fixed" side)
         for(var j=90;j<=510;j+=22){ stage.appendChild(el("line",{x1:j,y1:gy+5,x2:j-9,y2:gy+15,stroke:cssVar('--ground-fill'),"stroke-width":1.4})); }
+        // ground tick marks (the "ruler" on the ground)
+        var spacing = R*0.6;
+        for(var gx=x0; gx<=500; gx+=spacing){
+          stage.appendChild(el("line",{x1:gx,y1:gy-4,x2:gx,y2:gy,stroke:cssVar('--ink'),"stroke-width":1.8}));
+        }
+        // PAINT TRAIL on the ground: where the contact point has been (from x0 to x)
+        stage.appendChild(el("line",{x1:x0,y1:gy-1.5,x2:x,y2:gy-1.5,stroke:cssVar('--accent-dk'),"stroke-width":3,opacity:.55,"stroke-linecap":"round"}));
+        // wheel
         var cyc=gy-R;
-        stage.appendChild(el("circle",{cx:x,cy:cyc,r:R,fill:cssVar('--accent'),opacity:.85,stroke:cssVar('--accent-dk'),"stroke-width":2.5}));
-        // spoke shows rolling
-        var sr=ang2*Math.PI/180;
-        stage.appendChild(el("line",{x1:x,y1:cyc,x2:x+R*Math.sin(sr),y2:cyc-R*Math.cos(sr),stroke:"#fff","stroke-width":3}));
+        stage.appendChild(el("circle",{cx:x,cy:cyc,r:R,fill:cssVar('--accent'),opacity:.88,stroke:cssVar('--accent-dk'),"stroke-width":2.5}));
+        // wheel rim ticks (8 around) — rotate with the wheel
+        var nTicks=8;
+        for(var iT=0; iT<nTicks; iT++){
+          var phi = ang2 + iT*2*Math.PI/nTicks;
+          var rx = x + R*Math.sin(phi);
+          var ry = cyc + R*Math.cos(phi);
+          var rxOuter = x + (R-7)*Math.sin(phi);
+          var ryOuter = cyc + (R-7)*Math.cos(phi);
+          stage.appendChild(el("line",{x1:rxOuter,y1:ryOuter,x2:rx,y2:ry,stroke:"#fff","stroke-width":2}));
+        }
+        // PAINT DOT on rim: a single bright marker spot that started at the bottom (touched ground at x0)
+        var dotAng = ang2;
+        var dotX = x + R*Math.sin(dotAng);
+        var dotY = cyc + R*Math.cos(dotAng);
+        stage.appendChild(el("circle",{cx:dotX,cy:dotY,r:5,fill:cssVar('--accent-2'),stroke:"#fff","stroke-width":1.5}));
+        // spoke pointing to the painted dot (so its rotation is visible)
+        stage.appendChild(el("line",{x1:x,y1:cyc,x2:dotX,y2:dotY,stroke:"#fff","stroke-width":3,opacity:.85}));
+        // contact-point indicator (where wheel actually touches ground)
+        stage.appendChild(el("circle",{cx:x,cy:gy,r:4,fill:cssVar('--accent-2'),stroke:"#fff","stroke-width":1.5}));
         freePin(stage,x,cyc,5);
         var tx2=el("text",{x:x,y:cyc-R-10,fill:cssVar('--ink'),"font-size":13,"text-anchor":"middle"}); tx2.textContent="link 2"; stage.appendChild(tx2);
-        name="\u03B8 \u21D4 r\u2093 (coupled)"; val=Math.round(ang2)+"\u00B0";
-        note="Rolling joint \u00B7 P1. Rolling WITHOUT slipping: rotation and translation are locked together, so it is still ONE DOF.";
+        // legend (rolling)
+        var leg=el("text",{x:90,y:30,fill:cssVar('--ink-soft'),"font-size":11,"font-family":"var(--mono)"});
+        leg.textContent="\u2014 paint trail \u00B7 \u2022 rim mark prints onto ground"; stage.appendChild(leg);
+        name="arc \u03B8\u00B7\u03C1 = r\u2093 (coupled, 1 DOF)";
+        val=Math.round(ang2*180/Math.PI)+"\u00B0 / "+Math.round(arc)+"px";
+        note="Rolling joint \u00B7 P1. NO slipping: rim ticks land exactly on ground ticks every time. Rotation and translation are locked, so still ONE DOF.";
       } else { // slip P2
-        var gy3=232, R3=46, x3=120+t*320, ang3=(t*360)*1.0; // independent
+        // Slipping joint: theta and r_x are INDEPENDENT. We make this visible by
+        // having the wheel rotate FASTER than rolling would predict, so the rim
+        // ticks no longer line up with the ground ticks — and we draw a SKID
+        // MARK whose length = arc the wheel "thinks" it rolled minus the actual
+        // ground displacement.
+        var gy3=232, R3=46, travel3=320;
+        var x0s=120;
+        var x3=x0s+t*travel3;             // ground displacement
+        var arcActual=x3-x0s;             // ground distance travelled
+        var ang3=(t*3.0);                 // wheel rotation (rad) — too much for the distance
+        var arcExpected=ang3*R3;          // arc the wheel "spun out"
+        var slip=arcExpected-arcActual;   // how much the rim slipped past the ground
+        // ground line
         stage.appendChild(el("line",{x1:80,y1:gy3,x2:520,y2:gy3,stroke:cssVar('--ink-soft'),"stroke-width":4,opacity:.6}));
         for(var k=90;k<=510;k+=22){ stage.appendChild(el("line",{x1:k,y1:gy3+5,x2:k-9,y2:gy3+15,stroke:cssVar('--ground-fill'),"stroke-width":1.4})); }
+        // ground tick ruler
+        var spacing3=R3*0.6;
+        for(var gx2=x0s; gx2<=500; gx2+=spacing3){
+          stage.appendChild(el("line",{x1:gx2,y1:gy3-4,x2:gx2,y2:gy3,stroke:cssVar('--ink'),"stroke-width":1.8}));
+        }
+        // paint trail of actual contact point (the short, "real" travel)
+        stage.appendChild(el("line",{x1:x0s,y1:gy3-1.5,x2:x3,y2:gy3-1.5,stroke:cssVar('--accent-dk'),"stroke-width":3,opacity:.55,"stroke-linecap":"round"}));
+        // SKID MARK: trailing back from the current contact-point by `slip`, drawn in rust dash
+        if(slip>0.5){
+          var skidStart=Math.max(x0s-50, x3-slip);
+          stage.appendChild(el("line",{x1:skidStart,y1:gy3+1,x2:x3,y2:gy3+1,stroke:cssVar('--accent-2'),"stroke-width":4,opacity:.9,"stroke-linecap":"round","stroke-dasharray":"6 4"}));
+        }
         var cyc3=gy3-R3;
-        stage.appendChild(el("circle",{cx:x3,cy:cyc3,r:R3,fill:cssVar('--accent-2'),opacity:.8,stroke:"#7a3410","stroke-width":2.5}));
-        var sr3=ang3*Math.PI/180;
-        stage.appendChild(el("line",{x1:x3,y1:cyc3,x2:x3+R3*Math.sin(sr3),y2:cyc3-R3*Math.cos(sr3),stroke:"#fff","stroke-width":3}));
+        // wheel — rust to flag it as the P2 (higher-pair) case
+        stage.appendChild(el("circle",{cx:x3,cy:cyc3,r:R3,fill:cssVar('--accent-2'),opacity:.82,stroke:"#7a3410","stroke-width":2.5}));
+        // rim ticks rotating with the wheel
+        var nT2=8;
+        for(var iT2=0; iT2<nT2; iT2++){
+          var phi2=ang3 + iT2*2*Math.PI/nT2;
+          var rx2=x3+R3*Math.sin(phi2), ry2=cyc3+R3*Math.cos(phi2);
+          var rxO=x3+(R3-7)*Math.sin(phi2), ryO=cyc3+(R3-7)*Math.cos(phi2);
+          stage.appendChild(el("line",{x1:rxO,y1:ryO,x2:rx2,y2:ry2,stroke:"#fff","stroke-width":2}));
+        }
+        // painted rim dot — shows how the marker spins past the ground (ink-blue to contrast rust wheel)
+        var dotAng2=ang3;
+        var dotX2=x3+R3*Math.sin(dotAng2), dotY2=cyc3+R3*Math.cos(dotAng2);
+        stage.appendChild(el("circle",{cx:dotX2,cy:dotY2,r:5,fill:cssVar('--ink'),stroke:"#fff","stroke-width":1.5}));
+        stage.appendChild(el("line",{x1:x3,y1:cyc3,x2:dotX2,y2:dotY2,stroke:"#fff","stroke-width":3,opacity:.85}));
+        // contact-point marker (note: NOT aligned with rim dot — the giveaway of slipping)
+        stage.appendChild(el("circle",{cx:x3,cy:gy3,r:4,fill:cssVar('--ink'),stroke:"#fff","stroke-width":1.5}));
         freePin(stage,x3,cyc3,5);
         var tx3=el("text",{x:x3,y:cyc3-R3-10,fill:cssVar('--ink'),"font-size":13,"text-anchor":"middle"}); tx3.textContent="link 2"; stage.appendChild(tx3);
-        name="\u03B8 AND r\u2093 (independent)"; val="2 vars";
-        note="Slipping joint \u00B7 P2. Rolling WITH slipping: \u03B8 and r\u2093 vary independently \u2192 TWO DOF. (Eq. 1.1 does not apply.)";
+        // skid label
+        if(slip>2){
+          var lab=el("text",{x:Math.max(x0s,x3-slip/2),y:gy3+34,fill:cssVar('--accent-2'),"font-size":12,"font-weight":"700","text-anchor":"middle","font-family":"var(--mono)"});
+          lab.textContent="\u2190 skid "+Math.round(slip)+"px \u2192"; stage.appendChild(lab);
+        }
+        // legend (slipping)
+        var leg2=el("text",{x:90,y:30,fill:cssVar('--ink-soft'),"font-size":11,"font-family":"var(--mono)"});
+        leg2.textContent="\u2014 paint trail   \u2013\u2013 skid mark   \u2022 rim mark SKIPS ground"; stage.appendChild(leg2);
+        name="\u03B8 AND r\u2093 (independent, 2 DOF)";
+        val="\u0394="+Math.round(slip)+"px slip";
+        note="Slipping joint \u00B7 P2. WITH slipping: rim ticks no longer match ground ticks (see skid mark). \u03B8 and r\u2093 vary independently \u2192 TWO DOF. (Eq. 1.1 does not apply.)";
       }
       $("jointVarName").textContent=name; $("jointVarVal").textContent=val;
       info.innerHTML="<span>"+note+"</span>";
@@ -1362,63 +1599,120 @@
   (function(){
     var stage=$("invStage"); if(!stage) return;
     var fixed=1, ang=0, raf=null, playing=true;
-    // a 4-bar chain defined by link lengths; we re-ground by transform
     var names={1:"Fixed link 1 \u2192 standard four-bar (ground at bottom).",
                2:"Fixed link 2 \u2192 the input crank becomes ground; a different mechanism emerges.",
                3:"Fixed link 3 \u2192 the coupler is grounded; yet another inversion.",
                4:"Fixed link 4 \u2192 the output rocker is grounded; a fourth distinct machine."};
     var btns={1:$("inv1"),2:$("inv2"),3:$("inv3"),4:$("inv4")};
-    var L1=190,L2=70,L3=170,L4=150; // generic crank-rocker (grashof)
+    // The kinematic chain — link lengths are constant across inversions
+    var L1=190, L2=70, L3=170, L4=150; // generic crank-rocker (Grashof)
+    var Lens={1:L1, 2:L2, 3:L3, 4:L4};
+
+    // Solve the 4-bar geometry in its NATIVE chain frame (O2 at origin, link 1 along +x).
+    // `theta` is the angle of link 2 relative to link 1.
     function solve(theta){
-      // ground pivots O2=(0,0), O4=(L1,0); crank link2 angle theta
       var Ax=L2*Math.cos(theta), Ay=L2*Math.sin(theta);
       var Ox=L1, Oy=0;
       var dx=Ox-Ax, dy=Oy-Ay, d=Math.hypot(dx,dy);
-      if(d> (L3+L4) || d < Math.abs(L3-L4)) return null;
+      if(d > (L3+L4) || d < Math.abs(L3-L4)) return null;
       var a=(L3*L3 - L4*L4 + d*d)/(2*d);
       var h=Math.sqrt(Math.max(0,L3*L3-a*a));
       var xm=Ax+a*dx/d, ym=Ay+a*dy/d;
       var Bx=xm + h*dy/d, By=ym - h*dx/d;
       return {A:{x:Ax,y:Ay},B:{x:Bx,y:By},O2:{x:0,y:0},O4:{x:Ox,y:Oy}};
     }
+
+    // SCREEN anchor positions for each inversion's fixed-link endpoints.
+    // These are FIXED in screen space and do not change while the inversion is active —
+    // therefore the fixed link will literally never move on screen.
+    // The other links' positions are derived from a per-frame RIGID body transform
+    // that maps the fixed link's chain-frame endpoints onto these anchors.
+    // We also include an `orient` flag that flips the figure 180° about the fixed link
+    // when needed so the moving structure tends to lie ABOVE the ground link.
+    var anchors = {
+      1: { A:{x:165, y:240}, B:{x:165+L1, y:240}, flip:false },
+      2: { A:{x:300, y:240}, B:{x:300, y:240-L2}, flip:false },     // link 2 vertical, ground at bottom
+      3: { A:{x:215, y:240}, B:{x:215+L3, y:240}, flip:true  },     // link 3 horizontal
+      4: { A:{x:225, y:240}, B:{x:225+L4, y:240}, flip:true  }      // link 4 horizontal
+    };
+
+    // Per-frame: given the chain-frame snapshot `s` and which link is fixed, compute
+    // the rigid (rotation + uniform-scale + translation) transform that takes the
+    // fixed link's chain-frame endpoints to the chosen screen anchors. Apply it to
+    // all four pivots. Because the fixed link is rigid, this works every frame —
+    // the same chain-frame distance |fp1-fp0| maps to the same screen distance.
+    function transformAll(s){
+      var pts={1:[s.O2,s.O4], 2:[s.O2,s.A], 3:[s.A,s.B], 4:[s.O4,s.B]};
+      var fp=pts[fixed];
+      var anc=anchors[fixed];
+
+      // chain-frame vector and screen vector for the fixed link
+      var cdx=fp[1].x-fp[0].x, cdy=fp[1].y-fp[0].y;
+      var sdx=anc.B.x-anc.A.x, sdy=anc.B.y-anc.A.y;
+      var cL=Math.hypot(cdx,cdy), sL=Math.hypot(sdx,sdy);
+      if(cL<1e-6) return null;
+      // scale (constant per inversion, but recomputed each frame for safety)
+      var k = sL / cL;
+      // rotation that takes (cdx,cdy) → (sdx,sdy)
+      // using complex-number multiplication: rotation = (sdx+i sdy) / (cdx+i cdy)
+      var c =  (sdx*cdx + sdy*cdy) / (cL*cL);
+      var sn = (sdy*cdx - sdx*cdy) / (cL*cL);
+      // Apply optional 180° flip about the fixed link (to push the moving structure
+      // to the desired side). A flip is equivalent to reflecting points across the
+      // fixed-link axis. We do it BEFORE the chain→screen rigid transform.
+      function maybeFlip(p){
+        if(!anc.flip) return p;
+        // reflect p across the line through fp[0] in direction (cdx,cdy)
+        var ux=cdx/cL, uy=cdy/cL;
+        var rx=p.x-fp[0].x, ry=p.y-fp[0].y;
+        var along = rx*ux + ry*uy;
+        var perp_x = rx - along*ux, perp_y = ry - along*uy;
+        return { x: fp[0].x + along*ux - perp_x, y: fp[0].y + along*uy - perp_y };
+      }
+      function map(p){
+        var pp = maybeFlip(p);
+        var rx = pp.x - fp[0].x, ry = pp.y - fp[0].y;
+        // rotate by (c,sn) and scale by k
+        var nx = (rx*c - ry*sn) * k;
+        var ny = (rx*sn + ry*c) * k;
+        return { x: anc.A.x + nx, y: anc.A.y + ny };
+      }
+      return {
+        O2: map(s.O2), O4: map(s.O4), A: map(s.A), B: map(s.B),
+        anchorA: anc.A, anchorB: anc.B
+      };
+    }
+
     function render(){
       while(stage.firstChild) stage.removeChild(stage.firstChild);
       var s=solve(ang);
       if(!s){ ang+=0.03; return; }
-      // we keep the chain geometry constant; "fixing" a link rotates whole figure so that link is horizontal & grounded
-      var pts={1:[s.O2,s.O4],2:[s.O2,s.A],3:[s.A,s.B],4:[s.O4,s.B]};
-      var fp=pts[fixed];
-      // compute rotation to make fixed link horizontal, and translate its first point to a base anchor
-      var fa=Math.atan2(fp[1].y-fp[0].y, fp[1].x-fp[0].x);
-      var rot=-fa;
-      var cosr=Math.cos(rot), sinr=Math.sin(rot);
-      function tx(p){ var x=p.x-fp[0].x, y=p.y-fp[0].y; return {x:(x*cosr - y*sinr), y:(x*sinr + y*cosr)}; }
-      // transform all four key points, then fit/centre them in the 600x340 viewBox
-      var TO2=tx(s.O2), TO4=tx(s.O4), TA=tx(s.A), TB=tx(s.B);
-      var xs=[TO2.x,TO4.x,TA.x,TB.x], ys=[TO2.y,TO4.y,TA.y,TB.y];
-      var minX=Math.min.apply(null,xs), maxX=Math.max.apply(null,xs);
-      var minY=Math.min.apply(null,ys), maxY=Math.max.apply(null,ys);
-      var w=maxX-minX||1, h=maxY-minY||1;
-      var scale=Math.min(1.05, 440/w, 250/h);
-      var cx0=(minX+maxX)/2, cy0=(minY+maxY)/2;
-      function sc(p){ return {x:300 + (p.x-cx0)*scale, y:185 - (p.y-cy0)*scale}; }
-      var O2=sc(TO2), O4=sc(TO4), A=sc(TA), B=sc(TB);
+      var pose = transformAll(s);
+      if(!pose) return;
+      var O2=pose.O2, O4=pose.O4, A=pose.A, B=pose.B;
+
+      // Defensively snap the fixed link's two endpoints to their exact screen
+      // anchors (overrides any sub-pixel numerical drift).
+      var endpts = {1:[O2,O4],2:[O2,A],3:[A,B],4:[O4,B]}[fixed];
+      endpts[0].x = pose.anchorA.x; endpts[0].y = pose.anchorA.y;
+      endpts[1].x = pose.anchorB.x; endpts[1].y = pose.anchorB.y;
+
       var P={1:[O2,O4],2:[O2,A],3:[A,B],4:[O4,B]};
       var colors={1:cssVar('--ink-soft'),2:cssVar('--accent'),3:cssVar('--accent-2'),4:cssVar('--good')};
-      // draw links
+      // draw the four links
       for(var i=1;i<=4;i++){
-        var a=P[i][0], b=P[i][1];
+        var aP=P[i][0], bP=P[i][1];
         var isFixed=(i===fixed);
-        stage.appendChild(el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,
+        stage.appendChild(el("line",{x1:aP.x,y1:aP.y,x2:bP.x,y2:bP.y,
           stroke:isFixed?cssVar('--ink'):colors[i],"stroke-width":isFixed?9:6,"stroke-linecap":"round",
           opacity:isFixed?1:0.92}));
-        var mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+        var mx=(aP.x+bP.x)/2, my=(aP.y+bP.y)/2;
         var lab=el("text",{x:mx,y:my-10,fill:isFixed?cssVar('--ink'):colors[i],"font-size":13,"font-weight":"700","text-anchor":"middle"});
         lab.textContent=i; stage.appendChild(lab);
       }
-      // joints
+      // free pins at every joint
       [O2,O4,A,B].forEach(function(p){ freePin(stage,p.x,p.y,5.5); });
-      // ground hatch on the two endpoints of fixed link
+      // ground hatching at the two endpoints of the fixed link
       [P[fixed][0],P[fixed][1]].forEach(function(p){
         var gx=p.x, gy=p.y;
         stage.appendChild(el("circle",{cx:gx,cy:gy,r:7,fill:"none",stroke:cssVar('--ground-fill'),"stroke-width":2.4}));
@@ -1456,13 +1750,180 @@
       v.className="verdict "+cls; v.innerHTML=txt;
     }
     [N,P1,P2].forEach(function(inp){ inp.addEventListener("input",calc); });
-    function preset(n,p1,p2){ N.value=n; P1.value=p1; P2.value=p2; calc(); }
-    $("presetFour").addEventListener("click",function(){preset(4,4,0);});
-    $("presetSlider").addEventListener("click",function(){preset(4,4,0);});
-    $("presetTruss").addEventListener("click",function(){preset(3,3,0);});
-    $("presetCam").addEventListener("click",function(){preset(3,2,1);});
-    $("presetFive").addEventListener("click",function(){preset(5,5,0);});
+
+    // -------------------- PREVIEW DIAGRAMS --------------------
+    // Helpers reused across the preset diagrams
+    var prev = $("gruPreview");
+    function clearPrev(){ while(prev.firstChild) prev.removeChild(prev.firstChild); }
+    function pLink(x1,y1,x2,y2,color,w){
+      prev.appendChild(el("line",{x1:x1,y1:y1,x2:x2,y2:y2,
+        stroke:color||cssVar('--ink'),"stroke-width":w||5,"stroke-linecap":"round"}));
+    }
+    function pGroundPin(x,y){
+      prev.appendChild(el("circle",{cx:x,cy:y,r:7,fill:"none",stroke:cssVar('--ground-fill'),"stroke-width":2.4}));
+      prev.appendChild(el("circle",{cx:x,cy:y,r:2.4,fill:cssVar('--ground-fill')}));
+      prev.appendChild(el("line",{x1:x-15,y1:y+9,x2:x+15,y2:y+9,stroke:cssVar('--ground-fill'),"stroke-width":1.8}));
+      for(var k=-12;k<=12;k+=6){
+        prev.appendChild(el("line",{x1:x+k,y1:y+9,x2:x+k-5,y2:y+16,stroke:cssVar('--ground-fill'),"stroke-width":1.3}));
+      }
+    }
+    function pFreePin(x,y){
+      prev.appendChild(el("circle",{cx:x,cy:y,r:6,fill:cssVar('--panel'),stroke:cssVar('--ink'),"stroke-width":2.2}));
+      prev.appendChild(el("circle",{cx:x,cy:y,r:2,fill:cssVar('--ink')}));
+    }
+    function pLabel(x,y,text,color){
+      var t=el("text",{x:x,y:y,fill:color||cssVar('--ink'),"font-size":13,"font-weight":"700","text-anchor":"middle"});
+      t.textContent=text; prev.appendChild(t);
+    }
+    function pTag(x,y,text,color){
+      // small monospace tag (e.g. "P1", "P2") next to a joint
+      var t=el("text",{x:x,y:y,fill:color||cssVar('--accent-dk'),"font-size":11,"text-anchor":"middle","font-family":"var(--mono)"});
+      t.textContent=text; prev.appendChild(t);
+    }
+    function pGroundLine(x1,x2,y){
+      prev.appendChild(el("line",{x1:x1,y1:y,x2:x2,y2:y,stroke:cssVar('--ground-fill'),"stroke-width":2}));
+      for(var x=x1;x<=x2;x+=14){
+        prev.appendChild(el("line",{x1:x,y1:y,x2:x-8,y2:y+10,stroke:cssVar('--ground-fill'),"stroke-width":1.3}));
+      }
+    }
+    function pSlider(cx,cy,w,h,color){
+      prev.appendChild(el("rect",{x:cx-w/2,y:cy-h/2,width:w,height:h,rx:4,fill:color||cssVar('--accent'),opacity:.85,stroke:cssVar('--ink'),"stroke-width":2}));
+    }
+
+    var diagrams = {
+      four: function(){
+        // Four-bar: N=4, P1=4 (four pins), P2=0
+        var O2={x:170,y:170}, O4={x:430,y:170};
+        var A={x:230,y:75},   B={x:380,y:65};
+        pGroundLine(120,480,182);
+        pLink(O2.x,O2.y,O4.x,O4.y, cssVar('--ink-soft'),5);                  // link 1 (ground)
+        pLink(O2.x,O2.y,A.x,A.y,   cssVar('--accent'),6);                    // link 2 (crank)
+        pLink(A.x,A.y,B.x,B.y,     cssVar('--accent-2'),6);                  // link 3 (coupler)
+        pLink(O4.x,O4.y,B.x,B.y,   cssVar('--good'),6);                      // link 4 (rocker)
+        pGroundPin(O2.x,O2.y); pGroundPin(O4.x,O4.y);
+        pFreePin(A.x,A.y); pFreePin(B.x,B.y);
+        pLabel(195,160,"1",cssVar('--ink-soft'));
+        pLabel(190,115,"2",cssVar('--accent'));
+        pLabel(305,55,"3",cssVar('--accent-2'));
+        pLabel(415,120,"4",cssVar('--good'));
+        pTag(O2.x-22,O2.y-12,"P\u2081"); pTag(O4.x+22,O4.y-12,"P\u2081");
+        pTag(A.x-18,A.y-12,"P\u2081"); pTag(B.x+18,B.y-12,"P\u2081");
+        return { name:"PREVIEW \u00B7 FOUR-BAR LINKAGE", caption:"4 links (including ground), 4 pin joints, no point contacts. F = 3(4\u22121) \u2212 2(4) \u2212 0 = 1." };
+      },
+      slider: function(){
+        // Slider-crank: N=4, P1=4 (3 pins + 1 slider), P2=0
+        var O2={x:160,y:165}, A={x:225,y:80}, B={x:430,y:135};
+        pGroundLine(120,475,182);
+        // ground link (just the implied baseline)
+        pLink(O2.x,O2.y,B.x,O2.y, cssVar('--ink-soft'),3);
+        pLink(O2.x,O2.y,A.x,A.y,   cssVar('--accent'),6);   // crank
+        pLink(A.x,A.y,B.x,B.y,     cssVar('--accent-2'),6); // coupler
+        // slider on horizontal guide
+        prev.appendChild(el("line",{x1:340,y1:135,x2:480,y2:135,stroke:cssVar('--ink-soft'),"stroke-width":2}));
+        for(var sg=350;sg<=470;sg+=14){
+          prev.appendChild(el("line",{x1:sg,y1:142,x2:sg-8,y2:152,stroke:cssVar('--ground-fill'),"stroke-width":1.3}));
+        }
+        pSlider(B.x,B.y,52,26,cssVar('--good'));
+        pGroundPin(O2.x,O2.y);
+        pFreePin(A.x,A.y); pFreePin(B.x,B.y);
+        pLabel(290,158,"1",cssVar('--ink-soft'));
+        pLabel(185,122,"2",cssVar('--accent'));
+        pLabel(325,95,"3",cssVar('--accent-2'));
+        pLabel(B.x,B.y+38,"4",cssVar('--good'));
+        pTag(O2.x-22,O2.y-12,"P\u2081"); pTag(A.x-18,A.y-12,"P\u2081");
+        pTag(B.x,B.y-22,"P\u2081"); pTag(B.x+38,B.y-4,"P\u2081 (slide)");
+        return { name:"PREVIEW \u00B7 SLIDER-CRANK", caption:"4 links, 3 pin joints + 1 sliding joint = 4 P\u2081, no P\u2082. F = 3(4\u22121) \u2212 2(4) \u2212 0 = 1." };
+      },
+      truss: function(){
+        // 3-link truss: N=3, P1=3 (three pins), P2=0
+        var O1={x:200,y:175}, O2={x:400,y:175}, A={x:300,y:65};
+        pGroundLine(150,450,187);
+        pLink(O1.x,O1.y,O2.x,O2.y, cssVar('--ink-soft'),5);
+        pLink(O1.x,O1.y,A.x,A.y,   cssVar('--accent'),6);
+        pLink(O2.x,O2.y,A.x,A.y,   cssVar('--accent-2'),6);
+        pGroundPin(O1.x,O1.y); pGroundPin(O2.x,O2.y);
+        pFreePin(A.x,A.y);
+        pLabel(300,165,"1",cssVar('--ink-soft'));
+        pLabel(230,115,"2",cssVar('--accent'));
+        pLabel(370,115,"3",cssVar('--accent-2'));
+        pTag(O1.x-22,O1.y-12,"P\u2081"); pTag(O2.x+22,O2.y-12,"P\u2081"); pTag(A.x,A.y-15,"P\u2081");
+        return { name:"PREVIEW \u00B7 3-LINK PINNED TRUSS", caption:"3 links (including ground), 3 pin joints, no P\u2082. F = 3(3\u22121) \u2212 2(3) \u2212 0 = 0 \u2192 a STRUCTURE." };
+      },
+      cam: function(){
+        // Cam & follower: N=3, P1=2 (two pins), P2=1 (point/line contact)
+        pGroundLine(80,520,200);
+        // cam body (a noncircular disc)
+        var camC={x:200,y:130};
+        prev.appendChild(el("ellipse",{cx:camC.x,cy:camC.y,rx:58,ry:42,fill:cssVar('--accent'),opacity:.88,stroke:cssVar('--accent-dk'),"stroke-width":2.5}));
+        // cam shaft pin (ground)
+        pGroundPin(camC.x,camC.y);
+        // follower rod sliding vertically with roller at bottom contacting cam at top
+        var rollerC={x:285,y:90};
+        var rollerR=14;
+        prev.appendChild(el("circle",{cx:rollerC.x,cy:rollerC.y,r:rollerR,fill:cssVar('--accent-2'),opacity:.85,stroke:"#7a3410","stroke-width":2}));
+        // follower rod
+        pLink(rollerC.x,rollerC.y,rollerC.x,rollerC.y-50,cssVar('--good'),6);
+        pSlider(rollerC.x,30,42,22,cssVar('--good'));
+        // guide for follower
+        prev.appendChild(el("line",{x1:rollerC.x-30,y1:25,x2:rollerC.x-30,y2:75,stroke:cssVar('--ink-soft'),"stroke-width":2}));
+        prev.appendChild(el("line",{x1:rollerC.x+30,y1:25,x2:rollerC.x+30,y2:75,stroke:cssVar('--ink-soft'),"stroke-width":2}));
+        // contact point — the P2 joint
+        var contactX=rollerC.x-6, contactY=rollerC.y+12;
+        prev.appendChild(el("circle",{cx:contactX,cy:contactY,r:5,fill:"none",stroke:cssVar('--bad'),"stroke-width":2.5}));
+        // labels
+        pLabel(camC.x,camC.y+4,"2",cssVar('--accent-dk'));
+        pLabel(rollerC.x+50,rollerC.y+4,"3",cssVar('--good'));
+        pLabel(370,195,"1 (ground)",cssVar('--ink-soft'));
+        pTag(camC.x-18,camC.y-50,"P\u2081 (pin)");
+        pTag(rollerC.x+10,16,"P\u2081 (slide)");
+        pTag(contactX-2,contactY+22,"P\u2082 (point)", cssVar('--bad'));
+        return { name:"PREVIEW \u00B7 CAM & FOLLOWER", caption:"3 links, 2 P\u2081 (pin + slider) + 1 P\u2082 (cam-follower point contact). F = 3(3\u22121) \u2212 2(2) \u2212 1 = 1." };
+      },
+      five: function(){
+        // 5-bar 2-DOF: N=5, P1=5 (five pins), P2=0
+        var O2={x:140,y:170}, O5={x:460,y:170};
+        var A={x:200,y:75}, B={x:300,y:40}, C={x:400,y:75};
+        pGroundLine(95,505,182);
+        pLink(O2.x,O2.y,O5.x,O5.y, cssVar('--ink-soft'),4);
+        pLink(O2.x,O2.y,A.x,A.y,   cssVar('--accent'),6);
+        pLink(A.x,A.y,B.x,B.y,     cssVar('--accent-2'),6);
+        pLink(B.x,B.y,C.x,C.y,     cssVar('--good'),6);
+        pLink(C.x,C.y,O5.x,O5.y,   cssVar('--accent-dk'),6);
+        pGroundPin(O2.x,O2.y); pGroundPin(O5.x,O5.y);
+        pFreePin(A.x,A.y); pFreePin(B.x,B.y); pFreePin(C.x,C.y);
+        pLabel(300,160,"1",cssVar('--ink-soft'));
+        pLabel(155,120,"2",cssVar('--accent'));
+        pLabel(245,50,"3",cssVar('--accent-2'));
+        pLabel(355,50,"4",cssVar('--good'));
+        pLabel(445,120,"5",cssVar('--accent-dk'));
+        pTag(O2.x-22,O2.y-12,"P\u2081"); pTag(O5.x+22,O5.y-12,"P\u2081");
+        pTag(A.x-15,A.y-12,"P\u2081"); pTag(B.x,B.y-15,"P\u2081"); pTag(C.x+15,C.y-12,"P\u2081");
+        return { name:"PREVIEW \u00B7 5-BAR LINKAGE (2 DOF)", caption:"5 links, 5 pin joints, no P\u2082. F = 3(5\u22121) \u2212 2(5) \u2212 0 = 2 \u2192 needs 2 inputs." };
+      }
+    };
+
+    function drawDiagram(key){
+      clearPrev();
+      var fn = diagrams[key];
+      if(!fn) return;
+      var meta = fn();
+      if(meta){
+        $("gruPreviewName").textContent = meta.name;
+        $("gruPreviewCaption").textContent = meta.caption;
+      }
+    }
+
+    function preset(n,p1,p2, diagramKey){
+      N.value=n; P1.value=p1; P2.value=p2; calc();
+      if(diagramKey) drawDiagram(diagramKey);
+    }
+    $("presetFour").addEventListener("click",function(){preset(4,4,0,"four");});
+    $("presetSlider").addEventListener("click",function(){preset(4,4,0,"slider");});
+    $("presetTruss").addEventListener("click",function(){preset(3,3,0,"truss");});
+    $("presetCam").addEventListener("click",function(){preset(3,2,1,"cam");});
+    $("presetFive").addEventListener("click",function(){preset(5,5,0,"five");});
     calc();
+    drawDiagram("four"); // start with the four-bar preview
   })();
 
   /* ============================================================
