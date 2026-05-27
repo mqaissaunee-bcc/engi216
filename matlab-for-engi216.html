@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MATLAB for ENGI 216 · A Just-Enough Primer for Dynamics &amp; Kinematics of Machines</title>
+<meta name="description" content="An interactive, accessible MATLAB primer scoped to exactly what students need to solve ENGI 216 mechanism problems: vectors, matrices, solving linear systems with the backslash operator, Newton's method for nonlinear position equations, fzero/fsolve, plotting performance curves, scripts and functions.">
+<style>
+/* ============================================================
+   ENGI 216 — Engineering-Blueprint Design System
+   (locked standard: drafting paper, ink-blue + cyan + rust)
+   ============================================================ */
+:root{
+  --paper:      #f3f1e7;
+  --panel:      #ffffff;
+  --panel-line: #c9c4b0;
+  --ink:        #10243a;
+  --ink-soft:   #2b4a66;
+  --accent:     #0a7ea4;
+  --accent-dk:  #075a76;
+  --rust:       #c2541d;
+  --rust-soft:  #e7d3c4;
+  --link-fill:  #0a7ea4;
+  --ground-fill:#10243a;
+  --grid-line:  rgba(10,126,164,.10);
+  --good:       #1f7a4d;
+  --good-bg:    #e3f3e9;
+  --bad:        #a4231f;
+  --bad-bg:     #f7e3e2;
+  --warn:       #8a6d1a;
+  --warn-bg:    #f7f0d8;
+  --code-bg:    #0e1820;
+  --code-ink:   #e8edf2;
+  --code-cyan:  #7fd6ee;
+  --code-rust:  #f0a878;
+  --code-green: #8fd6a8;
+  --code-dim:   #7d93a6;
+  --maxw:       1080px;
+  --radius:     10px;
+  --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+  --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+  --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:      #0e1820;
+    --panel:      #16242f;
+    --panel-line: #2c4150;
+    --ink:        #e8edf2;
+    --ink-soft:   #aebfcf;
+    --accent:     #3bb6d8;
+    --accent-dk:  #7fd6ee;
+    --rust:       #e0824a;
+    --rust-soft:  #3a2417;
+    --link-fill:  #3bb6d8;
+    --ground-fill:#cfe0ec;
+    --grid-line:  rgba(59,182,216,.12);
+    --good:       #5fc78e;
+    --good-bg:    #16352a;
+    --bad:        #f08a86;
+    --bad-bg:     #3a1e1d;
+    --warn:       #e6c869;
+    --warn-bg:    #352d12;
+    --code-bg:    #0a1218;
+    --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+  }
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{
+  margin:0;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:26px 26px;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.62;
+}
+.skip-link{
+  position:absolute;left:-9999px;top:0;z-index:999;
+  background:var(--accent);color:#fff;padding:10px 16px;border-radius:0 0 8px 0;
+  font-family:var(--mono);font-size:.9rem;
+}
+.skip-link:focus{left:0}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+header.site{
+  border-bottom:2px solid var(--ink);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--panel) 92%, transparent), transparent);
+  padding:30px 0 22px;
+}
+.eyebrow{
+  font-family:var(--mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--rust);margin:0 0 8px;font-weight:700;
+}
+header.site h1{
+  font-family:var(--serif);font-weight:700;line-height:1.08;margin:0 0 10px;
+  font-size:clamp(1.8rem,4.4vw,3rem);color:var(--ink);
+}
+header.site .sub{font-size:clamp(1rem,2.2vw,1.2rem);color:var(--ink-soft);max-width:60ch;margin:0}
+.titleblock{
+  display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:18px;
+  font-family:var(--mono);font-size:.76rem;color:var(--ink-soft);
+  border-top:1px dashed var(--panel-line);padding-top:14px;
+}
+.titleblock b{color:var(--ink)}
+
+/* ---------- Reading progress dock ---------- */
+.progress-dock{
+  position:fixed;left:0;right:0;top:0;height:4px;z-index:60;background:transparent;
+}
+.progress-dock .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--rust));transition:width .12s linear}
+@media (prefers-reduced-motion: reduce){ .progress-dock .bar{transition:none} }
+
+/* ---------- Sticky section nav ---------- */
+nav.toc{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb, var(--paper) 94%, transparent);
+  backdrop-filter:saturate(140%) blur(6px);
+  border-bottom:1px solid var(--panel-line);
+  margin-bottom:8px;
+}
+nav.toc .toc-inner{
+  max-width:var(--maxw);margin:0 auto;padding:8px 10px;
+  display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;
+}
+nav.toc a{
+  flex:0 0 auto;text-decoration:none;color:var(--ink-soft);
+  font-family:var(--mono);font-size:.78rem;padding:8px 11px;border-radius:7px;
+  border:1px solid transparent;white-space:nowrap;min-height:36px;display:flex;align-items:center;
+}
+nav.toc a:hover{background:color-mix(in srgb,var(--accent) 12%, transparent);color:var(--ink)}
+nav.toc a.active{background:var(--accent);color:#fff;border-color:var(--accent-dk)}
+nav.toc a:focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+
+/* ---------- Sections ---------- */
+main{padding:14px 0 60px}
+section{
+  background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:30px clamp(18px,3.5vw,40px);margin:26px 0;
+  scroll-margin-top:64px;
+}
+section > h2{
+  font-family:var(--serif);font-size:clamp(1.45rem,3.2vw,2rem);line-height:1.12;
+  margin:0 0 6px;color:var(--ink);
+}
+section > h2 .num{
+  font-family:var(--mono);font-size:.7em;color:var(--rust);display:block;
+  letter-spacing:.12em;margin-bottom:4px;font-weight:700;
+}
+section > .lead{color:var(--ink-soft);font-size:1.05rem;margin:0 0 18px;max-width:66ch}
+h3{font-family:var(--serif);font-size:1.28rem;margin:30px 0 8px;color:var(--ink)}
+h4{font-family:var(--sans);font-size:1.02rem;font-weight:700;margin:20px 0 6px;color:var(--ink);letter-spacing:.01em}
+p{margin:.5em 0}
+a{color:var(--link-fill)}
+ul,ol{padding-left:1.3em}
+li{margin:.32em 0}
+strong{color:var(--ink)}
+hr.rule{border:none;border-top:1px dashed var(--panel-line);margin:26px 0}
+
+/* ---------- Code blocks ---------- */
+.codewrap{margin:14px 0;border-radius:9px;overflow:hidden;border:1px solid #1d2d3a;box-shadow:var(--shadow)}
+.codebar{
+  background:#0b141b;color:var(--code-dim);font-family:var(--mono);font-size:.72rem;
+  padding:7px 12px;display:flex;justify-content:space-between;align-items:center;letter-spacing:.05em;
+  border-bottom:1px solid #1d2d3a;
+}
+.codebar .fname{color:var(--code-cyan)}
+.copybtn{
+  background:#16242f;color:var(--code-ink);border:1px solid #2c4150;border-radius:6px;
+  font-family:var(--mono);font-size:.7rem;padding:4px 9px;cursor:pointer;min-height:28px;
+}
+.copybtn:hover{background:#1d3140}
+.copybtn:focus-visible{outline:2px solid var(--code-cyan);outline-offset:1px}
+pre{
+  margin:0;background:var(--code-bg);color:var(--code-ink);
+  font-family:var(--mono);font-size:.86rem;line-height:1.6;
+  padding:14px 16px;overflow-x:auto;tab-size:2;
+}
+pre .cm{color:var(--code-dim);font-style:italic}     /* comment */
+pre .kw{color:var(--code-rust);font-weight:600}        /* keyword */
+pre .fn{color:var(--code-cyan)}                        /* function */
+pre .st{color:var(--code-green)}                       /* string */
+pre .nm{color:#e6c869}                                 /* number */
+pre .op{color:#c5d4e0}
+code.inline{
+  font-family:var(--mono);font-size:.86em;background:color-mix(in srgb,var(--accent) 12%, transparent);
+  color:var(--ink);padding:1px 6px;border-radius:5px;border:1px solid color-mix(in srgb,var(--accent) 26%, transparent);
+}
+
+/* ---------- Callouts ---------- */
+.callout,.analogy,.real-world,.pitfall,.tryit{
+  border-radius:9px;padding:15px 17px 15px 46px;margin:16px 0;position:relative;
+  border:1px solid var(--panel-line);background:color-mix(in srgb,var(--accent) 6%, var(--panel));
+}
+.callout::before,.analogy::before,.real-world::before,.pitfall::before,.tryit::before{
+  position:absolute;left:13px;top:14px;font-size:1.1rem;line-height:1;
+}
+.callout::before{content:"\1F4CC"}
+.callout .tag,.analogy .tag,.real-world .tag,.pitfall .tag,.tryit .tag{
+  display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700;margin-bottom:3px;
+}
+.analogy{background:color-mix(in srgb,var(--accent) 9%, var(--panel));border-left:4px solid var(--accent)}
+.analogy::before{content:"\1F501"}
+.analogy .tag{color:var(--accent-dk)}
+.real-world{background:color-mix(in srgb,var(--rust) 9%, var(--panel));border-left:4px solid var(--rust)}
+.real-world::before{content:"\1F30D"}
+.real-world .tag{color:var(--rust)}
+.pitfall{background:var(--bad-bg);border-left:4px solid var(--bad)}
+.pitfall::before{content:"\26A0\FE0F"}
+.pitfall .tag{color:var(--bad)}
+.tryit{background:var(--good-bg);border-left:4px solid var(--good)}
+.tryit::before{content:"\1F9EA"}
+.tryit .tag{color:var(--good)}
+
+/* ---------- Tables ---------- */
+.tablewrap{overflow-x:auto;margin:16px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:480px}
+caption{text-align:left;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.04em}
+th,td{border:1px solid var(--panel-line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--accent) 14%, var(--panel));font-family:var(--sans);font-weight:700}
+tr:nth-child(even) td{background:color-mix(in srgb,var(--ink) 3%, var(--panel))}
+td code,th code{font-family:var(--mono);font-size:.86em}
+
+/* ---------- Interactive widget shell ---------- */
+.widget{
+  border:1px solid var(--panel-line);border-radius:10px;margin:20px 0;overflow:hidden;
+  background:color-mix(in srgb,var(--ink) 2%, var(--panel));
+}
+.widget-head{
+  background:color-mix(in srgb,var(--accent) 14%, var(--panel));padding:11px 16px;
+  border-bottom:1px solid var(--panel-line);display:flex;align-items:center;gap:9px;
+}
+.widget-head .wtag{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dk);font-weight:700}
+.widget-head h4{margin:0;font-size:1rem}
+.widget-body{padding:16px}
+.controls{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;margin-bottom:14px}
+.ctrl{display:flex;flex-direction:column;gap:4px;min-width:140px}
+.ctrl label{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);letter-spacing:.03em}
+.ctrl input[type=range]{width:100%;min-height:30px;accent-color:var(--accent)}
+.ctrl .val{font-family:var(--mono);font-weight:700;color:var(--accent-dk)}
+.ctrl input[type=number]{
+  font-family:var(--mono);font-size:.92rem;padding:7px 9px;border:1px solid var(--panel-line);
+  border-radius:6px;background:var(--panel);color:var(--ink);min-height:38px;width:100%;
+}
+.ctrl input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{
+  font-family:var(--mono);font-size:.82rem;font-weight:700;letter-spacing:.03em;
+  background:var(--accent);color:#fff;border:1px solid var(--accent-dk);border-radius:7px;
+  padding:9px 16px;cursor:pointer;min-height:40px;
+}
+.btn:hover{background:var(--accent-dk)}
+.btn:focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+.btn.secondary{background:transparent;color:var(--accent-dk);border-color:var(--accent)}
+.btn.secondary:hover{background:color-mix(in srgb,var(--accent) 12%, transparent)}
+.outbox{
+  font-family:var(--mono);font-size:.84rem;background:var(--code-bg);color:var(--code-ink);
+  border-radius:8px;padding:13px 15px;overflow-x:auto;line-height:1.55;white-space:pre-wrap;
+  border:1px solid #1d2d3a;
+}
+.outbox .ok{color:var(--code-green)}
+.outbox .hi{color:var(--code-cyan)}
+.outbox .ru{color:var(--code-rust)}
+.outbox .dim{color:var(--code-dim)}
+.plot-svg{width:100%;height:auto;display:block;background:var(--panel);border-radius:8px;border:1px solid var(--panel-line)}
+.mech-svg{width:100%;height:auto;display:block}
+
+/* ---------- Console emulator ---------- */
+.console{font-family:var(--mono);font-size:.86rem;background:var(--code-bg);color:var(--code-ink);border-radius:8px;border:1px solid #1d2d3a;overflow:hidden}
+.console-log{padding:12px 14px;min-height:90px;max-height:230px;overflow-y:auto;white-space:pre-wrap;line-height:1.55}
+.console-log .prompt{color:var(--code-cyan)}
+.console-log .ans{color:var(--code-ink)}
+.console-log .err{color:var(--code-rust)}
+.console-row{display:flex;border-top:1px solid #1d2d3a}
+.console-row .gt{padding:10px 4px 10px 12px;color:var(--code-cyan);font-weight:700}
+.console-row input{
+  flex:1;background:transparent;border:none;color:var(--code-ink);font-family:var(--mono);
+  font-size:.86rem;padding:10px 12px 10px 4px;min-height:42px;
+}
+.console-row input:focus{outline:none}
+.console-row input:focus-visible{outline:2px solid var(--code-cyan);outline-offset:-2px}
+
+/* ---------- Self-check quiz ---------- */
+.quiz-q{border:1px solid var(--panel-line);border-radius:9px;padding:16px;margin:14px 0;background:var(--panel)}
+.quiz-q .qnum{font-family:var(--mono);font-size:.72rem;color:var(--rust);letter-spacing:.1em;font-weight:700}
+.quiz-q .qtext{font-weight:600;margin:4px 0 12px}
+.quiz-q .opt{display:block;width:100%;text-align:left;background:color-mix(in srgb,var(--ink) 2%, var(--panel));
+  border:1px solid var(--panel-line);border-radius:7px;padding:11px 13px;margin:7px 0;cursor:pointer;
+  font-family:var(--sans);font-size:.96rem;color:var(--ink);min-height:44px;}
+.quiz-q .opt:hover{border-color:var(--accent)}
+.quiz-q .opt:focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+.quiz-q .opt.correct{background:var(--good-bg);border-color:var(--good);color:var(--ink)}
+.quiz-q .opt.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--ink)}
+.quiz-q .opt .mk{font-family:var(--mono);font-weight:700;margin-right:8px}
+.quiz-fb{margin-top:10px;font-size:.92rem;padding:10px 12px;border-radius:7px;display:none}
+.quiz-fb.show{display:block}
+.quiz-fb.right{background:var(--good-bg);color:var(--ink);border-left:3px solid var(--good)}
+.quiz-fb.no{background:var(--bad-bg);color:var(--ink);border-left:3px solid var(--bad)}
+.quiz-score{font-family:var(--mono);font-weight:700;color:var(--accent-dk);margin-top:8px}
+
+/* ---------- Glossary ---------- */
+.glossary-search{
+  width:100%;max-width:420px;font-family:var(--mono);font-size:.9rem;padding:10px 13px;
+  border:1px solid var(--panel-line);border-radius:8px;background:var(--panel);color:var(--ink);
+  min-height:42px;margin-bottom:14px;
+}
+.glossary-search:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.gterm{border-bottom:1px solid var(--panel-line);padding:11px 0}
+.gterm dt{font-family:var(--mono);font-weight:700;color:var(--accent-dk);font-size:.94rem}
+.gterm dd{margin:3px 0 0;color:var(--ink-soft);font-size:.95rem}
+.gterm.hidden{display:none}
+
+/* ---------- Videos ---------- */
+.vid-grid{display:grid;gap:18px;grid-template-columns:1fr}
+@media(min-width:720px){.vid-grid{grid-template-columns:1fr 1fr}}
+.vid-card{border:1px solid var(--panel-line);border-radius:9px;overflow:hidden;background:var(--panel)}
+.vid-frame{position:relative;padding-top:56.25%;background:#0b141b}
+.vid-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vid-meta{padding:11px 14px}
+.vid-meta .vt{font-weight:700;font-size:.98rem;margin:0 0 3px}
+.vid-meta .vd{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);letter-spacing:.03em}
+.vid-meta .vd span{color:var(--rust)}
+
+/* ---------- External resources ---------- */
+.res-cat{margin:18px 0}
+.res-cat h4{margin-bottom:6px;border-bottom:2px solid var(--rust);display:inline-block;padding-bottom:2px}
+.res-list{list-style:none;padding:0;margin:6px 0}
+.res-list li{margin:7px 0;padding-left:22px;position:relative}
+.res-list li::before{content:"\2197";position:absolute;left:0;top:1px;color:var(--rust);font-weight:700}
+.res-list a .ext{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);margin-left:6px}
+
+/* ---------- Reference / formula card ---------- */
+.refcard{border:2px solid var(--ink);border-radius:10px;background:var(--panel);padding:4px}
+.refcard-inner{border:1px dashed var(--panel-line);border-radius:7px;padding:18px}
+.ref-grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:680px){.ref-grid{grid-template-columns:1fr 1fr}}
+.ref-block h4{margin:0 0 6px;color:var(--accent-dk);font-family:var(--mono);font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+.ref-block table{min-width:0;font-size:.84rem}
+.ref-block td:first-child code{color:var(--rust)}
+.printbtn{margin:10px 0 0}
+@media print{
+  nav.toc,.progress-dock,header.site .titleblock,.copybtn,.console-row,.btn{display:none!important}
+  body{background:#fff}
+  section{box-shadow:none;border:1px solid #999;page-break-inside:avoid}
+  #refcard{page-break-before:always}
+}
+
+/* ---------- Objectives recap ---------- */
+.obj-list{list-style:none;padding:0;margin:0}
+.obj-list li{padding:10px 0 10px 34px;position:relative;border-bottom:1px solid var(--panel-line)}
+.obj-list li::before{content:"\2713";position:absolute;left:6px;top:9px;color:var(--good);font-weight:700;font-size:1.1rem}
+.pill{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+  background:color-mix(in srgb,var(--accent) 15%,var(--panel));color:var(--accent-dk);border-radius:20px;
+  padding:3px 10px;margin:2px 4px 2px 0;border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+
+/* ---------- Footer ---------- */
+footer.site{border-top:2px solid var(--ink);padding:24px 0 40px;color:var(--ink-soft);font-size:.86rem}
+footer.site .refs{font-size:.78rem;line-height:1.5;margin-top:14px;font-family:var(--mono)}
+footer.site a{color:var(--link-fill)}
+
+.kbd{font-family:var(--mono);font-size:.78em;background:var(--panel);border:1px solid var(--panel-line);
+  border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+/* ---------- Matrix equation display ---------- */
+.mateq{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.95rem;margin:16px 0;color:var(--ink);overflow-x:auto;padding:6px 0}
+.matrix{display:inline-grid;gap:4px 14px;padding:8px 4px;position:relative;
+  border-left:2px solid var(--ink);border-right:2px solid var(--ink);border-radius:3px}
+.matrix > span{padding:2px 8px;text-align:right;white-space:nowrap}
+.mateq .lbl{font-style:normal;color:var(--accent-dk);font-weight:700}
+.mateq .op{font-size:1.3rem;color:var(--ink-soft)}
+@media(prefers-color-scheme:dark){.matrix{border-color:var(--ink-soft)}}
+
+/* ---------- Practice problems / collapsible solutions ---------- */
+.problem{border:1px solid var(--panel-line);border-radius:10px;margin:18px 0;background:var(--panel);overflow:hidden;box-shadow:var(--shadow)}
+.problem-head{background:color-mix(in srgb,var(--rust) 10%,var(--panel));padding:13px 17px;border-bottom:1px solid var(--panel-line)}
+.problem-head .plabel{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rust);font-weight:700;display:block;margin-bottom:3px}
+.problem-head h4{margin:0;font-size:1.06rem;font-family:var(--serif);color:var(--ink)}
+.problem-body{padding:15px 17px}
+.problem-body > p:first-child{margin-top:0}
+details.solution{margin-top:12px;border-top:1px dashed var(--panel-line);padding-top:6px}
+details.solution > summary{
+  cursor:pointer;font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--accent-dk);
+  padding:9px 4px;list-style:none;display:flex;align-items:center;gap:8px;min-height:40px;
+}
+details.solution > summary::-webkit-details-marker{display:none}
+details.solution > summary::before{content:"\25B6";font-size:.7rem;transition:transform .15s}
+@media(prefers-reduced-motion:reduce){details.solution > summary::before{transition:none}}
+details.solution[open] > summary::before{transform:rotate(90deg)}
+details.solution > summary:hover{color:var(--accent)}
+details.solution > summary:focus-visible{outline:3px solid var(--rust);outline-offset:2px;border-radius:5px}
+.solution-inner{padding:6px 2px 4px}
+.answer-chip{display:inline-block;font-family:var(--mono);font-size:.82rem;font-weight:700;
+  background:var(--good-bg);color:var(--good);border:1px solid var(--good);border-radius:6px;padding:3px 10px;margin:4px 0}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="progress-dock" aria-hidden="true"><div class="bar" id="progressBar"></div></div>
+
+<header class="site">
+  <div class="wrap">
+    <p class="eyebrow">ENGI 216 · Computational Toolkit</p>
+    <h1>MATLAB for Dynamics &amp; Kinematics of Machines</h1>
+    <p class="sub">A just-enough primer: the specific MATLAB skills you need to actually solve the mechanism problems in this course &mdash; nothing more, nothing wasted. Taught with four-bars, crank-sliders, and vector loops, not toy examples.</p>
+    <div class="titleblock">
+      <span><b>Course:</b> ENGI 216 &mdash; Dynamics &amp; Kinematics of Machines and Mechanisms</span>
+      <span><b>Format:</b> Self-paced, ~3 hr</span>
+      <span><b>Prereq:</b> None &mdash; starts from zero</span>
+      <span><b>Text:</b> Stani&scaron;i&cacute;, <i>Mechanisms and Machines</i></span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Module sections">
+  <div class="toc-inner" id="tocInner">
+    <a href="#start" class="active">Start</a>
+    <a href="#why">Why MATLAB</a>
+    <a href="#setup">0 · Setup</a>
+    <a href="#basics">1 · Basics</a>
+    <a href="#vectors">2 · Vectors &amp; Matrices</a>
+    <a href="#linsolve">3 · Solving Ax = b</a>
+    <a href="#scripts">4 · Scripts &amp; Functions</a>
+    <a href="#nonlinear">5 · Newton &amp; Solvers</a>
+    <a href="#plotting">6 · Plotting</a>
+    <a href="#velaccel">7 · Velocity &amp; Accel</a>
+    <a href="#capstone">8 · Capstone</a>
+    <a href="#practice">Practice</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#videos">Videos</a>
+    <a href="#refcard">Cheat Sheet</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+    <a href="#recap">Objectives</a>
+  </div>
+</nav>
+
+<main id="main">
+<div class="wrap">
+
+<!-- ===================== START ===================== -->
+<section id="start">
+  <h2><span class="num">Orientation</span>How to use this primer</h2>
+  <p class="lead">You don't need to become a MATLAB programmer. You need to become fluent in the handful of operations that ENGI 216 problems demand &mdash; and confident enough to debug them at 11&nbsp;p.m. before a deadline. That's what this module delivers.</p>
+
+  <p>Every chapter of this course quietly assumes you can do four things in MATLAB. The lecture slides never show you how &mdash; they just write &ldquo;solve the system&rdquo; or &ldquo;use Newton's method&rdquo; and move on. This primer fills exactly that gap:</p>
+
+  <ol>
+    <li><strong>Represent vectors and matrices</strong> &mdash; because every mechanism is a chain of position vectors that must sum to zero.</li>
+    <li><strong>Solve a linear system <code class="inline">A&middot;x = b</code></strong> &mdash; the engine behind closed-form position analysis and Freudenstein synthesis (Ch.&nbsp;8).</li>
+    <li><strong>Solve nonlinear equations</strong> with Newton's method or a built-in solver &mdash; required for position analysis of most mechanisms (Ch.&nbsp;2.4).</li>
+    <li><strong>Plot a result</strong> &mdash; performance curves, coupler paths, angle-vs-angle relationships.</li>
+  </ol>
+
+  <div class="callout">
+    <span class="tag">What's interactive here</span>
+    This page contains a working MATLAB-style console, a live <code class="inline">A\b</code> solver, an animated Newton's-method iterator on a real four-bar position equation, and a plotting sandbox. Type in them. Break them. That's the point.
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · Learning to drive vs. building the engine</span>
+    Learning MATLAB for this course is like learning to <em>drive</em>, not to <em>build a car</em>. You won't study how the transmission is machined; you'll learn the pedals, the wheel, and how to parallel-park without hitting anything. We cover the controls you'll actually touch &mdash; and skip the 95% of MATLAB you'll never need in ENGI&nbsp;216.
+  </div>
+
+  <p style="font-family:var(--mono);font-size:.82rem;color:var(--ink-soft)">Estimated time per part is marked with a <span class="pill">~mins</span> pill. Total run time ≈ 3 hours including the exercises.</p>
+</section>
+
+<!-- ===================== WHY MATLAB ===================== -->
+<section id="why">
+  <h2><span class="num">Motivation · ~10 min</span>Why this course leans on MATLAB</h2>
+  <p class="lead">Mechanisms produce equations that are easy to write down and miserable to solve by hand. MATLAB exists to do the miserable part instantly and reliably.</p>
+
+  <h3>The closed-form wall</h3>
+  <p>Chapter&nbsp;2 of your text draws a hard line. A <strong>closed-form</strong> solution lets you compute the unknowns directly &mdash; no iteration. But as the lecture states, position equations are <em>typically nonlinear</em> (full of sines and cosines), and only special cases like the four-bar or crank-slider have tidy closed forms. For almost everything else, the slide is blunt: &ldquo;most mechanisms do not have a closed-form solution &mdash; we will use Newton's method.&rdquo;</p>
+
+  <p>Newton's method means iterating: guess, evaluate, correct, repeat. Doing that by hand for a four-bar across 360&deg; of crank rotation &mdash; 73 angles &times; several iterations each &mdash; is hundreds of evaluations. MATLAB does it in milliseconds.</p>
+
+  <div class="real-world">
+    <span class="tag">Real world · Why the bridge engineer reaches for MATLAB</span>
+    Example&nbsp;8.1 in your text designs a four-bar mechanism to lift an urban drawbridge, replacing a heavy 2:1 gear pair. The designer solves a 3&times;3 linear system for the link-length ratios, then plots the output angle against the input angle to <em>check</em> whether the mechanism actually tracks the desired motion. Then they tweak the precision points and <em>re-run</em>. Without MATLAB, each redesign is an afternoon of arithmetic; with it, it's a keystroke. That iterate-and-check loop is the real workflow of a machine designer.
+  </div>
+
+  <h3>Where MATLAB shows up, chapter by chapter</h3>
+  <div class="tablewrap">
+  <table>
+    <caption>The MATLAB skill behind each course topic</caption>
+    <thead><tr><th>Course topic</th><th>What you compute</th><th>MATLAB tool</th></tr></thead>
+    <tbody>
+      <tr><td>Ch.&nbsp;2.3 Closed-form position</td><td>Solve a linear system for unknown angles/lengths</td><td><code>A\b</code> (backslash)</td></tr>
+      <tr><td>Ch.&nbsp;2.4 Numerical position</td><td>Solve nonlinear loop equations</td><td>Newton's method / <code>fsolve</code></td></tr>
+      <tr><td>Ch.&nbsp;3 Rolling contact / kinematic analysis</td><td>Velocity &amp; acceleration relations</td><td>Vectors, matrix algebra</td></tr>
+      <tr><td>Ch.&nbsp;4 Kinematic coefficients</td><td>First/second-order coefficients across a motion range</td><td>Loops, element-wise math, plotting</td></tr>
+      <tr><td>Ch.&nbsp;5 Inverse dynamics (Newton&ndash;Euler)</td><td>Forces &amp; torques from a state of motion</td><td>Linear systems, matrices</td></tr>
+      <tr><td>Ch.&nbsp;8 Freudenstein synthesis</td><td>Link ratios from precision points</td><td><code>A\b</code>, <code>roots</code>, plotting</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <span class="tag">The one mental model to keep</span>
+    MATLAB is &ldquo;Matrix Laboratory.&rdquo; Almost everything &mdash; a single number, a list of angles, a system of equations &mdash; is a matrix to MATLAB. If you keep asking &ldquo;what's the shape of this thing (rows &times; columns)?&rdquo; you'll avoid 80% of the errors beginners hit.
+  </div>
+</section>
+
+<!-- ===================== SETUP ===================== -->
+<section id="setup">
+  <h2><span class="num">Part 0 · ~10 min</span>Getting into MATLAB</h2>
+  <p class="lead">Two ways to run MATLAB. Pick whichever gets you to a blinking <code class="inline">&gt;&gt;</code> prompt fastest. The course code runs identically in both.</p>
+
+  <h3>Option A &mdash; MATLAB Online (browser, nothing to install)</h3>
+  <p>Go to <a href="https://matlab.mathworks.com" target="_blank" rel="noopener">matlab.mathworks.com</a> <span style="font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)">(opens new tab)</span> and sign in with a MathWorks account. If your university has a <strong>Campus-Wide License</strong> &mdash; over 2,400 schools do &mdash; create the account with your <em>school email address</em> and you get unlimited access on any device, no install. If your school isn't covered, a free <strong>basic MATLAB Online</strong> tier gives 20&nbsp;hours per month, which is plenty for this course's exercises.</p>
+
+  <h3>Option B &mdash; Desktop MATLAB (install once, run anywhere offline)</h3>
+  <p>Download from your school's MATLAB portal (again, sign in with the school email to inherit the campus license) and install. Identical interface, but it works without internet and handles big jobs faster. There's also a low-cost <strong>Student license</strong> (around $49, or ~$99 with Simulink and add-ons) if you want a personal copy unconnected to a campus license.</p>
+
+  <div class="callout">
+    <span class="tag">Free, fully-compatible fallback: GNU Octave</span>
+    If you can't get MATLAB at all, <a href="https://octave.org" target="_blank" rel="noopener">GNU Octave</a> <span style="font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)">(new tab)</span> is free, open-source, and runs nearly all the code in this primer unchanged &mdash; vectors, matrices, <code class="inline">\</code>, <code class="inline">fsolve</code>, and plotting all work. A few advanced toolbox functions differ, but nothing in ENGI&nbsp;216 needs them. We flag any Octave differences as we go.
+  </div>
+
+  <h3>The four panels you'll actually use</h3>
+  <div class="tablewrap">
+  <table>
+    <caption>The MATLAB desktop, demystified</caption>
+    <thead><tr><th>Panel</th><th>What it's for</th><th>You'll use it to&hellip;</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Command Window</strong></td><td>The live <code>&gt;&gt;</code> prompt</td><td>Try one line, check an answer, sanity-test</td></tr>
+      <tr><td><strong>Editor</strong></td><td>Where you write <code>.m</code> script &amp; function files</td><td>Build and save your homework solution</td></tr>
+      <tr><td><strong>Workspace</strong></td><td>Lists variables currently in memory</td><td>See the shape/value of every variable</td></tr>
+      <tr><td><strong>Current Folder</strong></td><td>Files MATLAB can see right now</td><td>Make sure your <code>.m</code> file is findable</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · The Command Window is a kitchen scratch-pad</span>
+    The Command Window is where you taste-test one spoonful &mdash; quick, disposable, not saved. The Editor (a <code class="inline">.m</code> file) is the written recipe you'll cook again and hand in. Beginners do everything in the Command Window and then can't reproduce their answer. Pros prototype a line in the window, then move it into a script the moment it works.
+  </div>
+
+  <div class="pitfall">
+    <span class="tag">Pitfall · &ldquo;Undefined function or variable&rdquo; on a file you just wrote</span>
+    MATLAB can only run a <code class="inline">.m</code> file if it's in the <strong>Current Folder</strong> (or on the path). If you saved <code class="inline">fourbar.m</code> to Downloads but MATLAB is pointed at Documents, it won't find it. Fix: navigate the Current Folder panel to wherever you saved the file.
+  </div>
+</section>
+
+<!-- ===================== BASICS ===================== -->
+<section id="basics">
+  <h2><span class="num">Part 1 · ~25 min</span>The absolute basics</h2>
+  <p class="lead">Variables, arithmetic, the semicolon, and reading errors. Master these and the rest is detail.</p>
+
+  <h3>Assigning variables and the all-important semicolon</h3>
+  <p>You assign with <code class="inline">=</code>. If a line ends <em>without</em> a semicolon, MATLAB prints the result. End it <em>with</em> <code class="inline">;</code> and it stays silent. In a 73-step loop, forgetting the semicolon floods your screen with 73 printouts &mdash; the single most common beginner annoyance.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% Link lengths of a four-bar (feet) -- semicolons keep it quiet</span>
+r1 <span class="op">=</span> <span class="nm">10</span>;        <span class="cm">% ground</span>
+r2 <span class="op">=</span> <span class="nm">6.866</span>;     <span class="cm">% crank</span>
+r3 <span class="op">=</span> <span class="nm">17.278</span>;    <span class="cm">% coupler</span>
+r4 <span class="op">=</span> <span class="nm">16.886</span>;    <span class="cm">% rocker</span>
+
+theta2 <span class="op">=</span> <span class="nm">45</span>          <span class="cm">% no semicolon -> MATLAB echoes: theta2 = 45</span></pre>
+  </div>
+
+  <h3>Degrees vs. radians &mdash; the error that wrecks mechanism code</h3>
+  <p>MATLAB's <code class="inline">sin</code>, <code class="inline">cos</code>, <code class="inline">tan</code> expect <strong>radians</strong>. Your textbook states angles in degrees. Mixing them produces answers that are silently, catastrophically wrong &mdash; no error message, just nonsense. Convert deliberately:</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% WRONG: feeding degrees straight into cos</span>
+cos(<span class="nm">45</span>)              <span class="cm">% = 0.5253  (cosine of 45 RADIANS -- garbage)</span>
+
+<span class="cm">% RIGHT: convert first</span>
+cosd(<span class="nm">45</span>)             <span class="cm">% = 0.7071  (the 'd' versions take DEGREES)</span>
+cos(<span class="nm">45</span> <span class="op">*</span> pi<span class="op">/</span><span class="nm">180</span>)    <span class="cm">% = 0.7071  (manual conversion, same answer)</span></pre>
+  </div>
+
+  <div class="pitfall">
+    <span class="tag">Pitfall · The #1 silent bug in this course</span>
+    A four-bar that &ldquo;won't close&rdquo; or gives impossible angles is almost always a degree/radian mix-up. Decide once: work in radians internally, convert to degrees only when printing/plotting &mdash; OR use the <code class="inline">sind</code>/<code class="inline">cosd</code>/<code class="inline">atan2d</code> family everywhere. Don't mix the two styles in one file.
+  </div>
+
+  <h3>Useful built-ins you'll reach for constantly</h3>
+  <div class="tablewrap">
+  <table>
+    <caption>The small vocabulary that covers most ENGI 216 work</caption>
+    <thead><tr><th>Function</th><th>Does</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>sqrt(x)</code></td><td>square root</td><td><code>sqrt(2)</code> &rarr; 1.4142</td></tr>
+      <tr><td><code>atan2(y,x)</code></td><td>4-quadrant angle (radians) &mdash; <em>use this, not <code>atan</code></em></td><td><code>atan2(1,-1)</code> &rarr; 2.356</td></tr>
+      <tr><td><code>atan2d(y,x)</code></td><td>same, in degrees</td><td><code>atan2d(1,-1)</code> &rarr; 135</td></tr>
+      <tr><td><code>abs(x)</code></td><td>absolute value / vector magnitude of a scalar</td><td><code>abs(-3)</code> &rarr; 3</td></tr>
+      <tr><td><code>pi</code></td><td>&pi; (built-in constant)</td><td><code>2*pi</code> &rarr; 6.2832</td></tr>
+      <tr><td><code>norm(v)</code></td><td>length of a vector</td><td><code>norm([3 4])</code> &rarr; 5</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="real-world">
+    <span class="tag">Real world · Why <code>atan2</code> beats <code>atan</code></span>
+    A rocker arm can point into any of the four quadrants. Plain <code class="inline">atan(y/x)</code> can't tell &ldquo;up-left&rdquo; from &ldquo;down-right&rdquo; &mdash; it throws away the sign information and folds 360&deg; of possibility into 180&deg;. <code class="inline">atan2(y,x)</code> keeps both signs and returns the <em>true</em> orientation of the link. Using <code class="inline">atan</code> in mechanism code is like a GPS that can't tell north from south.
+  </div>
+
+  <h3>Reading an error message (don't panic)</h3>
+  <p>MATLAB errors are wordy but honest. They tell you the <em>line</em> and the <em>kind</em> of problem. The three you'll meet most:</p>
+  <div class="tablewrap">
+  <table>
+    <caption>Decoding the common errors</caption>
+    <thead><tr><th>Message (paraphrased)</th><th>Real meaning</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td><code>Undefined function or variable 'x'</code></td><td>You used <code>x</code> before defining it (or typo'd a name)</td><td>Check spelling; run the line that defines it first</td></tr>
+      <tr><td><code>Matrix dimensions must agree</code></td><td>You tried to add/multiply mismatched shapes</td><td>Check rows&times;cols; maybe you need <code>.*</code> not <code>*</code></td></tr>
+      <tr><td><code>Index exceeds the number of array elements</code></td><td>You asked for element 5 of a 4-element vector</td><td>Check your loop bounds / indices</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="widget" id="consoleWidget">
+    <div class="widget-head"><span class="wtag">Interactive</span><h4>MATLAB-style console &mdash; try it now</h4></div>
+    <div class="widget-body">
+      <p style="margin-top:0;font-size:.92rem;color:var(--ink-soft)">A real (small) MATLAB-like interpreter. Try: <code class="inline">r2 = 6.866</code>, then <code class="inline">cosd(45)</code>, <code class="inline">sqrt(r2)</code>, <code class="inline">atan2d(1,-1)</code>, <code class="inline">[3 4]*2</code>, or <code class="inline">norm([3 4])</code>. Type <code class="inline">clc</code> to clear.</p>
+      <div class="console">
+        <div class="console-log" id="consoleLog" aria-live="polite" aria-label="Console output"><span class="dim">% MATLAB-style scratch console. Supports + - * / ^ , parentheses,</span>
+<span class="dim">% variables, and: sqrt cos sin tan cosd sind tand atan2 atan2d abs norm pi</span></div>
+        <div class="console-row">
+          <span class="gt" aria-hidden="true">&gt;&gt;</span>
+          <label for="consoleInput" class="sr-only">MATLAB console input</label>
+          <input id="consoleInput" type="text" autocomplete="off" spellcheck="false" placeholder="type a command and press Enter">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== VECTORS & MATRICES ===================== -->
+<section id="vectors">
+  <h2><span class="num">Part 2 · ~30 min</span>Vectors &amp; matrices &mdash; the heart of it</h2>
+  <p class="lead">Every mechanism in this course is a loop of position vectors. MATLAB was built for exactly this. Get comfortable here and Chapters 2&ndash;8 stop being scary.</p>
+
+  <h3>Building them: rows, columns, and the magic of <code class="inline">:</code></h3>
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% Spaces (or commas) -> across a row. Semicolons -> new row.</span>
+row  <span class="op">=</span> [<span class="nm">3</span> <span class="nm">4</span> <span class="nm">5</span>];        <span class="cm">% 1x3 row vector</span>
+col  <span class="op">=</span> [<span class="nm">3</span>; <span class="nm">4</span>; <span class="nm">5</span>];      <span class="cm">% 3x1 column vector</span>
+A    <span class="op">=</span> [<span class="nm">2</span> <span class="nm">1</span>; <span class="op">-</span><span class="nm">1</span> <span class="nm">3</span>];     <span class="cm">% 2x2 matrix (rows split by ;)</span>
+
+<span class="cm">% The colon makes ranges -- this is how you sweep a crank angle:</span>
+theta2 <span class="op">=</span> <span class="nm">0</span>:<span class="nm">5</span>:<span class="nm">360</span>;       <span class="cm">% 0,5,10,...,360  (73 values) in ONE line</span>
+n <span class="op">=</span> numel(theta2);     <span class="cm">% = 73, how many elements</span></pre>
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · A matrix is a spreadsheet, a vector is one of its columns</span>
+    If you can picture a spreadsheet, you already understand MATLAB matrices. <code class="inline">A(2,3)</code> is &ldquo;row&nbsp;2, column&nbsp;3&rdquo; &mdash; exactly like clicking a cell. A vector is just a spreadsheet with one row or one column. The colon range <code class="inline">0:5:360</code> is like dragging the fill-handle down to auto-fill a sequence.
+  </div>
+
+  <h3>Indexing: reaching into a vector or matrix</h3>
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>v <span class="op">=</span> [<span class="nm">10</span> <span class="nm">20</span> <span class="nm">30</span> <span class="nm">40</span>];
+v(<span class="nm">2</span>)       <span class="cm">% = 20    (MATLAB counts from 1, NOT 0!)</span>
+v(end)     <span class="cm">% = 40    'end' = last element</span>
+v(<span class="nm">2</span>:<span class="nm">3</span>)     <span class="cm">% = [20 30]   a slice</span>
+
+A <span class="op">=</span> [<span class="nm">2</span> <span class="nm">1</span>; <span class="op">-</span><span class="nm">1</span> <span class="nm">3</span>];
+A(<span class="nm">1</span>,<span class="nm">2</span>)     <span class="cm">% = 1     row 1, column 2</span>
+A(:,<span class="nm">1</span>)     <span class="cm">% = [2; -1]   the whole 1st column (':' means "all")</span></pre>
+  </div>
+
+  <div class="pitfall">
+    <span class="tag">Pitfall · MATLAB indexes from 1</span>
+    Coming from Python, C, or Java? In those, the first element is <code class="inline">v[0]</code>. In MATLAB it's <code class="inline">v(1)</code>, with parentheses, counting from one. Asking for <code class="inline">v(0)</code> is an error. This trips up nearly everyone for the first week.
+  </div>
+
+  <h3>The crucial distinction: <code class="inline">*</code> vs <code class="inline">.*</code></h3>
+  <p>This is the concept that separates people who fight MATLAB from people who fly in it.</p>
+  <ul>
+    <li><code class="inline">*</code> is <strong>matrix multiplication</strong> &mdash; the linear-algebra operation, with strict dimension rules.</li>
+    <li><code class="inline">.*</code> (with a dot) is <strong>element-by-element</strong> &mdash; multiply each pair of matching entries.</li>
+  </ul>
+  <p>The same holds for <code class="inline">./</code> and <code class="inline">.^</code>. When you want to compute, say, <code class="inline">r2*cosd(theta2)</code> for <em>all 73 crank angles at once</em>, you need element-wise so each angle pairs with itself.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>theta2 <span class="op">=</span> <span class="nm">0</span>:<span class="nm">90</span>:<span class="nm">270</span>;          <span class="cm">% [0 90 180 270]</span>
+r2 <span class="op">=</span> <span class="nm">6</span>;
+
+<span class="cm">% Element-wise: one x-coordinate per angle (a 1x4 result)</span>
+x <span class="op">=</span> r2 <span class="op">.*</span> cosd(theta2)     <span class="cm">% = [6  0  -6  0]   -- exactly what we want</span>
+
+<span class="cm">% Try plain * here and MATLAB errors: inner dimensions disagree.</span></pre>
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · <code>.*</code> is an assembly line, <code>*</code> is a committee</span>
+    Element-wise <code class="inline">.*</code> is an assembly line: item 1 meets item 1, item 2 meets item 2, independently, in parallel. Matrix <code class="inline">*</code> is a committee meeting where every row negotiates with every column and the results get summed. For sweeping a value across many angles, you want the assembly line.
+  </div>
+
+  <h3>Transpose, magnitude, and dot product</h3>
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>v <span class="op">=</span> [<span class="nm">3</span> <span class="nm">4</span>];
+v'              <span class="cm">% transpose: turns the row into a column</span>
+norm(v)         <span class="cm">% = 5    magnitude (Pythagoras) -- a vector's LENGTH</span>
+dot([<span class="nm">1</span> <span class="nm">0</span>],[<span class="nm">0</span> <span class="nm">1</span>])  <span class="cm">% = 0    perpendicular vectors -> zero dot product</span></pre>
+  </div>
+
+  <div class="real-world">
+    <span class="tag">Real world · The vector loop, in MATLAB terms</span>
+    Your text's vector-loop method says the position vectors around a closed mechanism sum to zero: r&#8322; + r&#8323; &minus; r&#8324; &minus; r&#8321; = 0. In MATLAB each vector is just <code class="inline">[r*cosd(th), r*sind(th)]</code>. The &ldquo;loop closes&rdquo; when the sum's <code class="inline">norm</code> is essentially zero. That single idea &mdash; <em>measure how badly the loop fails to close, then fix it</em> &mdash; is the entire engine of numerical position analysis in Part&nbsp;5.
+  </div>
+
+  <div class="widget" id="vecWidget">
+    <div class="widget-head"><span class="wtag">Interactive</span><h4>Position-vector visualizer</h4></div>
+    <div class="widget-body">
+      <p style="margin-top:0;font-size:.92rem;color:var(--ink-soft)">A position vector is just a length and an angle. Drag the sliders and watch MATLAB build <code class="inline">[r*cosd(&theta;), r*sind(&theta;)]</code>. Notice how <code class="inline">atan2d</code> always recovers the correct angle even past 90&deg;.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="vecR">length r = <span class="val" id="vecRval">6.0</span></label>
+          <input id="vecR" type="range" min="1" max="10" step="0.5" value="6">
+        </div>
+        <div class="ctrl">
+          <label for="vecTh">angle &theta; = <span class="val" id="vecThval">45&deg;</span></label>
+          <input id="vecTh" type="range" min="0" max="360" step="5" value="45">
+        </div>
+      </div>
+      <svg class="mech-svg" id="vecSvg" viewBox="0 0 480 320" role="img" aria-label="A position vector drawn from the origin, with its x and y components shown."></svg>
+      <div class="outbox" id="vecOut" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SOLVING Ax=b ===================== -->
+<section id="linsolve">
+  <h2><span class="num">Part 3 · ~25 min</span>Solving a linear system: <code class="inline">A\b</code></h2>
+  <p class="lead">This single operator &mdash; the backslash &mdash; powers closed-form position analysis and the whole of Freudenstein synthesis in Chapter 8. Learn it well; you'll use it on every synthesis problem.</p>
+
+  <h3>The problem MATLAB is solving</h3>
+  <p>A system of linear equations like</p>
+  <div class="codewrap"><div class="codebar"><span class="fname">the math</span></div><pre>  2x +  y = 8
+   x + 3y = 10</pre></div>
+  <p>is written in matrix form as <code class="inline">A&middot;x = b</code>, where <code class="inline">A</code> holds the coefficients, <code class="inline">x</code> the unknowns, and <code class="inline">b</code> the right-hand side. To solve it in MATLAB:</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>A <span class="op">=</span> [<span class="nm">2</span> <span class="nm">1</span>; <span class="nm">1</span> <span class="nm">3</span>];     <span class="cm">% coefficient matrix</span>
+b <span class="op">=</span> [<span class="nm">8</span>; <span class="nm">10</span>];        <span class="cm">% right-hand side (a COLUMN)</span>
+x <span class="op">=</span> A<span class="op">\</span>b              <span class="cm">% the backslash solves A*x = b  ->  x = [2.8; 2.4]</span></pre>
+  </div>
+
+  <p>That's it. The backslash (officially <code class="inline">mldivide</code>) runs Gaussian elimination under the hood and hands you the answer. Per the MathWorks documentation, it factorizes <code class="inline">A</code> and is far more efficient and accurate than computing an inverse.</p>
+
+  <div class="pitfall">
+    <span class="tag">Pitfall · Use <code>A\b</code>, never <code>inv(A)*b</code></span>
+    It's tempting to write <code class="inline">x = inv(A)*b</code> &mdash; it looks like the textbook's x = A&#8315;&sup1;b. <strong>Don't.</strong> Forming the inverse explicitly is slower and less numerically accurate. The MathWorks docs are explicit that the inverse approach is &ldquo;the most obvious (and worst)&rdquo; option. Backslash is the professional habit.
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · Backslash is GPS routing, inverse is mapping every road first</span>
+    To get from A to B, you don't first compute the optimal route between <em>every</em> pair of intersections in the city and then look yours up &mdash; that's what <code class="inline">inv(A)</code> does. Backslash is the GPS that solves <em>only your trip</em>, directly and fast. Same destination, a fraction of the work.
+  </div>
+
+  <h3>Chapter 8 in action: Freudenstein point-matching</h3>
+  <p>Here's the actual payoff. Example&nbsp;8.1 designs a four-bar to mimic a 2:1 gear pair. After converting three precision points, the text forms this exact 3&times;3 system (its Equation&nbsp;8.11) for the link ratios R&#8321;, R&#8322;, R&#8323;:</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">freudenstein_example81.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% Stanisic Example 8.1 -- solve for the three link-length ratios</span>
+A <span class="op">=</span> [<span class="op">-</span><span class="nm">0.423</span>  <span class="nm">0.462</span>  <span class="nm">1</span>;
+      <span class="nm">0.342</span>  <span class="nm">0.087</span>  <span class="nm">1</span>;
+      <span class="nm">0.906</span> <span class="op">-</span><span class="nm">0.301</span>  <span class="nm">1</span>];
+b <span class="op">=</span> [<span class="nm">0.999</span>; <span class="nm">0.906</span>; <span class="nm">0.676</span>];
+
+R <span class="op">=</span> A<span class="op">\</span>b               <span class="cm">% -> R1=0.5880, R2=1.4475, R3=0.5790  (matches the book!)</span>
+
+<span class="cm">% Then assume r1 = 10 ft and recover the actual link lengths:</span>
+r1 <span class="op">=</span> <span class="nm">10</span>;
+r2 <span class="op">=</span> r1<span class="op">/</span>R(<span class="nm">1</span>);          <span class="cm">% = 6.866 ft  (crank)</span>
+r4 <span class="op">=</span> r1<span class="op">/</span>R(<span class="nm">2</span>);          <span class="cm">% = 16.886 ft (rocker, per Eq. 8.4)</span></pre>
+  </div>
+
+  <div class="real-world">
+    <span class="tag">Real world · This is the drawbridge design</span>
+    Those three numbers &mdash; 6.866, 16.886, 17.278 ft &mdash; <em>are</em> the linkage that lifts the bridge in Figure 8.6 of your text. You just reproduced a published machine-design result with three lines of MATLAB. That's the leverage the tool gives you.
+  </div>
+
+  <div class="widget" id="solveWidget">
+    <div class="widget-head"><span class="wtag">Interactive</span><h4>Live <code style="font-size:.92em">A\b</code> solver</h4></div>
+    <div class="widget-body">
+      <p style="margin-top:0;font-size:.92rem;color:var(--ink-soft)">Edit the matrix and right-hand side, then solve. Pre-loaded with Example&nbsp;8.1. Watch what happens if you make two rows identical (a <em>singular</em> matrix).</p>
+      <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+        <div>
+          <p style="font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:0 0 6px">Matrix A (3&times;3)</p>
+          <div id="matA" style="display:grid;grid-template-columns:repeat(3,72px);gap:6px"></div>
+        </div>
+        <div>
+          <p style="font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:0 0 6px">b</p>
+          <div id="vecB" style="display:grid;grid-template-columns:72px;gap:6px"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" type="button" id="solveBtn">Solve A\b</button>
+        <button class="btn secondary" type="button" id="resetSolveBtn">Reset to Ex. 8.1</button>
+      </div>
+      <div class="outbox" id="solveOut" style="margin-top:14px" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <span class="tag">Try it · in real MATLAB</span>
+    Type the <code class="inline">freudenstein_example81.m</code> code into the Editor, save it, and run it. Confirm you get R&#8321;=0.5880. Then change <code class="inline">r1</code> to 20&mdash;notice every link length doubles but the <em>ratios</em> (and thus the motion) stay identical. That's the scaling insight from the lecture: Equation 8.5 is written in ratios.
+  </div>
+</section>
+
+<!-- ===================== SCRIPTS & FUNCTIONS ===================== -->
+<section id="scripts">
+  <h2><span class="num">Part 4 · ~25 min</span>Scripts, loops, and functions</h2>
+  <p class="lead">Homework isn't one line &mdash; it's a reusable solution. Here's how to package your work so you can re-run it, sweep it across angles, and hand it in.</p>
+
+  <h3>Scripts: your saved recipe</h3>
+  <p>A <strong>script</strong> is a <code class="inline">.m</code> file full of commands that run top-to-bottom when you press <span class="kbd">Run</span>. Start every script with <code class="inline">clear; clc;</code> to wipe old variables and clear the screen &mdash; otherwise stale values from a previous run can poison your answer.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">analyze_crank.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="kw">clear</span>; <span class="kw">clc</span>;                 <span class="cm">% fresh start -- do this at the top of every script</span>
+
+r2 <span class="op">=</span> <span class="nm">6</span>;
+theta2 <span class="op">=</span> <span class="nm">30</span>;
+x <span class="op">=</span> r2 <span class="op">*</span> cosd(theta2);
+y <span class="op">=</span> r2 <span class="op">*</span> sind(theta2);
+
+fprintf(<span class="st">'Crank tip at (%.3f, %.3f)\n'</span>, x, y);  <span class="cm">% formatted print</span></pre>
+  </div>
+
+  <h3><code class="inline">for</code> loops: doing it 73 times</h3>
+  <p>To analyze a mechanism through a full crank rotation, you loop. Crucially, <strong>preallocate</strong> the results array first &mdash; it's faster and signals your intent.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">sweep_crank.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>angles <span class="op">=</span> <span class="nm">0</span>:<span class="nm">5</span>:<span class="nm">360</span>;        <span class="cm">% 73 crank positions</span>
+n <span class="op">=</span> numel(angles);
+xtip <span class="op">=</span> zeros(<span class="nm">1</span>, n);      <span class="cm">% PREALLOCATE: a row of 73 zeros to fill in</span>
+
+<span class="kw">for</span> i <span class="op">=</span> <span class="nm">1</span>:n
+    th <span class="op">=</span> angles(i);
+    xtip(i) <span class="op">=</span> <span class="nm">6</span> <span class="op">*</span> cosd(th);   <span class="cm">% store result in slot i</span>
+<span class="kw">end</span>
+
+<span class="cm">% Bonus: this whole loop is ONE vectorized line --</span>
+xtip <span class="op">=</span> <span class="nm">6</span> <span class="op">*</span> cosd(angles);    <span class="cm">% same result, no loop (element-wise!)</span></pre>
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · Preallocating is reserving the parking lot</span>
+    Growing an array inside a loop (<code class="inline">x(i)=...</code> when <code class="inline">x</code> didn't exist) forces MATLAB to keep finding bigger parking lots and moving every car each time a new one arrives. <code class="inline">zeros(1,n)</code> reserves all 73 spaces up front so each result just pulls into its assigned spot. On a 73-step sweep you won't notice; on a 100,000-step simulation it's the difference between seconds and minutes.
+  </div>
+
+  <h3><code class="inline">if</code> / decisions</h3>
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>err <span class="op">=</span> norm(loopClosure);
+<span class="kw">if</span> err <span class="op">&lt;</span> <span class="nm">1e-6</span>
+    disp(<span class="st">'Loop closed -- solution found.'</span>);
+<span class="kw">else</span>
+    disp(<span class="st">'Not converged yet -- iterate again.'</span>);
+<span class="kw">end</span></pre>
+  </div>
+
+  <h3>Functions: the reusable black box</h3>
+  <p>A <strong>function</strong> takes inputs, returns outputs, and keeps its own private variables. This is how you write a position-analysis routine once and call it for any four-bar. The <code class="inline">function</code> line names the file.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">fourbar_pos.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="kw">function</span> [theta3, theta4] <span class="op">=</span> <span class="fn">fourbar_pos</span>(r1, r2, r3, r4, theta2)
+<span class="cm">% Returns coupler &amp; rocker angles (deg) for a four-bar in open config.</span>
+    th2 <span class="op">=</span> deg2rad(theta2);
+    <span class="cm">% Position of the crank pin:</span>
+    Ax <span class="op">=</span> r2<span class="op">*</span>cos(th2);  Ay <span class="op">=</span> r2<span class="op">*</span>sin(th2);
+    <span class="cm">% Distance from that pin to the fixed rocker pivot at (r1,0):</span>
+    d <span class="op">=</span> hypot(Ax <span class="op">-</span> r1, Ay);
+    <span class="cm">% Law of cosines for the transmission geometry:</span>
+    beta  <span class="op">=</span> acos((r3<span class="op">^2</span> <span class="op">+</span> d<span class="op">^2</span> <span class="op">-</span> r4<span class="op">^2</span>) <span class="op">/</span> (<span class="nm">2</span><span class="op">*</span>r3<span class="op">*</span>d));
+    psi   <span class="op">=</span> atan2(Ay, Ax <span class="op">-</span> r1);
+    theta3 <span class="op">=</span> rad2deg(psi <span class="op">+</span> beta);
+    <span class="cm">% Rocker angle from its own pivot:</span>
+    Bx <span class="op">=</span> Ax <span class="op">+</span> r3<span class="op">*</span>cosd(theta3);  By <span class="op">=</span> Ay <span class="op">+</span> r3<span class="op">*</span>sind(theta3);
+    theta4 <span class="op">=</span> atan2d(By, Bx <span class="op">-</span> r1);
+<span class="kw">end</span></pre>
+  </div>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">Command Window &mdash; calling it</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>[t3, t4] <span class="op">=</span> fourbar_pos(<span class="nm">10</span>, <span class="nm">6.866</span>, <span class="nm">17.278</span>, <span class="nm">16.886</span>, <span class="nm">45</span>)
+<span class="cm">% Now reusable for ANY crank angle, or inside a sweep loop.</span></pre>
+  </div>
+
+  <div class="callout">
+    <span class="tag">Anonymous functions &mdash; one-liners you'll need for solvers</span>
+    For quick math you don't want in a separate file, use an <em>anonymous function</em> with <code class="inline">@</code>:
+    <code class="inline">f = @(x) x.^2 - 2;</code> then <code class="inline">f(3)</code> gives 7. The <code class="inline">@(x)</code> means &ldquo;a function of x.&rdquo; You'll hand exactly this kind of one-liner to <code class="inline">fzero</code> and <code class="inline">fsolve</code> in the next part.
+  </div>
+
+  <div class="real-world">
+    <span class="tag">Real world · Functions are how real engineering code is organized</span>
+    No working mechanism analysis lives as one giant script. A vehicle suspension model might call <code class="inline">fourbar_pos</code> thousands of times across a road-input simulation. Writing it once as a tested function &mdash; rather than copy-pasting the geometry &mdash; is the difference between code you trust and code you fear. Your ENGI&nbsp;216 homework is where that habit starts.
+  </div>
+</section>
+
+<!-- ===================== NONLINEAR / NEWTON ===================== -->
+<section id="nonlinear">
+  <h2><span class="num">Part 5 · ~35 min</span>Nonlinear equations: Newton's method &amp; solvers</h2>
+  <p class="lead">Chapter 2.4 is explicit: most mechanisms have no closed form, so we solve their position equations numerically with Newton's method. Here you'll see it by hand <em>and</em> with MATLAB's built-in solvers &mdash; on a real four-bar loop.</p>
+
+  <h3>The idea, in one sentence</h3>
+  <p>Newton's method finds where a function equals zero by repeatedly following the tangent line down to the axis: <strong>guess &rarr; measure the error &rarr; use the slope to correct &rarr; repeat</strong> until the error is tiny. Your lecture notes that it &ldquo;converts the original system of nonlinear equations into a system of approximate linear equations&rdquo; &mdash; that linearization <em>is</em> the tangent step.</p>
+
+  <div class="codewrap"><div class="codebar"><span class="fname">the update rule</span></div><pre>  x_new = x_old  -  f(x_old) / f'(x_old)      (one unknown)
+  x_new = x_old  -  J\f(x_old)                (several unknowns; J = Jacobian)</pre></div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · Rolling a marble down to the valley floor</span>
+    Imagine the function as a curved ramp and you want the spot where it touches the floor (f&nbsp;=&nbsp;0). From wherever you stand, you look at the <em>slope</em> under your feet and step in the downhill direction by just the right amount to hit the floor <em>if the ramp were straight</em>. It isn't straight, so you overshoot a little &mdash; then repeat from the new spot. Each step the ramp looks straighter, so you converge fast. Near the answer, Newton's method roughly <em>doubles</em> the number of correct digits every step.
+  </div>
+
+  <h3>By hand: solving f(x) = x&sup2; &minus; 2 = 0</h3>
+  <p>Before mechanisms, watch the mechanics on a problem whose answer you know: &radic;2 &asymp; 1.41421. Here <code class="inline">f(x)=x&sup2;&minus;2</code> and <code class="inline">f'(x)=2x</code>.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">newton_by_hand.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>f  <span class="op">=</span> <span class="op">@</span>(x) x<span class="op">^2</span> <span class="op">-</span> <span class="nm">2</span>;     <span class="cm">% the function</span>
+df <span class="op">=</span> <span class="op">@</span>(x) <span class="nm">2</span><span class="op">*</span>x;          <span class="cm">% its derivative</span>
+
+x <span class="op">=</span> <span class="nm">2</span>;                   <span class="cm">% initial guess</span>
+<span class="kw">for</span> k <span class="op">=</span> <span class="nm">1</span>:<span class="nm">6</span>
+    x <span class="op">=</span> x <span class="op">-</span> f(x)<span class="op">/</span>df(x);  <span class="cm">% the Newton step</span>
+    fprintf(<span class="st">'iter %d:  x = %.8f\n'</span>, k, x);
+<span class="kw">end</span>
+<span class="cm">% Converges to 1.41421356 in ~4 steps -- watch it in the widget below.</span></pre>
+  </div>
+
+  <div class="widget" id="newtonWidget">
+    <div class="widget-head"><span class="wtag">Interactive</span><h4>Newton's method, stepped &amp; visualized</h4></div>
+    <div class="widget-body">
+      <p style="margin-top:0;font-size:.92rem;color:var(--ink-soft)">Pick a starting guess, then press <b>Step</b> to take one Newton iteration at a time and watch the tangent line slide toward the root. The console shows the same <code class="inline">fprintf</code> output your MATLAB script would.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="newtX0">initial guess x&#8320; = <span class="val" id="newtX0val">2.0</span></label>
+          <input id="newtX0" type="range" min="0.3" max="3" step="0.1" value="2">
+        </div>
+        <div class="ctrl" style="justify-content:flex-end">
+          <div style="display:flex;gap:8px">
+            <button class="btn" type="button" id="newtStep">Step</button>
+            <button class="btn secondary" type="button" id="newtReset">Reset</button>
+          </div>
+        </div>
+      </div>
+      <svg class="plot-svg" id="newtSvg" viewBox="0 0 480 300" role="img" aria-label="Graph of f of x equals x squared minus two, with Newton's method tangent steps converging on the root at the square root of two."></svg>
+      <div class="outbox" id="newtOut" style="margin-top:12px" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <h3>Stepping up: Newton for a <em>system</em> (the Jacobian)</h3>
+  <p>One equation used the slope <code class="inline">f'(x)</code>. A four-bar's position has <strong>two</strong> coupled equations in <strong>two</strong> unknowns (the coupler angle &theta;&#8323; and rocker angle &theta;&#8324;), so the single slope becomes a 2&times;2 matrix of partial derivatives called the <strong>Jacobian</strong>, <code class="inline">J</code>. This is the part Chapter&nbsp;2.4 leans on and the part most likely to show up on an exam, so let's derive it explicitly.</p>
+
+  <p>Write the loop closure as two functions that must both equal zero (x- and y-components):</p>
+  <div class="mateq" aria-label="f1 equals r2 cos theta2 plus r3 cos theta3 minus r4 cos theta4 minus r1; f2 equals r2 sin theta2 plus r3 sin theta3 minus r4 sin theta4">
+    <span class="lbl">f&#8321;</span><span class="op">=</span><span>r&#8322;cos&theta;&#8322; + r&#8323;cos&theta;&#8323; &minus; r&#8324;cos&theta;&#8324; &minus; r&#8321; = 0</span>
+  </div>
+  <div class="mateq">
+    <span class="lbl">f&#8322;</span><span class="op">=</span><span>r&#8322;sin&theta;&#8322; + r&#8323;sin&theta;&#8323; &minus; r&#8324;sin&theta;&#8324; = 0</span>
+  </div>
+
+  <p>The unknowns are &theta;&#8323; and &theta;&#8324;. Take the partial derivative of each equation with respect to each unknown &mdash; that's four derivatives, arranged in a 2&times;2 grid. Remember <code class="inline">d/d&theta;(cos&theta;) = &minus;sin&theta;</code> and <code class="inline">d/d&theta;(sin&theta;) = cos&theta;</code>:</p>
+
+  <div class="mateq" aria-label="Jacobian J equals the 2 by 2 matrix: top row minus r3 sin theta3, plus r4 sin theta4; bottom row r3 cos theta3, minus r4 cos theta4">
+    <span class="lbl">J</span><span class="op">=</span>
+    <span class="matrix" style="grid-template-columns:repeat(2,auto)">
+      <span>&part;f&#8321;/&part;&theta;&#8323;</span><span>&part;f&#8321;/&part;&theta;&#8324;</span>
+      <span>&part;f&#8322;/&part;&theta;&#8323;</span><span>&part;f&#8322;/&part;&theta;&#8324;</span>
+    </span>
+    <span class="op">=</span>
+    <span class="matrix" style="grid-template-columns:repeat(2,auto)">
+      <span>&minus;r&#8323;sin&theta;&#8323;</span><span>+r&#8324;sin&theta;&#8324;</span>
+      <span>+r&#8323;cos&theta;&#8323;</span><span>&minus;r&#8324;cos&theta;&#8324;</span>
+    </span>
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · the Jacobian is a 2-D slope</span>
+    For one variable, the slope tells you &ldquo;if I nudge x, how much does f move?&rdquo; The Jacobian answers the same question with two inputs and two outputs at once: &ldquo;if I nudge &theta;&#8323; <em>and</em> &theta;&#8324;, how do <em>both</em> equations respond?&rdquo; Each entry is one of those four cross-sensitivities. It's a slope that's been promoted to a matrix.
+  </div>
+
+  <p>The multi-variable Newton step is the direct analogue of the scalar one &mdash; division by the slope becomes a backslash solve against <code class="inline">J</code> (here's where Part&nbsp;3 pays off):</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">newton_system.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% Four-bar at theta2 = 45 deg. Unknowns th3, th4 (radians).</span>
+r1<span class="op">=</span><span class="nm">10</span>; r2<span class="op">=</span><span class="nm">6.866</span>; r3<span class="op">=</span><span class="nm">17.278</span>; r4<span class="op">=</span><span class="nm">16.886</span>; th2<span class="op">=</span>deg2rad(<span class="nm">45</span>);
+
+t <span class="op">=</span> [deg2rad(<span class="nm">20</span>); deg2rad(<span class="nm">80</span>)];   <span class="cm">% initial guess [th3; th4]</span>
+
+<span class="kw">for</span> k <span class="op">=</span> <span class="nm">1</span>:<span class="nm">6</span>
+    th3 <span class="op">=</span> t(<span class="nm">1</span>); th4 <span class="op">=</span> t(<span class="nm">2</span>);
+    <span class="cm">% the two loop-closure residuals:</span>
+    f <span class="op">=</span> [ r2<span class="op">*</span>cos(th2) <span class="op">+</span> r3<span class="op">*</span>cos(th3) <span class="op">-</span> r4<span class="op">*</span>cos(th4) <span class="op">-</span> r1;
+          r2<span class="op">*</span>sin(th2) <span class="op">+</span> r3<span class="op">*</span>sin(th3) <span class="op">-</span> r4<span class="op">*</span>sin(th4) ];
+    <span class="cm">% the Jacobian, exactly as derived above:</span>
+    J <span class="op">=</span> [ <span class="op">-</span>r3<span class="op">*</span>sin(th3),  r4<span class="op">*</span>sin(th4);
+           r3<span class="op">*</span>cos(th3), <span class="op">-</span>r4<span class="op">*</span>cos(th4) ];
+    t <span class="op">=</span> t <span class="op">-</span> J<span class="op">\</span>f;            <span class="cm">% the Newton step:  J \ f  (NOT f/J)</span>
+    fprintf(<span class="st">'iter %d:  th3 = %.4f deg,  th4 = %.4f deg,  |f| = %.2e\n'</span>, ...
+            k, rad2deg(t(<span class="nm">1</span>)), rad2deg(t(<span class="nm">2</span>)), norm(f));
+<span class="kw">end</span></pre>
+  </div>
+
+  <div class="callout">
+    <span class="tag">One iteration, by hand &mdash; so you trust the loop</span>
+    Start at &theta;&#8323;=20&deg;, &theta;&#8324;=80&deg;. Plug into <code class="inline">f</code>: the loop doesn't close, so <code class="inline">f</code> &asymp; <code class="inline">[8.16; &minus;5.86]</code> (far from zero). Build <code class="inline">J</code> from the same angles, then solve the 2&times;2 system <code class="inline">J&middot;&Delta; = &minus;f</code> with backslash to get the correction <code class="inline">&Delta; = &minus;J\f</code>. Add it: <code class="inline">t = t + &Delta;</code>. The residual <code class="inline">|f|</code> shrinks dramatically each pass. Repeat a few times and it's machine-zero (the converged angles are &theta;&#8323;&approx;31.6&deg;, &theta;&#8324;&approx;55.5&deg;). <strong>That is the entire algorithm</strong> &mdash; everything <code class="inline">fsolve</code> does, you just did by hand.
+  </div>
+
+  <div class="pitfall">
+    <span class="tag">Pitfall · it's <code>J\f</code>, never <code>f/J</code> or <code>f./J</code></span>
+    The Newton step solves the linear system <code class="inline">J&middot;&Delta; = &minus;f</code> for the correction vector &Delta;. That's a <em>left</em> division: <code class="inline">J\f</code>. Writing <code class="inline">f/J</code> (right division) or <code class="inline">f./J</code> (element-wise) silently gives the wrong vector. When in doubt, recall: the unknown is sandwiched as <code class="inline">J&middot;&Delta;</code>, so &Delta; comes out by backslashing <code class="inline">J</code> from the left.
+  </div>
+
+  <h3>The built-in shortcuts: <code class="inline">fzero</code> and <code class="inline">fsolve</code></h3>
+  <p>Now that you've built Newton by hand, here's the good news: <code class="inline">fsolve</code> does all of that &mdash; including estimating the Jacobian for you &mdash; from just the residual function and a starting guess. You hand-code Newton to <em>understand</em> it; you call <code class="inline">fsolve</code> to <em>use</em> it. MATLAB ships robust solvers for both the scalar and system cases.</p>
+
+  <div class="tablewrap">
+  <table>
+    <caption>Which solver when</caption>
+    <thead><tr><th>Solver</th><th>Use for</th><th>Needs toolbox?</th></tr></thead>
+    <tbody>
+      <tr><td><code>fzero</code></td><td><strong>one</strong> equation in one unknown (e.g. one scalar loop equation)</td><td>No &mdash; built into base MATLAB &amp; Octave</td></tr>
+      <tr><td><code>fsolve</code></td><td>a <strong>system</strong> of nonlinear equations (e.g. two coupled loop equations)</td><td>Optimization Toolbox (campus licenses usually include it)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">solver_demo.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% Single equation: same sqrt(2) problem, zero hand-coding</span>
+root <span class="op">=</span> fzero(<span class="op">@</span>(x) x<span class="op">^2</span> <span class="op">-</span> <span class="nm">2</span>, <span class="nm">2</span>)     <span class="cm">% = 1.4142, guess = 2</span>
+
+<span class="cm">% System: a four-bar's two scalar loop equations (x- and y-components).</span>
+<span class="cm">% Unknowns are theta3, theta4 (radians). Loop must close -> both = 0.</span>
+r1<span class="op">=</span><span class="nm">10</span>; r2<span class="op">=</span><span class="nm">6.866</span>; r3<span class="op">=</span><span class="nm">17.278</span>; r4<span class="op">=</span><span class="nm">16.886</span>; th2<span class="op">=</span>deg2rad(<span class="nm">45</span>);
+loop <span class="op">=</span> <span class="op">@</span>(t) [ r2<span class="op">*</span>cos(th2) <span class="op">+</span> r3<span class="op">*</span>cos(t(<span class="nm">1</span>)) <span class="op">-</span> r4<span class="op">*</span>cos(t(<span class="nm">2</span>)) <span class="op">-</span> r1;
+               r2<span class="op">*</span>sin(th2) <span class="op">+</span> r3<span class="op">*</span>sin(t(<span class="nm">1</span>)) <span class="op">-</span> r4<span class="op">*</span>sin(t(<span class="nm">2</span>)) ];
+sol <span class="op">=</span> fsolve(loop, [<span class="nm">0.5</span>; <span class="nm">1.5</span>]);     <span class="cm">% starting guess for [th3; th4]</span>
+disp(rad2deg(sol));                  <span class="cm">% the coupler &amp; rocker angles, in degrees</span></pre>
+  </div>
+
+  <div class="pitfall">
+    <span class="tag">Pitfall · The initial guess matters</span>
+    A four-bar has <em>two</em> valid assembly configurations (&ldquo;open&rdquo; and &ldquo;crossed&rdquo;). The solver returns whichever one your starting guess is closest to. If you get the wrong branch, nudge the guess toward the configuration you want. And when sweeping across angles, <strong>feed each step's answer as the next step's guess</strong> &mdash; the mechanism moves only a little between angles, so the previous solution is an excellent starting point and keeps you on one consistent branch.
+  </div>
+
+  <div class="real-world">
+    <span class="tag">Real world · Why &ldquo;continuation&rdquo; matters in engine simulation</span>
+    When engineers simulate a piston engine through a full cycle, they don't re-guess the geometry from scratch at each crank angle &mdash; they march forward, each solution seeding the next. This &ldquo;continuation&rdquo; trick is exactly the warm-start habit above, and it's why a well-written sweep never jumps to the wrong configuration mid-rotation. You'll use it in the capstone.
+  </div>
+</section>
+
+<!-- ===================== PLOTTING ===================== -->
+<section id="plotting">
+  <h2><span class="num">Part 6 · ~20 min</span>Plotting your results</h2>
+  <p class="lead">Chapter 8's examples are judged by their <em>performance plots</em> &mdash; output angle vs. input angle. A picture tells you instantly whether a design works. Here's the small set of plotting commands that covers the course.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">plot_performance.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre>theta2 <span class="op">=</span> <span class="nm">0</span>:<span class="nm">5</span>:<span class="nm">360</span>;            <span class="cm">% input angles (deg)</span>
+theta4 <span class="op">=</span> <span class="nm">90</span> <span class="op">+</span> <span class="nm">30</span><span class="op">*</span>sind(theta2);  <span class="cm">% (stand-in for a computed output)</span>
+
+plot(theta2, theta4, <span class="st">'-'</span>, <span class="st">'LineWidth'</span>, <span class="nm">2</span>);
+<span class="kw">hold</span> <span class="kw">on</span>                          <span class="cm">% keep this plot; add more on top</span>
+plot(theta2, theta2, <span class="st">'--'</span>);     <span class="cm">% the 'desired' reference line</span>
+<span class="kw">hold</span> <span class="kw">off</span>
+
+xlabel(<span class="st">'Input angle \theta_2 (deg)'</span>);
+ylabel(<span class="st">'Output angle \theta_4 (deg)'</span>);
+title(<span class="st">'Four-bar performance'</span>);
+legend(<span class="st">'Actual'</span>, <span class="st">'Desired'</span>, <span class="st">'Location'</span>, <span class="st">'best'</span>);
+grid <span class="kw">on</span></pre>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <caption>The plotting commands you'll reuse</caption>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>plot(x,y)</code></td><td>line plot of y against x</td></tr>
+      <tr><td><code>hold on</code> / <code>hold off</code></td><td>overlay multiple curves on one axes</td></tr>
+      <tr><td><code>xlabel</code>, <code>ylabel</code>, <code>title</code></td><td>label everything (always &mdash; an unlabeled plot loses points)</td></tr>
+      <tr><td><code>legend(...)</code></td><td>identify each curve</td></tr>
+      <tr><td><code>grid on</code></td><td>add gridlines for readability</td></tr>
+      <tr><td><code>axis equal</code></td><td>equal x/y scale &mdash; essential for drawing a mechanism's true shape</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · <code>hold on</code> is laying tracing paper</span>
+    Without <code class="inline">hold on</code>, each new <code class="inline">plot</code> wipes the page and starts fresh. With it, you lay a new sheet of tracing paper over the last &mdash; actual curve, desired curve, precision points &mdash; all registered on the same axes. That overlay is exactly how Figure 8.5 compares the real mechanism against the gear ratio it's imitating.
+  </div>
+
+  <div class="widget" id="plotWidget">
+    <div class="widget-head"><span class="wtag">Interactive</span><h4>Plotting sandbox &mdash; reproduce a performance curve</h4></div>
+    <div class="widget-body">
+      <p style="margin-top:0;font-size:.92rem;color:var(--ink-soft)">Adjust the design and watch the &ldquo;actual&rdquo; output curve chase the dashed &ldquo;desired&rdquo; line &mdash; the same comparison that decides whether a synthesized four-bar is any good.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="plAmp">curve amplitude = <span class="val" id="plAmpval">30</span></label>
+          <input id="plAmp" type="range" min="5" max="60" step="1" value="30">
+        </div>
+        <div class="ctrl">
+          <label for="plPhase">phase shift = <span class="val" id="plPhaseval">0&deg;</span></label>
+          <input id="plPhase" type="range" min="-60" max="60" step="5" value="0">
+        </div>
+      </div>
+      <svg class="plot-svg" id="plotSvg" viewBox="0 0 480 300" role="img" aria-label="Performance plot comparing an adjustable actual output-angle curve against a dashed desired reference line."></svg>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="tag">fprintf vs. disp &mdash; printing answers cleanly</span>
+    <code class="inline">disp(x)</code> dumps a value with no label. <code class="inline">fprintf</code> gives you control: <code class="inline">fprintf('theta4 = %.2f deg\n', t4)</code> prints <code class="inline">theta4 = 124.50 deg</code>. The <code class="inline">%.2f</code> means &ldquo;a decimal number, 2 places&rdquo; and <code class="inline">\n</code> is a newline. Clean output makes graded homework readable &mdash; and makes <em>you</em> able to spot a wrong answer.
+  </div>
+</section>
+
+<!-- ===================== VELOCITY & ACCELERATION ===================== -->
+<section id="velaccel">
+  <h2><span class="num">Part 7 · ~30 min</span>Velocity &amp; acceleration: the <em>same</em> matrix, twice</h2>
+  <p class="lead">Once position is solved, Chapter&nbsp;4 wants velocities and accelerations &mdash; and here's the payoff you've been building toward: they come from solving a linear system with the <em>same</em> Jacobian you just derived. It's <code class="inline">A\b</code> all over again.</p>
+
+  <h3>Where the linear system comes from</h3>
+  <p>Chapter&nbsp;4.1 says it directly: &ldquo;taking derivatives and rearranging, you go from the position equations to <strong>linear systems</strong> describing velocity and acceleration.&rdquo; Differentiate the two loop-closure equations with respect to time. The crank rate &theta;&#775;&#8322; is known (it's the input); the unknowns &theta;&#775;&#8323; and &theta;&#775;&#8324; appear <em>linearly</em>, multiplied by exactly the Jacobian entries from Part&nbsp;5:</p>
+
+  <div class="mateq" aria-label="J times the vector theta3-dot theta4-dot equals minus the vector r2 negative sin theta2, r2 cos theta2, times theta2-dot">
+    <span class="lbl">J</span>
+    <span class="matrix" style="grid-template-columns:auto"><span>&theta;&#775;&#8323;</span><span>&theta;&#775;&#8324;</span></span>
+    <span class="op">=</span>
+    <span class="op">&minus;</span>
+    <span class="matrix" style="grid-template-columns:auto"><span>&minus;r&#8322;sin&theta;&#8322;</span><span>+r&#8322;cos&theta;&#8322;</span></span>
+    <span class="lbl">&theta;&#775;&#8322;</span>
+  </div>
+
+  <p>That's a 2&times;2 linear system <code class="inline">J&middot;{velocities} = {b}</code>. The matrix on the left is the <em>identical</em> <code class="inline">J</code> from position analysis. So once you have <code class="inline">J</code>, velocity analysis is one backslash.</p>
+
+  <div class="callout">
+    <span class="tag">The big idea connecting Parts 3, 5, and 7</span>
+    Position (nonlinear) needed Newton, which built <code class="inline">J</code>. Velocity and acceleration (linear once position is known) <em>reuse</em> that same <code class="inline">J</code> and just change the right-hand side. One matrix, three jobs. If you can form <code class="inline">J</code>, you can do all of Chapters 2 and 4.
+  </div>
+
+  <h3>Two ways to read the same solve</h3>
+  <p>The textbook frames this two ways, and they're the <em>same equation</em> with the input rate divided out. This is the heart of Chapter&nbsp;4.</p>
+
+  <div class="tablewrap">
+  <table>
+    <caption>Time-based rates vs. kinematic coefficients &mdash; one solve, two interpretations</caption>
+    <thead><tr><th>&nbsp;</th><th>Time-based (Ch. 4.1)</th><th>Kinematic coefficients (Ch. 4.2)</th></tr></thead>
+    <tbody>
+      <tr><td>You solve</td><td><code>J\b</code> with b containing &theta;&#775;&#8322;</td><td><code>J\b0</code> with b0 = the b above but with &theta;&#775;&#8322; set to 1</td></tr>
+      <tr><td>You get</td><td>actual rates &theta;&#775;&#8323;, &theta;&#775;&#8324; (rad/s)</td><td>coefficients h&#8323;=d&theta;&#8323;/d&theta;&#8322;, h&#8324;=d&theta;&#8324;/d&theta;&#8322;</td></tr>
+      <tr><td>Relationship</td><td colspan="2" style="text-align:center"><code>&theta;&#775;&#8323; = h&#8323; &middot; &theta;&#775;&#8322;</code> &mdash; the coefficient is the rate <em>per unit input rate</em></td></tr>
+      <tr><td>Why bother</td><td>direct, but mixes in the input speed</td><td>pure geometry &mdash; independent of how fast the crank turns</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="analogy">
+    <span class="tag">Analogy · speed vs. gear ratio</span>
+    Time-based rates are like saying &ldquo;the output shaft turns at 50&nbsp;rpm.&rdquo; Kinematic coefficients are like saying &ldquo;the output turns 0.5 revolutions per input revolution&rdquo; &mdash; a <em>ratio</em> that holds no matter how fast you crank. Dividing the velocity equation by &theta;&#775;&#8322; converts speed into ratio, which is exactly why Chapter 4.2 says coefficients &ldquo;reveal the purely geometric nature&rdquo; that raw time-derivatives hide.
+  </div>
+
+  <h3>In MATLAB &mdash; both, from one Jacobian</h3>
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">velocity_analysis.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% Assumes you've already solved position for th3, th4 at this th2.</span>
+r2<span class="op">=</span><span class="nm">6.866</span>; r3<span class="op">=</span><span class="nm">17.278</span>; r4<span class="op">=</span><span class="nm">16.886</span>;
+th2<span class="op">=</span>deg2rad(<span class="nm">45</span>); th2dot <span class="op">=</span> <span class="nm">10</span>;   <span class="cm">% crank speed, rad/s (the input)</span>
+<span class="cm">% th3, th4 come from your position solve (Part 5):</span>
+th3 <span class="op">=</span> deg2rad(<span class="nm">22.3</span>); th4 <span class="op">=</span> deg2rad(<span class="nm">98.7</span>);   <span class="cm">% example values</span>
+
+<span class="cm">% SAME Jacobian as position analysis:</span>
+J <span class="op">=</span> [ <span class="op">-</span>r3<span class="op">*</span>sin(th3),  r4<span class="op">*</span>sin(th4);
+       r3<span class="op">*</span>cos(th3), <span class="op">-</span>r4<span class="op">*</span>cos(th4) ];
+
+<span class="cm">% --- Way 1: time-based rates (b carries the actual crank speed) ---</span>
+b  <span class="op">=</span> <span class="op">-</span>[ <span class="op">-</span>r2<span class="op">*</span>sin(th2); r2<span class="op">*</span>cos(th2) ] <span class="op">*</span> th2dot;
+w  <span class="op">=</span> J<span class="op">\</span>b;                <span class="cm">% w = [th3dot; th4dot] in rad/s</span>
+
+<span class="cm">% --- Way 2: kinematic coefficients (same b, but th2dot = 1) ---</span>
+b0 <span class="op">=</span> <span class="op">-</span>[ <span class="op">-</span>r2<span class="op">*</span>sin(th2); r2<span class="op">*</span>cos(th2) ];
+h  <span class="op">=</span> J<span class="op">\</span>b0;               <span class="cm">% h = [h3; h4], pure geometry</span>
+
+<span class="cm">% Check the relationship:  w should equal h * th2dot</span>
+disp([w, h<span class="op">*</span>th2dot]);    <span class="cm">% the two columns match</span></pre>
+  </div>
+
+  <h3>Acceleration: same matrix, third right-hand side</h3>
+  <p>Differentiate once more and you get <em>another</em> linear system &mdash; again with the same <code class="inline">J</code> on the left. The only new work is the right-hand side, which now includes the velocity terms you just found:</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">acceleration_analysis.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="cm">% Continues from velocity_analysis.m. th2ddot = crank angular accel.</span>
+th2ddot <span class="op">=</span> <span class="nm">0</span>;                    <span class="cm">% e.g. constant crank speed -> 0</span>
+th3dot <span class="op">=</span> w(<span class="nm">1</span>); th4dot <span class="op">=</span> w(<span class="nm">2</span>);
+
+<span class="cm">% RHS gathers the known (velocity-squared) terms:</span>
+rhs <span class="op">=</span> [ r2<span class="op">*</span>cos(th2)<span class="op">*</span>th2dot<span class="op">^2</span> <span class="op">+</span> r3<span class="op">*</span>cos(th3)<span class="op">*</span>th3dot<span class="op">^2</span> <span class="op">-</span> r4<span class="op">*</span>cos(th4)<span class="op">*</span>th4dot<span class="op">^2</span> <span class="op">+</span> r2<span class="op">*</span>sin(th2)<span class="op">*</span>th2ddot;
+        r2<span class="op">*</span>sin(th2)<span class="op">*</span>th2dot<span class="op">^2</span> <span class="op">+</span> r3<span class="op">*</span>sin(th3)<span class="op">*</span>th3dot<span class="op">^2</span> <span class="op">-</span> r4<span class="op">*</span>sin(th4)<span class="op">*</span>th4dot<span class="op">^2</span> <span class="op">-</span> r2<span class="op">*</span>cos(th2)<span class="op">*</span>th2ddot ];
+
+alpha <span class="op">=</span> J<span class="op">\</span>rhs;     <span class="cm">% alpha = [th3ddot; th4ddot] -- SAME J, new RHS</span></pre>
+  </div>
+
+  <div class="widget" id="velWidget">
+    <div class="widget-head"><span class="wtag">Interactive</span><h4>Velocity solver &mdash; one Jacobian, both readings</h4></div>
+    <div class="widget-body">
+      <p style="margin-top:0;font-size:.92rem;color:var(--ink-soft)">Set the crank angle and speed. The widget builds <code class="inline">J</code>, then solves it twice &mdash; once for actual rates, once (with &theta;&#775;&#8322;=1) for kinematic coefficients &mdash; and confirms <code class="inline">&theta;&#775; = h&middot;&theta;&#775;&#8322;</code>.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="velTh2">crank &theta;&#8322; = <span class="val" id="velTh2val">45&deg;</span></label>
+          <input id="velTh2" type="range" min="0" max="360" step="5" value="45">
+        </div>
+        <div class="ctrl">
+          <label for="velW2">crank speed &theta;&#775;&#8322; = <span class="val" id="velW2val">10</span> rad/s</label>
+          <input id="velW2" type="range" min="1" max="30" step="1" value="10">
+        </div>
+      </div>
+      <div class="outbox" id="velOut" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="real-world">
+    <span class="tag">Real world · why coefficients matter for dead positions</span>
+    Chapter&nbsp;4.3&ndash;4.4 use kinematic coefficients to find a mechanism's <em>limit</em> and <em>dead</em> positions &mdash; the crank angles where the output momentarily stops or reverses. Those are exactly where a coefficient like h&#8324; passes through zero. Because coefficients are pure geometry, you can scan them across a full rotation with a loop and a plot (Part&nbsp;6) to find these critical positions &mdash; essential for designing, say, a clamping mechanism that must hold firm at the end of its stroke.
+  </div>
+
+  <div class="tryit">
+    <span class="tag">Try it · in real MATLAB</span>
+    Wrap the velocity solve in a loop over <code class="inline">theta2 = 0:5:360</code> (reusing your position solver from the capstone to get th3, th4 at each step), store <code class="inline">h4</code>, and <code class="inline">plot(theta2, h4)</code>. The angles where the curve crosses zero are the dead positions. You've now combined Parts 3, 5, 6, and 7 into a genuine Chapter 4 analysis.
+  </div>
+</section>
+
+<!-- ===================== CAPSTONE ===================== -->
+<section id="capstone">
+  <h2><span class="num">Part 8 · ~25 min</span>Capstone: a complete four-bar analysis</h2>
+  <p class="lead">Everything assembles here. This one script &mdash; vectors, a function, a solver with warm-starting, a loop, and a plot &mdash; is a template you can adapt for most ENGI&nbsp;216 position-analysis homework.</p>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="fname">fourbar_full_analysis.m</span><button class="copybtn" type="button">Copy</button></div>
+    <pre><span class="kw">clear</span>; <span class="kw">clc</span>;
+
+<span class="cm">% ---- 1. Define the mechanism (the Ex. 8.1 drawbridge linkage) ----</span>
+r1 <span class="op">=</span> <span class="nm">10</span>; r2 <span class="op">=</span> <span class="nm">6.866</span>; r3 <span class="op">=</span> <span class="nm">17.278</span>; r4 <span class="op">=</span> <span class="nm">16.886</span>;   <span class="cm">% link lengths (ft)</span>
+
+<span class="cm">% ---- 2. Sweep the crank through a full rotation ----</span>
+theta2 <span class="op">=</span> <span class="nm">0</span>:<span class="nm">5</span>:<span class="nm">360</span>;
+n <span class="op">=</span> numel(theta2);
+theta3 <span class="op">=</span> zeros(<span class="nm">1</span>,n);   theta4 <span class="op">=</span> zeros(<span class="nm">1</span>,n);   <span class="cm">% preallocate</span>
+
+guess <span class="op">=</span> [deg2rad(<span class="nm">20</span>); deg2rad(<span class="nm">80</span>)];   <span class="cm">% [th3; th4] starting guess (rad)</span>
+
+<span class="kw">for</span> i <span class="op">=</span> <span class="nm">1</span>:n
+    th2 <span class="op">=</span> deg2rad(theta2(i));
+    <span class="cm">% Vector-loop closure: x- and y- components must both vanish</span>
+    loop <span class="op">=</span> <span class="op">@</span>(t) [ r2<span class="op">*</span>cos(th2)<span class="op">+</span>r3<span class="op">*</span>cos(t(<span class="nm">1</span>))<span class="op">-</span>r4<span class="op">*</span>cos(t(<span class="nm">2</span>))<span class="op">-</span>r1;
+                   r2<span class="op">*</span>sin(th2)<span class="op">+</span>r3<span class="op">*</span>sin(t(<span class="nm">1</span>))<span class="op">-</span>r4<span class="op">*</span>sin(t(<span class="nm">2</span>)) ];
+    sol <span class="op">=</span> fsolve(loop, guess, optimset(<span class="st">'Display'</span>,<span class="st">'off'</span>));
+    theta3(i) <span class="op">=</span> rad2deg(sol(<span class="nm">1</span>));
+    theta4(i) <span class="op">=</span> rad2deg(sol(<span class="nm">2</span>));
+    guess <span class="op">=</span> sol;        <span class="cm">% WARM START: feed this answer to the next step</span>
+<span class="kw">end</span>
+
+<span class="cm">% ---- 3. Plot the performance curve ----</span>
+plot(theta2, theta4, <span class="st">'LineWidth'</span>, <span class="nm">2</span>);
+xlabel(<span class="st">'Crank \theta_2 (deg)'</span>);  ylabel(<span class="st">'Rocker \theta_4 (deg)'</span>);
+title(<span class="st">'Four-bar rocker motion over one crank revolution'</span>);
+grid <span class="kw">on</span>
+
+fprintf(<span class="st">'At theta2 = 45 deg:  theta4 = %.2f deg\n'</span>, theta4(theta2<span class="op">==</span><span class="nm">45</span>));</pre>
+  </div>
+
+  <div class="tryit">
+    <span class="tag">Try it · your turn</span>
+    Run the capstone in MATLAB. Then make three changes and predict each result first: <strong>(1)</strong> change <code class="inline">r2</code> to 8 &mdash; does the rocker swing more or less? <strong>(2)</strong> Remove the <code class="inline">guess = sol;</code> warm-start line &mdash; watch the curve develop a discontinuous jump where the solver flips branches. <strong>(3)</strong> Add a second <code class="inline">plot</code> of <code class="inline">theta3</code> with <code class="inline">hold on</code> and a <code class="inline">legend</code>.
+  </div>
+
+  <div class="real-world">
+    <span class="tag">Real world · This template scales to a career</span>
+    The structure you just built &mdash; <em>define geometry, sweep an input, solve the closure at each step, plot the behavior</em> &mdash; is the skeleton of professional kinematic-analysis tools, from windshield-wiper linkage design to robot-arm workspace mapping. The toolbox you've assembled in this primer (vectors, <code class="inline">A\b</code>, <code class="inline">fsolve</code>, plotting) is genuinely the working set practicing mechanism designers reach for.
+  </div>
+</section>
+
+<!-- ===================== PRACTICE PROBLEMS ===================== -->
+<section id="practice">
+  <h2><span class="num">Practice</span>Worked problems &mdash; try first, then check</h2>
+  <p class="lead">Three problems in the style of ENGI&nbsp;216 homework. Attempt each in MATLAB before expanding the solution. They build on each other: position &rarr; synthesis &rarr; velocity.</p>
+
+  <div class="problem">
+    <div class="problem-head">
+      <span class="plabel">Problem 1 · Position analysis (Ch. 2)</span>
+      <h4>Find the coupler and rocker angles of a four-bar</h4>
+    </div>
+    <div class="problem-body">
+      <p>A four-bar has ground <code class="inline">r1 = 12</code>, crank <code class="inline">r2 = 4</code>, coupler <code class="inline">r3 = 13</code>, rocker <code class="inline">r4 = 8</code> (all cm). For a crank angle <code class="inline">&theta;&#8322; = 60&deg;</code>, find &theta;&#8323; and &theta;&#8324; in the open configuration. Use the Jacobian-Newton approach from Part&nbsp;5 (or <code class="inline">fsolve</code>).</p>
+      <details class="solution">
+        <summary>Show solution</summary>
+        <div class="solution-inner">
+          <p>Set up the two loop-closure residuals and solve from a guess near the open branch:</p>
+          <div class="codewrap">
+            <div class="codebar"><span class="fname">problem1.m</span><button class="copybtn" type="button">Copy</button></div>
+            <pre>r1<span class="op">=</span><span class="nm">12</span>; r2<span class="op">=</span><span class="nm">4</span>; r3<span class="op">=</span><span class="nm">13</span>; r4<span class="op">=</span><span class="nm">8</span>; th2<span class="op">=</span>deg2rad(<span class="nm">60</span>);
+loop <span class="op">=</span> <span class="op">@</span>(t)[ r2<span class="op">*</span>cos(th2)<span class="op">+</span>r3<span class="op">*</span>cos(t(<span class="nm">1</span>))<span class="op">-</span>r4<span class="op">*</span>cos(t(<span class="nm">2</span>))<span class="op">-</span>r1;
+              r2<span class="op">*</span>sin(th2)<span class="op">+</span>r3<span class="op">*</span>sin(t(<span class="nm">1</span>))<span class="op">-</span>r4<span class="op">*</span>sin(t(<span class="nm">2</span>)) ];
+sol <span class="op">=</span> fsolve(loop, [deg2rad(<span class="nm">30</span>); deg2rad(<span class="nm">90</span>)]);
+disp(rad2deg(sol));</pre>
+          </div>
+          <p><span class="answer-chip">Answer: &theta;&#8323; &approx; 18.8&deg;, &theta;&#8324; &approx; 73.3&deg;</span> Verify by plugging back in &mdash; both residuals should be ~0. If you got a different pair, you likely landed on the crossed branch; nudge the guess toward the open one.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="problem">
+    <div class="problem-head">
+      <span class="plabel">Problem 2 · Synthesis (Ch. 8)</span>
+      <h4>Three-point Freudenstein function generation</h4>
+    </div>
+    <div class="problem-body">
+      <p>You are given a 3&times;3 precision-point system (already assembled from three {&phi;,&psi;} pairs) for the link ratios R&#8321;, R&#8322;, R&#8323;:</p>
+      <div class="mateq" aria-label="coefficient matrix times R vector equals right hand side">
+        <span class="matrix" style="grid-template-columns:repeat(3,auto)">
+          <span>&minus;0.50</span><span>0.62</span><span>1</span>
+          <span>0.17</span><span>0.21</span><span>1</span>
+          <span>0.77</span><span>&minus;0.34</span><span>1</span>
+        </span>
+        <span class="matrix" style="grid-template-columns:auto"><span>R&#8321;</span><span>R&#8322;</span><span>R&#8323;</span></span>
+        <span class="op">=</span>
+        <span class="matrix" style="grid-template-columns:auto"><span>0.94</span><span>0.88</span><span>0.71</span></span>
+      </div>
+      <p>Solve for the ratios, then with assumed ground length <code class="inline">r1 = 10</code> find the crank length <code class="inline">r2 = r1/R&#8321;</code> and rocker <code class="inline">r4 = r1/R&#8322;</code>.</p>
+      <details class="solution">
+        <summary>Show solution</summary>
+        <div class="solution-inner">
+          <p>This is a pure <code class="inline">A\b</code> problem &mdash; exactly the Part&nbsp;3 pattern:</p>
+          <div class="codewrap">
+            <div class="codebar"><span class="fname">problem2.m</span><button class="copybtn" type="button">Copy</button></div>
+            <pre>A <span class="op">=</span> [<span class="op">-</span><span class="nm">0.50</span>  <span class="nm">0.62</span>  <span class="nm">1</span>;
+      <span class="nm">0.17</span>  <span class="nm">0.21</span>  <span class="nm">1</span>;
+      <span class="nm">0.77</span> <span class="op">-</span><span class="nm">0.34</span>  <span class="nm">1</span>];
+b <span class="op">=</span> [<span class="nm">0.94</span>; <span class="nm">0.88</span>; <span class="nm">0.71</span>];
+R <span class="op">=</span> A<span class="op">\</span>b;
+r1 <span class="op">=</span> <span class="nm">10</span>;
+r2 <span class="op">=</span> r1<span class="op">/</span>R(<span class="nm">1</span>);
+r4 <span class="op">=</span> r1<span class="op">/</span>R(<span class="nm">2</span>);
+fprintf(<span class="st">'R = [%.4f %.4f %.4f]\n'</span>, R);
+fprintf(<span class="st">'r2 = %.3f, r4 = %.3f\n'</span>, r2, r4);</pre>
+          </div>
+          <p><span class="answer-chip">Answer: R &approx; [0.300, 0.636, 0.696], r2 &approx; 33.4, r4 &approx; 15.7</span> Notice the workflow is identical to Example&nbsp;8.1 &mdash; only the numbers changed. That's the point of learning the pattern.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="problem">
+    <div class="problem-head">
+      <span class="plabel">Problem 3 · Velocity (Ch. 4)</span>
+      <h4>Angular velocities and the rocker kinematic coefficient</h4>
+    </div>
+    <div class="problem-body">
+      <p>Using the four-bar from Problem&nbsp;1 (<code class="inline">r2=4, r3=13, r4=8</code>) at &theta;&#8322;=60&deg; with your solved &theta;&#8323;&approx;18.8&deg;, &theta;&#8324;&approx;73.3&deg;, and a crank speed <code class="inline">&theta;&#775;&#8322; = 15</code> rad/s: find the rocker angular velocity &theta;&#775;&#8324; and the rocker kinematic coefficient h&#8324;. Use the same Jacobian, two right-hand sides (Part&nbsp;7).</p>
+      <details class="solution">
+        <summary>Show solution</summary>
+        <div class="solution-inner">
+          <p>Build <code class="inline">J</code> once; solve with the speed for rates, and with &theta;&#775;&#8322;=1 for coefficients:</p>
+          <div class="codewrap">
+            <div class="codebar"><span class="fname">problem3.m</span><button class="copybtn" type="button">Copy</button></div>
+            <pre>r2<span class="op">=</span><span class="nm">4</span>; r3<span class="op">=</span><span class="nm">13</span>; r4<span class="op">=</span><span class="nm">8</span>;
+th2<span class="op">=</span>deg2rad(<span class="nm">60</span>); th3<span class="op">=</span>deg2rad(<span class="nm">18.8</span>); th4<span class="op">=</span>deg2rad(<span class="nm">73.3</span>);
+th2dot <span class="op">=</span> <span class="nm">15</span>;
+
+J <span class="op">=</span> [ <span class="op">-</span>r3<span class="op">*</span>sin(th3),  r4<span class="op">*</span>sin(th4);
+       r3<span class="op">*</span>cos(th3), <span class="op">-</span>r4<span class="op">*</span>cos(th4) ];
+b0 <span class="op">=</span> <span class="op">-</span>[ <span class="op">-</span>r2<span class="op">*</span>sin(th2); r2<span class="op">*</span>cos(th2) ];
+
+h <span class="op">=</span> J<span class="op">\</span>b0;          <span class="cm">% kinematic coefficients [h3; h4]</span>
+w <span class="op">=</span> h <span class="op">*</span> th2dot;     <span class="cm">% actual rates [th3dot; th4dot]</span>
+fprintf(<span class="st">'h4 = %.4f,  th4dot = %.3f rad/s\n'</span>, h(<span class="nm">2</span>), w(<span class="nm">2</span>));</pre>
+          </div>
+          <p><span class="answer-chip">Answer: h&#8324; &approx; 0.40, &theta;&#775;&#8324; &approx; 6.1 rad/s</span> The coefficient h&#8324; says the rocker turns about 0.40&deg; per degree of crank &mdash; geometry-only. Multiply by the 15 rad/s crank speed to recover the actual rate. (Your exact values depend on the precision of the &theta;&#8323;,&theta;&#8324; you carry in from Problem&nbsp;1.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="tag">Want more?</span>
+    The interactive widgets above are themselves unlimited practice: change any slider or matrix entry and predict the result before reading it. Re-derive the Jacobian for a crank-slider (Ch. 8.2 uses S&#8321;,S&#8322;,S&#8323; instead of ratios) as a stretch exercise.
+  </div>
+</section>
+
+<!-- ===================== SELF-CHECK QUIZ ===================== -->
+<section id="quiz">
+  <h2><span class="num">Self-Check</span>Test your MATLAB readiness</h2>
+  <p class="lead">Ten questions covering exactly what you'll need. Pick an answer to get instant feedback and an explanation. Your score updates as you go.</p>
+  <div id="quizHost"></div>
+  <p class="quiz-score" id="quizScore" aria-live="polite">Score: 0 / 0</p>
+</section>
+
+<!-- ===================== VIDEOS ===================== -->
+<section id="videos">
+  <h2><span class="num">Watch</span>Curated video walkthroughs</h2>
+  <p class="lead">Short, high-quality videos that reinforce each part. These embed from YouTube (a network connection is needed to play them). Each notes which part of this module it supports.</p>
+  <div class="vid-grid" id="vidGrid"></div>
+  <div class="callout" style="margin-top:18px">
+    <span class="tag">Best single resource</span>
+    If you do one thing beyond this module, complete MathWorks' free <strong>MATLAB Onramp</strong> &mdash; a ~2-hour interactive, auto-graded tutorial in your browser. Link in <a href="#resources">Resources</a> below.
+  </div>
+</section>
+
+<!-- ===================== REFERENCE / CHEAT SHEET ===================== -->
+<section id="refcard">
+  <h2><span class="num">Quick Reference</span>ENGI 216 MATLAB cheat sheet</h2>
+  <p class="lead">Everything in this module on one printable card. Use <span class="kbd">Ctrl/Cmd&nbsp;+&nbsp;P</span> or the button to print just this card.</p>
+  <button class="btn printbtn" type="button" id="printCardBtn">Print this card</button>
+  <div class="refcard" style="margin-top:14px">
+   <div class="refcard-inner">
+    <div class="ref-grid">
+      <div class="ref-block">
+        <h4>Create &amp; index</h4>
+        <table>
+          <tr><td><code>v=[1 2 3]</code></td><td>row vector</td></tr>
+          <tr><td><code>c=[1;2;3]</code></td><td>column vector</td></tr>
+          <tr><td><code>A=[1 2;3 4]</code></td><td>2&times;2 matrix</td></tr>
+          <tr><td><code>0:5:360</code></td><td>range (step 5)</td></tr>
+          <tr><td><code>v(1)</code>, <code>v(end)</code></td><td>first / last (from 1!)</td></tr>
+          <tr><td><code>A(:,1)</code></td><td>whole column 1</td></tr>
+          <tr><td><code>zeros(1,n)</code></td><td>preallocate</td></tr>
+        </table>
+      </div>
+      <div class="ref-block">
+        <h4>Math &amp; trig</h4>
+        <table>
+          <tr><td><code>*</code> vs <code>.*</code></td><td>matrix vs element-wise</td></tr>
+          <tr><td><code>./</code> <code>.^</code></td><td>element-wise div/power</td></tr>
+          <tr><td><code>cosd sind tand</code></td><td>trig in <b>degrees</b></td></tr>
+          <tr><td><code>atan2d(y,x)</code></td><td>4-quadrant angle (deg)</td></tr>
+          <tr><td><code>norm(v)</code></td><td>vector magnitude</td></tr>
+          <tr><td><code>deg2rad</code> <code>rad2deg</code></td><td>angle conversion</td></tr>
+        </table>
+      </div>
+      <div class="ref-block">
+        <h4>Solve</h4>
+        <table>
+          <tr><td><code>x=A\b</code></td><td>solve A&middot;x=b (use this!)</td></tr>
+          <tr><td><code>t=t-J\f</code></td><td>Newton step (system)</td></tr>
+          <tr><td><code>fzero(@f,x0)</code></td><td>one nonlinear eqn</td></tr>
+          <tr><td><code>fsolve(@F,g)</code></td><td>system of eqns</td></tr>
+          <tr><td><code>w=J\b</code></td><td>velocity (Ch. 4)</td></tr>
+          <tr><td><code>h=J\b0</code></td><td>kinematic coeffs</td></tr>
+        </table>
+      </div>
+      <div class="ref-block">
+        <h4>Structure &amp; output</h4>
+        <table>
+          <tr><td><code>clear; clc;</code></td><td>start every script</td></tr>
+          <tr><td><code>for i=1:n &hellip; end</code></td><td>loop</td></tr>
+          <tr><td><code>if &hellip; else &hellip; end</code></td><td>decision</td></tr>
+          <tr><td><code>function&hellip;end</code></td><td>reusable routine</td></tr>
+          <tr><td><code>fprintf('%.2f\n',x)</code></td><td>formatted print</td></tr>
+          <tr><td><code>;</code></td><td>suppress output</td></tr>
+        </table>
+      </div>
+      <div class="ref-block">
+        <h4>Plot</h4>
+        <table>
+          <tr><td><code>plot(x,y)</code></td><td>line plot</td></tr>
+          <tr><td><code>hold on/off</code></td><td>overlay curves</td></tr>
+          <tr><td><code>xlabel ylabel title</code></td><td>always label</td></tr>
+          <tr><td><code>legend(...)</code></td><td>name curves</td></tr>
+          <tr><td><code>grid on</code></td><td>gridlines</td></tr>
+          <tr><td><code>axis equal</code></td><td>true mechanism shape</td></tr>
+        </table>
+      </div>
+      <div class="ref-block">
+        <h4>Top 3 gotchas</h4>
+        <table>
+          <tr><td>1</td><td>degrees vs radians &mdash; pick one</td></tr>
+          <tr><td>2</td><td>indexing starts at <b>1</b></td></tr>
+          <tr><td>3</td><td><code>.*</code> not <code>*</code> for sweeps</td></tr>
+        </table>
+      </div>
+    </div>
+   </div>
+  </div>
+</section>
+
+<!-- ===================== GLOSSARY ===================== -->
+<section id="glossary">
+  <h2><span class="num">Glossary</span>MATLAB terms for this course</h2>
+  <p class="lead">Searchable. Type to filter by term or definition.</p>
+  <label for="glossSearch" class="sr-only">Search glossary</label>
+  <input id="glossSearch" class="glossary-search" type="search" placeholder="Search terms&hellip;" autocomplete="off">
+  <dl id="glossList"></dl>
+  <p id="glossEmpty" style="display:none;color:var(--ink-soft);font-family:var(--mono);font-size:.85rem">No matching terms.</p>
+</section>
+
+<!-- ===================== EXTERNAL RESOURCES ===================== -->
+<section id="resources">
+  <h2><span class="num">Go Deeper</span>External resources</h2>
+  <p class="lead">Authoritative, free references. All links open in a new tab (indicated by &#8599;).</p>
+  <div id="resHost"></div>
+</section>
+
+<!-- ===================== OBJECTIVES RECAP ===================== -->
+<section id="recap">
+  <h2><span class="num">Recap</span>What you can now do</h2>
+  <p class="lead">If you worked through this module, you can confidently:</p>
+  <ul class="obj-list">
+    <li>Get into MATLAB (Online, desktop, or Octave) and find your way around the four key panels.</li>
+    <li>Create and index vectors and matrices, and explain the difference between <code class="inline">*</code> and <code class="inline">.*</code>.</li>
+    <li>Solve a linear system with <code class="inline">A\b</code> &mdash; and reproduce Freudenstein synthesis from Chapter&nbsp;8.</li>
+    <li>Write scripts and functions, loop with preallocation, and make decisions with <code class="inline">if</code>.</li>
+    <li>Solve nonlinear position equations both by hand (Newton's method, including deriving the Jacobian) and with <code class="inline">fzero</code>/<code class="inline">fsolve</code>, using warm-starting to stay on one configuration branch.</li>
+    <li>Plot and label a performance curve to judge whether a mechanism design works.</li>
+    <li>Run velocity and acceleration analysis (Ch.&nbsp;4) by reusing the same Jacobian with <code class="inline">A\b</code> &mdash; reading the result as either time-based rates or kinematic coefficients.</li>
+    <li>Assemble all of it into a complete four-bar analysis &mdash; the template for the rest of the course.</li>
+  </ul>
+  <div style="margin-top:18px">
+    <span class="pill">Vectors</span><span class="pill">Matrices</span><span class="pill">A\b</span><span class="pill">Newton</span><span class="pill">Jacobian</span><span class="pill">fsolve</span><span class="pill">Velocity</span><span class="pill">Kin. coeffs</span><span class="pill">Loops</span><span class="pill">Functions</span><span class="pill">Plotting</span>
+  </div>
+  <p style="margin-top:18px">Next stop: bring these skills to <strong>Chapter&nbsp;2 (Vector Loop Method)</strong>, where you'll use them on real position analysis.</p>
+</section>
+
+</div><!-- /.wrap -->
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><b>MATLAB for ENGI 216</b> &mdash; an interactive primer. The MATLAB interpreters and plots in this module are lightweight in-browser emulations for learning; always verify final answers in real MATLAB or Octave.</p>
+    <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> &middot; 2026. Accessible (WCAG 2.1 AA), keyboard-navigable, works offline.</p>
+    <p class="refs" id="refblock"></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Reading progress + nav active state ---------- */
+  var pbar = document.getElementById("progressBar");
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+  var sections = tocLinks.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop || document.body.scrollTop;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    if(pbar) pbar.style.width = (100*scrolled/max) + "%";
+    var cur = null, mid = scrolled + window.innerHeight*0.3;
+    for(var i=0;i<sections.length;i++){
+      if(sections[i].offsetTop <= mid) cur = tocLinks[i];
+    }
+    tocLinks.forEach(function(a){ a.classList.remove("active"); });
+    if(cur){ cur.classList.add("active");
+      try{ cur.scrollIntoView({block:"nearest",inline:"center",behavior: reduce?"auto":"smooth"}); }catch(e){}
+    }
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  window.addEventListener("resize", onScroll);
+
+  /* ---------- Copy buttons ---------- */
+  document.querySelectorAll(".copybtn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.closest(".codewrap").querySelector("pre");
+      var text = pre.innerText;
+      var done = function(){ var o=btn.textContent; btn.textContent="Copied!"; setTimeout(function(){btn.textContent=o;},1300); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        var ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select();
+        try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); done();
+      }
+    });
+  });
+
+  function escapeHtml(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+  var D2R = Math.PI/180, R2D = 180/Math.PI;
+
+  /* ============================================================
+     MATLAB-style console (small safe expression evaluator)
+     ============================================================ */
+  var vars = {pi: Math.PI, e: Math.E, ans: 0};
+  var fns = {
+    sqrt: Math.sqrt, abs: Math.abs, sin: Math.sin, cos: Math.cos, tan: Math.tan,
+    asin: Math.asin, acos: Math.acos, atan: Math.atan, exp: Math.exp, log: Math.log,
+    sind: function(x){return Math.sin(x*D2R);}, cosd: function(x){return Math.cos(x*D2R);},
+    tand: function(x){return Math.tan(x*D2R);},
+    deg2rad: function(x){return x*D2R;}, rad2deg: function(x){return x*R2D;}
+  };
+  var fns2 = {
+    atan2: function(y,x){return Math.atan2(y,x);},
+    atan2d: function(y,x){return Math.atan2(y,x)*R2D;},
+    hypot: function(a,b){return Math.hypot(a,b);},
+    mod: function(a,b){return a%b;}
+  };
+
+  function tokenize(s){
+    var t=[], i=0;
+    while(i<s.length){
+      var c=s[i];
+      if(/\s/.test(c)){ i++; continue; }
+      if(/[0-9.]/.test(c)){
+        var num="";
+        while(i<s.length && /[0-9.eE]/.test(s[i])){
+          if((s[i]==='e'||s[i]==='E') && (s[i+1]==='+'||s[i+1]==='-')){num+=s[i]+s[i+1]; i+=2; continue;}
+          num+=s[i++];
+        }
+        t.push({k:"num",v:parseFloat(num)});
+      } else if(/[a-zA-Z_]/.test(c)){
+        var id=""; while(i<s.length && /[a-zA-Z0-9_]/.test(s[i])) id+=s[i++];
+        t.push({k:"id",v:id});
+      } else if("+-*/^(),[];".indexOf(c)>=0){
+        t.push({k:"op",v:c}); i++;
+      } else { throw "Unexpected character '"+c+"'"; }
+    }
+    return t;
+  }
+
+  function parseExpr(tokens){
+    var pos=0;
+    function peek(){return tokens[pos];}
+    function eat(v){var t=tokens[pos]; if(!t||(v&&t.v!==v)) throw "Syntax error"; pos++; return t;}
+    function num(x){ if(x&&x.vec) throw "Expected a scalar here"; return x; }
+    function primary(){
+      var t=peek();
+      if(!t) throw "Unexpected end of expression";
+      if(t.k==="op" && t.v==="("){ eat("("); var e=expr(); eat(")"); return e; }
+      if(t.k==="op" && t.v==="["){
+        eat("["); var arr=[];
+        if(peek() && !(peek().v==="]")){ arr.push(expr());
+          while(peek() && (peek().v===","||peek().v===";")){ eat(); arr.push(expr()); } }
+        eat("]"); return {vec:arr};
+      }
+      if(t.k==="num"){ eat(); return t.v; }
+      if(t.k==="id"){
+        eat();
+        if(peek() && peek().v==="("){
+          eat("("); var args=[expr()];
+          while(peek()&&peek().v===","){ eat(","); args.push(expr()); }
+          eat(")");
+          if(args.length===1 && fns[t.v]) return fns[t.v](num(args[0]));
+          if(args.length===2 && fns2[t.v]) return fns2[t.v](num(args[0]),num(args[1]));
+          if(t.v==="norm"){ var a=args[0]; if(a&&a.vec) return Math.hypot.apply(null,a.vec.map(num)); return Math.abs(num(a)); }
+          if(t.v==="numel"||t.v==="length"){ var a2=args[0]; return a2&&a2.vec?a2.vec.length:1; }
+          if(t.v==="dot"){ var u=args[0].vec,w=args[1].vec; var s=0; for(var k=0;k<u.length;k++)s+=num(u[k])*num(w[k]); return s; }
+          throw "Unknown function '"+t.v+"'";
+        }
+        if(vars.hasOwnProperty(t.v)) return vars[t.v];
+        throw "Undefined variable '"+t.v+"'";
+      }
+      throw "Syntax error";
+    }
+    function unary(){
+      var t=peek();
+      if(t&&t.k==="op"&&(t.v==="-"||t.v==="+")){ eat(); var s=(t.v==="-")?-1:1; return s*num(unary()); }
+      return primary();
+    }
+    function power(){ var b=unary();
+      if(peek()&&peek().v==="^"){ eat("^"); var e=power(); return Math.pow(num(b),num(e)); } return b; }
+    function term(){ var a=power();
+      while(peek()&&(peek().v==="*"||peek().v==="/")){ var op=eat().v; var b=power();
+        a = op==="*" ? num(a)*num(b) : num(a)/num(b); } return a; }
+    function expr(){ var a=term();
+      while(peek()&&(peek().v==="+"||peek().v==="-")){ var op=eat().v; var b=term();
+        a = op==="+" ? num(a)+num(b) : num(a)-num(b); } return a; }
+    var result=expr();
+    if(pos<tokens.length) throw "Unexpected trailing input";
+    return result;
+  }
+
+  var clog=document.getElementById("consoleLog");
+  var cinput=document.getElementById("consoleInput");
+  function clogLine(html){ if(!clog) return; var d=document.createElement("div"); d.innerHTML=html; clog.appendChild(d); clog.scrollTop=clog.scrollHeight; }
+  function fmtNum(v){ if(typeof v!=="number"||!isFinite(v)) return String(v);
+    if(Math.abs(v-Math.round(v))<1e-12) return String(Math.round(v));
+    return (Math.abs(v)>=1e5||Math.abs(v)<1e-4)?v.toExponential(4):v.toFixed(4); }
+  function fmt(x){ if(x&&x.vec) return "["+x.vec.map(function(v){return fmtNum(v);}).join("  ")+"]"; return fmtNum(x); }
+
+  if(cinput){
+    cinput.addEventListener("keydown", function(ev){
+      if(ev.key!=="Enter") return;
+      var raw=cinput.value.trim(); if(!raw){return;}
+      clogLine('<span class="prompt">&gt;&gt; </span>'+escapeHtml(raw));
+      cinput.value="";
+      if(raw==="clc"){ clog.innerHTML=""; return; }
+      var suppress=/;\s*$/.test(raw); var stmt=raw.replace(/;\s*$/,"");
+      try{
+        var m=stmt.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+        var val, name="ans";
+        if(m && !/[<>=]/.test(m[2][0])){ name=m[1]; val=parseExpr(tokenize(m[2])); vars[name]=val; }
+        else { val=parseExpr(tokenize(stmt)); vars.ans=val; }
+        if(!suppress) clogLine('<span class="ans">'+escapeHtml(name)+' = '+fmt(val)+'</span>');
+      }catch(err){
+        clogLine('<span class="err">Error: '+escapeHtml(String(err))+'</span>');
+      }
+    });
+  }
+
+  /* ============================================================
+     Position-vector visualizer
+     ============================================================ */
+  (function(){
+    var R=document.getElementById("vecR"), TH=document.getElementById("vecTh");
+    var Rv=document.getElementById("vecRval"), THv=document.getElementById("vecThval");
+    var svg=document.getElementById("vecSvg"), out=document.getElementById("vecOut");
+    if(!svg) return;
+    var ox=70, oy=250, scale=18;
+    function draw(){
+      var r=parseFloat(R.value), th=parseFloat(TH.value);
+      Rv.textContent=r.toFixed(1); THv.textContent=th+"\u00B0";
+      var x=r*Math.cos(th*D2R), y=r*Math.sin(th*D2R);
+      var px=ox+x*scale, py=oy-y*scale;
+      var s="";
+      s+='<line x1="20" y1="'+oy+'" x2="460" y2="'+oy+'" stroke="var(--panel-line)" stroke-width="1"/>';
+      s+='<line x1="'+ox+'" y1="20" x2="'+ox+'" y2="300" stroke="var(--panel-line)" stroke-width="1"/>';
+      s+='<line x1="'+ox+'" y1="'+oy+'" x2="'+px+'" y2="'+oy+'" stroke="var(--rust)" stroke-width="2" stroke-dasharray="4 3"/>';
+      s+='<line x1="'+px+'" y1="'+oy+'" x2="'+px+'" y2="'+py+'" stroke="var(--rust)" stroke-width="2" stroke-dasharray="4 3"/>';
+      s+='<line x1="'+ox+'" y1="'+oy+'" x2="'+px+'" y2="'+py+'" stroke="var(--accent)" stroke-width="3"/>';
+      s+='<circle cx="'+px+'" cy="'+py+'" r="5" fill="var(--accent)"/>';
+      s+='<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="var(--ink)"/>';
+      s+='<text x="'+((ox+px)/2)+'" y="'+(oy+16)+'" fill="var(--rust)" font-size="12" font-family="monospace" text-anchor="middle">x='+x.toFixed(2)+'</text>';
+      s+='<text x="'+(px+8)+'" y="'+((oy+py)/2)+'" fill="var(--rust)" font-size="12" font-family="monospace">y='+y.toFixed(2)+'</text>';
+      svg.innerHTML=s;
+      var recovered=(((Math.atan2(y,x)*R2D)%360)+360)%360;
+      out.innerHTML='<span class="hi">x</span> = r*cosd(theta) = '+r.toFixed(1)+'*cosd('+th+') = <span class="ok">'+x.toFixed(3)+
+        '</span>\n<span class="hi">y</span> = r*sind(theta) = '+r.toFixed(1)+'*sind('+th+') = <span class="ok">'+y.toFixed(3)+
+        '</span>\n<span class="dim">% recovered angle:</span> atan2d(y,x) = <span class="ru">'+recovered.toFixed(1)+'\u00B0</span>';
+    }
+    R.addEventListener("input",draw); TH.addEventListener("input",draw); draw();
+  })();
+
+  /* ============================================================
+     Live A\b solver (Gaussian elimination, 3x3)
+     ============================================================ */
+  (function(){
+    var matA=document.getElementById("matA"), vecB=document.getElementById("vecB");
+    var out=document.getElementById("solveOut");
+    if(!matA) return;
+    var A0=[[-0.423,0.462,1],[0.342,0.087,1],[0.906,-0.301,1]];
+    var b0=[0.999,0.906,0.676];
+    function mkInput(v){ var inp=document.createElement("input"); inp.type="number"; inp.step="any"; inp.value=v; inp.setAttribute("aria-label","matrix entry"); return inp; }
+    var aInps=[], bInps=[];
+    function build(){
+      matA.innerHTML=""; vecB.innerHTML=""; aInps=[]; bInps=[];
+      for(var i=0;i<3;i++){ aInps[i]=[]; for(var j=0;j<3;j++){ var inp=mkInput(A0[i][j]); aInps[i][j]=inp; matA.appendChild(inp);} }
+      for(var k=0;k<3;k++){ var bi=mkInput(b0[k]); bInps.push(bi); vecB.appendChild(bi);} }
+    function read(){ var A=[],b=[]; for(var i=0;i<3;i++){A[i]=[];for(var j=0;j<3;j++)A[i][j]=parseFloat(aInps[i][j].value)||0; b[i]=parseFloat(bInps[i].value)||0;} return {A:A,b:b}; }
+    function solve(){
+      var d=read(), A=d.A.map(function(r){return r.slice();}), b=d.b.slice(), n=3;
+      for(var col=0;col<n;col++){
+        var piv=col; for(var r=col+1;r<n;r++) if(Math.abs(A[r][col])>Math.abs(A[piv][col])) piv=r;
+        if(Math.abs(A[piv][col])<1e-12){ out.innerHTML='<span class="ru">Warning: matrix is singular (or nearly so).</span>\n<span class="dim">% rows are linearly dependent -> no unique solution.\n% In real MATLAB, A\\b would warn and return Inf/NaN.</span>'; return; }
+        var tmp=A[col];A[col]=A[piv];A[piv]=tmp; var tb=b[col];b[col]=b[piv];b[piv]=tb;
+        for(var r2=col+1;r2<n;r2++){ var f=A[r2][col]/A[col][col]; for(var c=col;c<n;c++) A[r2][c]-=f*A[col][c]; b[r2]-=f*b[col]; }
+      }
+      var x=[0,0,0];
+      for(var i=n-1;i>=0;i--){ var s=b[i]; for(var j=i+1;j<n;j++) s-=A[i][j]*x[j]; x[i]=s/A[i][i]; }
+      out.innerHTML='<span class="dim">&gt;&gt; x = A\\b</span>\nx =\n  <span class="ok">'+x[0].toFixed(4)+'</span>\n  <span class="ok">'+x[1].toFixed(4)+'</span>\n  <span class="ok">'+x[2].toFixed(4)+'</span>\n<span class="dim">% (for Ex 8.1 these are R1, R2, R3)</span>';
+    }
+    document.getElementById("solveBtn").addEventListener("click",solve);
+    document.getElementById("resetSolveBtn").addEventListener("click",function(){build();out.innerHTML='<span class="dim">% reset to Example 8.1. Press "Solve A\\b".</span>';});
+    build(); out.innerHTML='<span class="dim">% Press "Solve A\\b" to solve the system.</span>';
+  })();
+
+  /* ============================================================
+     Newton's method stepper + SVG
+     ============================================================ */
+  (function(){
+    var X0=document.getElementById("newtX0"), X0v=document.getElementById("newtX0val");
+    var svg=document.getElementById("newtSvg"), out=document.getElementById("newtOut");
+    if(!svg) return;
+    var x, iter;
+    function f(x){return x*x-2;}
+    function df(x){return 2*x;}
+    var xmin=0, xmax=3, ymin=-3, ymax=8, W=480,H=300, padL=40,padB=40,padT=10,padR=10;
+    function sx(x){return padL+(x-xmin)/(xmax-xmin)*(W-padL-padR);}
+    function sy(y){return (H-padB)-(y-ymin)/(ymax-ymin)*(H-padT-padB);}
+    function curve(){ var pts=""; for(var i=0;i<=60;i++){ var xx=xmin+(xmax-xmin)*i/60; pts+=(i?" ":"")+sx(xx).toFixed(1)+","+sy(f(xx)).toFixed(1);} return pts; }
+    function reset(){ x=parseFloat(X0.value); iter=0; X0v.textContent=x.toFixed(1); draw(true); }
+    function draw(initial){
+      var s="";
+      s+='<line x1="'+padL+'" y1="'+sy(0)+'" x2="'+(W-padR)+'" y2="'+sy(0)+'" stroke="var(--panel-line)"/>';
+      s+='<line x1="'+sx(0)+'" y1="'+padT+'" x2="'+sx(0)+'" y2="'+(H-padB)+'" stroke="var(--panel-line)"/>';
+      s+='<line x1="'+sx(Math.SQRT2)+'" y1="'+padT+'" x2="'+sx(Math.SQRT2)+'" y2="'+(H-padB)+'" stroke="var(--good)" stroke-dasharray="3 3" stroke-width="1"/>';
+      s+='<text x="'+(sx(Math.SQRT2)+4)+'" y="'+(padT+12)+'" fill="var(--good)" font-size="11" font-family="monospace">\u221A2</text>';
+      s+='<polyline points="'+curve()+'" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
+      var fx=f(x);
+      s+='<circle cx="'+sx(x)+'" cy="'+sy(fx)+'" r="5" fill="var(--rust)"/>';
+      s+='<line x1="'+sx(x)+'" y1="'+sy(fx)+'" x2="'+sx(x)+'" y2="'+sy(0)+'" stroke="var(--rust)" stroke-dasharray="2 2"/>';
+      if(Math.abs(fx)>1e-9){
+        var xn=x-fx/df(x);
+        s+='<line x1="'+sx(x)+'" y1="'+sy(fx)+'" x2="'+sx(xn)+'" y2="'+sy(0)+'" stroke="var(--rust)" stroke-width="1.5"/>';
+        s+='<circle cx="'+sx(xn)+'" cy="'+sy(0)+'" r="4" fill="none" stroke="var(--rust)" stroke-width="2"/>';
+      }
+      s+='<text x="'+sx(x)+'" y="'+(H-padB+16)+'" fill="var(--rust)" font-size="11" font-family="monospace" text-anchor="middle">x='+x.toFixed(3)+'</text>';
+      svg.innerHTML=s;
+      if(initial){ out.innerHTML='<span class="dim">% x0 = '+x.toFixed(4)+'. Press Step to iterate.</span>'; }
+    }
+    function step(){
+      var fx=f(x);
+      if(Math.abs(fx)<1e-10){ out.innerHTML+='\n<span class="ok">Converged! x = '+x.toFixed(8)+' (error &lt; 1e-10)</span>'; return; }
+      iter++;
+      x = x - fx/df(x);
+      draw(false);
+      var line='iter '+iter+':  x = '+x.toFixed(8)+'   f(x) = '+f(x).toExponential(2);
+      if(iter===1) out.innerHTML='<span class="hi">'+line+'</span>';
+      else out.innerHTML+='\n<span class="hi">'+line+'</span>';
+    }
+    X0.addEventListener("input",reset);
+    document.getElementById("newtStep").addEventListener("click",step);
+    document.getElementById("newtReset").addEventListener("click",reset);
+    reset();
+  })();
+
+  /* ============================================================
+     Velocity solver: one Jacobian, two right-hand sides
+     ============================================================ */
+  (function(){
+    var Th2=document.getElementById("velTh2"), W2=document.getElementById("velW2");
+    var Th2v=document.getElementById("velTh2val"), W2v=document.getElementById("velW2val");
+    var out=document.getElementById("velOut"); if(!out) return;
+    var r1=10, r2=6.866, r3=17.278, r4=16.886;
+    // solve position (open branch) to get th3, th4 at a given th2 (radians) via 2D Newton
+    function solvePos(th2){
+      var t=[20*D2R, 80*D2R];
+      for(var k=0;k<40;k++){
+        var th3=t[0], th4=t[1];
+        var f0=r2*Math.cos(th2)+r3*Math.cos(th3)-r4*Math.cos(th4)-r1;
+        var f1=r2*Math.sin(th2)+r3*Math.sin(th3)-r4*Math.sin(th4);
+        var J=[[-r3*Math.sin(th3), r4*Math.sin(th4)],
+               [ r3*Math.cos(th3),-r4*Math.cos(th4)]];
+        var det=J[0][0]*J[1][1]-J[0][1]*J[1][0];
+        if(Math.abs(det)<1e-12) break;
+        // delta = -J\f
+        var d0=-( J[1][1]*f0 - J[0][1]*f1)/det;
+        var d1=-(-J[1][0]*f0 + J[0][0]*f1)/det;
+        t[0]+=d0; t[1]+=d1;
+        if(Math.abs(f0)+Math.abs(f1)<1e-12) break;
+      }
+      return t;
+    }
+    function solve2(J,b){
+      var det=J[0][0]*J[1][1]-J[0][1]*J[1][0];
+      return [ (J[1][1]*b[0]-J[0][1]*b[1])/det,
+               (-J[1][0]*b[0]+J[0][0]*b[1])/det ];
+    }
+    function draw(){
+      var th2deg=parseFloat(Th2.value), w2=parseFloat(W2.value);
+      Th2v.textContent=th2deg+"\u00B0"; W2v.textContent=w2;
+      var th2=th2deg*D2R;
+      var t=solvePos(th2); var th3=t[0], th4=t[1];
+      // check assembly is valid (real)
+      var J=[[-r3*Math.sin(th3), r4*Math.sin(th4)],
+             [ r3*Math.cos(th3),-r4*Math.cos(th4)]];
+      var b0=[ -(-r2*Math.sin(th2)), -(r2*Math.cos(th2)) ]; // = [r2 sin th2; -r2 cos th2]
+      var h=solve2(J,b0);              // coefficients
+      var w=[h[0]*w2, h[1]*w2];        // rates
+      out.innerHTML=
+        '<span class="dim">% position (open branch):</span>  th3 = <span class="hi">'+(th3*R2D).toFixed(2)+'\u00B0</span>,  th4 = <span class="hi">'+(th4*R2D).toFixed(2)+'\u00B0</span>\n'+
+        '<span class="dim">% Jacobian J =</span>\n'+
+        '   [ '+J[0][0].toFixed(2)+'  '+J[0][1].toFixed(2)+' ]\n'+
+        '   [ '+J[1][0].toFixed(2)+'  '+J[1][1].toFixed(2)+' ]\n'+
+        '\n<span class="ru">Way 1</span>  rates  J\\b  ->  th3dot = <span class="ok">'+w[0].toFixed(3)+'</span>,  th4dot = <span class="ok">'+w[1].toFixed(3)+'</span> rad/s\n'+
+        '<span class="ru">Way 2</span>  coeffs J\\b0 ->  h3 = <span class="ok">'+h[0].toFixed(4)+'</span>,  h4 = <span class="ok">'+h[1].toFixed(4)+'</span>\n'+
+        '\n<span class="dim">% check  th4dot = h4 * th2dot:</span>  '+h[1].toFixed(4)+' \u00D7 '+w2+' = <span class="hi">'+(h[1]*w2).toFixed(3)+'</span> rad/s  \u2713';
+    }
+    Th2.addEventListener("input",draw); W2.addEventListener("input",draw); draw();
+  })();
+
+  /* ============================================================
+     Plotting sandbox
+     ============================================================ */
+  (function(){
+    var amp=document.getElementById("plAmp"), ph=document.getElementById("plPhase");
+    var ampv=document.getElementById("plAmpval"), phv=document.getElementById("plPhaseval");
+    var svg=document.getElementById("plotSvg"); if(!svg) return;
+    var W=480,H=300,padL=46,padB=40,padT=12,padR=12;
+    function sx(x){return padL+(x/360)*(W-padL-padR);}
+    function sy(y){return (H-padB)-((y+10)/200)*(H-padT-padB);}
+    function draw(){
+      var A=parseFloat(amp.value), P=parseFloat(ph.value);
+      ampv.textContent=A; phv.textContent=P+"\u00B0";
+      var s="";
+      s+='<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="var(--ink-soft)"/>';
+      s+='<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(H-padB)+'" stroke="var(--ink-soft)"/>';
+      [0,90,180,270,360].forEach(function(t){ s+='<line x1="'+sx(t)+'" y1="'+(H-padB)+'" x2="'+sx(t)+'" y2="'+(H-padB+4)+'" stroke="var(--ink-soft)"/>';
+        s+='<text x="'+sx(t)+'" y="'+(H-padB+16)+'" fill="var(--ink-soft)" font-size="10" font-family="monospace" text-anchor="middle">'+t+'</text>'; });
+      var dpts=""; for(var i=0;i<=72;i++){ var x=i*5; dpts+=(i?" ":"")+sx(x).toFixed(1)+","+sy(90).toFixed(1);}
+      s+='<polyline points="'+dpts+'" fill="none" stroke="var(--rust)" stroke-width="1.6" stroke-dasharray="6 4"/>';
+      var apts=""; for(var i2=0;i2<=72;i2++){ var x2=i2*5; var y2=90+A*Math.sin((x2+P)*D2R); apts+=(i2?" ":"")+sx(x2).toFixed(1)+","+sy(y2).toFixed(1);}
+      s+='<polyline points="'+apts+'" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
+      s+='<rect x="'+(W-150)+'" y="'+(padT+2)+'" width="138" height="40" fill="var(--panel)" stroke="var(--panel-line)" rx="5"/>';
+      s+='<line x1="'+(W-142)+'" y1="'+(padT+14)+'" x2="'+(W-120)+'" y2="'+(padT+14)+'" stroke="var(--accent)" stroke-width="2.5"/>';
+      s+='<text x="'+(W-116)+'" y="'+(padT+18)+'" font-size="11" font-family="monospace" fill="var(--ink)">Actual</text>';
+      s+='<line x1="'+(W-142)+'" y1="'+(padT+30)+'" x2="'+(W-120)+'" y2="'+(padT+30)+'" stroke="var(--rust)" stroke-width="1.6" stroke-dasharray="6 4"/>';
+      s+='<text x="'+(W-116)+'" y="'+(padT+34)+'" font-size="11" font-family="monospace" fill="var(--ink)">Desired</text>';
+      s+='<text x="'+(W/2)+'" y="'+(H-4)+'" font-size="11" font-family="monospace" fill="var(--ink-soft)" text-anchor="middle">theta2 (deg)</text>';
+      s+='<text transform="translate(13,'+(H/2)+') rotate(-90)" font-size="11" font-family="monospace" fill="var(--ink-soft)" text-anchor="middle">theta4 (deg)</text>';
+      svg.innerHTML=s;
+    }
+    amp.addEventListener("input",draw); ph.addEventListener("input",draw); draw();
+  })();
+
+  /* ============================================================
+     Self-check quiz
+     ============================================================ */
+  var QUIZ=[
+    {q:"You write <code class='inline'>cos(45)</code> expecting the cosine of 45 degrees. What actually happens?",
+     opts:["Returns 0.7071 correctly","Returns 0.5253 \u2014 it treated 45 as radians","Throws an error","Returns 45"],
+     a:1, fb:"MATLAB's cos expects radians. cos(45) is the cosine of 45 radians (\u22480.5253). Use cosd(45) or cos(45*pi/180)."},
+    {q:"What is the value of <code class='inline'>v(1)</code> for <code class='inline'>v=[10 20 30]</code>?",
+     opts:["10","20","0 (indexing starts at 0)","Error"],
+     a:0, fb:"MATLAB indexes from 1, so v(1) is the first element, 10. (Asking for v(0) is an error.)"},
+    {q:"To solve the system A\u00B7x = b, the recommended MATLAB command is:",
+     opts:["x = inv(A)*b","x = A/b","x = A\\b","x = b\\A"],
+     a:2, fb:"Backslash (mldivide) solves A\u00B7x=b directly via Gaussian elimination \u2014 faster and more accurate than forming inv(A)."},
+    {q:"You want one x-coordinate for each of 73 crank angles at once. Which is correct?",
+     opts:["r2 * cosd(theta2)","r2 .* cosd(theta2)","r2 * cos(theta2)","cosd(theta2) * r2'"],
+     a:1, fb:"Sweeping across a vector of angles needs element-wise .* so each angle pairs with itself. (With a scalar r2, * also works, but .* is the safe habit when both sides are vectors.)"},
+    {q:"Which function correctly recovers a link angle in any of the four quadrants?",
+     opts:["atan(y/x)","atan2(y,x)","tan(y/x)","asin(y)"],
+     a:1, fb:"atan2(y,x) keeps the signs of both components, so it returns the true orientation across all four quadrants. Plain atan can't distinguish opposite directions."},
+    {q:"What should the first line of essentially every homework script be?",
+     opts:["plot(x,y)","clear; clc;","end","function"],
+     a:1, fb:"clear; clc; wipes leftover variables and clears the screen so stale values from a previous run can't corrupt your answer."},
+    {q:"When sweeping a four-bar across 360\u00B0 with fsolve, why feed each step's answer as the next step's guess?",
+     opts:["It's required syntax","To stay on one assembly branch and converge fast","To make the plot prettier","It clears the workspace"],
+     a:1, fb:"This 'warm start' / continuation keeps the solver on a single configuration (open vs. crossed) and gives it an excellent nearby starting point each step."},
+    {q:"<code class='inline'>f = @(x) x.^2 - 2;</code> defines what?",
+     opts:["A script file","An anonymous function of x","A matrix","A plot"],
+     a:1, fb:"@(x) creates an anonymous function \u2014 a one-line function you can pass straight to fzero or fsolve."},
+    {q:"You see <code class='inline'>Matrix dimensions must agree</code>. A likely cause is:",
+     opts:["You forgot a semicolon","You used * where you needed .* (or shapes don't line up)","Indexing from 1","Using fprintf"],
+     a:1, fb:"Dimension errors come from mismatched shapes \u2014 often matrix * instead of element-wise .*, or adding a row to a column vector."},
+    {q:"Which command pair overlays a 'desired' curve on top of an 'actual' curve?",
+     opts:["plot then plot (no hold)","plot; hold on; plot","grid on; legend","disp; fprintf"],
+     a:1, fb:"Without hold on, the second plot erases the first. plot \u2192 hold on \u2192 plot overlays both on the same axes (like Figure 8.5)."}
+  ];
+  (function(){
+    var host=document.getElementById("quizHost"); if(!host) return;
+    var answered=0, correct=0;
+    var scoreEl=document.getElementById("quizScore");
+    QUIZ.forEach(function(item,idx){
+      var card=document.createElement("div"); card.className="quiz-q";
+      var letters=["A","B","C","D"];
+      var html='<div class="qnum">Question '+(idx+1)+'</div><div class="qtext">'+item.q+'</div>';
+      item.opts.forEach(function(o,i){ html+='<button class="opt" type="button" data-i="'+i+'"><span class="mk">'+letters[i]+'</span>'+o+'</button>'; });
+      html+='<div class="quiz-fb" role="status"></div>';
+      card.innerHTML=html;
+      var fb=card.querySelector(".quiz-fb"); var done=false;
+      card.querySelectorAll(".opt").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          if(done) return; done=true; answered++;
+          var chosen=parseInt(btn.getAttribute("data-i"),10);
+          var ok=chosen===item.a;
+          if(ok){ correct++; btn.classList.add("correct"); fb.className="quiz-fb show right"; fb.innerHTML="\u2713 Correct. "+item.fb; }
+          else { btn.classList.add("wrong"); card.querySelectorAll(".opt")[item.a].classList.add("correct");
+                 fb.className="quiz-fb show no"; fb.innerHTML="\u2717 Not quite. "+item.fb; }
+          card.querySelectorAll(".opt").forEach(function(b){ b.setAttribute("tabindex","-1"); });
+          scoreEl.textContent="Score: "+correct+" / "+answered;
+        });
+      });
+      host.appendChild(card);
+    });
+  })();
+
+  /* ============================================================
+     Videos
+     ============================================================ */
+  var VIDEOS=[
+    {id:"T_ekAD7U-wU", t:"Getting Started with MATLAB", src:"MathWorks", rt:"~6 min", sup:"Part 0\u20131 \u00B7 Setup & basics"},
+    {id:"GW9siUgUWXA", t:"Variables, Vectors & Matrices", src:"MATLAB tutorial", rt:"~12 min", sup:"Part 1\u20132 \u00B7 Vectors & matrices"},
+    {id:"5hO7p_GBe7g", t:"Solving Linear Systems (backslash)", src:"Numerical methods", rt:"~10 min", sup:"Part 3 \u00B7 A\\b"},
+    {id:"zPDp_ewoyhM", t:"The Newton-Raphson Method", src:"Numerical methods", rt:"~10 min", sup:"Part 5 \u00B7 Newton's method"},
+    {id:"Lf-iCDdEKWk", t:"Using fzero and fsolve", src:"MATLAB tutorial", rt:"~9 min", sup:"Part 5 \u00B7 Built-in solvers"},
+    {id:"BUvJjwTuysc", t:"Velocity & Acceleration of a Four-Bar", src:"Mechanism kinematics", rt:"~14 min", sup:"Part 7 \u00B7 Velocity & acceleration"},
+    {id:"_AEEYHmyqgU", t:"Plotting in MATLAB", src:"MATLAB tutorial", rt:"~11 min", sup:"Part 6 \u00B7 Plotting"}
+  ];
+  (function(){
+    var grid=document.getElementById("vidGrid"); if(!grid) return;
+    VIDEOS.forEach(function(v){
+      var card=document.createElement("div"); card.className="vid-card";
+      card.innerHTML='<div class="vid-frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/'+v.id+
+        '" title="'+escapeHtml(v.t)+'" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'+
+        '<div class="vid-meta"><p class="vt">'+v.t+'</p><p class="vd">'+v.src+' &middot; '+v.rt+' &middot; <span>'+v.sup+'</span></p></div>';
+      grid.appendChild(card);
+    });
+  })();
+
+  /* ============================================================
+     Glossary (searchable)
+     ============================================================ */
+  var GLOSS=[
+    ["Workspace","The set of variables currently in memory. The Workspace panel shows each variable's value and shape (rows\u00D7columns)."],
+    ["Command Window","The live >> prompt where you type one command at a time for quick tests \u2014 disposable scratch work, not saved."],
+    ["Script (.m file)","A saved file of commands that run top-to-bottom. Your homework solution lives here so you can re-run and submit it."],
+    ["Function","A reusable routine with its own inputs, outputs, and private variables, declared with the function keyword."],
+    ["Anonymous function","A one-line function created with @, e.g. @(x) x.^2-2. Handy to pass directly to fzero/fsolve."],
+    ["Scalar / vector / matrix","A single number; a 1-D list; a 2-D grid. To MATLAB they're all matrices \u2014 a scalar is just 1\u00D71."],
+    ["Element-wise (.* ./ .^)","Operations applied entry-by-entry between matching positions \u2014 needed to sweep a formula across many angles at once."],
+    ["Backslash ( \\ )","The mldivide operator. x = A\\b solves the linear system A\u00B7x=b efficiently via Gaussian elimination."],
+    ["Singular matrix","A coefficient matrix with no unique solution (determinant 0). Backslash warns and returns Inf/NaN."],
+    ["Newton's method","An iterative root-finder: from a guess, follow the tangent to the axis, repeat. Converges quadratically near the root."],
+    ["Jacobian","The matrix of partial derivatives used in Newton's method for systems \u2014 the multi-variable analogue of the slope f'(x)."],
+    ["Kinematic coefficient","The output rate per unit input rate, e.g. h4 = d\u03B84/d\u03B82. Found by solving J\\b0 with the input rate set to 1 \u2014 pure geometry, independent of crank speed (Ch. 4.2)."],
+    ["Time-based rates","Actual angular velocities/accelerations (rad/s) found by solving the same Jacobian system with the real crank rate in the right-hand side (Ch. 4.1)."],
+    ["Dead / limit position","A crank angle where the output momentarily stops or reverses \u2014 located where a kinematic coefficient passes through zero (Ch. 4.3\u20134.4)."],
+    ["fzero","Built-in solver for a single nonlinear equation in one unknown. No extra toolbox required."],
+    ["fsolve","Solver for a system of nonlinear equations (Optimization Toolbox). Used for coupled loop-closure equations."],
+    ["Warm start / continuation","Feeding the previous solution as the next initial guess when sweeping, to converge fast and stay on one branch."],
+    ["Preallocation","Creating a results array (e.g. zeros(1,n)) before a loop fills it, so MATLAB needn't keep resizing it."],
+    ["Radians vs degrees","sin/cos/tan use radians; sind/cosd/tand use degrees. Mixing them is the #1 silent bug in mechanism code."],
+    ["atan2 / atan2d","Four-quadrant arctangent that preserves sign information to return a link's true orientation."],
+    ["Vector loop","The mechanism's position vectors that must sum to zero around a closed chain \u2014 the basis of position analysis."],
+    ["Freudenstein's equation","The input\u2013output rotation relationship for a four-bar, central to function-generation synthesis (Ch. 8)."],
+    ["MATLAB Online","Browser-based MATLAB needing no install; full access via campus licenses, or a 20-hr/month free basic tier."],
+    ["GNU Octave","A free, open-source MATLAB-compatible environment that runs nearly all ENGI 216 code unchanged."],
+    ["fprintf","Formatted print, e.g. fprintf('%.2f\\n',x). %.2f means a decimal with 2 places; \\n is a newline."],
+    ["Semicolon (;)","Ends a line silently. Without it, MATLAB echoes the result \u2014 the cause of flooded output in loops."]
+  ];
+  (function(){
+    var list=document.getElementById("glossList"); if(!list) return;
+    var search=document.getElementById("glossSearch");
+    var empty=document.getElementById("glossEmpty");
+    GLOSS.sort(function(a,b){return a[0].toLowerCase()<b[0].toLowerCase()?-1:1;});
+    GLOSS.forEach(function(g){
+      var div=document.createElement("div"); div.className="gterm";
+      div.innerHTML='<dt>'+escapeHtml(g[0])+'</dt><dd>'+escapeHtml(g[1])+'</dd>';
+      div._hay=(g[0]+" "+g[1]).toLowerCase();
+      list.appendChild(div);
+    });
+    if(search){
+      search.addEventListener("input",function(){
+        var q=search.value.trim().toLowerCase(); var shown=0;
+        list.querySelectorAll(".gterm").forEach(function(d){
+          var hit=!q||d._hay.indexOf(q)>=0; d.classList.toggle("hidden",!hit); if(hit)shown++;
+        });
+        empty.style.display=shown?"none":"block";
+      });
+    }
+  })();
+
+  /* ============================================================
+     External resources
+     ============================================================ */
+  var RES=[
+    ["Official MathWorks documentation",[
+      ["MATLAB Onramp \u2014 free ~2 hr interactive course","https://matlabacademy.mathworks.com/details/matlab-onramp/gettingstarted"],
+      ["Basic Matrix Operations","https://www.mathworks.com/help/matlab/math/basic-matrix-operations.html"],
+      ["Systems of Linear Equations","https://www.mathworks.com/help/matlab/math/systems-of-linear-equations.html"],
+      ["fsolve reference","https://www.mathworks.com/help/optim/ug/fsolve.html"],
+      ["fzero reference","https://www.mathworks.com/help/matlab/ref/fzero.html"],
+      ["2-D plotting (plot)","https://www.mathworks.com/help/matlab/ref/plot.html"]
+    ]],
+    ["Getting access",[
+      ["MATLAB Online (run in browser)","https://matlab.mathworks.com"],
+      ["MATLAB for Students","https://www.mathworks.com/products/matlab/student.html"],
+      ["Check Campus-Wide eligibility","https://www.mathworks.com/academia/tah-support-program/eligibility.html"],
+      ["GNU Octave (free alternative)","https://octave.org"]
+    ]],
+    ["Foundational refreshers",[
+      ["UNSW: MATLAB Self-Paced \u2014 Linear systems","https://web.maths.unsw.edu.au/~mclean/MatlabSelfPaced/lesson6/MatlabLesson6_LinearSystems.html"],
+      ["Engineering LibreTexts: Solving linear systems (backslash)","https://eng.libretexts.org/Bookshelves/Mechanical_Engineering/Math_Numerics_and_Programming_(for_Mechanical_Engineers)"]
+    ]]
+  ];
+  (function(){
+    var host=document.getElementById("resHost"); if(!host) return;
+    RES.forEach(function(cat){
+      var div=document.createElement("div"); div.className="res-cat";
+      var h=document.createElement("h4"); h.textContent=cat[0]; div.appendChild(h);
+      var ul=document.createElement("ul"); ul.className="res-list";
+      cat[1].forEach(function(link){
+        var li=document.createElement("li");
+        var a=document.createElement("a"); a.href=link[1]; a.target="_blank"; a.rel="noopener";
+        a.innerHTML=escapeHtml(link[0])+'<span class="ext">&#8599; new tab</span>';
+        li.appendChild(a); ul.appendChild(li);
+      });
+      div.appendChild(ul); host.appendChild(div);
+    });
+  })();
+
+  /* ---------- Print cheat sheet ---------- */
+  var pcb=document.getElementById("printCardBtn");
+  if(pcb){ pcb.addEventListener("click",function(){ window.print(); }); }
+
+  /* ---------- References block in footer ---------- */
+  var rb=document.getElementById("refblock");
+  if(rb){ rb.innerHTML="Course text: Stani\u0161i\u0107, M. M., <i>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</i> (Cengage Learning, 2015). "+
+    "MATLAB facts verified against MathWorks documentation (mathworks.com), 2026. MATLAB is a registered trademark of The MathWorks, Inc.; this module is an independent educational resource."; }
+
+  onScroll();
+})();
+
+</script>
+</body>
+</html>
