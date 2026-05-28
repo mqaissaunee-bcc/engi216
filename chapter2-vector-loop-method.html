@@ -242,6 +242,53 @@
   .stage-wrap{ position:relative; }
   svg text{ font-family:var(--mono); }
 
+  /* ---------- Newton example presets ---------- */
+  .ex-btn{ flex:1 1 160px; font-size:.84rem; padding:9px 12px; min-height:44px; }
+  .ex-btn[aria-pressed="true"]{ background:var(--accent-dk); color:#fff; border-color:var(--accent-dk); }
+  @media (prefers-color-scheme: dark){
+    .ex-btn[aria-pressed="true"]{ background:var(--accent); color:var(--paper); }
+  }
+  .ex-blurb{
+    font-family:var(--mono); font-size:.84rem; background:var(--paper-2);
+    border-left:3px solid var(--accent); padding:10px 14px; margin:10px 0;
+    border-radius:0 6px 6px 0; color:var(--ink); line-height:1.5;
+  }
+  .ex-blurb b{ color:var(--accent-dk); }
+
+  /* ---------- textbook figure (in examples section) ---------- */
+  .tb-figure{
+    margin:14px 0 18px; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:8px; overflow:hidden;
+  }
+  .tb-figure svg{ display:block; width:100%; height:auto; background:var(--panel); }
+  .tb-figure figcaption{
+    background:var(--paper-2); border-top:1px solid var(--panel-line);
+    padding:10px 14px; font-family:var(--mono); font-size:.82rem;
+    color:var(--ink-soft); line-height:1.5;
+  }
+  .tb-figure figcaption b{ color:var(--accent-dk); letter-spacing:.06em; }
+
+  /* color classes so SVG primitives respect dark mode via CSS variables */
+  .tb-figure .ink       { stroke:var(--ink); fill:none; }
+  .tb-figure .ink-thin  { stroke:var(--ink); fill:none; stroke-width:1; }
+  .tb-figure .ink-soft  { stroke:var(--ink-soft); fill:none; }
+  .tb-figure .ink-fill  { fill:var(--ink); }
+  .tb-figure .paper-fill{ fill:var(--panel); }
+  .tb-figure .cyan      { stroke:var(--accent); fill:none; }
+  .tb-figure .cyan-fill { fill:var(--accent); }
+  .tb-figure .cyan-light{ fill:var(--accent); opacity:0.13; }
+  .tb-figure .rust      { stroke:var(--accent-2); fill:none; }
+  .tb-figure .rust-fill { fill:var(--accent-2); }
+  .tb-figure .slider-fill{ fill:var(--accent-dk); }
+  .tb-figure text.lbl-ink   { fill:var(--ink); font-weight:700; }
+  .tb-figure text.lbl-soft  { fill:var(--ink-soft); font-style:italic; }
+  .tb-figure text.lbl-cyan  { fill:var(--accent-dk); font-style:italic; font-weight:700; }
+  .tb-figure text.lbl-rust  { fill:var(--accent-2); font-style:italic; font-weight:700; }
+  .tb-figure .hatch-line{ stroke:var(--ink); stroke-width:1.2; }
+  .tb-figure .spring-line{ stroke:var(--ink); stroke-width:1.6; fill:none; }
+  .tb-figure .dim-line { stroke:var(--ink-soft); stroke-width:1; stroke-dasharray:3 3; }
+  .tb-figure .rail-line{ stroke:var(--ink-soft); stroke-width:1.4; stroke-dasharray:6 5; opacity:0.7; }
+
   /* ---------- readouts ---------- */
   .readout{
     font-family:var(--mono); display:flex; flex-wrap:wrap; gap:10px 18px;
@@ -796,9 +843,17 @@
   <div class="card tool" aria-labelledby="newton-tool-h">
     <div class="tool-label"><span>Newton&rsquo;s method, iteration by iteration</span></div>
     <h3 id="newton-tool-h" style="margin-top:.3em">Watch the tangent walk to the root</h3>
-    <p>Here is a 1-D root problem of the kind a position equation produces: <em>f</em>(<em>x</em>) = <em>x</em> &minus; <em>k</em>&middot;cos(<em>x</em>) (a transcendental equation, no closed form). Set your initial guess and step through. Each press draws the tangent line at the current guess and jumps to where it crosses zero &mdash; exactly Equation (2.61) in one variable. The residual |<em>f</em>| should plunge toward zero.</p>
+    <p>Step through Newton&rsquo;s method on five different root problems. Each press draws the tangent line at the current guess and jumps to where it crosses zero &mdash; exactly Equation (2.61) in one variable. The residual |<em>f</em>| should plunge toward zero <em>when</em> the method converges; some examples here show what happens when it doesn&rsquo;t.</p>
+    <div class="controls" role="group" aria-label="Choose an example problem">
+      <button type="button" class="ex-btn" data-ex="0" aria-pressed="true">1 · Mechanism residual (default)</button>
+      <button type="button" class="ex-btn secondary" data-ex="1" aria-pressed="false">2 · Quadratic (good case)</button>
+      <button type="button" class="ex-btn secondary" data-ex="2" aria-pressed="false">3 · Cubic with three roots</button>
+      <button type="button" class="ex-btn secondary" data-ex="3" aria-pressed="false">4 · arctan (can diverge)</button>
+      <button type="button" class="ex-btn secondary" data-ex="4" aria-pressed="false">5 · Four-bar residual (two branches)</button>
+    </div>
+    <div class="ex-blurb" id="nwBlurb"></div>
     <div class="controls">
-      <div class="ctrl"><label for="nwK">Parameter k · <span class="val" id="nwKv">1.5</span></label><input type="range" id="nwK" min="0.5" max="3" value="1.5" step="0.1"></div>
+      <div class="ctrl" id="nwKwrap"><label for="nwK">Parameter k · <span class="val" id="nwKv">1.5</span></label><input type="range" id="nwK" min="0.5" max="3" value="1.5" step="0.1"></div>
       <div class="ctrl"><label for="nwX0">Initial guess x&#8304; · <span class="val" id="nwX0v">3.0</span></label><input type="range" id="nwX0" min="-2" max="6" value="3.0" step="0.1"></div>
     </div>
     <div class="controls">
@@ -902,6 +957,79 @@
   <details>
     <summary>Example 2.2 — Position equations of an offset crank-slider</summary>
     <div class="body">
+      <figure class="tb-figure" aria-labelledby="fig22-cap">
+        <svg viewBox="0 0 640 360" role="img" aria-label="Schematic of an offset crank-slider mechanism. A crank r-bar 2 rotates about a fixed pin O, reaching point A. From A, the coupler r-bar 3 extends down-right to a slider B that runs along a horizontal line offset by distance e from the crank pivot. Vector r-bar 4 is shown along the X axis from O to the projection of B. Angles theta 2 and theta 3 are measured from the positive X axis to the crank and coupler.">
+          <defs>
+            <pattern id="hatch22" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="8" class="hatch-line"/>
+            </pattern>
+            <marker id="arrInk22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="ink-fill"/>
+            </marker>
+            <marker id="arrCyan22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="cyan-fill"/>
+            </marker>
+            <marker id="arrRust22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="rust-fill"/>
+            </marker>
+          </defs>
+          <!-- light coupling triangle (visual hint) -->
+          <polygon points="120,240 250,135 470,210" class="cyan-light"/>
+          <!-- ground line -->
+          <line x1="60" y1="285" x2="600" y2="285" class="ink" stroke-width="2"/>
+          <rect x="60" y="285" width="540" height="14" fill="url(#hatch22)" opacity="0.55"/>
+          <!-- slider guide rail -->
+          <line x1="100" y1="210" x2="600" y2="210" class="rail-line"/>
+          <text x="592" y="204" font-size="11" class="lbl-soft" text-anchor="end">slider line</text>
+          <!-- offset bracket -->
+          <line x1="80" y1="240" x2="80" y2="210" class="dim-line"/>
+          <text x="65" y="228" font-size="13" class="lbl-soft">e</text>
+          <line x1="76" y1="240" x2="84" y2="240" class="ink-soft" stroke-width="1.2"/>
+          <line x1="76" y1="210" x2="84" y2="210" class="ink-soft" stroke-width="1.2"/>
+          <!-- X axis arrow -->
+          <line x1="120" y1="240" x2="560" y2="240" class="ink" stroke-width="1.2" opacity="0.8" marker-end="url(#arrInk22)"/>
+          <text x="565" y="244" font-size="12" class="lbl-ink">X</text>
+          <line x1="120" y1="240" x2="120" y2="120" class="ink" stroke-width="1.2" opacity="0.8" marker-end="url(#arrInk22)"/>
+          <text x="124" y="118" font-size="12" class="lbl-ink">Y</text>
+          <!-- Ground pin at O -->
+          <circle cx="120" cy="240" r="6" class="paper-fill ink" stroke-width="2"/>
+          <circle cx="120" cy="240" r="2" class="ink-fill"/>
+          <polygon points="108,253 132,253 126,265 114,265" class="ink" stroke-width="1.5"/>
+          <line x1="108" y1="265" x2="132" y2="265" class="ink" stroke-width="1.5"/>
+          <line x1="108" y1="265" x2="102" y2="273" class="ink" stroke-width="1.2"/>
+          <line x1="116" y1="265" x2="110" y2="273" class="ink" stroke-width="1.2"/>
+          <line x1="124" y1="265" x2="118" y2="273" class="ink" stroke-width="1.2"/>
+          <line x1="132" y1="265" x2="126" y2="273" class="ink" stroke-width="1.2"/>
+          <text x="106" y="258" font-size="12" class="lbl-ink">O</text>
+          <!-- Crank r2 -->
+          <line x1="120" y1="240" x2="250" y2="135" class="rust" stroke-width="3.4" marker-end="url(#arrRust22)"/>
+          <text x="170" y="178" font-size="14" class="lbl-rust">r̄₂</text>
+          <!-- theta_2 arc -->
+          <path d="M 165 240 A 45 45 0 0 0 152 209" class="rust" stroke-width="1.4"/>
+          <text x="170" y="225" font-size="12" class="lbl-rust" font-weight="normal">θ₂</text>
+          <!-- A: free pin -->
+          <circle cx="250" cy="135" r="5" class="paper-fill ink" stroke-width="2"/>
+          <text x="244" y="125" font-size="13" class="lbl-ink">A</text>
+          <!-- Coupler r3 -->
+          <line x1="250" y1="135" x2="470" y2="210" class="cyan" stroke-width="3.4" marker-end="url(#arrCyan22)"/>
+          <text x="355" y="160" font-size="14" class="lbl-cyan">r̄₃</text>
+          <!-- theta_3 arc -->
+          <line x1="250" y1="135" x2="320" y2="135" class="cyan" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>
+          <path d="M 295 135 A 45 45 0 0 0 309 150" class="cyan" stroke-width="1.4"/>
+          <text x="307" y="148" font-size="12" class="lbl-cyan" font-weight="normal">θ₃</text>
+          <!-- B: slider pin -->
+          <circle cx="470" cy="210" r="5" class="paper-fill ink" stroke-width="2"/>
+          <text x="476" y="200" font-size="13" class="lbl-ink">B</text>
+          <!-- Slider block -->
+          <rect x="442" y="194" width="56" height="32" rx="3" class="slider-fill" opacity="0.85" stroke="var(--ink)" stroke-width="2"/>
+          <!-- r4: from O along X to projection of B -->
+          <line x1="120" y1="262" x2="470" y2="262" class="ink" stroke-width="2" marker-end="url(#arrInk22)"/>
+          <text x="280" y="278" font-size="13" class="lbl-ink" font-style="italic">r̄₄</text>
+          <!-- drop from B to r4 line -->
+          <line x1="470" y1="226" x2="470" y2="262" class="dim-line"/>
+        </svg>
+        <figcaption id="fig22-cap"><b>FIGURE 2.6</b> &mdash; The offset crank-slider. Crank r̄₂ rotates about the fixed pin <em>O</em>; coupler r̄₃ connects the crank tip <em>A</em> to the slider <em>B</em>, which moves along a horizontal rail at offset <em>e</em>. The slider&rsquo;s position is r̄₄, measured from <em>O</em> along the <em>X</em> axis.</figcaption>
+      </figure>
       <p><strong>Problem.</strong> Write the position equations of an offset crank-slider whose crank r&#8322; rotates about a fixed pin, whose coupler is r&#8323;, whose slider runs along a horizontal line at offset <em>e</em>, and whose slider position is r&#8324;.</p>
       <p><strong>Loop.</strong> One closed loop: crank, then coupler, then back along the slider line and the offset. The vector loop equation decomposes into:</p>
       <div class="eqn">r&#8322;cos&theta;&#8322; + r&#8323;cos&theta;&#8323; &minus; r&#8324; = 0 <span class="lbl">(2.7)</span></div>
@@ -918,6 +1046,136 @@
   <details>
     <summary>Example 2.7 — A three-loop front loader; counting DOF from the equations</summary>
     <div class="body">
+      <figure class="tb-figure" aria-labelledby="fig23-cap">
+        <svg viewBox="0 0 700 460" role="img" aria-label="Skeleton vector-loop diagram of a front loader. Two ground pins at the left are joined by a vertical link r-bar 1. From the upper pin, a hydraulic cylinder (r-bar 2 and r-bar 4) extends right, connecting through a slider to the boom. From the lower pin, vector r-bar 1 along X. A large triangular boom is the central link. The boom connects through r-bar 5 to a second hydraulic cylinder (r-bar 7, r-bar 8) which actuates the bucket (link 9). Vectors r-bar 9 and r-bar 10 locate the bucket. Angles gamma and phi are shown at the boom and bucket joints.">
+          <defs>
+            <pattern id="hatch23" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="7" class="hatch-line"/>
+            </pattern>
+            <marker id="arrInk23" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="ink-fill"/>
+            </marker>
+            <marker id="arrCyan23" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="cyan-fill"/>
+            </marker>
+            <marker id="arrRust23" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="rust-fill"/>
+            </marker>
+          </defs>
+
+          <!-- Background tinted boom (link 4) -->
+          <polygon points="100,140 380,90 470,250 100,260" class="cyan-light"/>
+          <!-- Bucket (link 9) -->
+          <polygon points="540,260 640,260 660,360 525,330" class="cyan" stroke-width="1.5" fill="var(--accent)" fill-opacity="0.2"/>
+          <text x="595" y="305" font-size="14" class="lbl-cyan">9</text>
+
+          <!-- ===== GROUND PINS ===== -->
+          <!-- Top ground pin (link 1, upper) -->
+          <circle cx="100" cy="140" r="6" class="paper-fill ink" stroke-width="2"/>
+          <circle cx="100" cy="140" r="2" class="ink-fill"/>
+          <polygon points="86,126 114,126 108,114 92,114" class="ink" stroke-width="1.5"/>
+          <line x1="86" y1="114" x2="114" y2="114" class="ink" stroke-width="1.5"/>
+          <line x1="86" y1="114" x2="80" y2="106" class="ink" stroke-width="1"/>
+          <line x1="94" y1="114" x2="88" y2="106" class="ink" stroke-width="1"/>
+          <line x1="102" y1="114" x2="96" y2="106" class="ink" stroke-width="1"/>
+          <line x1="110" y1="114" x2="104" y2="106" class="ink" stroke-width="1"/>
+          <text x="76" y="148" font-size="13" class="lbl-ink">1</text>
+
+          <!-- Bottom ground pin (link 1, lower) -->
+          <circle cx="100" cy="260" r="6" class="paper-fill ink" stroke-width="2"/>
+          <circle cx="100" cy="260" r="2" class="ink-fill"/>
+          <polygon points="86,274 114,274 108,286 92,286" class="ink" stroke-width="1.5"/>
+          <line x1="86" y1="286" x2="114" y2="286" class="ink" stroke-width="1.5"/>
+          <line x1="86" y1="286" x2="80" y2="294" class="ink" stroke-width="1"/>
+          <line x1="94" y1="286" x2="88" y2="294" class="ink" stroke-width="1"/>
+          <line x1="102" y1="286" x2="96" y2="294" class="ink" stroke-width="1"/>
+          <line x1="110" y1="286" x2="104" y2="294" class="ink" stroke-width="1"/>
+          <text x="76" y="270" font-size="13" class="lbl-ink">1</text>
+
+          <!-- X-Y axes at top ground pin (origin) -->
+          <line x1="100" y1="140" x2="100" y2="180" class="ink" stroke-width="1.2" marker-end="url(#arrInk23)" opacity="0.8"/>
+          <text x="104" y="178" font-size="11" class="lbl-ink">X</text>
+          <line x1="100" y1="140" x2="140" y2="140" class="ink" stroke-width="1.2" marker-end="url(#arrInk23)" opacity="0.8"/>
+          <text x="138" y="136" font-size="11" class="lbl-ink">Y</text>
+
+          <!-- ===== LOOP 1: 1-2-3-4 ===== -->
+          <!-- r1 vector (vertical between two ground pins) -->
+          <line x1="100" y1="142" x2="100" y2="258" class="ink" stroke-width="2.4" marker-end="url(#arrInk23)"/>
+          <text x="76" y="205" font-size="14" class="lbl-ink" font-style="italic">r̄₁</text>
+
+          <!-- r2: from bottom ground pin to hydraulic cylinder (link 2 body) -->
+          <line x1="100" y1="260" x2="210" y2="240" class="rust" stroke-width="2.4" marker-end="url(#arrRust23)"/>
+          <text x="142" y="262" font-size="13" class="lbl-rust">r̄₂</text>
+          <!-- cylinder body (link 2) - drawn as rectangle -->
+          <rect x="160" y="230" width="60" height="22" rx="2" class="paper-fill ink" stroke-width="1.5" opacity="0.9"/>
+          <text x="186" y="245" font-size="11" class="lbl-ink">2</text>
+          <!-- piston rod (link 3) emerging from cylinder -->
+          <rect x="220" y="236" width="80" height="10" class="slider-fill" opacity="0.6" stroke="var(--ink)" stroke-width="1"/>
+          <text x="252" y="231" font-size="11" class="lbl-ink">3</text>
+          <!-- r4: from top pin down-right to pin at end of piston (where rod meets link 4 boom) -->
+          <line x1="100" y1="140" x2="305" y2="240" class="ink" stroke-width="2.4" marker-end="url(#arrInk23)"/>
+          <text x="218" y="178" font-size="13" class="lbl-ink" font-style="italic">r̄₄</text>
+          <!-- pin at piston rod tip -->
+          <circle cx="305" cy="240" r="5" class="paper-fill ink" stroke-width="2"/>
+
+          <!-- Boom (link 4) label -->
+          <text x="280" y="172" font-size="14" class="lbl-cyan">4</text>
+
+          <!-- ===== LOOP 2: 4-5-6-8 ===== -->
+          <!-- r5: from a point on the boom to a pin -->
+          <line x1="370" y1="100" x2="460" y2="170" class="cyan" stroke-width="2.4" marker-end="url(#arrCyan23)"/>
+          <text x="403" y="125" font-size="13" class="lbl-cyan">r̄₅</text>
+          <text x="430" y="160" font-size="13" class="lbl-cyan">5</text>
+          <!-- pin at top of boom -->
+          <circle cx="370" cy="100" r="5" class="paper-fill ink" stroke-width="2"/>
+          <!-- pin at the end of r5 -->
+          <circle cx="460" cy="170" r="5" class="paper-fill ink" stroke-width="2"/>
+          <!-- second hydraulic: cylinder body (link 6) -->
+          <rect x="445" y="180" width="44" height="56" rx="2" class="paper-fill ink" stroke-width="1.5" opacity="0.9"/>
+          <text x="463" y="216" font-size="11" class="lbl-ink">6</text>
+          <!-- piston rod (link 7) emerging downward from cylinder 6 -->
+          <rect x="461" y="236" width="10" height="50" class="slider-fill" opacity="0.6" stroke="var(--ink)" stroke-width="1"/>
+          <text x="478" y="270" font-size="11" class="lbl-ink">7</text>
+
+          <!-- ===== LOOP 3: 4-8-7-9 ===== -->
+          <!-- r3 (from the pin at the end of piston 3 to the bucket linkage area) -->
+          <line x1="305" y1="240" x2="465" y2="172" class="rust" stroke-width="2.4" marker-end="url(#arrRust23)" opacity="0.85"/>
+          <text x="370" y="218" font-size="13" class="lbl-rust">r̄₃</text>
+
+          <!-- gamma angle -->
+          <path d="M 332 222 A 28 28 0 0 0 343 230" class="ink" stroke-width="1.2"/>
+          <text x="338" y="220" font-size="11" class="lbl-ink" font-style="italic" font-weight="normal">γ</text>
+
+          <!-- link 8: from pin at bottom of piston 7 to bucket -->
+          <line x1="466" y1="286" x2="540" y2="290" class="ink" stroke-width="2.4" marker-end="url(#arrInk23)"/>
+          <text x="488" y="305" font-size="13" class="lbl-ink" font-style="italic">r̄₈</text>
+          <text x="500" y="280" font-size="11" class="lbl-ink">8</text>
+          <!-- pin at junction of 7 and 8 -->
+          <circle cx="466" cy="286" r="5" class="paper-fill ink" stroke-width="2"/>
+          <!-- pin where 8 attaches to the bucket frame -->
+          <circle cx="540" cy="290" r="5" class="paper-fill ink" stroke-width="2"/>
+
+          <!-- r7: from boom top pin diagonally to bucket pin -->
+          <line x1="370" y1="100" x2="540" y2="290" class="ink" stroke-width="2" marker-end="url(#arrInk23)" opacity="0.7"/>
+          <text x="445" y="200" font-size="13" class="lbl-ink" font-style="italic">r̄₇</text>
+
+          <!-- r9: along the bucket top edge -->
+          <line x1="540" y1="290" x2="630" y2="280" class="rust" stroke-width="2.4" marker-end="url(#arrRust23)"/>
+          <text x="575" y="278" font-size="13" class="lbl-rust">r̄₉</text>
+
+          <!-- r10: along the bucket edge (down-right) -->
+          <line x1="630" y1="280" x2="655" y2="355" class="cyan" stroke-width="2.4" marker-end="url(#arrCyan23)"/>
+          <text x="648" y="320" font-size="13" class="lbl-cyan">r̄₁₀</text>
+
+          <!-- phi angle on bucket -->
+          <path d="M 620 304 A 16 16 0 0 0 632 312" class="ink" stroke-width="1.2"/>
+          <text x="608" y="318" font-size="11" class="lbl-ink" font-style="italic" font-weight="normal">φ</text>
+
+          <!-- Boom outline (visual hint - large triangle) -->
+          <polygon points="100,140 380,95 470,250 100,260" class="cyan" stroke-width="1.4" fill="none" opacity="0.55"/>
+        </svg>
+        <figcaption id="fig23-cap"><b>FIGURE 2.23</b> &mdash; Skeleton diagram with vector loops for the front loader. The mechanism has three independent loops (1-2-3-4, 4-5-6-8, and 4-8-7-9). The origin is taken at the pin between links 1 and 5; the <em>X</em> axis is aligned with r̄₁. Each scalar component yields one equation &mdash; six equations in total &mdash; plus two geometric constraints from links that share a rigid body, giving eight equations in ten unknowns: <strong>two degrees of freedom</strong>.</figcaption>
+      </figure>
       <p><strong>Problem.</strong> The skeleton of a front loader (the machine from Chapter&nbsp;1, Figure 1.17). Derive its position equations and deduce the number of degrees of freedom.</p>
       <p><strong>Loops.</strong> It is a three-loop mechanism: loop&nbsp;1 is links 1-2-3-4, loop&nbsp;2 is 4-5-6-8, loop&nbsp;3 is 4-8-7-9. (A fourth loop 4-5-6-7-9 exists but is <em>not independent</em> &mdash; it is a consequence of loops 2 and 3.) So there are <strong>three</strong> vector loop equations:</p>
       <div class="eqn">r&#772;&#8321; + r&#772;&#8324; &minus; r&#772;&#8322; = 0&#772; <span class="lbl">(2.33a)</span></div>
@@ -935,6 +1193,129 @@
   <details>
     <summary>Example 2.11 — Position of a point of interest Q on a coupler</summary>
     <div class="body">
+      <figure class="tb-figure" aria-labelledby="fig25-cap">
+        <svg viewBox="0 0 700 400" role="img" aria-label="Vector loop locating point Q on the coupler of an offset crank-slider. The crank r-bar 2 rotates about origin O, reaching pin A. From A, vector r-bar 5 extends to point Q at angle phi from the coupler r-bar 3. The coupler r-bar 3 continues from A down to slider B at link 4. A spring connects Q to a ground pivot at the upper left. Vector r-bar Q runs from origin O directly to Q.">
+          <defs>
+            <pattern id="hatch25" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="8" class="hatch-line"/>
+            </pattern>
+            <marker id="arrInk25" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="ink-fill"/>
+            </marker>
+            <marker id="arrCyan25" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="cyan-fill"/>
+            </marker>
+            <marker id="arrRust25" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="rust-fill"/>
+            </marker>
+          </defs>
+
+          <!-- Coupler triangle (light fill) -->
+          <polygon points="170,170 530,310 470,140" class="cyan-light"/>
+
+          <!-- Ground rail (link 1, bottom) -->
+          <line x1="80" y1="320" x2="660" y2="320" class="ink" stroke-width="2.2"/>
+          <rect x="80" y="320" width="580" height="14" fill="url(#hatch25)" opacity="0.55"/>
+          <text x="370" y="370" font-size="13" class="lbl-ink">1</text>
+
+          <!-- Slider guide -->
+          <line x1="100" y1="310" x2="660" y2="310" class="rail-line"/>
+
+          <!-- ===== Upper ground pivot for spring ===== -->
+          <line x1="100" y1="80" x2="180" y2="80" class="ink" stroke-width="2"/>
+          <rect x="100" y="66" width="80" height="14" fill="url(#hatch25)" opacity="0.55"/>
+          <line x1="105" y1="80" x2="99" y2="92" class="ink" stroke-width="1"/>
+          <line x1="115" y1="80" x2="109" y2="92" class="ink" stroke-width="1"/>
+          <line x1="125" y1="80" x2="119" y2="92" class="ink" stroke-width="1"/>
+          <line x1="135" y1="80" x2="129" y2="92" class="ink" stroke-width="1"/>
+          <line x1="145" y1="80" x2="139" y2="92" class="ink" stroke-width="1"/>
+          <line x1="155" y1="80" x2="149" y2="92" class="ink" stroke-width="1"/>
+          <line x1="165" y1="80" x2="159" y2="92" class="ink" stroke-width="1"/>
+          <line x1="175" y1="80" x2="169" y2="92" class="ink" stroke-width="1"/>
+          <!-- Ground pin for spring -->
+          <circle cx="135" cy="92" r="5" class="paper-fill ink" stroke-width="2"/>
+          <circle cx="135" cy="92" r="2" class="ink-fill"/>
+
+          <!-- ===== Origin O & crank pivot ===== -->
+          <circle cx="170" cy="280" r="6" class="paper-fill ink" stroke-width="2"/>
+          <circle cx="170" cy="280" r="2" class="ink-fill"/>
+          <polygon points="158,293 182,293 176,305 164,305" class="ink" stroke-width="1.5"/>
+          <line x1="158" y1="305" x2="182" y2="305" class="ink" stroke-width="1.5"/>
+          <text x="148" y="298" font-size="13" class="lbl-ink">O</text>
+          <text x="155" y="316" font-size="13" class="lbl-ink">1</text>
+
+          <!-- X-Y axes at O -->
+          <line x1="170" y1="280" x2="250" y2="280" class="ink" stroke-width="1.4" marker-end="url(#arrInk25)" opacity="0.85"/>
+          <text x="252" y="284" font-size="12" class="lbl-ink">X</text>
+          <line x1="170" y1="280" x2="170" y2="220" class="ink" stroke-width="1.4" marker-end="url(#arrInk25)" opacity="0.85"/>
+          <text x="174" y="222" font-size="12" class="lbl-ink">Y</text>
+
+          <!-- ===== Crank r2 ===== -->
+          <line x1="170" y1="280" x2="295" y2="170" class="rust" stroke-width="3.2" marker-end="url(#arrRust25)"/>
+          <text x="210" y="220" font-size="14" class="lbl-rust">r̄₂</text>
+          <!-- Point A -->
+          <circle cx="295" cy="170" r="5" class="paper-fill ink" stroke-width="2"/>
+          <text x="270" y="162" font-size="13" class="lbl-ink">A</text>
+
+          <!-- ===== Coupler r3 (from A to slider B) ===== -->
+          <line x1="295" y1="170" x2="540" y2="310" class="cyan" stroke-width="3.2" marker-end="url(#arrCyan25)"/>
+          <text x="430" y="225" font-size="14" class="lbl-cyan">r̄₃</text>
+
+          <!-- ===== r5 from A to Q ===== -->
+          <line x1="295" y1="170" x2="470" y2="140" class="rust" stroke-width="3" marker-end="url(#arrRust25)"/>
+          <text x="365" y="140" font-size="14" class="lbl-rust">r̄₅</text>
+
+          <!-- phi angle at A -->
+          <path d="M 343 188 A 50 50 0 0 0 354 162" class="ink" stroke-width="1.4"/>
+          <text x="358" y="184" font-size="12" class="lbl-ink" font-style="italic" font-weight="normal">φ</text>
+
+          <!-- Q: point of interest -->
+          <circle cx="470" cy="140" r="5.5" class="ink-fill" stroke="var(--panel)" stroke-width="1.5"/>
+          <text x="478" y="135" font-size="14" class="lbl-ink">Q</text>
+
+          <!-- r_q from origin O to Q -->
+          <line x1="170" y1="280" x2="470" y2="140" class="ink-soft" stroke-width="2.2" marker-end="url(#arrInk25)" opacity="0.9"/>
+          <text x="307" y="225" font-size="14" class="lbl-soft" font-weight="700">r̄q</text>
+
+          <!-- Spring from upper ground pivot to Q (zigzag) -->
+          <path class="spring-line" d="M 135 92
+                     L 155 99
+                     L 158 89
+                     L 178 96
+                     L 181 86
+                     L 201 93
+                     L 204 83
+                     L 224 90
+                     L 227 80
+                     L 247 87
+                     L 250 77
+                     L 270 84
+                     L 273 74
+                     L 293 81
+                     L 296 71
+                     L 316 78
+                     L 319 88
+                     L 339 95
+                     L 342 105
+                     L 362 112
+                     L 365 122
+                     L 385 129
+                     L 388 119
+                     L 408 126
+                     L 411 136
+                     L 431 143
+                     L 434 133
+                     L 454 140
+                     L 470 140"/>
+          <text x="280" y="60" font-size="13" class="lbl-ink" font-style="italic" font-weight="normal">spring</text>
+
+          <!-- ===== Slider at B (link 4) ===== -->
+          <circle cx="540" cy="310" r="5" class="paper-fill ink" stroke-width="2"/>
+          <rect x="510" y="294" width="60" height="32" rx="3" class="slider-fill" opacity="0.85" stroke="var(--ink)" stroke-width="2"/>
+          <text x="600" y="316" font-size="13" class="lbl-ink">4</text>
+        </svg>
+        <figcaption id="fig25-cap"><b>FIGURE 2.25</b> &mdash; A vector loop locating <em>Q</em>, a point of interest on the coupler of an offset crank-slider. r̄<sub>q</sub> = r̄₂ + r̄₅; the angle &phi; is the fixed angle between the coupler r̄₃ and the locating vector r̄₅. The spring from <em>Q</em> to a ground pin gives a force that depends on <em>Q</em>&rsquo;s position &mdash; which depends on the crank angle &theta;₂.</figcaption>
+      </figure>
       <p><strong>Problem.</strong> Take the offset crank-slider of Example&nbsp;2.2 (one DOF; given &theta;&#8322;, you can already find &theta;&#8323; and r&#8324;). Now a point <em>Q</em> on the coupler is connected to ground through a spring. To describe the spring force as a function of &theta;&#8322;, you must describe the position of <em>Q</em> as a function of &theta;&#8322;. Derive the equations for <em>Q</em>.</p>
       <p><strong>Loop to Q.</strong> The coordinates of <em>Q</em> follow a short vector loop r&#772;<sub>q</sub> = r&#772;&#8322; + r&#772;&#8325;, where r&#772;&#8325; is a <em>known</em> vector locating <em>Q</em> on the coupler. Its <em>X</em> and <em>Y</em> components are:</p>
       <div class="eqn">r<sub>qx</sub> = r&#8322;cos&theta;&#8322; + r&#8325;cos(&theta;&#8323; + &phi;) <span class="lbl">(2.67)</span></div>
@@ -1572,51 +1953,172 @@
   })();
 
   /* ============================================================
-     2.4 · NEWTON'S METHOD VISUALIZER  f(x)=x - k cos x
+     2.4 · NEWTON'S METHOD VISUALIZER  (5 example problems)
      ============================================================ */
   (function(){
     var stage=$("nwStage"); if(!stage) return;
-    var k=1.5, x0=3.0, current=3.0, iter=0, history=[], autoRaf=null;
-    // plotting window
-    var xmin=-2.5, xmax=6.5, padL=46, padR=20, padT=20, padB=40;
-    var W=600, H=340;
-    function f(x){ return x - k*Math.cos(x); }
-    function fp(x){ return 1 + k*Math.sin(x); }
-    function fmin(){ var m=1e9; for(var x=xmin;x<=xmax;x+=0.02){ m=Math.min(m,f(x)); } return m; }
-    function fmax(){ var m=-1e9; for(var x=xmin;x<=xmax;x+=0.02){ m=Math.max(m,f(x)); } return m; }
-    function PX(x){ return padL + (x-xmin)/(xmax-xmin)*(W-padL-padR); }
-    function PY(y,ylo,yhi){ return padT + (yhi-y)/(yhi-ylo)*(H-padT-padB); }
+    var W=600, H=340, padL=46, padR=20, padT=20, padB=40;
+
+    // ---- Example library ----
+    // Each example provides f, f', a plotting window, a k-slider config
+    // (or null to hide k), a recommended x0 range, and a default x0.
+    var EXAMPLES = [
+      {
+        name: "Mechanism residual",
+        blurb: "<b>f(x) = x &minus; k&middot;cos(x)</b> &mdash; a transcendental position-equation residual with one real root. Smooth, well-behaved: Newton converges in 3&ndash;5 steps from almost any guess. This is the canonical &ldquo;1-D version of equation (2.61).&rdquo; (Try a guess far from the root and see what happens.)",
+        f:  function(x,k){ return x - k*Math.cos(x); },
+        fp: function(x,k){ return 1 + k*Math.sin(x); },
+        kCfg: { min:0.5, max:3, val:1.5, step:0.1, show:true },
+        x0Cfg:{ min:-2, max:6, val:1.0, step:0.1 },
+        xmin:-2.5, xmax:6.5
+      },
+      {
+        name: "Quadratic",
+        blurb: "<b>f(x) = x&sup2; &minus; k</b> &mdash; classic quadratic. With k=2 the roots are &plusmn;&radic;2 &asymp; &plusmn;1.414. <b>Quadratic convergence</b> is visible here: each step roughly squares the error. Starting positive lands on +&radic;k; starting negative lands on &minus;&radic;k.",
+        f:  function(x,k){ return x*x - k; },
+        fp: function(x,k){ return 2*x; },
+        kCfg: { min:1, max:9, val:2, step:0.5, show:true },
+        x0Cfg:{ min:-4, max:4, val:3.0, step:0.1 },
+        xmin:-3.5, xmax:3.5
+      },
+      {
+        name: "Cubic, three roots",
+        blurb: "<b>f(x) = x&sup3; &minus; 3x + k</b> &mdash; a cubic with up to three real roots (at k&asymp;0 the roots are near &minus;1.73, 0, +1.73). Different initial guesses fall into different <b>basins of attraction</b>. This mirrors the open/crossed assembly branches of a mechanism.",
+        f:  function(x,k){ return x*x*x - 3*x + k; },
+        fp: function(x,k){ return 3*x*x - 3; },
+        kCfg: { min:-1.5, max:1.5, val:0.5, step:0.1, show:true },
+        x0Cfg:{ min:-3, max:3, val:1.4, step:0.1 },
+        xmin:-2.6, xmax:2.6
+      },
+      {
+        name: "arctan (can diverge)",
+        blurb: "<b>f(x) = arctan(k&middot;x)</b> &mdash; has one root at x=0, but the curve flattens for large |x|. Start near the root (|x&#8304;|&lt;1): converges fast. Start far away (|x&#8304;|&gt;~1.4): the tangent <b>overshoots</b> the root and Newton diverges. This is the classic Newton failure mode.",
+        f:  function(x,k){ return Math.atan(k*x); },
+        fp: function(x,k){ return k/(1 + k*k*x*x); },
+        kCfg: { min:1, max:4, val:2, step:0.1, show:true },
+        x0Cfg:{ min:-3, max:3, val:1.5, step:0.1 },
+        xmin:-3.5, xmax:3.5
+      },
+      {
+        name: "Four-bar residual",
+        blurb: "<b>f(&theta;) = cos(&theta;) + k&middot;cos(2&theta;) &minus; 0.3</b> &mdash; the kind of trigonometric residual the four-bar position problem reduces to once one unknown is eliminated. Multiple real roots inside one crank revolution: each corresponds to a different <b>assembly configuration</b>. Slide x&#8304; to see Newton snap onto whichever root is closest.",
+        f:  function(x,k){ return Math.cos(x) + k*Math.cos(2*x) - 0.3; },
+        fp: function(x,k){ return -Math.sin(x) - 2*k*Math.sin(2*x); },
+        kCfg: { min:0.2, max:0.8, val:0.5, step:0.05, show:true },
+        x0Cfg:{ min:0, max:6.28, val:1.0, step:0.05 },
+        xmin:0, xmax:6.4
+      }
+    ];
+
+    var exIdx=0, current=3.0, iter=0, history=[], autoRaf=null, autoTimer=null;
+    var k=1.5;
+
+    function ex(){ return EXAMPLES[exIdx]; }
+    function f(x){ return ex().f(x, k); }
+    function fp(x){ return ex().fp(x, k); }
+
+    function sampleMinMax(){
+      var e=ex(), m=1e9, M=-1e9;
+      var step=(e.xmax-e.xmin)/300;
+      for(var x=e.xmin; x<=e.xmax; x+=step){
+        var y=f(x);
+        if(!isFinite(y)) continue;
+        if(y<m) m=y;
+        if(y>M) M=y;
+      }
+      // Pad
+      var span = Math.max(M-m, 1);
+      m -= span*0.1; M += span*0.1;
+      // ensure y=0 is on screen
+      if(m>0) m=-span*0.15;
+      if(M<0) M= span*0.15;
+      return [m, M];
+    }
+
+    function PX(x){ var e=ex(); return padL + (x-e.xmin)/(e.xmax-e.xmin)*(W-padL-padR); }
+    function PY(y, ylo, yhi){ return padT + (yhi-y)/(yhi-ylo)*(H-padT-padB); }
 
     function render(){
       clear(stage);
-      var ylo=Math.min(-0.5,fmin()-0.5), yhi=Math.max(0.5,fmax()+0.5);
-      // grid
+      var e=ex();
+      var mm=sampleMinMax(), ylo=mm[0], yhi=mm[1];
+
+      // clip-path so tangent lines never spill outside the plot area
+      var defs=el("defs",{});
+      var cp=el("clipPath",{id:"nwClip"});
+      cp.appendChild(el("rect",{x:padL, y:padT, width:W-padL-padR, height:H-padT-padB}));
+      defs.appendChild(cp);
+      stage.appendChild(defs);
+
+      // gridlines
       var grid=el("g",{stroke:cssVar('--grid-line'),"stroke-width":1});
-      for(var gx=Math.ceil(xmin);gx<=xmax;gx++){ grid.appendChild(el("line",{x1:PX(gx),y1:padT,x2:PX(gx),y2:H-padB})); }
+      var xStep = (e.xmax-e.xmin) > 8 ? 1 : ((e.xmax-e.xmin) > 4 ? 0.5 : 0.5);
+      for(var gx=Math.ceil(e.xmin/xStep)*xStep; gx<=e.xmax; gx+=xStep){
+        grid.appendChild(el("line",{x1:PX(gx),y1:padT,x2:PX(gx),y2:H-padB}));
+      }
       stage.appendChild(grid);
+
       // axes
       var y0=PY(0,ylo,yhi);
       stage.appendChild(el("line",{x1:padL,y1:y0,x2:W-padR,y2:y0,stroke:cssVar('--ink-soft'),"stroke-width":2}));
-      stage.appendChild(el("line",{x1:PX(0),y1:padT,x2:PX(0),y2:H-padB,stroke:cssVar('--ink-soft'),"stroke-width":1.4,opacity:.6}));
-      var axl=el("text",{x:W-padR-4,y:y0-6,fill:cssVar('--ink-soft'),"font-size":11,"text-anchor":"end"}); axl.textContent="x"; stage.appendChild(axl);
-      var fxl=el("text",{x:PX(0)+6,y:padT+10,fill:cssVar('--ink-soft'),"font-size":11}); fxl.textContent="f(x)"; stage.appendChild(fxl);
-      // the curve
-      var d="";
-      for(var x=xmin;x<=xmax;x+=0.03){ d += (d===""?"M":"L")+" "+PX(x).toFixed(1)+" "+PY(f(x),ylo,yhi).toFixed(1)+" "; }
-      stage.appendChild(el("path",{d:d,fill:"none",stroke:cssVar('--accent'),"stroke-width":2.6}));
-      // history tangents
-      history.forEach(function(h,i){
-        var op=(0.35+0.65*(i+1)/history.length).toFixed(2);
-        // tangent line: from (xi, f(xi)) to (xnext, 0)
-        stage.appendChild(el("line",{x1:PX(h.xi),y1:PY(h.fi,ylo,yhi),x2:PX(h.xn),y2:PY(0,ylo,yhi),stroke:cssVar('--accent-2'),"stroke-width":1.8,opacity:op}));
-        // point on curve
-        stage.appendChild(el("circle",{cx:PX(h.xi),cy:PY(h.fi,ylo,yhi),r:4,fill:cssVar('--accent-2'),opacity:op}));
-        // drop line to axis
-        stage.appendChild(el("line",{x1:PX(h.xn),y1:PY(0,ylo,yhi),x2:PX(h.xn),y2:PY(f(h.xn),ylo,yhi),stroke:cssVar('--ink-soft'),"stroke-width":1,"stroke-dasharray":"3 3",opacity:op}));
+      // y axis at x=0 only if x=0 is in range
+      if(e.xmin <= 0 && e.xmax >= 0){
+        stage.appendChild(el("line",{x1:PX(0),y1:padT,x2:PX(0),y2:H-padB,stroke:cssVar('--ink-soft'),"stroke-width":1.4,opacity:.55}));
+      }
+      // tick labels (just a few)
+      var ticks=[];
+      for(var t=Math.ceil(e.xmin); t<=e.xmax; t++){ if(t!==0) ticks.push(t); }
+      ticks.forEach(function(t){
+        var tk=el("text",{x:PX(t), y:y0+14, fill:cssVar('--ink-soft'),"font-size":10,"text-anchor":"middle"});
+        tk.textContent=t; stage.appendChild(tk);
       });
-      // current iterate marker
-      stage.appendChild(el("circle",{cx:PX(current),cy:PY(0,ylo,yhi),r:5,fill:cssVar('--ink'),stroke:"#fff","stroke-width":1.5}));
-      var ct=el("text",{x:PX(current),y:PY(0,ylo,yhi)+22,fill:cssVar('--ink'),"font-size":11,"text-anchor":"middle"}); ct.textContent="x"+iter; stage.appendChild(ct);
+      var axl=el("text",{x:W-padR-4,y:y0-6,fill:cssVar('--ink-soft'),"font-size":11,"text-anchor":"end"}); axl.textContent="x"; stage.appendChild(axl);
+      var fxl=el("text",{x:padL+8,y:padT+12,fill:cssVar('--ink-soft'),"font-size":11}); fxl.textContent="f(x)"; stage.appendChild(fxl);
+
+      // the curve (clipped)
+      var curveG=el("g",{"clip-path":"url(#nwClip)"});
+      var d="", started=false;
+      var nstep=(e.xmax-e.xmin)/400;
+      for(var x=e.xmin; x<=e.xmax; x+=nstep){
+        var y=f(x); if(!isFinite(y)) { started=false; continue; }
+        var py=PY(y,ylo,yhi);
+        d += (started?"L":"M") + " " + PX(x).toFixed(1) + " " + py.toFixed(1) + " ";
+        started=true;
+      }
+      curveG.appendChild(el("path",{d:d,fill:"none",stroke:cssVar('--accent'),"stroke-width":2.6}));
+      stage.appendChild(curveG);
+
+      // ---- Tangent history: only keep most recent few visible, FADE older quickly ----
+      var tanG=el("g",{"clip-path":"url(#nwClip)"});
+      var maxShow = Math.min(history.length, 4); // only the last 4 tangents at most
+      var startI = history.length - maxShow;
+      for(var i=startI; i<history.length; i++){
+        var h=history[i];
+        var age = history.length - 1 - i; // 0 = most recent
+        var op  = age===0 ? 0.95 : (age===1 ? 0.45 : 0.18);
+        var wt  = age===0 ? 2.0  : 1.4;
+        // tangent from (xi, f(xi)) to (xn, 0)
+        tanG.appendChild(el("line",{
+          x1:PX(h.xi), y1:PY(h.fi,ylo,yhi),
+          x2:PX(h.xn), y2:PY(0,ylo,yhi),
+          stroke:cssVar('--accent-2'),"stroke-width":wt, opacity:op,
+          "stroke-linecap":"round"
+        }));
+        // dot on the curve at xi
+        tanG.appendChild(el("circle",{
+          cx:PX(h.xi), cy:PY(h.fi,ylo,yhi), r: age===0?4.5:3.5,
+          fill:cssVar('--accent-2'), opacity:op
+        }));
+      }
+      stage.appendChild(tanG);
+
+      // current iterate marker on the x-axis
+      stage.appendChild(el("circle",{cx:PX(current), cy:PY(0,ylo,yhi), r:5,
+        fill:cssVar('--ink'), stroke:"#fff","stroke-width":1.5}));
+      var ct=el("text",{x:PX(current), y:PY(0,ylo,yhi)+22,
+        fill:cssVar('--ink'),"font-size":11,"text-anchor":"middle","font-weight":"700"});
+      ct.textContent="x"+iter; stage.appendChild(ct);
+
       // readout
       var resid=Math.abs(f(current));
       $("nwReadout").innerHTML =
@@ -1624,39 +2126,118 @@
         "<span>x<sub>"+iter+"</sub> = <b>"+current.toFixed(4)+"</b></span>"+
         "<span>f(x) = <b>"+f(current).toFixed(4)+"</b></span>"+
         "<span>|residual| = <b>"+resid.toFixed(4)+"</b></span>";
+
       var v=$("nwVerdict");
-      if(resid<1e-4){ v.className="verdict good"; v.innerHTML="<b>Converged.</b> |f(x)| &lt; tolerance. The root is x &asymp; "+current.toFixed(4)+". This is the configuration that closes the (1-D) position equation."; }
-      else { v.className="verdict warn"; v.innerHTML="<b>Not yet converged.</b> Take another Newton step \u2014 each one linearizes f at the current guess and jumps to where the tangent hits zero."; }
+      // Check for divergence: out of plotting range
+      if(current<e.xmin-2 || current>e.xmax+2 || !isFinite(current)){
+        v.className="verdict bad";
+        v.innerHTML="<b>Diverging.</b> The iterate has flown off the plot. A flat tangent or a poor initial guess sent it to infinity &mdash; in a mechanism this would be a failed solve. Reset and try a guess closer to the root.";
+        return;
+      }
+      if(resid<1e-4){
+        v.className="verdict good";
+        v.innerHTML="<b>Converged.</b> |f(x)| &lt; tolerance. The root is x &asymp; "+current.toFixed(4)+". This is the configuration that closes the (1-D) position equation.";
+      } else if(iter===0){
+        v.className="verdict warn";
+        v.innerHTML="<b>Press &lsquo;Take one Newton step&rsquo;</b> to draw the tangent at x&#8304; and jump to where it crosses zero.";
+      } else {
+        v.className="verdict warn";
+        v.innerHTML="<b>Not yet converged.</b> Take another Newton step \u2014 each one linearizes f at the current guess and jumps to where the tangent hits zero.";
+      }
     }
+
     function step(){
       var d=fp(current);
-      if(Math.abs(d)<1e-9){ var v=$("nwVerdict"); v.className="verdict bad"; v.innerHTML="<b>Derivative \u2248 0 (singular).</b> The tangent is flat \u2014 Newton\u2019s update divides by zero. In a mechanism this is a kinematic singularity."; return; }
+      if(Math.abs(d)<1e-9){
+        var v=$("nwVerdict"); v.className="verdict bad";
+        v.innerHTML="<b>Derivative \u2248 0 (singular).</b> The tangent is flat \u2014 Newton\u2019s update divides by zero. In a mechanism this is a kinematic singularity.";
+        return;
+      }
       var xn=current - f(current)/d;
       history.push({xi:current, fi:f(current), xn:xn});
       current=xn; iter++;
       render();
     }
-    function reset(){
-      k=+$("nwK").value; x0=+$("nwX0").value; current=x0; iter=0; history=[];
-      $("nwKv").textContent=k.toFixed(1); $("nwX0v").textContent=x0.toFixed(1);
+
+    function stopAuto(){
       if(autoRaf){ cancelAnimationFrame(autoRaf); autoRaf=null; }
+      if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; }
+    }
+
+    function reset(){
+      stopAuto();
+      var e=ex();
+      if(e.kCfg.show) k=+$("nwK").value;
+      var x0=+$("nwX0").value;
+      current=x0; iter=0; history=[];
+      if(e.kCfg.show) $("nwKv").textContent=k.toFixed(2).replace(/\.?0+$/,'');
+      $("nwX0v").textContent=x0.toFixed(2).replace(/\.?0+$/,'');
       render();
     }
-    $("nwK").addEventListener("input",reset);
-    $("nwX0").addEventListener("input",reset);
-    $("nwStep").addEventListener("click",function(){ step(); });
-    $("nwReset").addEventListener("click",reset);
-    $("nwAuto").addEventListener("click",function(){
-      if(reduceMotion){ for(var i=0;i<12 && Math.abs(f(current))>1e-4;i++){ step(); } return; }
-      if(autoRaf){ cancelAnimationFrame(autoRaf); autoRaf=null; }
+
+    function applyExample(idx){
+      stopAuto();
+      exIdx=idx;
+      var e=ex();
+      // Update blurb
+      $("nwBlurb").innerHTML = "<b>Example "+(idx+1)+" &mdash; "+e.name+".</b> "+e.blurb;
+      // Update / show k slider
+      var kw=$("nwKwrap");
+      if(e.kCfg.show){
+        kw.style.display="";
+        var kInp=$("nwK");
+        kInp.min=e.kCfg.min; kInp.max=e.kCfg.max; kInp.step=e.kCfg.step;
+        kInp.value=e.kCfg.val;
+        k=e.kCfg.val;
+        $("nwKv").textContent=k.toFixed(2).replace(/\.?0+$/,'');
+      } else {
+        kw.style.display="none";
+      }
+      // Update x0 slider
+      var x0Inp=$("nwX0");
+      x0Inp.min=e.x0Cfg.min; x0Inp.max=e.x0Cfg.max; x0Inp.step=e.x0Cfg.step;
+      x0Inp.value=e.x0Cfg.val;
+      // Update preset button states
+      var btns=document.querySelectorAll('.ex-btn');
+      btns.forEach(function(b,i){
+        var on = (i===idx);
+        b.setAttribute('aria-pressed', on ? 'true':'false');
+        b.classList.toggle('secondary', !on);
+      });
+      reset();
+    }
+
+    // Wire up controls
+    $("nwK").addEventListener("input", reset);
+    $("nwX0").addEventListener("input", reset);
+    $("nwStep").addEventListener("click", function(){ stopAuto(); step(); });
+    $("nwReset").addEventListener("click", reset);
+    $("nwAuto").addEventListener("click", function(){
+      stopAuto();
+      if(reduceMotion){
+        for(var i=0; i<15 && Math.abs(f(current))>1e-4; i++){ step(); }
+        return;
+      }
       var n=0;
-      (function tick(){
-        if(Math.abs(f(current))<=1e-4 || n>20) return;
+      function tick(){
+        if(Math.abs(f(current))<=1e-4 || n>20){ stopAuto(); return; }
         step(); n++;
-        autoRaf=requestAnimationFrame(function(){ setTimeout(tick, 650); });
-      })();
+        autoTimer=setTimeout(function(){
+          autoRaf=requestAnimationFrame(tick);
+        }, 650);
+      }
+      tick();
     });
-    reset();
+
+    // Example preset buttons
+    document.querySelectorAll('.ex-btn').forEach(function(b){
+      b.addEventListener('click', function(){
+        applyExample(+this.getAttribute('data-ex'));
+      });
+    });
+
+    // Initial render
+    applyExample(0);
   })();
 
   /* ============================================================
