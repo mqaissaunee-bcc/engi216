@@ -163,6 +163,20 @@
   .tool-label::before{ content:"▸ INTERACTIVE"; }
   .tool-label span{ color:var(--ink-soft); }
 
+  /* ---------- textbook figure (reference diagram) ---------- */
+  .card.figure{ border-top:3px solid var(--accent-2); }
+  .fig-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-2); font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .fig-label::before{ content:"▸ FIGURE"; }
+  .fig-label span{ color:var(--ink-soft); }
+  .fig-caption{
+    font-family:var(--serif); font-size:.95rem; color:var(--ink-soft);
+    font-style:italic; margin:8px 0 0; text-align:center;
+  }
+  .fig-caption .num{ font-family:var(--mono); font-style:normal; font-weight:700; color:var(--accent-2); letter-spacing:.06em; }
+
   .defn{
     border-left:4px solid var(--accent); background:var(--paper-2);
     padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0;
@@ -207,6 +221,42 @@
   .eqn .c{ color:#ffd9a8; }       /* highlighted coefficient */
   .eqn .m{ color:#9fe6c4; }       /* highlighted secondary term */
   @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
+
+  /* ---------- vector-arrow letter ---------- */
+  /* Use <span class="vec">r</span> to render r with a proper arrow above it.
+     Works in every font and every browser — the arrow is an inline SVG so it
+     doesn't depend on Unicode combining-character support. The arrow color
+     follows currentColor so it matches the surrounding text in light or
+     dark mode and inside the dark .eqn box. */
+  .vec{
+    position:relative; display:inline-block;
+    padding-top:.42em;    /* room for the arrow above */
+    line-height:1;
+  }
+  .vec::before{
+    content:"";
+    position:absolute; left:50%; top:.02em;
+    width:1em; height:.36em;
+    transform:translateX(-50%);
+    /* SVG arrow: thin shaft with arrowhead at the right.  
+       stroke="currentColor" picks up the surrounding text color. */
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 8' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><line x1='1.5' y1='4' x2='20' y2='4'/><polyline points='16,1.2 20.5,4 16,6.8'/></svg>");
+    background-repeat:no-repeat; background-position:center;
+    background-size:100% 100%;
+  }
+  /* Inside the dark equation box the arrow needs to be light. */
+  .eqn .vec::before{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 8' fill='none' stroke='%23e9f6fb' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><line x1='1.5' y1='4' x2='20' y2='4'/><polyline points='16,1.2 20.5,4 16,6.8'/></svg>");
+  }
+  @media (prefers-color-scheme: dark){
+    .vec::before{
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 8' fill='none' stroke='%23e8edf2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><line x1='1.5' y1='4' x2='20' y2='4'/><polyline points='16,1.2 20.5,4 16,6.8'/></svg>");
+    }
+  }
+  /* Prevent the subscript that immediately follows from being pushed away */
+  .vec + sub{ margin-left:0; }
+  /* Italic stays italic */
+  i .vec, em .vec{ font-style:italic; }
 
   /* ---------- grids ---------- */
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -499,7 +549,7 @@
 <section id="timebased" aria-labelledby="tb-h">
   <span class="sec-tag">Section 4.1</span>
   <h2 id="tb-h">4.1 · Time-based velocity &amp; acceleration of the four-bar</h2>
-  <p>Let&rsquo;s start where Chapter&nbsp;2 left off. The four-bar loop equation <i>r&#8407;<sub>2</sub> + r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub> &minus; r&#8407;<sub>1</sub></i>&nbsp;=&nbsp;0 splits into an <i>X</i> and a <i>Y</i> scalar equation. Differentiate both once with respect to <strong>time</strong> and you get the velocity equations:</p>
+  <p>Let&rsquo;s start where Chapter&nbsp;2 left off. The four-bar loop equation <i><span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> &minus; <span class="vec">r</span><sub>4</sub> &minus; <span class="vec">r</span><sub>1</sub></i>&nbsp;=&nbsp;0 splits into an <i>X</i> and a <i>Y</i> scalar equation. Differentiate both once with respect to <strong>time</strong> and you get the velocity equations:</p>
   <div class="eqn" role="img" aria-label="negative r 2 sine theta 2 theta 2 dot minus r 3 sine theta 3 theta 3 dot plus r 4 sine theta 4 theta 4 dot equals zero">
     &minus;r<sub>2</sub>sin&theta;<sub>2</sub>&nbsp;&theta;&#775;<sub>2</sub> &minus; r<sub>3</sub>sin&theta;<sub>3</sub>&nbsp;&theta;&#775;<sub>3</sub> + r<sub>4</sub>sin&theta;<sub>4</sub>&nbsp;&theta;&#775;<sub>4</sub> = 0
     <span class="lbl">(4.3)</span>
@@ -746,7 +796,7 @@
   <div class="card tool" id="deadTool">
     <div class="tool-label">Tool 4 <span>&middot; Determinant scope</span></div>
     <h3 style="margin-top:.3em">Hunt for |J| = 0 around the cycle</h3>
-    <p>This scope sweeps the crank through a full turn and plots the Jacobian determinant |<i>J</i>| for the four-bar you size below. Wherever the curve <strong>touches or crosses the zero line</strong>, you&rsquo;ve found a dead position &mdash; the tool marks it. Try a non-Grashof set of links and watch |<i>J</i>| hit zero where the crank can no longer push the linkage through.</p>
+    <p>This scope sweeps the crank through a full turn and plots the Jacobian determinant |<i>J</i>| for the four-bar you size below. Wherever the curve <strong>touches or crosses the zero line</strong>, you&rsquo;ve found a dead position &mdash; the tool marks it. <strong>Drag the green cursor</strong> along the chart and watch the linkage on the left assume the corresponding posture; you&rsquo;ll see the coupler and rocker line up (transmission angle &rarr; 0 or &pi;) exactly where |<i>J</i>| dips to zero.</p>
     <div class="controls">
       <div class="ctrl">
         <label for="dR1">Ground r<sub>1</sub> &mdash; <span class="val" id="dR1v">120</span></label>
@@ -765,9 +815,15 @@
         <input type="range" id="dR4" min="50" max="160" step="2" value="95">
       </div>
     </div>
-    <div class="stage-wrap">
-      <svg id="dStage" class="stage" viewBox="0 0 640 300" role="img" aria-label="A plot of the Jacobian determinant against crank angle, with a zero baseline and any dead positions marked.">
-      </svg>
+    <div class="grid2" style="gap:14px; align-items:start; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)">
+      <div class="stage-wrap">
+        <svg id="dMech" class="stage" viewBox="0 0 320 300" role="img" aria-label="The four-bar at the cursor crank angle; coupler and rocker turn orange when they approach a dead position.">
+        </svg>
+      </div>
+      <div class="stage-wrap">
+        <svg id="dStage" class="stage" viewBox="0 0 420 300" role="img" aria-label="A plot of the Jacobian determinant against crank angle, with a zero baseline, dead-position markers, and a draggable green angle cursor.">
+        </svg>
+      </div>
     </div>
     <div class="readout" id="dOut" aria-live="polite"></div>
   </div>
@@ -840,7 +896,7 @@
     <li>Differentiate that vector&rsquo;s <i>X</i> and <i>Y</i> components with respect to the <strong>input</strong>, applying the chain rule through the basic coefficients.</li>
   </ol>
 
-  <p>For a coupler point <i>C</i> referenced from the pin between links 2 and 3 by a vector <i>r&#8407;&prime;<sub>3</sub></i> at angle (&theta;<sub>3</sub>&nbsp;+&nbsp;&phi;<sub>3</sub>), the components are:</p>
+  <p>For a coupler point <i>C</i> referenced from the pin between links 2 and 3 by a vector <i><span class="vec">r</span>&prime;<sub>3</sub></i> at angle (&theta;<sub>3</sub>&nbsp;+&nbsp;&phi;<sub>3</sub>), the components are:</p>
   <div class="eqn" role="img" aria-label="r C x equals r 2 cosine theta 2 plus r prime 3 cosine of theta 3 plus phi 3; r C y equals r 2 sine theta 2 plus r prime 3 sine of theta 3 plus phi 3">
     r<sub>Cx</sub> = r<sub>2</sub>cos&theta;<sub>2</sub> + r&prime;<sub>3</sub>cos(&theta;<sub>3</sub>+&phi;<sub>3</sub>)<br>
     r<sub>Cy</sub> = r<sub>2</sub>sin&theta;<sub>2</sub> + r&prime;<sub>3</sub>sin(&theta;<sub>3</sub>+&phi;<sub>3</sub>)
@@ -919,13 +975,32 @@
   <p>Two textbook examples, fully worked. The first is a step-through derivation you advance one logical move at a time; the second is animated so you can watch a coupler point&rsquo;s velocity and acceleration come from its coefficients.</p>
 
   <h3>Example 4.1 &middot; Inverted crank-slider</h3>
-  <p>The mechanism is an inverted crank-slider with loop equation <i>r&#8407;<sub>1</sub> + r&#8407;<sub>2</sub> &minus; r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub></i>&nbsp;=&nbsp;0. Its <i>X</i>, <i>Y</i> components plus a geometric constraint give three position equations:</p>
+  <p>The mechanism is an inverted crank-slider with loop equation <i><span class="vec">r</span><sub>1</sub> + <span class="vec">r</span><sub>2</sub> &minus; <span class="vec">r</span><sub>3</sub> &minus; <span class="vec">r</span><sub>4</sub></i>&nbsp;=&nbsp;0. Its <i>X</i>, <i>Y</i> components plus a geometric constraint give three position equations:</p>
   <div class="eqn" role="img" aria-label="position equations 4.16, 4.17, 4.18">
     r<sub>1</sub> + r<sub>2</sub>cos&theta;<sub>2</sub> &minus; r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> = 0 &nbsp;<span style="color:#8fc6d8">(4.16)</span><br>
     r<sub>2</sub>sin&theta;<sub>2</sub> &minus; r<sub>3</sub>sin&theta;<sub>3</sub> &minus; r<sub>4</sub>sin&theta;<sub>4</sub> = 0 &nbsp;<span style="color:#8fc6d8">(4.17)</span><br>
     &theta;<sub>4</sub> &minus; &pi;/2 &minus; &theta;<sub>3</sub> = 0 &nbsp;<span style="color:#8fc6d8">(4.18)</span>
   </div>
   <p><strong>Knowns:</strong> r<sub>1</sub>, &theta;<sub>1</sub>&nbsp;=&nbsp;0&deg;, r<sub>2</sub>, r<sub>4</sub>. &nbsp;<strong>Unknowns:</strong> &theta;<sub>2</sub>, &theta;<sub>3</sub>, r<sub>3</sub>, &theta;<sub>4</sub>. Take &theta;<sub>2</sub> as the input <i>S<sub>i</sub></i>; the three outputs are &theta;<sub>3</sub>, r<sub>3</sub>, &theta;<sub>4</sub>, so the coefficients we want are <i>h<sub>3</sub></i>, <i>f<sub>3</sub></i>, <i>h<sub>4</sub></i> (first order) and their primes (second order).</p>
+
+  <!-- FIGURE 4.1 : interactive textbook diagram -->
+  <div class="card figure" id="fig41Card">
+    <div class="fig-label">Figure 4.1 <span>&middot; Reference diagram for Example 4.1</span></div>
+    <h3 style="margin-top:.3em">The inverted crank-slider, labeled to match the equations above</h3>
+    <p style="margin:.3em 0 .6em">Redrawn from the textbook in the chapter&rsquo;s blueprint style. Drag the crank or use the slider to change <i>&theta;<sub>2</sub></i>; the vectors <i><span class="vec">r</span><sub>1</sub></i>, <i><span class="vec">r</span><sub>2</sub></i>, <i><span class="vec">r</span><sub>3</sub></i>, <i><span class="vec">r</span><sub>4</sub></i> stay attached and the three output values <i>&theta;<sub>3</sub></i>, <i>r<sub>3</sub></i>, <i>&theta;<sub>4</sub></i> update in real time.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="f41Theta">Crank angle &theta;<sub>2</sub> &mdash; <span class="val" id="f41Thetav">90&deg;</span></label>
+        <input type="range" id="f41Theta" min="0" max="360" step="1" value="90">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="f41Stage" class="stage" viewBox="0 0 640 400" role="img" aria-label="Figure 4.1: An inverted crank-slider with ground link r 1, crank r 2 at angle theta 2, variable-length link r 3 at angle theta 3 with a slider, and link r 4 perpendicular to r 3 at angle theta 4. All four position vectors are labeled with arrows.">
+      </svg>
+    </div>
+    <div class="readout" id="f41Out" aria-live="polite"></div>
+    <p class="fig-caption"><span class="num">Figure 4.1</span> &nbsp;An inverted crank-slider mechanism. The slider on link&nbsp;1 rides along the variable-length link <i>r<sub>3</sub></i>; link <i>r<sub>4</sub></i> is rigidly perpendicular to it (the constraint <i>&theta;<sub>4</sub>&nbsp;=&nbsp;&pi;/2&nbsp;+&nbsp;&theta;<sub>3</sub></i>). Compare the labels here with equations (4.16)&ndash;(4.18).</p>
+  </div>
 
   <!-- TOOL 6: Example 4.1 step-through -->
   <div class="card tool" id="ex41Tool">
@@ -964,14 +1039,80 @@
     </div>
   </details>
 
+  <!-- TOOL 9 : Inverted crank-slider explorer (parallels Tool 2 for the four-bar) -->
+  <div class="card tool" id="ex41Explorer">
+    <div class="tool-label">Tool 9 <span>&middot; Inverted crank-slider coefficient explorer</span></div>
+    <h3 style="margin-top:.3em">Live numbers for Example 4.1</h3>
+    <p>This is the Example 4.1 mechanism, instrumented. Adjust the three knowns (<i>r<sub>1</sub></i>, <i>r<sub>2</sub></i>, <i>r<sub>4</sub></i>) and sweep the input <i>&theta;<sub>2</sub></i>; the tool solves for <i>&theta;<sub>3</sub></i>, <i>r<sub>3</sub></i>, <i>&theta;<sub>4</sub></i>, then reads off the first-order coefficients <i>h<sub>3</sub></i>, <i>f<sub>3</sub></i>, <i>h<sub>4</sub></i> from equation&nbsp;(4.22). Watch how <i>r<sub>3</sub></i> grows and shrinks &mdash; that&rsquo;s the <em>slider stroke</em> &mdash; while <i>h<sub>4</sub>&nbsp;=&nbsp;h<sub>3</sub></i> always (the geometric constraint forces them equal).</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="ex41R1">Ground r<sub>1</sub> &mdash; <span class="val" id="ex41R1v">80</span></label>
+        <input type="range" id="ex41R1" min="40" max="160" step="2" value="80">
+      </div>
+      <div class="ctrl">
+        <label for="ex41R2">Crank r<sub>2</sub> &mdash; <span class="val" id="ex41R2v">50</span></label>
+        <input type="range" id="ex41R2" min="15" max="100" step="1" value="50">
+      </div>
+      <div class="ctrl">
+        <label for="ex41R4">Offset r<sub>4</sub> &mdash; <span class="val" id="ex41R4v">25</span></label>
+        <input type="range" id="ex41R4" min="0" max="80" step="1" value="25">
+      </div>
+      <div class="ctrl">
+        <label for="ex41Th2">Input &theta;<sub>2</sub> &mdash; <span class="val" id="ex41Th2v">90&deg;</span></label>
+        <input type="range" id="ex41Th2" min="0" max="360" step="1" value="90">
+      </div>
+      <button id="ex41Play" aria-pressed="false">▶ Animate</button>
+      <button id="ex41Rst" class="secondary">Reset</button>
+    </div>
+    <div class="grid2" style="gap:14px; align-items:start">
+      <div class="stage-wrap">
+        <svg id="ex41Stage" class="stage" viewBox="0 0 420 340" role="img" aria-label="Live inverted crank-slider posture for the chosen link lengths and crank angle.">
+        </svg>
+      </div>
+      <div class="stage-wrap">
+        <svg id="ex41Chart" class="stage" viewBox="0 0 420 340" role="img" aria-label="Plot of f 3 (slider velocity coefficient) versus crank angle, with the current angle marked.">
+        </svg>
+      </div>
+    </div>
+    <div class="readout" id="ex41OutLive" aria-live="polite"></div>
+    <p style="margin:.6em 0 0; font-size:.92rem; color:var(--ink-soft)">The strip chart plots <i>f<sub>3</sub></i> (the slider&rsquo;s velocity coefficient in mm per radian of crank) across one full revolution. Where <i>f<sub>3</sub></i> crosses zero is a <strong>limit position of the slider</strong> &mdash; the stroke reverses there. Notice how <i>h<sub>3</sub></i> and <i>h<sub>4</sub></i> remain equal at every angle, exactly as Eq.&nbsp;(4.18) demands.</p>
+  </div>
+
   <h3>Example 4.6 &middot; Coefficients of a coupler point</h3>
-  <p>Find the kinematic coefficients of point <i>C</i> on the coupler of a four-bar, with &theta;<sub>2</sub> as input. First solve the loop <i>r&#8407;<sub>2</sub> + r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub> &minus; r&#8407;<sub>1</sub></i>&nbsp;=&nbsp;0 for the basic coefficients <i>h<sub>3</sub></i>, <i>h&prime;<sub>3</sub></i>, <i>h<sub>4</sub></i>, <i>h&prime;<sub>4</sub></i>. Then locate <i>C</i> with <i>r&#8407;<sub>C</sub></i>&nbsp;=&nbsp;<i>r&#8407;<sub>2</sub> + r&#8407;&prime;<sub>3</sub></i> and differentiate as in &sect;4.5. The animated tool below traces the coupler curve and shows how <i>C</i>&rsquo;s velocity and acceleration are built from its coefficients.</p>
+  <p>Find the kinematic coefficients of point <i>C</i> on the coupler of a four-bar, with &theta;<sub>2</sub> as input. First solve the loop <i><span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> &minus; <span class="vec">r</span><sub>4</sub> &minus; <span class="vec">r</span><sub>1</sub></i>&nbsp;=&nbsp;0 for the basic coefficients <i>h<sub>3</sub></i>, <i>h&prime;<sub>3</sub></i>, <i>h<sub>4</sub></i>, <i>h&prime;<sub>4</sub></i>. Then locate <i>C</i> with <i><span class="vec">r</span><sub>C</sub></i>&nbsp;=&nbsp;<i><span class="vec">r</span><sub>2</sub> + <span class="vec">r</span>&prime;<sub>3</sub></i> and differentiate as in &sect;4.5. The animated tool below traces the coupler curve and shows how <i>C</i>&rsquo;s velocity and acceleration are built from its coefficients.</p>
+
+  <!-- FIGURE 4.7 : interactive textbook diagram -->
+  <div class="card figure" id="fig47Card">
+    <div class="fig-label">Figure 4.7 <span>&middot; Reference diagram for Example 4.6</span></div>
+    <h3 style="margin-top:.3em">The kinematic coefficients of a coupler point</h3>
+    <p style="margin:.3em 0 .6em">Redrawn from the textbook. The four-bar carries a coupler point <i>C</i>, located on link&nbsp;3 by the offset vector <i><span class="vec">r</span>&prime;<sub>3</sub></i> at angle (&theta;<sub>3</sub>&nbsp;+&nbsp;&phi;<sub>3</sub>). The position of <i>C</i> in the fixed frame is the sum <i><span class="vec">r</span><sub>C</sub>&nbsp;=&nbsp;<span class="vec">r</span><sub>2</sub>&nbsp;+&nbsp;<span class="vec">r</span>&prime;<sub>3</sub></i> &mdash; differentiate that w.r.t. <i>&theta;<sub>2</sub></i> and you get <i><span class="vec">f</span><sub>C</sub></i>. Drag the crank to watch all the labeled vectors stay attached.</p>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="f47Theta">Crank angle &theta;<sub>2</sub> &mdash; <span class="val" id="f47Thetav">60&deg;</span></label>
+        <input type="range" id="f47Theta" min="0" max="360" step="1" value="60">
+      </div>
+      <div class="ctrl">
+        <label for="f47Off">Offset r&prime;<sub>3</sub> &mdash; <span class="val" id="f47Offv">70</span></label>
+        <input type="range" id="f47Off" min="20" max="120" step="2" value="70">
+      </div>
+      <div class="ctrl">
+        <label for="f47Phi">Offset angle &phi;<sub>3</sub> &mdash; <span class="val" id="f47Phiv">35&deg;</span></label>
+        <input type="range" id="f47Phi" min="-90" max="90" step="2" value="35">
+      </div>
+    </div>
+    <div class="stage-wrap">
+      <svg id="f47Stage" class="stage" viewBox="0 0 640 420" role="img" aria-label="Figure 4.7: A four-bar with vectors r 2, r 3, r 4, r 1 labeled around the loop, plus an offset vector r prime 3 from the pin between links 2 and 3 to a coupler point C. The angle phi 3 between r prime 3 and the coupler r 3 is marked, and the coupler curve C traces is shown as a dashed loop.">
+      </svg>
+    </div>
+    <div class="readout" id="f47Out" aria-live="polite"></div>
+    <p class="fig-caption"><span class="num">Figure 4.7</span> &nbsp;The kinematic coefficients of a coupler point. <i><span class="vec">r</span>&prime;<sub>3</sub></i> locates <i>C</i> on the coupler, relative to the pin between links&nbsp;2 and&nbsp;3 (the alternate referencing <i><span class="vec">r</span><sub>C</sub>&nbsp;=&nbsp;<span class="vec">r</span><sub>1</sub>&nbsp;+&nbsp;<span class="vec">r</span><sub>4</sub>&nbsp;&minus;&nbsp;<span class="vec">r</span><sub>3</sub>&nbsp;+&nbsp;<span class="vec">r</span>&prime;<sub>3</sub></i> from the other pin is equivalent but more complicated). The dashed loop is the coupler curve <i>C</i> sweeps over one crank revolution.</p>
+  </div>
 
   <!-- TOOL 7: coupler-point animator -->
   <div class="card tool" id="couplerTool">
     <div class="tool-label">Tool 8 <span>&middot; Coupler-point curve &amp; coefficients</span></div>
     <h3 style="margin-top:.3em">Watch point C trace its path &mdash; speed from f<sub>C</sub></h3>
-    <p>The crank turns; point <i>C</i> (offset from the coupler) traces its characteristic curve. The velocity vector drawn at <i>C</i> is <i>f&#8407;<sub>C</sub>&middot;&theta;&#775;<sub>2</sub></i> &mdash; longest where the coefficient is largest. Adjust the offset to reshape the curve.</p>
+    <p>The crank turns; point <i>C</i> (offset from the coupler) traces its characteristic curve. The velocity vector drawn at <i>C</i> is <i><span class="vec">f</span><sub>C</sub>&middot;&theta;&#775;<sub>2</sub></i> &mdash; longest where the coefficient is largest. Adjust the offset to reshape the curve.</p>
     <div class="controls">
       <div class="ctrl">
         <label for="cpOff">Coupler offset r&prime;<sub>3</sub> &mdash; <span class="val" id="cpOffv">70</span></label>
@@ -1116,7 +1257,7 @@
           <h4>Geartrain</h4>
           <div class="rc-eq">n<sub>s</sub> = &omega;<sub>k</sub>/&omega;<sub>i</sub> = h<sub>k</sub> (const), h&prime;<sub>k</sub> = 0</div>
           <h4>Point of interest C</h4>
-          <div class="rc-eq">r&#8407;<sub>C</sub> = r&#8407;<sub>2</sub>+r&#8407;&prime;<sub>3</sub>; differentiate X,Y w.r.t. input</div>
+          <div class="rc-eq"><span class="vec">r</span><sub>C</sub> = <span class="vec">r</span><sub>2</sub>+<span class="vec">r</span>&prime;<sub>3</sub>; differentiate X,Y w.r.t. input</div>
         </div>
       </div>
       <h4 style="margin-top:14px">Reading the signs</h4>
@@ -1308,6 +1449,64 @@
     return function(x,y){
       return { X: W/2 + (x-cx)*s, Y: H/2 - (y-cy)*s };
     };
+  }
+
+  /* ============================================================
+     INVERTED CRANK-SLIDER SOLVER (Example 4.1)
+     Loop:  r1 + r2 - r3 - r4 = 0   with  θ1 = 0,  θ4 = θ3 + π/2.
+     Knowns: r1, r2, r4.  Unknowns: θ3, r3, θ4.
+     Origin at the pivot of link 4 (ground pin "O1"); O2 is at (r1, 0).
+     Crank tip Q = (r1 + r2 cosθ2,  r2 sinθ2)
+     Slider corner P (end of -r3 from Q, also end of +r4 from origin)
+         = r4 ( -sinθ3, cosθ3 )
+     So Q - P = r3 (cosθ3, sinθ3).
+     ============================================================ */
+  function solveInvSlider(r1,r2,r4,th2){
+    var A = r1 + r2*Math.cos(th2);   // = r3 cosθ3 - r4 sinθ3
+    var B =      r2*Math.sin(th2);   // = r3 sinθ3 + r4 cosθ3
+    var R2sum = A*A + B*B;
+    if(R2sum < r4*r4) return null;   // can't reach
+    var r3 = Math.sqrt(R2sum - r4*r4);
+    // Solve  B cosθ3 - A sinθ3 = r4  →  θ3 = atan2(B,A) - asin(r4/√(A²+B²))
+    var alpha = Math.atan2(B, A);
+    var rho = Math.sqrt(R2sum);
+    var arg = r4/rho;
+    if(arg > 1 || arg < -1) return null;
+    var th3 = alpha - Math.asin(arg);
+    var th4 = th3 + Math.PI/2;
+    // Reconstruct key points (in model frame, mm).
+    var ox = 0, oy = 0;                                  // O1 (slider-link ground pivot)
+    var o2x = r1, o2y = 0;                                // O2 (crank pivot)
+    var qx = o2x + r2*Math.cos(th2), qy = o2y + r2*Math.sin(th2); // crank tip (pin between 2 & 3)
+    var px = r4*(-Math.sin(th3)),    py = r4*Math.cos(th3);       // slider corner P (end of r4)
+    return {
+      r3:r3, th3:th3, th4:th4,
+      ox:ox, oy:oy, o2x:o2x, o2y:o2y,
+      qx:qx, qy:qy, px:px, py:py
+    };
+  }
+
+  // First-order coefficients h3 = dθ3/dθ2, f3 = dr3/dθ2, h4 = dθ4/dθ2
+  // From differentiating (4.16),(4.17),(4.18) at θ2:
+  //   r3 sinθ3 · h3 - cosθ3 · f3 + r4 sinθ4 · h4 = r2 sinθ2
+  //  -r3 cosθ3 · h3 - sinθ3 · f3 - r4 cosθ4 · h4 = -r2 cosθ2
+  //          - h3        + 0          +     h4   = 0           (so h4 = h3)
+  // Substituting h4 = h3 collapses to a 2×2 in (h3, f3).
+  function coeffsInvSlider(s,r2,r4,th2){
+    var s3=Math.sin(s.th3), c3=Math.cos(s.th3);
+    var s4=Math.sin(s.th4), c4=Math.cos(s.th4);
+    // After h4 = h3 substitution:
+    //   ( r3 sinθ3 + r4 sinθ4 ) h3 + (- cosθ3) f3 =  r2 sinθ2
+    //   (-r3 cosθ3 - r4 cosθ4 ) h3 + (- sinθ3) f3 = -r2 cosθ2
+    var a11 =  s.r3*s3 + r4*s4, a12 = -c3;
+    var a21 = -s.r3*c3 - r4*c4, a22 = -s3;
+    var b1  =  r2*Math.sin(th2);
+    var b2  = -r2*Math.cos(th2);
+    var det = a11*a22 - a12*a21;
+    if(Math.abs(det) < 1e-9) return {h3:Infinity, f3:Infinity, h4:Infinity, detJ:det};
+    var h3 = ( b1*a22 - a12*b2)/det;
+    var f3 = ( a11*b2 - b1*a21)/det;
+    return {h3:h3, f3:f3, h4:h3, detJ:det};
   }
 
   /* ============================================================
@@ -1506,61 +1705,152 @@
 
   /* ============================================================
      TOOL 4 · DETERMINANT SCOPE (|J| over a full turn)
+     Now also draws the live four-bar posture at the cursor angle and
+     lets the student drag the cursor across the chart to scrub θ₂.
      ============================================================ */
   (function(){
-    var stage=$("dStage"); if(!stage) return;
-    function render(){
-      clear(stage);
-      var r1=+$("dR1").value,r2=+$("dR2").value,r3=+$("dR3").value,r4=+$("dR4").value;
+    var chart=$("dStage"), mech=$("dMech"); if(!chart || !mech) return;
+    // shared sweep state — angle of the cursor on the chart, degrees
+    var cursorDeg = 0;
+    // cached sweep data for the current geometry (re-computed on slider change)
+    var sweep = { r1:0,r2:0,r3:0,r4:0, pts:[], maxAbs:1, zeros:[], gaps:0 };
+
+    function compute(){
+      var r1=+$("dR1").value, r2=+$("dR2").value, r3=+$("dR3").value, r4=+$("dR4").value;
       $("dR1v").textContent=r1; $("dR2v").textContent=r2; $("dR3v").textContent=r3; $("dR4v").textContent=r4;
-      var W=640,H=300,pad=42;
-      var x0=pad,x1=W-14,y0=16,y1=H-pad, midY=(y0+y1)/2;
-      line(stage,x0,y1,x1,y1,cssVar('--ink-soft'),1.5);
-      line(stage,x0,y0,x0,y1,cssVar('--ink-soft'),1.5);
-      line(stage,x0,midY,x1,midY,cssVar('--accent-2'),1.2,"5 4");
-      txt(stage,W/2,H-10,"crank angle \u03B8\u2082 (0\u2013360\u00B0)",cssVar('--ink-soft'),11,"middle");
-      txt(stage,x1-2,midY-5,"|J| = 0  (dead position)",cssVar('--accent-2'),10,"end");
-      txt(stage,x0-6,y0+8,"|J|",cssVar('--ink-soft'),11,"end");
-      var pts=[], maxAbs=1;
+      sweep.r1=r1; sweep.r2=r2; sweep.r3=r3; sweep.r4=r4;
+      sweep.pts=[]; sweep.maxAbs=1; sweep.zeros=[]; sweep.gaps=0;
+      var prev=null;
       for(var d=0; d<=360; d+=1){
         var th=d*Math.PI/180;
         var s=solveFourbar(r1,r2,r3,r4,th);
         var v=null;
         if(s){ v=r3*r4*Math.sin(s.th4-s.th3); }
-        pts.push({d:d,v:v});
-        if(v!==null) maxAbs=Math.max(maxAbs,Math.abs(v));
+        else sweep.gaps++;
+        sweep.pts.push({d:d,v:v});
+        if(v!==null) sweep.maxAbs=Math.max(sweep.maxAbs,Math.abs(v));
+        if(prev!==null && prev.v!==null && v!==null && (prev.v<0)!==(v<0)) sweep.zeros.push((prev.d+d)/2);
+        prev={d:d,v:v};
       }
+    }
+
+    function drawChart(){
+      clear(chart);
+      var W=420, H=300, pad=42;
+      var x0=pad,x1=W-14,y0=16,y1=H-pad, midY=(y0+y1)/2;
+      // axes + zero line
+      line(chart,x0,y1,x1,y1,cssVar('--ink-soft'),1.5);
+      line(chart,x0,y0,x0,y1,cssVar('--ink-soft'),1.5);
+      line(chart,x0,midY,x1,midY,cssVar('--accent-2'),1.2,"5 4");
+      txt(chart,W/2,H-10,"crank angle \u03B8\u2082 (0\u2013360\u00B0) \u2014 drag to scrub",cssVar('--ink-soft'),11,"middle");
+      txt(chart,x1-2,midY-5,"|J| = 0  (dead position)",cssVar('--accent-2'),10,"end");
+      txt(chart,x0-6,y0+8,"|J|",cssVar('--ink-soft'),11,"end");
+      // tick marks on x at 0, 90, 180, 270, 360
+      [0,90,180,270,360].forEach(function(d){
+        var X = x0 + (d/360)*(x1-x0);
+        line(chart,X,y1-3,X,y1+3,cssVar('--ink-soft'),1);
+        txt(chart,X,y1+14,d+"\u00B0",cssVar('--ink-soft'),10,"middle");
+      });
       function px(d){ return x0+(d/360)*(x1-x0); }
-      function py(v){ return midY - (v/maxAbs)*((y1-y0)/2-8); }
-      var run=[]; var zeros=[];
-      function flush(){ if(run.length>1){ stage.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:run.join(" ")})); } run=[]; }
-      var prev=null;
-      pts.forEach(function(p){
-        if(p.v===null){ flush(); prev=null; return; }
+      function py(v){ return midY - (v/sweep.maxAbs)*((y1-y0)/2-8); }
+      // curve, broken on null
+      var run=[];
+      function flush(){ if(run.length>1){ chart.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:run.join(" ")})); } run=[]; }
+      sweep.pts.forEach(function(p){
+        if(p.v===null){ flush(); return; }
         run.push(px(p.d)+","+py(p.v));
-        if(prev!==null && prev.v!==null && (prev.v<0)!==(p.v<0)){ zeros.push((prev.d+p.d)/2); }
-        prev=p;
       });
       flush();
-      zeros.forEach(function(z){
+      // dead-position markers
+      sweep.zeros.forEach(function(z){
         var X=px(z);
-        stage.appendChild(el("circle",{cx:X,cy:midY,r:5,fill:cssVar('--accent-2')}));
-        txt(stage,X,midY+18,degTxt(z),cssVar('--accent-2'),10,"middle","700");
+        chart.appendChild(el("circle",{cx:X,cy:midY,r:5,fill:cssVar('--accent-2')}));
+        txt(chart,X,midY+18,degTxt(z),cssVar('--accent-2'),10,"middle","700");
       });
-      // detect non-assembly span
-      var gaps=pts.filter(function(p){return p.v===null;}).length;
+      // current-angle cursor (draggable)
+      var X = px(cursorDeg);
+      var cursor = el("line",{x1:X,y1:y0,x2:X,y2:y1,stroke:cssVar('--good'),"stroke-width":2});
+      chart.appendChild(cursor);
+      txt(chart,X,y0+10,"\u03B8\u2082 = "+Math.round(cursorDeg)+"\u00B0",cssVar('--good'),11,"middle","700");
+      // hit-zone for dragging
+      var hit = el("rect",{x:x0,y:y0,width:x1-x0,height:y1-y0,fill:"transparent","style":"cursor:ew-resize"});
+      chart.appendChild(hit);
+      function setFromEvent(e){
+        var rect=chart.getBoundingClientRect();
+        // viewBox-to-client conversion
+        var vbScale = rect.width / W;
+        var clientX = (e.touches?e.touches[0].clientX:e.clientX);
+        var localX = (clientX - rect.left)/vbScale;
+        var d = ((localX - x0)/(x1-x0))*360;
+        cursorDeg = Math.max(0,Math.min(360,d));
+        renderAll();
+      }
+      var dragging=false;
+      hit.addEventListener("mousedown",function(e){ dragging=true; setFromEvent(e); e.preventDefault(); });
+      hit.addEventListener("touchstart",function(e){ dragging=true; setFromEvent(e); e.preventDefault(); },{passive:false});
+      window.addEventListener("mousemove",function(e){ if(dragging) setFromEvent(e); });
+      window.addEventListener("touchmove",function(e){ if(dragging) setFromEvent(e); },{passive:false});
+      window.addEventListener("mouseup",function(){ dragging=false; });
+      window.addEventListener("touchend",function(){ dragging=false; });
+    }
+
+    function drawMech(){
+      clear(mech);
+      var W=320,H=300,pad=20;
+      var r1=sweep.r1,r2=sweep.r2,r3=sweep.r3,r4=sweep.r4;
+      var th2 = cursorDeg*Math.PI/180;
+      var map=makeMapper(r1,r2,r3,r4,W,H,pad);
+      var s=solveFourbar(r1,r2,r3,r4,th2);
+      var O2=map(0,0), O4=map(r1,0);
+      groundHatch(mech,(O2.X+O4.X)/2,Math.max(O2.Y,O4.Y), Math.abs(O4.X-O2.X)+40);
+      line(mech,O2.X,O2.Y,O4.X,O4.Y,cssVar('--ink-soft'),1.5,"6 5");
+      txt(mech,W/2,18,"linkage at \u03B8\u2082 = "+Math.round(cursorDeg)+"\u00B0",cssVar('--ink-soft'),11,"middle","700");
+      if(!s){
+        pin(mech,O2.X,O2.Y); pin(mech,O4.X,O4.Y);
+        txt(mech,W/2,H/2,"cannot assemble",cssVar('--accent-2'),12,"middle","700");
+        return;
+      }
+      var A=map(s.ax,s.ay), B=map(s.bx,s.by);
+      // determinant magnitude at this angle
+      var detJ = r3*r4*Math.sin(s.th4-s.th3);
+      var near = Math.abs(detJ) < 0.05*r3*r4;
+      line(mech,O2.X,O2.Y,A.X,A.Y,cssVar('--accent'),5);
+      line(mech,A.X,A.Y,B.X,B.Y, near?cssVar('--accent-2'):cssVar('--ink-soft'),5);
+      line(mech,O4.X,O4.Y,B.X,B.Y, near?cssVar('--accent-2'):cssVar('--good'),5);
+      pin(mech,O2.X,O2.Y); pin(mech,O4.X,O4.Y); pin(mech,A.X,A.Y); pin(mech,B.X,B.Y);
+      txt(mech,O2.X-6,O2.Y+18,"O\u2082",cssVar('--ink'),11,"end","700");
+      txt(mech,O4.X+6,O4.Y+18,"O\u2084",cssVar('--ink'),11,"start","700");
+      if(near){
+        // highlight: coupler & rocker are nearly collinear → dead position
+        txt(mech,(A.X+B.X)/2,(A.Y+B.Y)/2-12,"\u03B8\u2084 \u2212 \u03B8\u2083 \u2192 0 or \u03C0",cssVar('--accent-2'),10,"middle","700");
+      }
+    }
+
+    function renderReadout(){
+      var th2=cursorDeg*Math.PI/180;
+      var s=solveFourbar(sweep.r1,sweep.r2,sweep.r3,sweep.r4,th2);
       var msg;
-      if(zeros.length){
-        msg="Found <b>"+zeros.length+"</b> dead position"+(zeros.length>1?"s":"")+" where |J| crosses zero (marked). At those angles the coefficients diverge and the crank locks.";
-      } else if(gaps>0){
-        msg="This link set does not assemble through part of the turn ("+Math.round(gaps/361*100)+"% of angles), so the crank cannot complete a revolution \u2014 the missing span is itself a motion limit.";
+      if(sweep.zeros.length){
+        msg="Found <b>"+sweep.zeros.length+"</b> dead position"+(sweep.zeros.length>1?"s":"")+" where |J| crosses zero: "+sweep.zeros.map(function(z){return Math.round(z)+"\u00B0";}).join(", ")+". ";
+      } else if(sweep.gaps>0){
+        msg="This link set does not assemble through "+Math.round(sweep.gaps/361*100)+"% of the cycle \u2014 the missing arc is itself a motion limit. ";
       } else {
-        msg="|J| never reaches zero for this set \u2014 a clean crank-rocker with no dead position in the cycle. Try a longer coupler or shorter ground to force one.";
+        msg="|J| never reaches zero \u2014 a clean crank-rocker with no dead position. Try a longer coupler or shorter ground to force one. ";
+      }
+      if(s){
+        var detJ = sweep.r3*sweep.r4*Math.sin(s.th4-s.th3);
+        msg += "At the cursor (\u03B8\u2082 = <b>"+Math.round(cursorDeg)+"\u00B0</b>): |J| = <b>"+detJ.toFixed(1)+"</b> mm\u00B2.";
+      } else {
+        msg += "At the cursor (\u03B8\u2082 = <b>"+Math.round(cursorDeg)+"\u00B0</b>): linkage cannot assemble here.";
       }
       $("dOut").innerHTML=msg;
     }
-    ["dR1","dR2","dR3","dR4"].forEach(function(id){ $(id).addEventListener("input",render); });
-    render();
+
+    function renderAll(){ drawChart(); drawMech(); renderReadout(); }
+    function renderFromInputs(){ compute(); renderAll(); }
+
+    ["dR1","dR2","dR3","dR4"].forEach(function(id){ $(id).addEventListener("input",renderFromInputs); });
+    renderFromInputs();
   })();
 
   /* ============================================================
@@ -1714,7 +2004,7 @@
     var dots=$("ex41Dots"), body=$("ex41Body"); if(!body) return;
     var steps=[
       {t:"Write the position equations",
-       h:"Loop r\u20D7\u2081 + r\u20D7\u2082 \u2212 r\u20D7\u2083 \u2212 r\u20D7\u2084 = 0 gives X, Y components plus the geometric constraint \u03B8\u2084 = \u03C0/2 + \u03B8\u2083:",
+       h:"Loop <span class='vec'>r</span>\u2081 + <span class='vec'>r</span>\u2082 \u2212 <span class='vec'>r</span>\u2083 \u2212 <span class='vec'>r</span>\u2084 = 0 gives X, Y components plus the geometric constraint \u03B8\u2084 = \u03C0/2 + \u03B8\u2083:",
        eq:"r\u2081 + r\u2082cos\u03B8\u2082 \u2212 r\u2083cos\u03B8\u2083 \u2212 r\u2084cos\u03B8\u2084 = 0&nbsp; (4.16)<br>r\u2082sin\u03B8\u2082 \u2212 r\u2083sin\u03B8\u2083 \u2212 r\u2084sin\u03B8\u2084 = 0&nbsp; (4.17)<br>\u03B8\u2084 \u2212 \u03C0/2 \u2212 \u03B8\u2083 = 0&nbsp; (4.18)",
        n:"Knowns: r\u2081, \u03B8\u2081=0, r\u2082, r\u2084. Unknowns: \u03B8\u2082(input), \u03B8\u2083, r\u2083, \u03B8\u2084. We want h\u2083, f\u2083, h\u2084."},
       {t:"Differentiate once w.r.t. the input \u03B8\u2082",
@@ -1824,7 +2114,7 @@
         var vx=C.X + fCx*scale, vy=C.Y - fCy*scale;
         arrow(stage,C.X,C.Y,vx,vy,cssVar('--accent'),3);
         out="Velocity coefficient at C: f_Cx = <b>"+fCx.toFixed(2)+"</b>, f_Cy = <b>"+fCy.toFixed(2)+"</b> (per rad). "+
-            "Multiply by \u03B8\u0307\u2082 for the true velocity v\u20D7_C = f\u20D7_C \u03B8\u0307\u2082; the arrow shows its direction. The dashed curve is the coupler path C traces over one crank revolution.";
+            "Multiply by \u03B8\u0307\u2082 for the true velocity <span class='vec'>v</span><sub>C</sub> = <span class='vec'>f</span><sub>C</sub>\u00B7\u03B8\u0307\u2082; the arrow shows its direction. The dashed curve is the coupler path C traces over one crank revolution.";
       }
       $("cpOut").innerHTML=out;
     }
@@ -1840,6 +2130,484 @@
       theta=40; $("cpOff").value=70; $("cpPhi").value=35; render();
     });
     ["cpOff","cpPhi"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     SHARED ARROW WITH LABEL  (for figure diagrams)
+     Draws an arrow from (x1,y1) to (x2,y2) and places a labeled
+     vector glyph at the midpoint, offset perpendicular to the arrow.
+     ============================================================ */
+  function vecArrow(stage, x1,y1, x2,y2, label, color, offset){
+    color = color || cssVar('--ink');
+    offset = (offset === undefined) ? 12 : offset;
+    arrow(stage, x1,y1, x2,y2, color, 2);
+    if(label){
+      // Midpoint, then offset along the right-hand normal
+      var mx=(x1+x2)/2, my=(y1+y2)/2;
+      var dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy)||1;
+      var nx=-dy/len, ny=dx/len;
+      var lx = mx + nx*offset, ly = my + ny*offset;
+      // Draw a small "vector glyph" — a letter with a tiny arrow above
+      var g = el("g",{transform:"translate("+lx+","+ly+")"});
+      // mini arrow above the letter
+      var mini = el("path",{
+        d:"M -7 -10 L 5 -10 M 2 -12.5 L 5 -10 L 2 -7.5",
+        stroke:color, "stroke-width":1.3, fill:"none",
+        "stroke-linecap":"round","stroke-linejoin":"round"
+      });
+      g.appendChild(mini);
+      var t = el("text",{x:0,y:0,fill:color,"font-size":13,"font-style":"italic","text-anchor":"middle","font-family":"var(--serif)","font-weight":"700"});
+      t.textContent = label;
+      g.appendChild(t);
+      stage.appendChild(g);
+    }
+  }
+
+  /* ============================================================
+     FIGURE 4.1 (Example 4.1) — Inverted crank-slider diagram
+     Interactive: drag θ₂ slider, see r⃗₁..r⃗₄ stay labeled, plus
+     live readouts of the three outputs θ₃, r₃, θ₄.
+     ============================================================ */
+  (function(){
+    var stage=$("f41Stage"); if(!stage) return;
+    // Fixed-known link dimensions for the textbook figure
+    var R1=140, R2=90, R4=40;
+    function render(){
+      clear(stage);
+      var deg=+$("f41Theta").value;
+      $("f41Thetav").textContent=degTxt(deg);
+      var th2 = deg*Math.PI/180;
+      var s = solveInvSlider(R1,R2,R4,th2);
+      var W=640, H=400, pad=40;
+      // Choose a mapper covering all relevant points
+      var span = R1+R2+R4 + (s? s.r3 : R1+R2);
+      var s2 = 1.3; // padding factor
+      var ext = Math.max(R1+R2+R4, s ? Math.abs(s.r3)+R2 : R1+R2);
+      var minx=-ext*0.6, maxx=R1+R2+10;
+      var miny=-(ext*0.4), maxy=(s?s.qy+10:R2+10);
+      // Auto-fit
+      function mkMap(){
+        var sx=(W-2*pad)/(maxx-minx), sy=(H-2*pad)/(maxy-miny);
+        var sc=Math.min(sx,sy);
+        var cx=(minx+maxx)/2, cy=(miny+maxy)/2;
+        return function(x,y){ return { X: W/2 + (x-cx)*sc, Y: H/2 - (y-cy)*sc }; };
+      }
+      var map=mkMap();
+      // Coordinate frame (Y axis label)
+      var Oref=map(0,0);
+      // X axis arrow (model x = +right, label X)
+      var xAxEnd=map(maxx*0.92, 0);
+      line(stage, Oref.X, Oref.Y, xAxEnd.X, xAxEnd.Y, cssVar('--ink-soft'), 1, "4 3");
+      txt(stage, xAxEnd.X+8, xAxEnd.Y+4, "X", cssVar('--ink-soft'), 12, "start", "700");
+      // Y axis (vertical at origin)
+      var yAxEnd=map(0, (maxy)*0.92);
+      line(stage, Oref.X, Oref.Y, yAxEnd.X, yAxEnd.Y, cssVar('--ink-soft'), 1, "4 3");
+      txt(stage, yAxEnd.X-12, yAxEnd.Y+4, "Y", cssVar('--ink-soft'), 12, "end", "700");
+      // Title
+      txt(stage, W/2, 22, "Figure 4.1 \u00B7 Inverted Crank-Slider", cssVar('--ink-soft'), 11, "middle", "700");
+
+      if(!s){
+        // Just show what we can
+        var O1f=map(0,0), O2f=map(R1,0);
+        groundHatch(stage, O1f.X, O1f.Y+2, 30);
+        groundHatch(stage, O2f.X, O2f.Y+2, 30);
+        pin(stage, O1f.X, O1f.Y); pin(stage, O2f.X, O2f.Y);
+        txt(stage, W/2, H/2, "cannot assemble at this angle", cssVar('--accent-2'), 14, "middle", "700");
+        $("f41Out").innerHTML="At &theta;<sub>2</sub> = "+degTxt(deg)+" the chosen r<sub>1</sub>, r<sub>2</sub>, r<sub>4</sub> can't close the loop.";
+        return;
+      }
+
+      // Model points
+      var O1m={x:0,y:0};                 // origin of loop (ground pivot of link 4)
+      var O2m={x:R1,y:0};                // crank pivot
+      var Qm={x:s.qx,y:s.qy};            // crank tip (pin between 2 and 3)
+      var Pm={x:s.px,y:s.py};            // corner: end of r4 from origin (start of r3 going to Q)
+
+      var O1=map(O1m.x,O1m.y), O2f=map(O2m.x,O2m.y), Q=map(Qm.x,Qm.y), P=map(Pm.x,Pm.y);
+
+      // Ground hatching beneath both ground pivots
+      groundHatch(stage, O1.X, O1.Y+0, 36);
+      groundHatch(stage, O2f.X, O2f.Y+0, 36);
+
+      // Draw link 4 (slider-pivot link): from O1 to P, color cyan-ish
+      line(stage, O1.X, O1.Y, P.X, P.Y, cssVar('--good'), 5);
+      // Draw link 3 (sliding bar): extended slightly past P and Q for the slider track look
+      var dxm=Qm.x-Pm.x, dym=Qm.y-Pm.y, lm=Math.sqrt(dxm*dxm+dym*dym)||1;
+      var extPm={x:Pm.x - dxm/lm*30, y:Pm.y - dym/lm*30};
+      var extQm={x:Qm.x + dxm/lm*15, y:Qm.y + dym/lm*15};
+      var Pe=map(extPm.x,extPm.y), Qe=map(extQm.x,extQm.y);
+      // Bar (the link-3 track)
+      line(stage, Pe.X, Pe.Y, Qe.X, Qe.Y, cssVar('--accent-2'), 5);
+      // Crank
+      line(stage, O2f.X, O2f.Y, Q.X, Q.Y, cssVar('--accent'), 5);
+      // Ground (r1) drawn lightly between the two ground pivots
+      line(stage, O1.X, O1.Y, O2f.X, O2f.Y, cssVar('--ink-soft'), 1.5, "6 5");
+
+      // Slider block on link 3 — drawn at point P (where r4 meets r3)
+      var slider = el("g",{transform:"translate("+P.X+","+P.Y+") rotate("+(Math.atan2(Qe.Y-Pe.Y, Qe.X-Pe.X)*180/Math.PI)+")"});
+      slider.appendChild(el("rect",{x:-12,y:-9,width:24,height:18, fill:cssVar('--panel'), stroke:cssVar('--ink'),"stroke-width":2, rx:2}));
+      stage.appendChild(slider);
+
+      // Pins
+      pin(stage, O1.X, O1.Y); pin(stage, O2f.X, O2f.Y); pin(stage, Q.X, Q.Y); pin(stage, P.X, P.Y);
+
+      // Pin labels
+      txt(stage, O1.X-10, O1.Y+18, "O\u2081", cssVar('--ink'), 12, "end", "700");
+      txt(stage, O2f.X+10, O2f.Y+18, "O\u2082", cssVar('--ink'), 12, "start", "700");
+
+      // Link-number labels in plain circles
+      function linkNum(x,y,num){
+        var g=el("g",{transform:"translate("+x+","+y+")"});
+        g.appendChild(el("circle",{cx:0,cy:0,r:9,fill:cssVar('--panel'),stroke:cssVar('--ink-soft'),"stroke-width":1.2}));
+        var t=el("text",{x:0,y:4,fill:cssVar('--ink-soft'),"font-size":11,"text-anchor":"middle","font-weight":"700"});
+        t.textContent=num; g.appendChild(t); stage.appendChild(g);
+      }
+      // Place numbers near the middles of the links
+      linkNum((O1.X+P.X)/2 + 14, (O1.Y+P.Y)/2 - 6, "4");
+      linkNum((Pe.X+Qe.X)/2, (Pe.Y+Qe.Y)/2 - 18, "3");
+      linkNum((O2f.X+Q.X)/2 + 12, (O2f.Y+Q.Y)/2, "2");
+      linkNum((O1.X+O2f.X)/2, O1.Y+22, "1");
+
+      // Vector arrows (r1, r2, r3, r4) drawn with offsets to the side of the link
+      // r1: from O1 to O2 (along ground)
+      vecArrow(stage, O1.X, O1.Y-14, O2f.X, O2f.Y-14, "r\u2081", cssVar('--ink'), -10);
+      // r2: from O2 to Q (crank)
+      vecArrow(stage, O2f.X, O2f.Y, Q.X, Q.Y, "r\u2082", cssVar('--accent-dk'), 14);
+      // r3: from Q back to P (vector points from Q toward P? actually -r3 from Q lands at P
+      //     so r⃗3 from origin perspective goes from P to Q). The textbook draws r⃗3
+      //     with its tail at P and head at Q — that matches the loop equation
+      //     +r1 + r2 − r3 − r4 = 0 ⟹ r3 = P→Q. So:
+      vecArrow(stage, P.X, P.Y, Q.X, Q.Y, "r\u2083", cssVar('--accent-2'), -14);
+      // r4: from O1 to P
+      vecArrow(stage, O1.X, O1.Y, P.X, P.Y, "r\u2084", cssVar('--good'), -12);
+
+      // angle markers θ₂ (between +x at O2 and r2) and θ₃ (between +x at P and r3)
+      // tiny arcs
+      function arc(cx,cy,r,a1,a2,color){
+        var x1=cx+r*Math.cos(a1), y1=cy-r*Math.sin(a1);
+        var x2=cx+r*Math.cos(a2), y2=cy-r*Math.sin(a2);
+        var large=(Math.abs(a2-a1)>Math.PI)?1:0;
+        var sweep=(a2>a1)?0:1; // we passed inverted y so sweep flips
+        var p=el("path",{d:"M "+x1+" "+y1+" A "+r+" "+r+" 0 "+large+" "+sweep+" "+x2+" "+y2,
+          stroke:color,"stroke-width":1.4,fill:"none"});
+        stage.appendChild(p);
+      }
+      // θ₂ at O2 from +x to th2
+      arc(O2f.X, O2f.Y, 22, 0, th2, cssVar('--accent-dk'));
+      var lx=O2f.X+30*Math.cos(th2/2), ly=O2f.Y-30*Math.sin(th2/2);
+      txt(stage, lx, ly+4, "\u03B8\u2082", cssVar('--accent-dk'), 12, "middle", "700");
+
+      // Update readout
+      var th3deg = ((s.th3*180/Math.PI)%360+360)%360;
+      var th4deg = ((s.th4*180/Math.PI)%360+360)%360;
+      $("f41Out").innerHTML =
+        "<b>Inputs (knowns):</b> r<sub>1</sub>=<b>"+R1+"</b>, r<sub>2</sub>=<b>"+R2+"</b>, r<sub>4</sub>=<b>"+R4+"</b>, &theta;<sub>2</sub>=<b>"+degTxt(deg)+"</b><br>"+
+        "<b>Outputs (solved):</b> &theta;<sub>3</sub>=<b>"+th3deg.toFixed(1)+"\u00B0</b> &nbsp;&middot;&nbsp; r<sub>3</sub>=<b>"+s.r3.toFixed(1)+"</b> &nbsp;&middot;&nbsp; &theta;<sub>4</sub>=<b>"+th4deg.toFixed(1)+"\u00B0</b> &nbsp;<span style='color:var(--ink-soft)'>(constraint &theta;<sub>4</sub>&nbsp;&minus;&nbsp;&theta;<sub>3</sub>&nbsp;=&nbsp;90\u00B0 holds)</span>";
+    }
+    $("f41Theta").addEventListener("input",render);
+    render();
+  })();
+
+  /* ============================================================
+     FIGURE 4.7 (Example 4.6) — Four-bar with coupler point C
+     Shows the labeled vector loop r⃗2 + r⃗3 − r⃗4 − r⃗1 = 0 plus the
+     offset vector r⃗′3 from the pin between links 2 and 3 to point C,
+     with the angle φ₃ marked and the coupler curve drawn as a dashed
+     loop in the background.
+     ============================================================ */
+  (function(){
+    var stage=$("f47Stage"); if(!stage) return;
+    var R1=170, R2=58, R3=140, R4=110; // pleasantly proportioned four-bar
+    function render(){
+      clear(stage);
+      var deg=+$("f47Theta").value;
+      var off=+$("f47Off").value;
+      var phi=+$("f47Phi").value*Math.PI/180;
+      $("f47Thetav").textContent=degTxt(deg);
+      $("f47Offv").textContent=off;
+      $("f47Phiv").textContent=Math.round(+$("f47Phi").value)+"\u00B0";
+      var th2=deg*Math.PI/180;
+      var s=solveFourbar(R1,R2,R3,R4,th2);
+      var W=640,H=420,pad=44;
+      // Sample the coupler curve in advance to compute extents
+      var trace=[];
+      for(var d=0; d<=360; d+=4){
+        var th=d*Math.PI/180, ss=solveFourbar(R1,R2,R3,R4,th);
+        if(!ss) continue;
+        var ang = ss.th3 + phi;
+        var Cx = ss.ax + off*Math.cos(ang);
+        var Cy = ss.ay + off*Math.sin(ang);
+        trace.push({x:Cx,y:Cy,ax:ss.ax,ay:ss.ay});
+      }
+      // Find extents
+      var minx=-R2-20, maxx=R1+R4+20;
+      var miny=-(R2+R3)*0.6, maxy=(R2+R3)*0.7;
+      trace.forEach(function(p){
+        if(p.x<minx) minx=p.x; if(p.x>maxx) maxx=p.x;
+        if(p.y<miny) miny=p.y; if(p.y>maxy) maxy=p.y;
+      });
+      // pad
+      minx-=20; maxx+=20; miny-=20; maxy+=20;
+      var sx=(W-2*pad)/(maxx-minx), sy=(H-2*pad)/(maxy-miny);
+      var sc=Math.min(sx,sy);
+      var cx=(minx+maxx)/2, cy=(miny+maxy)/2;
+      function map(x,y){ return { X: W/2 + (x-cx)*sc, Y: H/2 - (y-cy)*sc }; }
+
+      // Title
+      txt(stage, W/2, 22, "Figure 4.7 \u00B7 Coupler point C on a four-bar", cssVar('--ink-soft'), 11, "middle", "700");
+
+      // Axes hint (light)
+      var Oref=map(0,0);
+      // X axis arrow
+      var xEnd=map(maxx*0.95,0);
+      line(stage, Oref.X, Oref.Y, xEnd.X, xEnd.Y, cssVar('--ink-soft'), 1, "4 3");
+      txt(stage, xEnd.X+8, xEnd.Y+4, "X", cssVar('--ink-soft'), 12, "start", "700");
+      var yEnd=map(0,maxy*0.95);
+      line(stage, Oref.X, Oref.Y, yEnd.X, yEnd.Y, cssVar('--ink-soft'), 1, "4 3");
+      txt(stage, yEnd.X-12, yEnd.Y+4, "Y", cssVar('--ink-soft'), 12, "end", "700");
+
+      // Coupler curve (dashed background trace of C)
+      var path=[];
+      trace.forEach(function(p){ var P=map(p.x,p.y); path.push(P.X+","+P.Y); });
+      if(path.length>1){
+        stage.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":1.4,"stroke-dasharray":"5 4",opacity:.5,points:path.join(" ")}));
+      }
+
+      if(!s){
+        $("f47Out").innerHTML="Linkage cannot assemble at &theta;<sub>2</sub> = "+degTxt(deg)+".";
+        return;
+      }
+
+      // Key points
+      var O2=map(0,0), O4=map(R1,0);
+      var A=map(s.ax,s.ay), B=map(s.bx,s.by);
+      var Cang = s.th3 + phi;
+      var Cm={x: s.ax + off*Math.cos(Cang), y: s.ay + off*Math.sin(Cang)};
+      var C=map(Cm.x, Cm.y);
+
+      // Ground line and hatching
+      groundHatch(stage, O2.X, O2.Y+0, 36);
+      groundHatch(stage, O4.X, O4.Y+0, 36);
+      line(stage, O2.X, O2.Y, O4.X, O4.Y, cssVar('--ink-soft'), 1.5, "6 5");
+
+      // Links: crank, coupler, rocker
+      line(stage, O2.X, O2.Y, A.X, A.Y, cssVar('--accent'), 5);
+      line(stage, A.X, A.Y, B.X, B.Y, cssVar('--accent-2'), 5);
+      line(stage, O4.X, O4.Y, B.X, B.Y, cssVar('--good'), 5);
+      // Coupler "tail" from A to C (offset link visualizing the triangular coupler)
+      line(stage, A.X, A.Y, C.X, C.Y, cssVar('--accent-2'), 2.5, "3 3");
+
+      // Pins
+      pin(stage, O2.X, O2.Y); pin(stage, O4.X, O4.Y);
+      pin(stage, A.X, A.Y); pin(stage, B.X, B.Y);
+      // Point C - small filled triangle/marker
+      stage.appendChild(el("circle",{cx:C.X,cy:C.Y,r:5,fill:cssVar('--accent-2'),stroke:cssVar('--ink'),"stroke-width":1.5}));
+      txt(stage, C.X, C.Y-12, "C", cssVar('--ink'), 14, "middle", "700");
+
+      // Pin labels
+      txt(stage, O2.X-10, O2.Y+18, "O\u2082", cssVar('--ink'), 12, "end", "700");
+      txt(stage, O4.X+10, O4.Y+18, "O\u2084", cssVar('--ink'), 12, "start", "700");
+
+      // Link numbers
+      function linkNum(x,y,num){
+        var g=el("g",{transform:"translate("+x+","+y+")"});
+        g.appendChild(el("circle",{cx:0,cy:0,r:9,fill:cssVar('--panel'),stroke:cssVar('--ink-soft'),"stroke-width":1.2}));
+        var t=el("text",{x:0,y:4,fill:cssVar('--ink-soft'),"font-size":11,"text-anchor":"middle","font-weight":"700"});
+        t.textContent=num; g.appendChild(t); stage.appendChild(g);
+      }
+      linkNum((O2.X+A.X)/2 + 14, (O2.Y+A.Y)/2, "2");
+      linkNum((A.X+B.X)/2, (A.Y+B.Y)/2 + 16, "3");
+      linkNum((O4.X+B.X)/2 + 14, (O4.Y+B.Y)/2, "4");
+      linkNum((O2.X+O4.X)/2, O2.Y+24, "1");
+
+      // Vector arrows
+      // r1 along ground (O2 → O4) — placed below ground line so it doesn't fight the linkage
+      vecArrow(stage, O2.X, O2.Y+30, O4.X, O4.Y+30, "r\u2081", cssVar('--ink'), 12);
+      // r2 (O2 → A)
+      vecArrow(stage, O2.X, O2.Y, A.X, A.Y, "r\u2082", cssVar('--accent-dk'), -14);
+      // r3 (A → B)
+      vecArrow(stage, A.X, A.Y, B.X, B.Y, "r\u2083", cssVar('--accent-2'), -14);
+      // r4 (O4 → B) — note: textbook loop is r2 + r3 − r4 − r1 = 0, so r4 goes O4→B
+      vecArrow(stage, O4.X, O4.Y, B.X, B.Y, "r\u2084", cssVar('--good'), 14);
+      // r′3 (A → C)
+      vecArrow(stage, A.X, A.Y, C.X, C.Y, "r\u2032\u2083", cssVar('--accent-2'), 14);
+      // rC (O2 → C) — light, in the background, to emphasize the decomposition
+      arrow(stage, O2.X, O2.Y, C.X, C.Y, cssVar('--ink-soft'), 1.5);
+
+      // Angle marker φ3 — between r3 (A→B) and r′3 (A→C), centered at A
+      var ang3 = Math.atan2(s.by-s.ay, s.bx-s.ax);  // direction of r3 in model frame (+y up)
+      var ang3p = Cang;                              // direction of r'3
+      // map to screen angles (screen y is flipped)
+      var aScreen1 = -ang3, aScreen2 = -ang3p;
+      // Draw small arc at A
+      var rArc = 22;
+      var x1=A.X + rArc*Math.cos(aScreen1), y1=A.Y + rArc*Math.sin(aScreen1);
+      var x2=A.X + rArc*Math.cos(aScreen2), y2=A.Y + rArc*Math.sin(aScreen2);
+      // Determine arc direction
+      var da = aScreen2 - aScreen1;
+      while(da > Math.PI) da -= 2*Math.PI;
+      while(da < -Math.PI) da += 2*Math.PI;
+      var large = Math.abs(da) > Math.PI ? 1 : 0;
+      var sweep = da > 0 ? 1 : 0;
+      var pp=el("path",{d:"M "+x1+" "+y1+" A "+rArc+" "+rArc+" 0 "+large+" "+sweep+" "+x2+" "+y2,
+        stroke:cssVar('--accent-2'),"stroke-width":1.4,fill:"none"});
+      stage.appendChild(pp);
+      var midA = aScreen1 + da/2;
+      txt(stage, A.X + (rArc+12)*Math.cos(midA), A.Y + (rArc+12)*Math.sin(midA), "\u03C6\u2083", cssVar('--accent-2'), 13, "middle", "700");
+
+      // Compute f_C numerically via central difference on θ2
+      var eps=0.001;
+      function pointC(th){
+        var ss=solveFourbar(R1,R2,R3,R4,th); if(!ss) return null;
+        var aa=ss.th3+phi;
+        return {x:ss.ax+off*Math.cos(aa), y:ss.ay+off*Math.sin(aa)};
+      }
+      var c0=pointC(th2-eps), c1=pointC(th2+eps);
+      var fCx="\u2014", fCy="\u2014", fmag="\u2014";
+      if(c0 && c1){
+        var fx=(c1.x-c0.x)/(2*eps), fy=(c1.y-c0.y)/(2*eps);
+        fCx=fx.toFixed(2); fCy=fy.toFixed(2); fmag=Math.sqrt(fx*fx+fy*fy).toFixed(2);
+      }
+      $("f47Out").innerHTML =
+        "<b>Loop solution at &theta;<sub>2</sub>=</b> "+degTxt(deg)+": &theta;<sub>3</sub>=<b>"+((s.th3*180/Math.PI+360)%360).toFixed(1)+"\u00B0</b>, &theta;<sub>4</sub>=<b>"+((s.th4*180/Math.PI+360)%360).toFixed(1)+"\u00B0</b>. <br>"+
+        "<b>Point C location:</b> (<b>"+Cm.x.toFixed(1)+"</b>, <b>"+Cm.y.toFixed(1)+"</b>). <b>Coefficient f<sub>C</sub>:</b> ("+fCx+", "+fCy+") &nbsp;|f<sub>C</sub>|=<b>"+fmag+"</b> mm/rad.";
+    }
+    ["f47Theta","f47Off","f47Phi"].forEach(function(id){ $(id).addEventListener("input",render); });
+    render();
+  })();
+
+  /* ============================================================
+     TOOL 9 · INVERTED CRANK-SLIDER EXPLORER (Example 4.1)
+     Live linkage + f3 strip chart, parallel to Tool 2 for the four-bar.
+     ============================================================ */
+  (function(){
+    var stage=$("ex41Stage"), chart=$("ex41Chart"); if(!stage || !chart) return;
+    var spinning=false, raf=null;
+    function drawLinkage(r1,r2,r4,th2){
+      clear(stage);
+      var s=solveInvSlider(r1,r2,r4,th2);
+      var W=420,H=340,pad=30;
+      // estimate range
+      var ext = r1+r2 + (s? s.r3 : 0) + r4 + 20;
+      var minx=-Math.max(r4,20)-10, maxx=r1+r2+15;
+      var miny=-Math.max(20, r4+10), maxy=(s? Math.max(s.qy,s.py)+15 : r2+15);
+      var sx=(W-2*pad)/(maxx-minx), sy=(H-2*pad)/(maxy-miny);
+      var sc=Math.min(sx,sy);
+      var cxm=(minx+maxx)/2, cym=(miny+maxy)/2;
+      function map(x,y){ return {X:W/2+(x-cxm)*sc, Y:H/2-(y-cym)*sc}; }
+      if(!s){
+        var O1=map(0,0), O2=map(r1,0);
+        groundHatch(stage,O1.X,O1.Y,30); groundHatch(stage,O2.X,O2.Y,30);
+        pin(stage,O1.X,O1.Y); pin(stage,O2.X,O2.Y);
+        txt(stage,W/2,H/2,"cannot assemble",cssVar('--accent-2'),13,"middle","700");
+        return null;
+      }
+      var O1=map(0,0), O2=map(r1,0), Q=map(s.qx,s.qy), P=map(s.px,s.py);
+      groundHatch(stage,O1.X,O1.Y,30); groundHatch(stage,O2.X,O2.Y,30);
+      line(stage,O1.X,O1.Y,O2.X,O2.Y, cssVar('--ink-soft'),1.5,"6 5");
+      // r4 link
+      line(stage,O1.X,O1.Y,P.X,P.Y, cssVar('--good'), 5);
+      // r3 slider bar (extended)
+      var dxm=s.qx-s.px, dym=s.qy-s.py, lm=Math.sqrt(dxm*dxm+dym*dym)||1;
+      var extPm={x:s.px-dxm/lm*22, y:s.py-dym/lm*22};
+      var extQm={x:s.qx+dxm/lm*12, y:s.qy+dym/lm*12};
+      var Pe=map(extPm.x,extPm.y), Qe=map(extQm.x,extQm.y);
+      line(stage,Pe.X,Pe.Y,Qe.X,Qe.Y, cssVar('--accent-2'), 5);
+      // crank
+      line(stage,O2.X,O2.Y,Q.X,Q.Y, cssVar('--accent'), 5);
+      // slider block
+      var ang = Math.atan2(Qe.Y-Pe.Y, Qe.X-Pe.X)*180/Math.PI;
+      var slider = el("g",{transform:"translate("+P.X+","+P.Y+") rotate("+ang+")"});
+      slider.appendChild(el("rect",{x:-10,y:-7,width:20,height:14,fill:cssVar('--panel'),stroke:cssVar('--ink'),"stroke-width":2,rx:2}));
+      stage.appendChild(slider);
+      pin(stage,O1.X,O1.Y); pin(stage,O2.X,O2.Y); pin(stage,Q.X,Q.Y); pin(stage,P.X,P.Y);
+      txt(stage,O1.X-8,O1.Y+18,"O\u2081",cssVar('--ink'),11,"end","700");
+      txt(stage,O2.X+8,O2.Y+18,"O\u2082",cssVar('--ink'),11,"start","700");
+      return s;
+    }
+    function drawChart(r1,r2,r4,th2){
+      clear(chart);
+      var W=420,H=340,pad=40, x0=pad,x1=W-12,y0=18,y1=H-pad,midY=(y0+y1)/2;
+      var pts=[], maxAbs=0.5;
+      for(var d=0; d<=360; d+=2){
+        var th=d*Math.PI/180;
+        var s=solveInvSlider(r1,r2,r4,th);
+        var v=null;
+        if(s){ var c=coeffsInvSlider(s,r2,r4,th); v=isFinite(c.f3)?c.f3:null; }
+        pts.push({d:d,v:v});
+        if(v!==null) maxAbs=Math.max(maxAbs,Math.abs(v));
+      }
+      maxAbs=Math.min(maxAbs, 5*r2); // sanity clamp
+      // axes
+      line(chart,x0,y1,x1,y1,cssVar('--ink-soft'),1.4);
+      line(chart,x0,y0,x0,y1,cssVar('--ink-soft'),1.4);
+      line(chart,x0,midY,x1,midY,cssVar('--accent-2'),1.2,"4 4");
+      txt(chart,W/2,H-10,"crank angle \u03B8\u2082 (deg)",cssVar('--ink-soft'),11,"middle");
+      txt(chart,x1-2,midY-4,"f\u2083 = 0 (slider limit)",cssVar('--accent-2'),10,"end");
+      txt(chart,x0-4,y0+10,"f\u2083",cssVar('--ink-soft'),11,"end");
+      [0,90,180,270,360].forEach(function(d){
+        var X=x0+(d/360)*(x1-x0);
+        line(chart,X,y1-3,X,y1+3,cssVar('--ink-soft'),1);
+        txt(chart,X,y1+14,d+"\u00B0",cssVar('--ink-soft'),10,"middle");
+      });
+      function pxf(d){return x0+(d/360)*(x1-x0);}
+      function pyf(v){return midY - (Math.max(-maxAbs,Math.min(maxAbs,v))/maxAbs)*((y1-y0)/2-8);}
+      var run=[];
+      function flush(){ if(run.length>1) chart.appendChild(el("polyline",{fill:"none",stroke:cssVar('--accent'),"stroke-width":2.2,points:run.join(" ")})); run=[]; }
+      pts.forEach(function(p){ if(p.v===null){flush();return;} run.push(pxf(p.d)+","+pyf(p.v)); });
+      flush();
+      // mark zero crossings
+      var prev=null, zeros=[];
+      pts.forEach(function(p){ if(prev!==null && prev.v!==null && p.v!==null && (prev.v<0)!==(p.v<0)) zeros.push((prev.d+p.d)/2); prev=p; });
+      zeros.forEach(function(z){
+        var X=pxf(z);
+        chart.appendChild(el("circle",{cx:X,cy:midY,r:4,fill:cssVar('--accent-2')}));
+      });
+      // current-angle cursor
+      var cx=pxf(th2*180/Math.PI);
+      line(chart,cx,y0,cx,y1,cssVar('--good'),1.6);
+      txt(chart,cx,y0+10,"\u03B8\u2082",cssVar('--good'),11,"middle","700");
+      return zeros;
+    }
+    function render(){
+      var r1=+$("ex41R1").value, r2=+$("ex41R2").value, r4=+$("ex41R4").value;
+      var deg=+$("ex41Th2").value, th2=deg*Math.PI/180;
+      $("ex41R1v").textContent=r1; $("ex41R2v").textContent=r2; $("ex41R4v").textContent=r4;
+      $("ex41Th2v").textContent=degTxt(deg);
+      var s=drawLinkage(r1,r2,r4,th2);
+      var zeros=drawChart(r1,r2,r4,th2);
+      var out=$("ex41OutLive");
+      if(!s){
+        out.innerHTML="At &theta;<sub>2</sub> = "+degTxt(deg)+" the chosen geometry can't close \u2014 slider stroke would have to be imaginary. Lower r<sub>4</sub> or raise r<sub>2</sub>.";
+        return;
+      }
+      var c=coeffsInvSlider(s,r2,r4,th2);
+      var fmt=function(x){return isFinite(x)?x.toFixed(3):"\u221E";};
+      var h3s=fmt(c.h3), f3s=fmt(c.f3), h4s=fmt(c.h4);
+      var atLim = isFinite(c.f3) && Math.abs(c.f3) < 0.02*r2;
+      var zText = zeros.length ? zeros.map(function(z){return Math.round(z)+"\u00B0";}).join(", ") : "none in this set";
+      out.innerHTML =
+        "<b>Outputs:</b> &theta;<sub>3</sub> = <b>"+((s.th3*180/Math.PI+360)%360).toFixed(1)+"\u00B0</b> &nbsp;&middot;&nbsp; r<sub>3</sub> = <b>"+s.r3.toFixed(1)+"</b> mm &nbsp;&middot;&nbsp; &theta;<sub>4</sub> = <b>"+((s.th4*180/Math.PI+360)%360).toFixed(1)+"\u00B0</b><br>"+
+        "<b>First-order coefficients:</b> h<sub>3</sub> = "+h3s+" &nbsp;&middot;&nbsp; f<sub>3</sub> = <b>"+f3s+"</b> mm/rad &nbsp;&middot;&nbsp; h<sub>4</sub> = "+h4s+" &nbsp;<span style='color:var(--ink-soft)'>(h<sub>4</sub>=h<sub>3</sub> by Eq 4.18)</span><br>"+
+        "<b>Slider limit positions (f<sub>3</sub> = 0):</b> "+zText+(atLim ? " &nbsp;<span style='color:var(--accent-2);font-weight:700'>\u2190 you're at one right now</span>" : "");
+    }
+    function step(){
+      if(!spinning) return;
+      var t=+$("ex41Th2").value; t=(t+1.4)%360; $("ex41Th2").value=t; render();
+      raf=requestAnimationFrame(step);
+    }
+    $("ex41Play").addEventListener("click",function(){
+      if(reduceMotion){ var t=(+$("ex41Th2").value+10)%360; $("ex41Th2").value=t; render(); return; }
+      spinning=!spinning; this.setAttribute("aria-pressed",spinning?"true":"false");
+      this.textContent=spinning?"\u275A\u275A Pause":"\u25B6 Animate";
+      if(spinning) step(); else cancelAnimationFrame(raf);
+    });
+    $("ex41Rst").addEventListener("click",function(){
+      spinning=false; $("ex41Play").setAttribute("aria-pressed","false"); $("ex41Play").textContent="\u25B6 Animate"; cancelAnimationFrame(raf);
+      $("ex41R1").value=80; $("ex41R2").value=50; $("ex41R4").value=25; $("ex41Th2").value=90; render();
+    });
+    ["ex41R1","ex41R2","ex41R4","ex41Th2"].forEach(function(id){ $(id).addEventListener("input",render); });
     render();
   })();
 
@@ -1871,8 +2639,8 @@
        opts:["Equal to the speed ratio","Zero, because the ratio doesn't change with position","Infinite at mesh","Equal to the tooth count"],
        correct:1, fb:"A geartrain's ratio is constant, so its first-order coefficient h\u2096 is constant and its derivative h\u2032\u2096 = 0 \u2014 no second-order term."},
       {q:"To get the velocity of a coupler POINT of interest (not a joint), the method is to:",
-       opts:["Ignore it \u2014 only joints matter","Write the point's position as a vector sum, then differentiate to get its coefficients f\u20D7_C","Measure it experimentally","Use the input torque"],
-       correct:1, fb:"Express the point's position vectorially (e.g. r\u20D7_C = r\u20D7\u2082 + r\u20D7\u2032\u2083), differentiate w.r.t. the input to get f\u20D7_C, then v\u20D7_C = f\u20D7_C \u03B8\u0307\u2082 (Ex 4.6)."}
+       opts:["Ignore it \u2014 only joints matter","Write the point's position as a vector sum, then differentiate to get its coefficients f_C","Measure it experimentally","Use the input torque"],
+       correct:1, fb:"Express the point's position vectorially (e.g. r_C = r\u2082 + r\u2032\u2083, all vectors), differentiate w.r.t. the input to get f_C, then v_C = f_C \u00B7 \u03B8\u0307\u2082 (Ex 4.6)."}
     ];
     var answered=0, correctCount=0;
     function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
@@ -1933,9 +2701,9 @@
       ["Limit position","A configuration where an output's first-order coefficient is zero (e.g. h\u2084 = 0); that output momentarily stops and reverses.","\u00A7 4.4 Limit positions"],
       ["Speed ratio","The ratio of output to input angular speed; for a geartrain it equals the constant first-order coefficient h\u2096.","\u00A7 4.6 Geartrains"],
       ["Point of interest","A point on a link (e.g. a coupler point or mass center) whose velocity/acceleration is found by writing its position vectorially and differentiating.","\u00A7 4.5 Points"],
-      ["Coupler point","A point fixed on the coupler (floating link) that traces a coupler curve; its coefficients f\u20D7_C give its velocity direction.","\u00A7 4.5 / Ex 4.6"],
+      ["Coupler point","A point fixed on the coupler (floating link) that traces a coupler curve; its coefficients f_C give its velocity direction (per radian of input).","\u00A7 4.5 / Ex 4.6"],
       ["Coriolis term","The 2f\u2096h\u2096-type product appearing in second-order equations when a length and angle both vary (e.g. sliding joints).","Ex 4.1"],
-      ["Loop-closure equation","The vector equation \u03A3 r\u20D7 = 0 around a mechanism loop; differentiating it generates the coefficient equations.","\u00A7 4.1 Time-based"],
+      ["Loop-closure equation","The vector equation \u03A3 r = 0 (sum of position vectors) around a mechanism loop; differentiating it generates the coefficient equations.","\u00A7 4.1 Time-based"],
       ["Crank-rocker","A four-bar in which the crank fully rotates while the rocker oscillates between two limit positions.","\u00A7 4.4 Limit positions"],
       ["Determinant |J|","Scalar measuring how far the Jacobian is from singular; its zeros are the dead positions. For a four-bar, |J| \u221D sin(\u03B8\u2084 \u2212 \u03B8\u2083).","\u00A7 4.3 Dead positions"],
       ["Chain rule","The calculus identity that separates geometry from time: dS\u2096/dt = (dS\u2096/dS\u1D62)(dS\u1D62/dt) = h\u2096 S\u0307\u1D62.","\u00A7 4.0 Foundations"],
