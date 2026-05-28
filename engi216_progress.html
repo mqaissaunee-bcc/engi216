@@ -1,0 +1,30 @@
+<div style="font-family: sans-serif; max-width: 600px;">
+  <p><strong>📅 Summer 2026 - ENGI 216: Mechanisms and Machines Progress</strong></p>
+  <div id="progress-text"></div>
+  <div style="background-color: #ddd; width: 100%; height: 25px; border-radius: 5px;">
+    <div id="progress-bar" style="background-color: #4caf50; height: 100%; border-radius: 5px;"></div>
+  </div>
+</div>
+<script>
+  var startDate = Date.UTC(2026, 5, 2);
+  var endDate = Date.UTC(2026, 7, 4);
+  var today = new Date();
+  var todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  var totalDays = 0;
+  var currentDate = startDate;
+  while (currentDate <= endDate) {
+    totalDays++;
+    currentDate += 24 * 60 * 60 * 1000;
+  }
+  var elapsedDays = 0;
+  if (todayUTC >= startDate) {
+    currentDate = startDate;
+    while (currentDate <= Math.min(todayUTC, endDate)) {
+      elapsedDays++;
+      currentDate += 24 * 60 * 60 * 1000;
+    }
+  }
+  var percent = totalDays > 0 ? ((elapsedDays / totalDays) * 100).toFixed(1) : 0;
+  document.getElementById("progress-text").innerText = "Day " + elapsedDays + " of " + totalDays + " (" + percent + "%)";
+  document.getElementById("progress-bar").style.width = percent + "%";
+</script>
