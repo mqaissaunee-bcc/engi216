@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENGI 216 — Mechanism Atlas</title>
+<style>
+  :root{
+    --paper:#f3f1e8; --grid:rgba(10,126,164,.10);
+    --ink:#10243a; --cyan:#0a7ea4; --rust:#c2541d; --steel:#5b6b7b;
+    --card:#fbfbf6; --line:#d8d6c8; --soft:#eceadf;
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --ui:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  [data-theme="dark"]{
+    --paper:#0c1925; --grid:rgba(56,189,248,.09);
+    --ink:#e7eef5; --cyan:#38bdf8; --rust:#f08a4b; --steel:#9fb3c8;
+    --card:#11263b; --line:#23435f; --soft:#16304a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--ui);color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:26px 26px;min-height:100vh;padding:26px 16px;}
+  .wrap{max-width:1040px;margin:0 auto}
+  header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;
+    border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:8px}
+  .brand{display:flex;flex-direction:column;gap:2px}
+  .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(1.6rem,3.6vw,2.3rem);margin:0;color:var(--ink)}
+  .sub{color:var(--steel);font-size:.95rem;max-width:64ch;margin:4px 0 0}
+  .topbtns{display:flex;gap:8px;align-items:center}
+  .iconbtn{font-family:var(--ui);font-size:.85rem;font-weight:600;border:1.5px solid var(--line);background:var(--card);
+    color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+  .iconbtn:hover{border-color:var(--cyan)}
+  .iconbtn:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+  .bar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin:16px 0 22px}
+  .filters{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-family:var(--ui);font-size:.8rem;border:1.5px solid var(--line);background:var(--card);color:var(--steel);
+    border-radius:999px;padding:7px 13px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .playbtn{font-family:var(--ui);font-weight:600;font-size:.9rem;border:none;background:var(--cyan);color:#fff;
+    border-radius:999px;padding:9px 18px;cursor:pointer}
+  .playbtn:hover{filter:brightness(1.07)}
+  .count{font-family:var(--mono);font-size:.75rem;color:var(--steel)}
+  .grid{display:grid;grid-template-columns:1fr;gap:22px}
+  @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    box-shadow:0 8px 24px rgba(16,36,58,.07);display:flex;flex-direction:column}
+  .viz{position:relative;background:repeating-linear-gradient(0deg,transparent,transparent 25px,var(--grid) 25px,var(--grid) 26px),
+    repeating-linear-gradient(90deg,transparent,transparent 25px,var(--grid) 25px,var(--grid) 26px),var(--soft);
+    border-bottom:1px solid var(--line)}
+  canvas{display:block;width:100%;height:auto;aspect-ratio:360/240}
+  .play1{position:absolute;top:10px;left:10px;width:34px;height:34px;border-radius:8px;border:1.5px solid var(--line);
+    background:var(--card);color:var(--ink);font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+  .play1:hover{border-color:var(--cyan);color:var(--cyan)}
+  .play1[aria-pressed="true"]{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+  .seg{position:absolute;top:10px;right:10px;display:flex;background:var(--card);border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;border:none;background:transparent;color:var(--steel);padding:6px 11px;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--cyan);color:#fff}
+  .corner{position:absolute;bottom:10px;left:10px;font-family:var(--mono);font-size:.68rem;color:var(--steel);background:var(--card);border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+  .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px}
+  .body h3{font-family:var(--display);font-size:1.22rem;margin:0;color:var(--ink)}
+  .fam{font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;color:var(--cyan);text-transform:uppercase}
+  .io{margin:0;font-size:.93rem;color:var(--ink)}.io b{color:var(--rust)}.io .arr{color:var(--steel);padding:0 6px}
+  .mob{font-family:var(--mono);font-size:.78rem;background:var(--soft);border:1px dashed var(--line);border-radius:8px;padding:10px 12px;color:var(--ink);line-height:1.7}
+  .mob .res{color:var(--cyan);font-weight:700}
+  .meta{font-size:.85rem;color:var(--steel);margin:0}.meta b{color:var(--ink)}
+  .grashof{font-size:.82rem;color:var(--ink);font-family:var(--mono)}
+  .callout{border-left:3px solid var(--cyan);background:color-mix(in srgb,var(--cyan) 8%,transparent);padding:9px 12px;border-radius:0 8px 8px 0;font-size:.87rem;line-height:1.5}
+  .callout .h{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);display:block;margin-bottom:3px}
+  .rw{border-left:3px solid var(--rust);background:color-mix(in srgb,var(--rust) 8%,transparent);padding:9px 12px;border-radius:0 8px 8px 0}
+  .rw .h{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);display:block;margin-bottom:6px}
+  .rw .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .rw .chips span{font-size:.79rem;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+  .ctl{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--steel)}
+  .ctl input[type=range]{accent-color:var(--cyan);width:120px}.ctl .v{font-family:var(--mono);color:var(--ink)}
+  .xref{margin-top:2px;font-size:.83rem;font-weight:600;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .xref:hover{text-decoration:underline}.xref .nt{font-size:.7rem;color:var(--steel);font-weight:400}
+  .ddtag{font-family:var(--mono);font-size:.58rem;color:var(--rust);vertical-align:middle}
+  .part{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:6px}
+  .part h2{font-family:var(--display);font-size:1.05rem;margin:0;color:var(--ink);white-space:nowrap}
+  .part .pp{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+  .part .rule{flex:1;height:1px;background:var(--line)}
+  footer{margin-top:30px;border-top:1px solid var(--line);padding-top:14px;color:var(--steel);font-size:.82rem;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="tag">ENGI 216 · Dynamics &amp; Kinematics of Machines</span>
+      <h1>Mechanism Atlas</h1>
+      <p class="sub">Real machines and the kinematics underneath them. Flip any card between the <b>machine</b> and its <b>skeleton diagram</b> — the mobility, joints, and Grashof class come along for the ride. Each card has its own play button.</p>
+    </div>
+    <div class="topbtns"><button class="iconbtn" id="themeBtn" aria-pressed="false">◐ Theme</button></div>
+  </header>
+
+  <div class="bar">
+    <div class="filters" role="group" aria-label="Filter by motion transformation">
+      <button class="chip" data-filter="all" aria-pressed="true">All</button>
+      <button class="chip" data-filter="recip" aria-pressed="false">→ Reciprocation</button>
+      <button class="chip" data-filter="oscill" aria-pressed="false">→ Oscillation</button>
+      <button class="chip" data-filter="intermittent" aria-pressed="false">→ Intermittent</button>
+      <button class="chip" data-filter="gear" aria-pressed="false">Gearing &amp; transmission</button>
+      <button class="chip" data-filter="path" aria-pressed="false">Path &amp; orientation</button>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <span class="count" id="count"></span>
+      <button class="playbtn" id="playBtn" aria-pressed="true">⏸ Pause all</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <p>Thirteen mechanisms across five motion families. The slider-crank, four-bar, parallelogram, and toggle reuse the circle-intersection / slider-crank solvers from the standalone modules; gears share one tooth-drawing engine. The whole library is the <code>MECH</code> data array — each entry is one config object plus a draw function.</p>
+    <p>Built in the ENGI 216 blueprint style · WCAG 2.1 AA targets · single self-contained file · all diagrams original.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  function pal(){const s=getComputedStyle(document.body);const c=function(v){return s.getPropertyValue(v).trim();};
+    return {paper:c('--paper'),ink:c('--ink'),cyan:c('--cyan'),rust:c('--rust'),steel:c('--steel'),soft:c('--soft'),card:c('--card')};}
+  const D=Math.PI/180;
+  function intersect(A,rA,C,rC,sign){const dx=C.x-A.x,dy=C.y-A.y,d=Math.hypot(dx,dy);
+    const a=(rA*rA-rC*rC+d*d)/(2*d),h=Math.sqrt(Math.max(0,rA*rA-a*a));
+    const xm=A.x+a*dx/d,ym=A.y+a*dy/d,ux=-dy/d,uy=dx/d;return {x:xm+sign*h*ux,y:ym+sign*h*uy};}
+  function camS(th,h){th=((th%360)+360)%360;
+    if(th<90){const b=th/90;return h*(b-Math.sin(2*Math.PI*b)/(2*Math.PI));}
+    if(th<180)return h;
+    if(th<270){const b=(th-180)/90;return h*(1-(b-Math.sin(2*Math.PI*b)/(2*Math.PI)));}return 0;}
+  function geneva(th,n){const m=1/Math.sin(Math.PI/n),idx=360/n,half=90-180/n;
+    const k=Math.round(th/360);let tc=th-360*k,loc;
+    if(Math.abs(tc)<=half){const a=tc*D;loc=Math.atan2(Math.sin(a),m-Math.cos(a))/D;}else loc=Math.sign(tc)*idx/2;
+    return k*idx+loc;}
+
+  // skeleton primitives
+  function link(ctx,a,b,col,w){ctx.strokeStyle=col;ctx.lineWidth=w||4;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  function pin(ctx,x,y,p){ctx.fillStyle=p.card;ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,4.5,0,7);ctx.fill();ctx.stroke();}
+  function gpin(ctx,x,y,p){pin(ctx,x,y,p);ctx.strokeStyle=p.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y+4.5);ctx.lineTo(x-9,y+16);ctx.lineTo(x+9,y+16);ctx.closePath();ctx.stroke();hatch(ctx,x-12,y+16,24,p);}
+  function hatch(ctx,x,y,len,p){ctx.strokeStyle=p.steel;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len,y);ctx.stroke();for(let i=0;i<=len;i+=5){ctx.beginPath();ctx.moveTo(x+i,y);ctx.lineTo(x+i-5,y+5);ctx.stroke();}}
+  function vrail(ctx,x,y1,y2,p){ctx.strokeStyle=p.steel;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();for(let i=0;i<=(y2-y1);i+=5){ctx.beginPath();ctx.moveTo(x,y1+i);ctx.lineTo(x-5,y1+i+5);ctx.stroke();}}
+  function num(ctx,x,y,t,p){ctx.fillStyle=p.card;ctx.strokeStyle=p.steel;ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,8,0,7);ctx.fill();ctx.stroke();ctx.fillStyle=p.ink;ctx.font="600 10px ui-monospace,monospace";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t,x,y);ctx.textBaseline="alphabetic";}
+  function hp(ctx,x,y,p){ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.fill();ctx.strokeStyle=p.rust;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y,9,-0.6,0.6);ctx.stroke();ctx.font="600 9px ui-monospace,monospace";ctx.fillText("J₂",x+11,y-7);}
+  function cap(ctx,t,x,y,p){ctx.fillStyle=p.steel;ctx.font="11px ui-monospace,monospace";ctx.textAlign="center";ctx.fillText(t,x,y);}
+  function gear(ctx,cx,cy,rp,N,ph,fill,p){ctx.save();ctx.translate(cx,cy);ctx.rotate(ph);ctx.fillStyle=fill;ctx.strokeStyle=p.ink;ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.arc(0,0,rp-3,0,7);ctx.fill();ctx.stroke();
+    for(let i=0;i<N;i++){const a=i/N*2*Math.PI;ctx.save();ctx.rotate(a);ctx.beginPath();ctx.moveTo(-3.2,rp-4);ctx.lineTo(-2.1,rp+4);ctx.lineTo(2.1,rp+4);ctx.lineTo(3.2,rp-4);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
+    ctx.fillStyle=p.card;ctx.beginPath();ctx.arc(0,0,rp*0.3,0,7);ctx.fill();ctx.stroke();ctx.restore();}
+  function pc(ctx,cx,cy,r,p){ctx.strokeStyle=p.line;ctx.setLineDash([4,3]);ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.stroke();ctx.setLineDash([]);}
+
+  // ===================== ENGINES =====================
+  function eSliderCrank(ctx,W,H,t,mode,p){const O={x:108,y:128},r2=34,r3=120;
+    const A={x:O.x+r2*Math.cos(t),y:O.y+r2*Math.sin(t)};
+    const sx=A.x+Math.sqrt(Math.max(0,r3*r3-(A.y-O.y)*(A.y-O.y))),S={x:sx,y:O.y};
+    if(mode==="real"){ctx.fillStyle=p.soft;ctx.strokeStyle=p.line;ctx.lineWidth=2;ctx.fillRect(168,O.y-30,150,60);ctx.strokeRect(168,O.y-30,150,60);
+      ctx.fillStyle=p.cyan;ctx.fillRect(S.x-2,O.y-26,30,52);ctx.strokeStyle=p.ink;ctx.strokeRect(S.x-2,O.y-26,30,52);
+      link(ctx,A,S,p.steel,7);ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(O.x,O.y,30,0,7);ctx.fill();ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.stroke();
+      link(ctx,O,A,p.ink,6);pin(ctx,O.x,O.y,p);pin(ctx,A.x,A.y,p);cap(ctx,"cylinder",243,O.y+48,p);cap(ctx,"crankshaft",O.x,O.y+48,p);
+    }else{link(ctx,{x:60,y:O.y},{x:300,y:O.y},p.steel,1);vrail(ctx,168,O.y-34,O.y+34,p);
+      ctx.fillStyle=p.card;ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.fillRect(S.x-16,O.y-12,32,24);ctx.strokeRect(S.x-16,O.y-12,32,24);
+      link(ctx,O,A,p.cyan,4);link(ctx,A,S,p.ink,4);gpin(ctx,O.x,O.y,p);pin(ctx,A.x,A.y,p);pin(ctx,S.x,S.y,p);
+      num(ctx,(O.x+A.x)/2-6,(O.y+A.y)/2-12,"2",p);num(ctx,(A.x+S.x)/2,(A.y+S.y)/2-14,"3",p);num(ctx,S.x,O.y+26,"4",p);num(ctx,O.x-22,O.y+8,"1",p);}}
+
+  function eScotch(ctx,W,H,t,mode,p){const O={x:96,y:122},r=38;const A={x:O.x+r*Math.cos(t),y:O.y+r*Math.sin(t)};const yx=A.x;
+    if(mode==="real"){link(ctx,O,A,p.ink,6);ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(O.x,O.y,r,0,7);ctx.fill();ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle=p.cyan;ctx.fillRect(yx-9,O.y-46,8,92);ctx.fillRect(yx+1,O.y-46,8,92);ctx.fillRect(yx-9,O.y-46,18,8);ctx.fillRect(yx-9,O.y+38,18,8);
+      ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.strokeRect(yx-9,O.y-46,18,92);
+      link(ctx,{x:yx+9,y:O.y},{x:yx+150,y:O.y},p.steel,6);ctx.fillStyle=p.soft;ctx.fillRect(248,O.y-22,46,44);ctx.strokeRect(248,O.y-22,46,44);
+      ctx.fillStyle=p.cyan;ctx.fillRect(yx+140,O.y-18,20,36);ctx.strokeRect(yx+140,O.y-18,20,36);
+      pin(ctx,O.x,O.y,p);ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(A.x,A.y,5,0,7);ctx.fill();cap(ctx,"slotted yoke",yx,O.y+62,p);
+    }else{link(ctx,{x:70,y:O.y},{x:300,y:O.y},p.steel,1);hatch(ctx,70,O.y+30,200,p);
+      ctx.fillStyle=p.card;ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.fillRect(yx-13,O.y-28,26,56);ctx.strokeRect(yx-13,O.y-28,26,56);
+      ctx.strokeStyle=p.steel;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(yx,O.y-26);ctx.lineTo(yx,O.y+26);ctx.stroke();ctx.setLineDash([]);
+      link(ctx,{x:yx+13,y:O.y},{x:yx+150,y:O.y},p.steel,2);ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.strokeRect(yx+150,O.y-12,24,24);
+      link(ctx,O,A,p.cyan,4);gpin(ctx,O.x,O.y,p);hp(ctx,A.x,A.y,p);
+      num(ctx,(O.x+A.x)/2-8,(O.y+A.y)/2,"2",p);num(ctx,yx,O.y-36,"3",p);num(ctx,O.x-20,O.y+8,"1",p);}}
+
+  function eCam(ctx,W,H,t,mode,p){const Cc={x:126,y:172},rb=30,h=36;const rot=t/D*0.9;const lift=rb+camS(((rot%360)+360)%360,h);const Ct={x:Cc.x,y:Cc.y-lift};
+    function build(){ctx.beginPath();for(let f=0;f<=360;f+=4){const R=rb+camS(f,h),ang=(f-rot)*D,x=Cc.x+Math.sin(ang)*R,y=Cc.y-Math.cos(ang)*R;f?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();}
+    if(mode==="real"){build();ctx.fillStyle=p.rust;ctx.fill();ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=p.card;ctx.beginPath();ctx.arc(Cc.x,Cc.y,6,0,7);ctx.fill();ctx.stroke();
+      ctx.strokeStyle=p.ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(Ct.x,Ct.y);ctx.lineTo(Ct.x,40);ctx.stroke();
+      ctx.strokeStyle=p.cyan;ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<8;i++){const y=Ct.y-8-i*9;ctx.moveTo(Ct.x-8,y);ctx.lineTo(Ct.x+8,y-4);}ctx.stroke();
+      ctx.fillStyle=p.cyan;ctx.fillRect(Ct.x-16,34,32,8);ctx.fillStyle=p.steel;ctx.beginPath();ctx.arc(Ct.x,Ct.y,5,0,7);ctx.fill();cap(ctx,"cam",Cc.x,Cc.y+rb+24,p);cap(ctx,"valve",Ct.x,30,p);
+    }else{build();ctx.strokeStyle=p.line;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);vrail(ctx,Cc.x-16,46,Ct.y,p);
+      ctx.fillStyle=p.card;ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.fillRect(Ct.x-14,Ct.y,28,20);ctx.strokeRect(Ct.x-14,Ct.y,28,20);ctx.beginPath();ctx.moveTo(Ct.x,Ct.y);ctx.lineTo(Ct.x,Ct.y+20);ctx.stroke();
+      gpin(ctx,Cc.x,Cc.y,p);hp(ctx,Ct.x,Ct.y,p);num(ctx,Cc.x+rb+10,Cc.y-6,"2",p);num(ctx,Ct.x+20,Ct.y+10,"3",p);num(ctx,Cc.x-26,Cc.y+10,"1",p);}}
+
+  function eQuickReturn(ctx,W,H,t,mode,p){const O2={x:150,y:66},O4={x:150,y:196},r2=32;const th=t;
+    const A={x:O2.x+r2*Math.cos(th),y:O2.y+r2*Math.sin(th)};
+    const dx=A.x-O4.x,dy=A.y-O4.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;const C={x:O4.x+168*ux,y:O4.y+168*uy};
+    const Rx=C.x+Math.sqrt(Math.max(0,64*64-(C.y-40)*(C.y-40))),R={x:Rx,y:40};
+    if(mode==="real"){link(ctx,O4,C,p.steel,8);ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(O2.x,O2.y,r2,0,7);ctx.fill();ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle=p.cyan;ctx.save();ctx.translate(A.x,A.y);ctx.rotate(Math.atan2(uy,ux));ctx.fillRect(-9,-7,18,14);ctx.strokeRect(-9,-7,18,14);ctx.restore();
+      link(ctx,C,R,p.ink,5);ctx.fillStyle=p.cyan;ctx.fillRect(R.x-18,R.y-9,36,18);ctx.strokeRect(R.x-18,R.y-9,36,18);
+      ctx.strokeStyle=p.steel;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(70,R.y-12);ctx.lineTo(270,R.y-12);ctx.moveTo(70,R.y+12);ctx.lineTo(270,R.y+12);ctx.stroke();
+      ctx.fillStyle=p.soft;ctx.fillRect(280,R.y-14,18,28);ctx.strokeStyle=p.ink;ctx.strokeRect(280,R.y-14,18,28);
+      pin(ctx,O2.x,O2.y,p);pin(ctx,O4.x,O4.y,p);cap(ctx,"ram",R.x,70,p);cap(ctx,"slotted lever",O4.x+58,140,p);
+    }else{link(ctx,O4,C,p.ink,4);link(ctx,O2,A,p.cyan,4);link(ctx,C,R,p.steel,3);
+      ctx.fillStyle=p.card;ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.save();ctx.translate(A.x,A.y);ctx.rotate(Math.atan2(uy,ux));ctx.fillRect(-8,-6,16,12);ctx.strokeRect(-8,-6,16,12);ctx.restore();
+      link(ctx,{x:120,y:40},{x:270,y:40},p.steel,1);ctx.strokeRect(R.x-12,R.y-9,24,18);
+      gpin(ctx,O2.x,O2.y,p);gpin(ctx,O4.x,O4.y,p);pin(ctx,A.x,A.y,p);pin(ctx,C.x,C.y,p);pin(ctx,R.x,R.y,p);
+      num(ctx,(O2.x+A.x)/2+12,(O2.y+A.y)/2,"2",p);num(ctx,O4.x-18,140,"4",p);num(ctx,(C.x+R.x)/2,(C.y+R.y)/2-10,"5",p);num(ctx,R.x,52,"6",p);}}
+
+  function eFourBar(ctx,W,H,t,mode,p){const O2={x:92,y:172},O4={x:208,y:96},r2=24,r3=120,r4=70;
+    const A={x:O2.x+r2*Math.cos(t),y:O2.y+r2*Math.sin(t)};const B=intersect(A,r3,O4,r4,-1);
+    const ux=(O4.x-B.x),uy=(O4.y-B.y),ul=Math.hypot(ux,uy),Hh={x:O4.x+ux/ul*78,y:O4.y+uy/ul*78};
+    if(mode==="real"){ctx.fillStyle=p.soft;ctx.fillRect(60,196,220,14);ctx.strokeStyle=p.ink;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(O4.x-26,196);ctx.lineTo(O4.x,O4.y);ctx.lineTo(O4.x+26,196);ctx.stroke();link(ctx,B,Hh,p.steel,9);
+      ctx.fillStyle=p.cyan;ctx.beginPath();ctx.arc(Hh.x,Hh.y,12,Math.PI*0.1,Math.PI*1.1);ctx.fill();ctx.strokeStyle=p.ink;ctx.beginPath();ctx.moveTo(Hh.x,Hh.y+10);ctx.lineTo(Hh.x,210);ctx.stroke();
+      ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(O2.x,O2.y,22,0,7);ctx.fill();ctx.strokeStyle=p.ink;ctx.stroke();link(ctx,A,B,p.steel,6);
+      pin(ctx,O2.x,O2.y,p);pin(ctx,O4.x,O4.y,p);pin(ctx,A.x,A.y,p);pin(ctx,B.x,B.y,p);cap(ctx,"pump jack",150,226,p);
+    }else{link(ctx,O2,O4,p.steel,1);link(ctx,O2,A,p.cyan,4);link(ctx,A,B,p.ink,4);link(ctx,B,O4,p.ink,4);link(ctx,O4,Hh,p.steel,3);
+      gpin(ctx,O2.x,O2.y,p);gpin(ctx,O4.x,O4.y,p);pin(ctx,A.x,A.y,p);pin(ctx,B.x,B.y,p);
+      num(ctx,(O2.x+A.x)/2-10,(O2.y+A.y)/2,"2",p);num(ctx,(A.x+B.x)/2,(A.y+B.y)/2-12,"3",p);num(ctx,(B.x+O4.x)/2,(B.y+O4.y)/2-12,"4",p);num(ctx,(O2.x+O4.x)/2,(O2.y+O4.y)/2+14,"1",p);}}
+
+  function eToggle(ctx,W,H,t,mode,p){const O={x:180,y:48},r2=40,r3=112;const th=90*D+52*D*Math.sin(t*0.6);
+    const A={x:O.x+r2*Math.cos(th),y:O.y+r2*Math.sin(th)};const Ry=A.y+Math.sqrt(Math.max(0,r3*r3-(A.x-180)*(A.x-180)));const R={x:180,y:Ry};
+    const near=Math.abs(A.x-180)<16;
+    if(mode==="real"){ctx.fillStyle=p.soft;ctx.fillRect(150,30,60,12);ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.strokeRect(150,30,60,12);
+      link(ctx,O,A,p.ink,6);ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(A.x,A.y,10,0,7);ctx.fill();ctx.stroke();link(ctx,A,R,p.cyan,6);
+      vrailReal(ctx,180,R.y,p);ctx.fillStyle=p.cyan;ctx.fillRect(R.x-20,R.y-8,40,18);ctx.strokeStyle=p.ink;ctx.strokeRect(R.x-20,R.y-8,40,18);
+      ctx.fillStyle=p.soft;ctx.fillRect(150,R.y+30,60,16);ctx.strokeRect(150,R.y+30,60,16);ctx.fillStyle=p.steel;ctx.fillRect(160,R.y+10,40,20);
+      if(near){ctx.strokeStyle=p.rust;ctx.lineWidth=3;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(160+i*16,R.y+10);ctx.lineTo(160+i*16,R.y+30);ctx.stroke();ctx.beginPath();ctx.moveTo(155+i*16,R.y+24);ctx.lineTo(160+i*16,R.y+30);ctx.lineTo(165+i*16,R.y+24);ctx.stroke();}ctx.fillStyle=p.rust;ctx.font="600 11px ui-monospace,monospace";ctx.textAlign="center";ctx.fillText("MA ↑",230,R.y+4);}
+      pin(ctx,O.x,O.y,p);cap(ctx,"toggle press",O.x,R.y+62,p);
+    }else{link(ctx,O,A,p.cyan,4);link(ctx,A,R,p.ink,4);vrail(ctx,164,R.y-40,R.y+10,p);
+      ctx.fillStyle=p.card;ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.fillRect(R.x-14,R.y-10,28,20);ctx.strokeRect(R.x-14,R.y-10,28,20);
+      gpin2(ctx,O.x,O.y,p);pin(ctx,A.x,A.y,p);pin(ctx,R.x,R.y,p);
+      num(ctx,(O.x+A.x)/2-12,(O.y+A.y)/2,"2",p);num(ctx,(A.x+R.x)/2+12,(A.y+R.y)/2,"3",p);num(ctx,R.x+20,R.y,"4",p);}}
+  function vrailReal(ctx,x,ry,p){ctx.strokeStyle=p.steel;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-22,ry-40);ctx.lineTo(x-22,ry+12);ctx.moveTo(x+22,ry-40);ctx.lineTo(x+22,ry+12);ctx.stroke();}
+  function gpin2(ctx,x,y,p){pin(ctx,x,y,p);ctx.strokeStyle=p.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y-4.5);ctx.lineTo(x-9,y-16);ctx.lineTo(x+9,y-16);ctx.closePath();ctx.stroke();hatch(ctx,x-12,y-16,24,p);}
+
+  function eGeneva(ctx,W,H,t,mode,p,prm){const n=prm.slots||4,r=40,c=r/Math.sin(Math.PI/n);const Dc={x:118,y:122},Gc={x:Dc.x+c,y:122};
+    const th=t/D*0.6;const pinP={x:Dc.x+r*Math.cos(th*D),y:Dc.y+r*Math.sin(th*D)};const beta=geneva(th,n)*D;const Rg=c-r+6;
+    if(mode==="real"){ctx.fillStyle=p.soft;ctx.strokeStyle=p.line;ctx.lineWidth=2;ctx.beginPath();ctx.arc(Dc.x,Dc.y,30,0,7);ctx.fill();ctx.stroke();
+      ctx.fillStyle=p.rust;ctx.beginPath();ctx.arc(pinP.x,pinP.y,6,0,7);ctx.fill();link(ctx,Dc,pinP,p.ink,4);
+      ctx.save();ctx.translate(Gc.x,Gc.y);ctx.rotate(beta);ctx.fillStyle=p.cyan;ctx.beginPath();ctx.arc(0,0,Rg,0,7);ctx.fill();ctx.fillStyle=p.soft;
+      for(let k=0;k<n;k++){ctx.save();ctx.rotate(k*2*Math.PI/n);ctx.fillRect(-6,Rg-22,12,30);ctx.restore();}ctx.restore();
+      ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(Gc.x,Gc.y,Rg,0,7);ctx.stroke();pin(ctx,Dc.x,Dc.y,p);pin(ctx,Gc.x,Gc.y,p);
+      cap(ctx,"drive",Dc.x,Dc.y+48,p);cap(ctx,n+"-slot wheel",Gc.x,Gc.y+Rg+18,p);
+    }else{link(ctx,Dc,pinP,p.cyan,4);ctx.save();ctx.translate(Gc.x,Gc.y);ctx.rotate(beta);ctx.strokeStyle=p.steel;ctx.lineWidth=1.5;
+      for(let k=0;k<n;k++){const a=k*2*Math.PI/n;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Rg*Math.cos(a),Rg*Math.sin(a));ctx.stroke();}ctx.restore();
+      pc(ctx,Gc.x,Gc.y,Rg,p);gpin(ctx,Dc.x,Dc.y,p);gpin(ctx,Gc.x,Gc.y,p);pin(ctx,pinP.x,pinP.y,p);hp(ctx,pinP.x,pinP.y,p);
+      num(ctx,(Dc.x+pinP.x)/2,(Dc.y+pinP.y)/2-12,"2",p);num(ctx,Gc.x+Rg+4,Gc.y-Rg+4,"3",p);num(ctx,(Dc.x+Gc.x)/2,Gc.y+30,"1",p);}}
+
+  function eRatchet(ctx,W,H,t,mode,p){const Wc={x:150,y:128},Rw=52,Nt=12,A0=2*Math.PI/Nt;const s=t*1.1;
+    const cyc=Math.floor(s/(2*Math.PI)),pcc=s-cyc*2*Math.PI,arm=A0*(0.5-0.5*Math.cos(pcc));const wheel=cyc*A0+(pcc<Math.PI?arm:A0);
+    const armAng=-Math.PI/2+arm;const tip={x:Wc.x+(Rw+6)*Math.cos(armAng),y:Wc.y+(Rw+6)*Math.sin(armAng)};
+    if(mode==="real"){ctx.fillStyle=p.cyan;ctx.beginPath();ctx.arc(Wc.x,Wc.y,Rw-12,0,7);ctx.fill();
+      ctx.save();ctx.translate(Wc.x,Wc.y);ctx.rotate(wheel);ctx.fillStyle=p.cyan;ctx.strokeStyle=p.ink;ctx.lineWidth=1.5;
+      for(let i=0;i<Nt;i++){ctx.save();ctx.rotate(i*A0);ctx.beginPath();ctx.moveTo(Rw-12,0);ctx.lineTo(Rw,0);ctx.lineTo(Rw-12,Rw*A0*0.9);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}ctx.restore();
+      ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(Wc.x,Wc.y,Rw-12,0,7);ctx.stroke();
+      link(ctx,Wc,tip,p.ink,5);ctx.fillStyle=p.rust;ctx.beginPath();ctx.moveTo(tip.x,tip.y);ctx.lineTo(tip.x-14,tip.y-4);ctx.lineTo(tip.x-8,tip.y+8);ctx.closePath();ctx.fill();
+      ctx.strokeStyle=p.steel;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(Wc.x+38,Wc.y-60);ctx.lineTo(Wc.x+6,Wc.y-Rw+6);ctx.stroke();
+      pin(ctx,Wc.x,Wc.y,p);cap(ctx,"ratchet wheel",Wc.x,Wc.y+Rw+16,p);cap(ctx,"holding pawl",Wc.x+58,Wc.y-66,p);
+    }else{pc(ctx,Wc.x,Wc.y,Rw-6,p);link(ctx,Wc,tip,p.cyan,4);gpin(ctx,Wc.x,Wc.y,p);hp(ctx,tip.x-6,tip.y+2,p);
+      num(ctx,Wc.x+(Rw-20)*Math.cos(armAng),Wc.y+(Rw-20)*Math.sin(armAng),"2",p);num(ctx,Wc.x+Rw,Wc.y+10,"3",p);num(ctx,Wc.x-20,Wc.y+26,"1",p);}}
+
+  function eSpur(ctx,W,H,t,mode,p){const g1={x:110,y:120},rp1=46,N1=15,rp2=34,N2=11;const g2={x:g1.x+rp1+rp2,y:120};
+    const ph1=t,ph2=-t*rp1/rp2+Math.PI/N2;
+    if(mode==="real"){gear(ctx,g1.x,g1.y,rp1,N1,ph1,p.rust,p);gear(ctx,g2.x,g2.y,rp2,N2,ph2,p.cyan,p);pin(ctx,g1.x,g1.y,p);pin(ctx,g2.x,g2.y,p);
+      cap(ctx,"driver",g1.x,g1.y+rp1+18,p);cap(ctx,"driven",g2.x,g2.y+rp2+18,p);
+    }else{pc(ctx,g1.x,g1.y,rp1,p);pc(ctx,g2.x,g2.y,rp2,p);gpin(ctx,g1.x,g1.y,p);gpin(ctx,g2.x,g2.y,p);hp(ctx,g1.x+rp1,g1.y,p);
+      num(ctx,g1.x,g1.y,"2",p);num(ctx,g2.x,g2.y,"3",p);num(ctx,(g1.x+g2.x)/2,g1.y+rp1+18,"1",p);}}
+
+  function eRack(ctx,W,H,t,mode,p){const pn={x:130,y:84},rp=40,N=13;const ph=t;const pl=pn.y+rp;const pitch=2*Math.PI*rp/N;const off=((rp*t)%pitch+pitch)%pitch;
+    if(mode==="real"){gear(ctx,pn.x,pn.y,rp,N,ph,p.rust,p);pin(ctx,pn.x,pn.y,p);
+      ctx.fillStyle=p.soft;ctx.fillRect(20,pl,300,26);ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.strokeRect(20,pl,300,26);
+      ctx.fillStyle=p.cyan;ctx.strokeStyle=p.ink;for(let x=20-pitch;x<320;x+=pitch){const xx=x-off;ctx.beginPath();ctx.moveTo(xx,pl);ctx.lineTo(xx+pitch*0.25,pl-7);ctx.lineTo(xx+pitch*0.5,pl-7);ctx.lineTo(xx+pitch*0.75,pl);ctx.closePath();ctx.fill();ctx.stroke();}
+      ctx.fillStyle=p.steel;ctx.font="600 12px ui-monospace,monospace";ctx.textAlign="center";ctx.fillText("→ v = ω·r",250,pl+44);cap(ctx,"pinion",pn.x,pn.y+rp+18,p);
+    }else{pc(ctx,pn.x,pn.y,rp,p);link(ctx,{x:30,y:pl},{x:310,y:pl},p.ink,2);hatch(ctx,30,pl+16,280,p);gpin(ctx,pn.x,pn.y,p);hp(ctx,pn.x,pl,p);
+      num(ctx,pn.x,pn.y,"2",p);num(ctx,290,pl-8,"3",p);num(ctx,80,pl+30,"1",p);}}
+
+  function ePlanetary(ctx,W,H,t,mode,p,prm){const C={x:150,y:120},rs=24,rr=82,rpl=(rr-rs)/2,cr=rs+rpl;const sp=t*1.1,carr=sp*rs/(rs+rr),pspin=-sp*rs/rpl;
+    if(mode==="real"){ctx.strokeStyle=p.steel;ctx.lineWidth=12;ctx.beginPath();ctx.arc(C.x,C.y,rr+6,0,7);ctx.stroke();
+      ctx.strokeStyle=p.ink;ctx.lineWidth=1.5;for(let i=0;i<28;i++){const a=i/28*2*Math.PI;ctx.beginPath();ctx.moveTo(C.x+(rr)*Math.cos(a),C.y+rr*Math.sin(a));ctx.lineTo(C.x+(rr-5)*Math.cos(a),C.y+(rr-5)*Math.sin(a));ctx.stroke();}
+      ctx.strokeStyle=p.ink;ctx.lineWidth=5;for(let k=0;k<3;k++){const a=carr+k*2*Math.PI/3;ctx.beginPath();ctx.moveTo(C.x,C.y);ctx.lineTo(C.x+cr*Math.cos(a),C.y+cr*Math.sin(a));ctx.stroke();}
+      for(let k=0;k<3;k++){const a=carr+k*2*Math.PI/3;gear(ctx,C.x+cr*Math.cos(a),C.y+cr*Math.sin(a),rpl,9,pspin,p.cyan,p);}
+      gear(ctx,C.x,C.y,rs,8,sp,p.rust,p);pin(ctx,C.x,C.y,p);
+      ctx.fillStyle=p.steel;ctx.font="600 10px ui-monospace,monospace";ctx.textAlign="center";ctx.fillText("RING FIXED",C.x,C.y+rr+18);ctx.fillText("drive sun",C.x,C.y-rr-8);
+    }else{pc(ctx,C.x,C.y,rr,p);pc(ctx,C.x,C.y,rs,p);for(let k=0;k<3;k++){const a=carr+k*2*Math.PI/3,px=C.x+cr*Math.cos(a),py=C.y+cr*Math.sin(a);
+        link(ctx,C,{x:px,y:py},p.cyan,3);pc(ctx,px,py,rpl,p);pin(ctx,px,py,p);if(k===0){hp(ctx,C.x+(rs)*Math.cos(a),C.y+rs*Math.sin(a),p);hp(ctx,C.x+(rr)*Math.cos(a),C.y+rr*Math.sin(a),p);}}
+      gpin(ctx,C.x,C.y,p);num(ctx,C.x,C.y-10,"S",p);}}
+
+  function eUniversal(ctx,W,H,t,mode,p,prm){const beta=(prm.beta||35)*D;const L={x:104,y:120},Rt={x:236,y:120},rr=40;const th1=t;const th2=Math.atan2(Math.cos(beta)*Math.sin(th1),Math.cos(th1));
+    const rx=rr*Math.cos(beta);
+    if(mode==="real"){ctx.strokeStyle=p.steel;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(20,L.y);ctx.lineTo(L.x,L.y);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(Rt.x,Rt.y);ctx.lineTo(Rt.x+90*Math.cos(beta),Rt.y+90*Math.sin(beta));ctx.stroke();
+      ctx.strokeStyle=p.line;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(L.x,L.y,rr,0,7);ctx.stroke();ctx.beginPath();ctx.ellipse(Rt.x,Rt.y,rx,rr,0,0,7);ctx.stroke();
+      const a1={x:L.x+rr*Math.cos(th1),y:L.y+rr*Math.sin(th1)},a2={x:L.x-rr*Math.cos(th1),y:L.y-rr*Math.sin(th1)};
+      ctx.strokeStyle=p.rust;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(a1.x,a1.y);ctx.lineTo(a2.x,a2.y);ctx.stroke();
+      const b1={x:Rt.x+rx*Math.cos(th2),y:Rt.y+rr*Math.sin(th2)},b2={x:Rt.x-rx*Math.cos(th2),y:Rt.y-rr*Math.sin(th2)};
+      ctx.strokeStyle=p.cyan;ctx.beginPath();ctx.moveTo(b1.x,b1.y);ctx.lineTo(b2.x,b2.y);ctx.stroke();
+      ctx.fillStyle=p.ink;ctx.beginPath();ctx.arc((L.x+Rt.x)/2,L.y,6,0,7);ctx.fill();
+      pin(ctx,L.x,L.y,p);pin(ctx,Rt.x,Rt.y,p);ctx.fillStyle=p.steel;ctx.font="600 10px ui-monospace,monospace";ctx.textAlign="center";ctx.fillText("β="+(prm.beta||35)+"°",(L.x+Rt.x)/2,160);
+      cap(ctx,"drive",L.x,L.y+rr+16,p);cap(ctx,"driven (non-uniform)",Rt.x,Rt.y+rr+16,p);
+    }else{ctx.strokeStyle=p.line;ctx.setLineDash([4,3]);ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(L.x,L.y,rr,0,7);ctx.stroke();ctx.beginPath();ctx.ellipse(Rt.x,Rt.y,rx,rr,0,0,7);ctx.stroke();ctx.setLineDash([]);
+      ctx.strokeStyle=p.cyan;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(L.x+rr*Math.cos(th1),L.y+rr*Math.sin(th1));ctx.lineTo(L.x-rr*Math.cos(th1),L.y-rr*Math.sin(th1));ctx.stroke();
+      ctx.strokeStyle=p.ink;ctx.beginPath();ctx.moveTo(Rt.x+rx*Math.cos(th2),Rt.y+rr*Math.sin(th2));ctx.lineTo(Rt.x-rx*Math.cos(th2),Rt.y-rr*Math.sin(th2));ctx.stroke();
+      hp(ctx,(L.x+Rt.x)/2,L.y,p);gpin(ctx,L.x,L.y,p);gpin(ctx,Rt.x,Rt.y,p);num(ctx,L.x,L.y-rr-6,"2",p);num(ctx,Rt.x,Rt.y-rr-6,"3",p);}}
+
+  function eParallelogram(ctx,W,H,t,mode,p){const O2={x:104,y:150},O4={x:236,y:150},rc=34;const A={x:O2.x+rc*Math.cos(t),y:O2.y+rc*Math.sin(t)},B={x:O4.x+rc*Math.cos(t),y:O4.y+rc*Math.sin(t)};
+    if(mode==="real"){link(ctx,{x:70,y:172},{x:280,y:172},p.steel,4);hatch(ctx,70,176,210,p);
+      ctx.fillStyle=p.soft;ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(O2.x,O2.y,28,0,7);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(O4.x,O4.y,28,0,7);ctx.fill();ctx.stroke();
+      link(ctx,O2,A,p.rust,5);link(ctx,O4,B,p.rust,5);link(ctx,A,B,p.cyan,7);
+      pin(ctx,O2.x,O2.y,p);pin(ctx,O4.x,O4.y,p);pin(ctx,A.x,A.y,p);pin(ctx,B.x,B.y,p);
+      const mid={x:(A.x+B.x)/2,y:(A.y+B.y)/2};ctx.strokeStyle=p.ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(mid.x,mid.y);ctx.lineTo(mid.x,mid.y-20);ctx.stroke();ctx.beginPath();ctx.moveTo(mid.x-4,mid.y-15);ctx.lineTo(mid.x,mid.y-20);ctx.lineTo(mid.x+4,mid.y-15);ctx.stroke();
+      cap(ctx,"coupling rod keeps orientation",170,206,p);
+    }else{link(ctx,O2,O4,p.steel,1);link(ctx,O2,A,p.cyan,4);link(ctx,O4,B,p.cyan,4);link(ctx,A,B,p.ink,4);
+      gpin(ctx,O2.x,O2.y,p);gpin(ctx,O4.x,O4.y,p);pin(ctx,A.x,A.y,p);pin(ctx,B.x,B.y,p);
+      num(ctx,(O2.x+A.x)/2-10,(O2.y+A.y)/2,"2",p);num(ctx,(A.x+B.x)/2,(A.y+B.y)/2-10,"3",p);num(ctx,(O4.x+B.x)/2+10,(O4.y+B.y)/2,"4",p);num(ctx,(O2.x+O4.x)/2,O2.y+16,"1",p);}}
+
+  // ===================== DATA =====================
+  const C1="chapter1-introduction-to-mechanisms.html",C3="chapter3-kinematic-analysis-rolling-contacts.html",C4="chapter4-kinematic-coefficients.html",C8="chapter8-mechanism-synthesis-ii-crank-slider.html";
+  const MECH=[
+   {motion:"recip",cat:"Rotation → Reciprocation",name:"Slider-Crank",fam:"Linkage · inversion source",io:["Rotation","Reciprocation"],deep:true,
+    mob:{n:4,j1:4,j2:0,M:1},joints:"3 revolute + 1 prismatic",grashof:null,
+    analogy:"A bicycle pedal stroke run backwards: a spinning crank is forced into a straight push-and-pull.",
+    rw:["IC engine","Reciprocating pump","Air compressor"],xref:{t:"Ch 8 · Crank-slider synthesis",h:C8},eng:eSliderCrank},
+   {motion:"recip",cat:"Rotation → Reciprocation",name:"Scotch Yoke",fam:"Higher-pair · pure SHM",io:["Rotation","Reciprocation (SHM)"],
+    mob:{n:3,j1:2,j2:1,M:1},joints:"1 revolute + 1 prismatic + 1 pin-in-slot",grashof:null,
+    analogy:"A swing's seat tracing a perfect sine wave — output displacement is exactly r·cos θ, no harmonics.",
+    rw:["Steam-engine valve gear","Test shakers","Some pumps"],xref:{t:"Ch 1 · Higher pairs",h:C1},eng:eScotch},
+   {motion:"recip",cat:"Rotation → Reciprocation",name:"Cam & Follower",fam:"Higher-pair mechanism",io:["Rotation","Programmed translation"],
+    mob:{n:3,j1:2,j2:1,M:1},joints:"1 revolute + 1 prismatic + 1 cam contact",grashof:null,
+    analogy:"A bump in the road felt through your suspension: the follower rises and falls exactly as the profile dictates.",
+    rw:["Engine valvetrain","Machine tools","Sewing machine"],xref:{t:"Ch 3 · Rolling & contact",h:C3},eng:eCam},
+   {motion:"recip",cat:"Rotation → Reciprocation",name:"Quick-Return (Crank-Shaper)",fam:"6-bar · slider-crank inversion",io:["Rotation","Asymmetric reciprocation"],
+    mob:{n:6,j1:7,j2:0,M:1},joints:"6 revolute + 1 prismatic (die in slot = R+P)",grashof:null,
+    analogy:"A saw that cuts slowly on the push and snaps back fast — the working stroke takes more crank rotation than the return.",
+    rw:["Shaping machine","Slotting machine","Mechanical hacksaw"],xref:{t:"Ch 4 · Kinematic coefficients",h:C4},eng:eQuickReturn},
+
+   {motion:"oscill",cat:"Rotation → Oscillation",name:"Four-Bar (Crank-Rocker)",fam:"Linkage · the master mechanism",io:["Rotation","Limited oscillation"],
+    mob:{n:4,j1:4,j2:0,M:1},joints:"4 revolute",grashof:"S + L ≤ P + Q  →  crank-rocker",
+    analogy:"A seesaw with a motor: one end driven in a full circle, the far end just nods up and down.",
+    rw:["Oil-pump jack","Windshield wiper","Rowing machine"],xref:{t:"Ch 1 · Grashof's criterion",h:C1},eng:eFourBar},
+   {motion:"oscill",cat:"Rotation → Oscillation",name:"Toggle Press / Clamp",fam:"Slider-crank · force amplifier",io:["Lever input","Clamping force"],deep:true,
+    mob:{n:4,j1:4,j2:0,M:1,note:"mechanical advantage → ∞ at the toggle (dead-center)"},joints:"3 revolute + 1 prismatic",grashof:null,
+    analogy:"Straightening your locked knee to stand: tiny motion at the joint, enormous force at the foot.",
+    rw:["Vise-grip pliers","Punch press","Rock crusher (Blake)"],xref:{t:"Ch 4 · Mechanical advantage",h:C4},eng:eToggle},
+
+   {motion:"intermittent",cat:"Rotation → Intermittent",name:"Geneva Wheel",fam:"Intermittent-motion mechanism",io:["Rotation","Indexed step + dwell"],
+    mob:{n:3,j1:2,j2:1,M:1},joints:"2 revolute + 1 pin-in-slot (higher pair)",grashof:null,
+    analogy:"A turnstile: steady push outside, but inside it advances one fixed click at a time, then locks and holds.",
+    rw:["Film projector advance","Indexing tables","Mechanical watch"],xref:{t:"Ch 1 · Mobility & higher pairs",h:C1},eng:eGeneva,prm:{slots:4},ctl:{label:"Slots",min:3,max:6,step:1,val:4,key:"slots"}},
+   {motion:"intermittent",cat:"Rotation → Intermittent",name:"Ratchet & Pawl",fam:"One-way intermittent",io:["Oscillation","One-way indexing"],
+    mob:{n:3,j1:2,j2:1,M:1,note:"holding pawl makes motion one-way (engaged stroke shown)"},joints:"2 revolute + 1 pawl contact (higher pair)",grashof:null,
+    analogy:"Winding a watch or zip-tie: each stroke advances it a notch, and it physically cannot run backward.",
+    rw:["Socket wrench","Cable ties","Hoist & winch"],xref:{t:"Ch 1 · Higher pairs",h:C1},eng:eRatchet},
+
+   {motion:"gear",cat:"Gearing & Transmission",name:"Spur Gear Pair",fam:"Rolling-contact · transmission",io:["Rotation","Rotation (reversed)"],
+    mob:{n:3,j1:2,j2:1,M:1},joints:"2 revolute + 1 gear mesh (higher pair)",grashof:null,
+    analogy:"Two interlocked bike sprockets: the smaller spins faster, in the opposite direction, by the tooth ratio.",
+    rw:["Gearboxes","Clocks","Hand drill"],xref:{t:"Ch 3 · Rolling contacts",h:C3},eng:eSpur},
+   {motion:"gear",cat:"Gearing & Transmission",name:"Rack & Pinion",fam:"Rolling-contact · rotation→linear",io:["Rotation","Linear translation"],
+    mob:{n:3,j1:2,j2:1,M:1},joints:"1 revolute + 1 prismatic + 1 gear mesh",grashof:null,
+    analogy:"A cog railway: the train's spinning gear walks itself along a fixed toothed track.",
+    rw:["Car steering","CNC table drives","Stairlifts"],xref:{t:"Ch 3 · Rolling contacts",h:C3},eng:eRack},
+   {motion:"gear",cat:"Gearing & Transmission",name:"Planetary (Epicyclic)",fam:"Gear train · two DOF",io:["Two inputs","One output"],
+    mob:{n:5,j1:4,j2:2,M:2,note:"needs 2 controls — e.g. drive sun + hold ring — for M = 1"},joints:"4 revolute + 2 gear meshes",grashof:null,
+    analogy:"Planets orbiting a sun while spinning: hold one part, drive another, and the third gives a chosen ratio.",
+    rw:["Automatic transmission","Bike hub gears","Electric screwdriver"],xref:{t:"Ch 3 · Rolling contacts",h:C3},eng:ePlanetary},
+   {motion:"gear",cat:"Gearing & Transmission",name:"Universal (Hooke) Joint",fam:"Spatial · non-uniform transmission",io:["Rotation","Rotation through an angle"],
+    mob:{spatial:true,M:1,note:"velocity ratio swings between cos β and 1/cos β"},joints:"4 revolute (spatial cross)",grashof:null,
+    analogy:"Turning a corner with a flexible drill extension: it transmits the spin, but the output speeds up and slows down each turn.",
+    rw:["Driveshafts","Steering columns","Socket extensions"],xref:{t:"Ch 4 · Kinematic coefficients",h:C4},eng:eUniversal,prm:{beta:35},ctl:{label:"Shaft angle β",min:0,max:50,step:5,val:35,key:"beta",unit:"°"}},
+
+   {motion:"path",cat:"Path & Orientation",name:"Parallelogram Linkage",fam:"Four-bar · special (change-point)",io:["Rotation","Translation, fixed orientation"],
+    mob:{n:4,j1:4,j2:0,M:1,note:"change-point case: S + L = P + Q"},joints:"4 revolute",grashof:"Equal opposite links → coupler never rotates",
+    analogy:"Two friends carrying a ladder level while walking a curve: the bar moves around but never tilts.",
+    rw:["Locomotive coupling rods","Drafting lamps","Parallel-jaw clamps"],xref:{t:"Ch 1 · Grashof / change-points",h:C1},eng:eParallelogram}
+  ];
+
+  // ===================== BUILD =====================
+  const grid=document.getElementById("grid"),cards=[];
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let lastCat=null;
+  MECH.forEach(function(m){
+    if(m.cat!==lastCat){const ph=document.createElement("div");ph.className="part";ph.dataset.motion=m.motion;ph.dataset.part="1";
+      ph.innerHTML='<span class="pp">'+m.cat+'</span><span class="rule"></span>';grid.appendChild(ph);lastCat=m.cat;}
+    const art=document.createElement("article");art.className="card";art.dataset.motion=m.motion;
+    const mobLine=m.mob.spatial?'Spatial 4-revolute chain · M = <span class="res">'+m.mob.M+'</span>':
+      'M = 3(n−1) − 2J₁ − J₂ = 3('+(m.mob.n-1)+') − 2('+m.mob.j1+') − '+m.mob.j2+' = <span class="res">'+m.mob.M+'</span>';
+    const mobSub=m.mob.spatial?(m.mob.note||''):'n='+m.mob.n+' · J₁='+m.mob.j1+' · J₂='+m.mob.j2+(m.mob.note?' · '+m.mob.note:'');
+    art.innerHTML='<div class="viz"><button class="play1" data-play aria-pressed="false" aria-label="Play '+m.name+'">▶</button>'+
+      '<span class="corner" data-corner>machine</span>'+
+      '<canvas width="360" height="240" role="img" aria-label="'+m.name+' animation"></canvas>'+
+      '<div class="seg" role="group" aria-label="View mode for '+m.name+'"><button data-mode="real" aria-pressed="true">Machine</button><button data-mode="skeleton" aria-pressed="false">Skeleton</button></div></div>'+
+      '<div class="body"><div><span class="fam">'+m.fam+'</span><h3>'+m.name+(m.deep?' <span class="ddtag">DEEP DIVE ✓</span>':'')+'</h3></div>'+
+      '<p class="io"><b>'+m.io[0]+'</b><span class="arr">→</span><b>'+m.io[1]+'</b></p>'+
+      '<div class="mob">'+mobLine+'<br><span style="color:var(--steel)">'+mobSub+'</span></div>'+
+      '<p class="meta"><b>Joints:</b> '+m.joints+'</p>'+
+      (m.grashof?'<p class="grashof">'+m.grashof+'</p>':'')+
+      '<div class="callout"><span class="h">Analogy</span>'+m.analogy+'</div>'+
+      '<div class="rw"><span class="h">In the world</span><div class="chips">'+m.rw.map(function(r){return '<span>'+r+'</span>';}).join('')+'</div></div>'+
+      (m.ctl?'<div class="ctl"><label>'+m.ctl.label+'</label><input type="range" min="'+m.ctl.min+'" max="'+m.ctl.max+'" step="'+m.ctl.step+'" value="'+m.ctl.val+'"><span class="v">'+m.ctl.val+(m.ctl.unit||'')+'</span></div>':'')+
+      '<a class="xref" href="'+m.xref.h+'" target="_blank" rel="noopener noreferrer">Reinforces: '+m.xref.t+' ↗ <span class="nt">(new tab)</span></a></div>';
+    grid.appendChild(art);
+    const cv=art.querySelector("canvas");
+    const obj={m:m,art:art,cv:cv,ctx:cv.getContext("2d"),mode:"real",phase:0,running:false,prm:Object.assign({},m.prm||{}),
+      corner:art.querySelector("[data-corner]"),playBtn:art.querySelector("[data-play]")};
+    obj.dpi=function(){const d=Math.min(window.devicePixelRatio||1,2.5);cv.width=360*d;cv.height=240*d;obj.ctx.setTransform(d,0,0,d,0,0);};obj.dpi();
+    obj.playBtn.addEventListener("click",function(){setCard(obj,!obj.running);});
+    art.querySelectorAll(".seg button").forEach(function(b){b.addEventListener("click",function(){obj.mode=b.dataset.mode;
+      art.querySelectorAll(".seg button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});
+      obj.corner.textContent=obj.mode==="real"?"machine":"skeleton diagram";
+      cv.setAttribute("aria-label",m.name+" — "+(obj.mode==="real"?"machine view":"kinematic skeleton, mobility "+m.mob.M));
+      if(!obj.running)draw(obj);});});
+    const sl=art.querySelector('input[type=range]');
+    if(sl&&m.ctl){const v=art.querySelector('.ctl .v');sl.addEventListener("input",function(){obj.prm[m.ctl.key]=+this.value;v.textContent=this.value+(m.ctl.unit||'');if(!obj.running)draw(obj);});}
+    cards.push(obj);
+  });
+
+  // ===================== ANIMATION (per-card) =====================
+  let rafId=null;
+  function draw(o){const P=pal();o.ctx.clearRect(0,0,360,240);o.m.eng(o.ctx,360,240,o.phase,o.mode,P,o.prm);}
+  function tick(){let any=false;cards.forEach(function(o){if(o.running){o.phase+=0.035;draw(o);any=true;}});rafId=any?requestAnimationFrame(tick):null;}
+  function startLoop(){if(rafId==null)rafId=requestAnimationFrame(tick);}
+  function setCard(o,run){o.running=run;o.playBtn.textContent=run?"⏸":"▶";o.playBtn.setAttribute("aria-pressed",run?"true":"false");
+    o.playBtn.setAttribute("aria-label",(run?"Pause ":"Play ")+o.m.name);if(run)startLoop();else draw(o);syncGlobal();}
+
+  // ===================== GLOBAL CONTROLS =====================
+  const pb=document.getElementById("playBtn");
+  function syncGlobal(){const all=cards.every(function(o){return o.running;});pb.textContent=all?"⏸ Pause all":"▶ Play all";pb.setAttribute("aria-pressed",all?"true":"false");}
+  pb.addEventListener("click",function(){const all=cards.every(function(o){return o.running;});cards.forEach(function(o){setCard(o,!all);});});
+
+  const cnt=document.getElementById("count");
+  function refreshCount(f){const n=(f==="all")?cards.length:cards.filter(function(o){return o.m.motion===f;}).length;cnt.textContent=n+" mechanism"+(n===1?"":"s");}
+  document.querySelectorAll(".filters .chip").forEach(function(c){c.addEventListener("click",function(){
+    document.querySelectorAll(".filters .chip").forEach(function(x){x.setAttribute("aria-pressed","false");});c.setAttribute("aria-pressed","true");
+    const f=c.dataset.filter;cards.forEach(function(o){o.art.style.display=(f==="all"||o.m.motion===f)?"":"none";});
+    document.querySelectorAll('[data-part]').forEach(function(ph){ph.style.display=(f==="all")?"":"none";});
+    refreshCount(f);});});
+  refreshCount("all");
+
+  const tb=document.getElementById("themeBtn");
+  if(window.matchMedia("(prefers-color-scheme: dark)").matches)document.body.setAttribute("data-theme","dark");
+  tb.addEventListener("click",function(){const dark=document.body.getAttribute("data-theme")==="dark";
+    document.body.setAttribute("data-theme",dark?"light":"dark");tb.setAttribute("aria-pressed",dark?"false":"true");cards.forEach(draw);});
+
+  window.addEventListener("resize",function(){cards.forEach(function(o){o.dpi();});cards.forEach(draw);});
+
+  // ===================== INIT =====================
+  cards.forEach(draw);
+  cards.forEach(function(o){setCard(o,!reduce);});
+})();
+</script>
+</body>
+</html>
