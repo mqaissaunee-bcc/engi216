@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blake Jaw Crusher — Four-Bar Linkage</title>
+<style>
+  :root{
+    --bg:#eef2f7;--panel:#ffffff;--ink:#1f2933;--muted:#5b6770;--line:#d7dee6;
+    --accent:#2563eb;--ground:#64748b;--crank:#f59e0b;--coupler:#3b82f6;--rocker:#8b5cf6;
+    --crush:#f43f5e;--ok:#16a34a;
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --ui:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --radius:14px;--shadow:0 10px 30px rgba(31,41,51,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--ui);color:var(--ink);
+    background:radial-gradient(1200px 600px at 50% -10%, #f6f9ff 0%, var(--bg) 60%);
+    min-height:100vh;padding:24px 16px;display:flex;justify-content:center;}
+  .container{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);max-width:920px;width:100%;padding:26px;}
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(1.5rem,3.4vw,2.1rem);margin:0 0 4px;}
+  .subtitle{color:var(--muted);font-size:.95rem;margin:0 0 18px;}
+  .stage{border:1px solid var(--line);border-radius:12px;
+    background:linear-gradient(180deg,#fbfdff 0%, #f4f7fb 100%);padding:10px;overflow:hidden;}
+  canvas{display:block;width:100%;max-width:860px;height:auto;aspect-ratio:860/600;margin:0 auto;border-radius:8px;}
+  .readout{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0 4px;}
+  .chip{background:#f1f5f9;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.85rem;color:var(--muted);}
+  .chip b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .status{text-align:center;font-family:var(--display);font-size:1.05rem;margin:12px 0 14px;min-height:1.4em;}
+  .controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center;}
+  button{font-family:var(--ui);font-size:.95rem;font-weight:600;color:#fff;border:none;cursor:pointer;
+    padding:11px 20px;border-radius:999px;background:linear-gradient(135deg,var(--accent),#1d4ed8);
+    box-shadow:0 4px 14px rgba(37,99,235,.30);transition:transform .15s ease, box-shadow .15s ease;}
+  button:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(37,99,235,.38)}
+  button.secondary{background:#eef2f7;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+  button.secondary:hover{box-shadow:inset 0 0 0 1px #c2cdda;transform:translateY(-2px)}
+  button:focus-visible, input:focus-visible{outline:3px solid #93c5fd;outline-offset:2px;}
+  .row{display:flex;gap:20px 26px;justify-content:center;flex-wrap:wrap;align-items:center;margin-top:18px;}
+  .field{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted)}
+  input[type="range"]{width:150px;accent-color:var(--accent)}
+  .val{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;min-width:3.2ch}
+  .check{display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)}
+  input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+  .info{margin-top:22px;border-left:4px solid var(--accent);background:#f1f6ff;border-radius:0 10px 10px 0;
+    padding:16px 18px;color:var(--ink);font-size:.94rem;line-height:1.58;}
+  .info h2{font-family:var(--display);font-size:1.15rem;margin:0 0 8px;font-weight:600}
+  .info p{margin:0 0 12px}
+  .glossary{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr;gap:8px}
+  .glossary li{background:#fff;border:1px solid #dbe6f5;border-radius:8px;padding:9px 12px;font-size:.9rem}
+  .glossary b{color:var(--accent)}
+  .note{font-size:.85rem;color:var(--muted);font-style:italic;margin-top:6px}
+  @media (min-width:620px){.glossary{grid-template-columns:1fr 1fr}}
+  @media (prefers-reduced-motion: reduce){button{transition:none}}
+</style>
+</head>
+<body>
+  <main class="container">
+    <h1>Blake Jaw Crusher</h1>
+    <p class="subtitle">A genuine four‑bar (crank‑rocker) linkage: a rotating eccentric drives a swinging jaw that crushes rock against a fixed jaw.</p>
+
+    <div class="stage">
+      <canvas id="canvas" width="860" height="600" role="img"
+        aria-label="Animated Blake jaw crusher. A rotating flywheel and eccentric drive a pitman, which rocks a top-pivoted swing jaw toward and away from a fixed jaw, crushing rock in the wedge-shaped chamber between them."></canvas>
+    </div>
+
+    <div class="readout" aria-hidden="true">
+      <span class="chip">Nip angle: <b id="nipVal">–</b></span>
+      <span class="chip">Setting (gap): <b id="setVal">–</b></span>
+      <span class="chip">Stroke: <b id="phaseVal">–</b></span>
+    </div>
+
+    <p class="status" id="status" role="status" aria-live="polite">Ready — press Play to drive the eccentric.</p>
+
+    <div class="controls">
+      <button id="playBtn" aria-pressed="false">▶ Play</button>
+      <button id="stepBtn" class="secondary">⏭ Step</button>
+      <button id="resetBtn" class="secondary">↺ Reset</button>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="speed">Speed</label>
+        <input type="range" id="speed" min="0.3" max="3" step="0.1" value="1" aria-describedby="speedVal">
+        <span class="val" id="speedVal">1.0×</span>
+      </div>
+      <label class="check"><input type="checkbox" id="linkage" checked> Linkage overlay</label>
+      <label class="check"><input type="checkbox" id="annot" checked> Annotations</label>
+      <label class="check"><input type="checkbox" id="feed" checked> Feed rock</label>
+    </div>
+
+    <section class="info">
+      <h2>What is a Blake jaw crusher?</h2>
+      <p>Patented by <strong>Eli Whitney Blake in 1858</strong>, the Blake jaw crusher is one of the oldest and most widely used machines for <strong>primary crushing</strong> — the first stage of breaking large run‑of‑mine rock or ore down to a manageable size. Material is squeezed between a stationary <strong>fixed jaw</strong> and a <strong>swing jaw</strong> that is pivoted at the <em>top</em>. Rock is fed into the wide opening at the top and the crushed product falls out the narrow gap at the bottom. A heavy <strong>flywheel</strong> stores energy and smooths the heavily fluctuating crushing load between strokes.</p>
+      <p>The motion is pure four‑bar kinematics. The rotating <span style="color:var(--crank);font-weight:600">eccentric</span> is the <strong>crank</strong>, the <span style="color:var(--coupler);font-weight:600">pitman</span> is the <strong>coupler</strong>, the <span style="color:var(--rocker);font-weight:600">swing jaw</span> is the <strong>rocker</strong>, and the <span style="color:var(--ground);font-weight:600">frame</span> is the fixed <strong>ground</strong> link. Because the eccentric is by far the shortest link and sits next to the frame, the linkage is a Grashof <strong>crank‑rocker</strong>: the crank spins all the way around while the jaw oscillates back and forth. Toggle this in the diagram with the “Linkage overlay” switch.</p>
+      <ul class="glossary">
+        <li><b>Gape</b> — the width of the feed opening at the top; sets the largest rock the crusher will accept.</li>
+        <li><b>Setting</b> — the discharge gap at the bottom (open‑ and closed‑side). It controls product size.</li>
+        <li><b>Throw</b> — how far the jaw travels horizontally per stroke. More throw = more crushing per cycle.</li>
+        <li><b>Nip angle</b> — the angle between the two jaw faces. Kept below ~22–26°, or rock slips upward instead of being gripped (“nipped”) and crushed.</li>
+      </ul>
+      <p class="note">Note: production Blake crushers use a <em>double‑toggle</em> mechanism (two toggle plates). This model abstracts the essential motion into a single crank‑rocker four‑bar so the rotation‑to‑oscillation conversion is easy to see. Schematic, not to scale.</p>
+    </section>
+  </main>
+
+<script>
+(function(){
+  "use strict";
+  const canvas=document.getElementById("canvas"), ctx=canvas.getContext("2d");
+  const statusEl=document.getElementById("status");
+  const playBtn=document.getElementById("playBtn"), stepBtn=document.getElementById("stepBtn"), resetBtn=document.getElementById("resetBtn");
+  const speed=document.getElementById("speed"), speedVal=document.getElementById("speedVal");
+  const linkageChk=document.getElementById("linkage"), annotChk=document.getElementById("annot"), feedChk=document.getElementById("feed");
+  const nipVal=document.getElementById("nipVal"), setVal=document.getElementById("setVal"), phaseVal=document.getElementById("phaseVal");
+
+  const W=860,H=600;
+  function hidpi(){const d=Math.min(window.devicePixelRatio||1,2.5);
+    canvas.width=Math.round(W*d);canvas.height=Math.round(H*d);ctx.setTransform(d,0,0,d,0,0);}
+  hidpi();
+
+  // ---- Four-bar geometry (crank-rocker) ----
+  const O2={x:150,y:300};   // eccentric (crank) pivot — fixed
+  const O4={x:315,y:115};   // swing-jaw (rocker) pivot — fixed
+  const r2=6, r3=215, r4=135;          // crank, coupler(pitman), rocker
+  // |O2-O4| ~= 248 = ground link (longest). Grashof crank-rocker.
+
+  let crankAngle=0, speedMul=1, running=false, rafId=null;
+  const reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Swing-jaw rigid body, defined at home pose (crankAngle = 0)
+  const sfTop={x:345,y:165}, sfTip={x:360,y:418};   // crushing face (right edge)
+  const sbTop={x:320,y:160}, sbTip={x:338,y:420};   // back edge
+  // Fixed jaw (stationary)
+  const ffTop={x:478,y:158}, ffTip={x:398,y:430};   // fixed face (left edge)
+  const fbTop={x:506,y:150}, fbTip={x:432,y:440};   // back edge
+
+  function intersect(A,rA,C,rC,sign){
+    const dx=C.x-A.x, dy=C.y-A.y, d=Math.hypot(dx,dy);
+    const a=(rA*rA-rC*rC+d*d)/(2*d);
+    const h=Math.sqrt(Math.max(0,rA*rA-a*a));
+    const xm=A.x+a*dx/d, ym=A.y+a*dy/d, ux=-dy/d, uy=dx/d;
+    return {x:xm+sign*h*ux, y:ym+sign*h*uy};
+  }
+  function rot(p,c,ang){const s=Math.sin(ang),co=Math.cos(ang),dx=p.x-c.x,dy=p.y-c.y;
+    return {x:c.x+dx*co-dy*s, y:c.y+dx*s+dy*co};}
+  function lerpX(P1,P2,y){let t=(y-P1.y)/(P2.y-P1.y);t=Math.max(0,Math.min(1,t));return P1.x+t*(P2.x-P1.x);}
+
+  function solve(a){
+    const A={x:O2.x+r2*Math.cos(a), y:O2.y+r2*Math.sin(a)};
+    const B=intersect(A,r3,O4,r4,-1);
+    let delta=Math.atan2(B.y-O4.y,B.x-O4.x)-homeRockerAngle;
+    if(delta>Math.PI)delta-=2*Math.PI; if(delta<-Math.PI)delta+=2*Math.PI;
+    return {A,B,delta};
+  }
+  // establish home rocker angle
+  const A0={x:O2.x+r2,y:O2.y}, B0=intersect(A0,r3,O4,r4,-1);
+  const homeRockerAngle=Math.atan2(B0.y-O4.y,B0.x-O4.x);
+
+  // throw range (sample one revolution)
+  let tipMin=Infinity,tipMax=-Infinity;
+  for(let i=0;i<=120;i++){const d=solve(i/120*2*Math.PI).delta;const t=rot(sfTip,O4,d);if(t.x<tipMin)tipMin=t.x;if(t.x>tipMax)tipMax=t.x;}
+
+  // rocks
+  let rocks=[];
+  function spawnRock(y){return {x:410,y:y,r:12+Math.random()*11};}
+  function initRocks(){rocks=[];for(let i=0;i<6;i++)rocks.push(spawnRock(165+i*42));}
+  initRocks();
+  let prevTip=null;
+
+  // ---- drawing ----
+  function frame(){
+    ctx.fillStyle="#e9eef5";
+    ctx.beginPath();ctx.roundRect(60,80,720,470,18);ctx.fill();
+    ctx.strokeStyle="#cdd6e2";ctx.lineWidth=2;ctx.stroke();
+    // hopper lips
+    ctx.fillStyle="#cfd8e3";
+    ctx.beginPath();ctx.moveTo(300,90);ctx.lineTo(345,150);ctx.lineTo(330,150);ctx.lineTo(290,96);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(520,90);ctx.lineTo(478,150);ctx.lineTo(494,150);ctx.lineTo(534,96);ctx.closePath();ctx.fill();
+    // discharge
+    ctx.fillStyle="#dde4ee";ctx.fillRect(330,470,150,8);
+    ctx.fillStyle="#7b8794";ctx.font="600 13px system-ui,sans-serif";ctx.textAlign="center";
+    ctx.fillText("FEED",410,78);ctx.fillText("crushed product →",410,498);
+  }
+  function flywheelCrank(A){
+    ctx.fillStyle="#fde9c8";ctx.beginPath();ctx.arc(O2.x,O2.y,46,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle="#f59e0b";ctx.lineWidth=4;ctx.stroke();
+    ctx.strokeStyle="#e3a93f";ctx.lineWidth=3;
+    for(let k=0;k<6;k++){const an=crankAngle+k*Math.PI/3;
+      ctx.beginPath();ctx.moveTo(O2.x,O2.y);ctx.lineTo(O2.x+42*Math.cos(an),O2.y+42*Math.sin(an));ctx.stroke();}
+    ctx.fillStyle="#b45309";ctx.beginPath();ctx.arc(O2.x,O2.y,8,0,Math.PI*2);ctx.fill();
+    // eccentric sheave at crank pin
+    ctx.fillStyle="#f59e0b";ctx.beginPath();ctx.arc(A.x,A.y,15,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle="#b45309";ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle="#7c4a07";ctx.beginPath();ctx.arc(A.x,A.y,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#7b8794";ctx.font="12px system-ui,sans-serif";ctx.textAlign="center";
+    ctx.fillText("flywheel + eccentric",O2.x,O2.y+64);
+  }
+  function pitman(A,B){
+    ctx.strokeStyle="#3b82f6";ctx.lineWidth=10;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+    ctx.strokeStyle="#1d4ed8";ctx.lineWidth=2;ctx.stroke();
+  }
+  function swingJaw(B,delta){
+    const sfT=rot(sfTop,O4,delta), sfB=rot(sfTip,O4,delta), sbT=rot(sbTop,O4,delta), sbB=rot(sbTip,O4,delta);
+    // rocker arm O4 -> B
+    ctx.strokeStyle="#8b5cf6";ctx.lineWidth=12;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(O4.x,O4.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+    // jaw plate
+    ctx.fillStyle="#a78bfa";ctx.beginPath();
+    ctx.moveTo(sbT.x,sbT.y);ctx.lineTo(sfT.x,sfT.y);ctx.lineTo(sfB.x,sfB.y);ctx.lineTo(sbB.x,sbB.y);ctx.closePath();ctx.fill();
+    ctx.strokeStyle="#6d28d9";ctx.lineWidth=2;ctx.stroke();
+    // crushing teeth on face
+    ctx.strokeStyle="#7c3aed";ctx.lineWidth=2;
+    for(let t=0.1;t<1;t+=0.16){const x=sfT.x+(sfB.x-sfT.x)*t,y=sfT.y+(sfB.y-sfT.y)*t;
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+8,y+3);ctx.stroke();}
+    // connect plate top to pivot
+    ctx.strokeStyle="#8b5cf6";ctx.lineWidth=10;
+    ctx.beginPath();ctx.moveTo(O4.x,O4.y);ctx.lineTo(sbT.x,sbT.y);ctx.stroke();
+    ctx.fillStyle="#7b8794";ctx.font="12px system-ui,sans-serif";ctx.textAlign="left";
+    ctx.fillText("swing jaw",sbB.x-86,sbB.y+18);
+    return {sfT,sfB};
+  }
+  function fixedJaw(){
+    ctx.fillStyle="#cbd5e1";ctx.beginPath();
+    ctx.moveTo(fbTop.x,fbTop.y);ctx.lineTo(ffTop.x,ffTop.y);ctx.lineTo(ffTip.x,ffTip.y);ctx.lineTo(fbTip.x,fbTip.y);ctx.closePath();ctx.fill();
+    ctx.strokeStyle="#94a3b8";ctx.lineWidth=2;ctx.stroke();
+    ctx.strokeStyle="#94a3b8";ctx.lineWidth=2;
+    for(let t=0.1;t<1;t+=0.16){const x=ffTop.x+(ffTip.x-ffTop.x)*t,y=ffTop.y+(ffTip.y-ffTop.y)*t;
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-8,y+3);ctx.stroke();}
+    ctx.fillStyle="#7b8794";ctx.font="12px system-ui,sans-serif";ctx.textAlign="right";
+    ctx.fillText("fixed jaw",ffTip.x+96,ffTip.y+18);
+  }
+  function drawRocks(sf){
+    for(const k of rocks){
+      const swX=lerpX(sf.sfT,sf.sfB,k.y), fxX=lerpX(ffTop,ffTip,k.y);
+      const gap=fxX-swX, mid=(swX+fxX)/2;
+      k.x=mid;
+      let crushing=false;
+      if(2*k.r>gap-2 && k.y<430){k.r=Math.max(7,(gap-2)/2);crushing=true;}
+      const fall=(0.5+ (k.r<10?0.9:0))*Math.max(.4,speedMul);
+      if(running) k.y+=fall;
+      if(k.y>448){const n=spawnRock(162);k.x=n.x;k.y=n.y;k.r=n.r;}
+      const jit=(crushing&&running&&!reduceMotion)?(Math.random()-0.5)*2:0;
+      ctx.beginPath();ctx.arc(k.x+jit,k.y,k.r,0,Math.PI*2);
+      ctx.fillStyle=crushing?"#fb923c":"#9aa6b4";ctx.fill();
+      ctx.strokeStyle=crushing?"#c2410c":"#64748b";ctx.lineWidth=2;ctx.stroke();
+      if(crushing&&k.r>8){ctx.strokeStyle="#7c2d12";ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(k.x-k.r*0.5,k.y-k.r*0.4);ctx.lineTo(k.x+k.r*0.3,k.y+k.r*0.5);ctx.stroke();}
+    }
+  }
+  function annotations(sf){
+    // nip angle arc near top of chamber
+    const v1=Math.atan2(sf.sfB.y-sf.sfT.y, sf.sfB.x-sf.sfT.x);
+    const v2=Math.atan2(ffTip.y-ffTop.y, ffTip.x-ffTop.x);
+    const apex={x:(sf.sfT.x+ffTop.x)/2, y:(sf.sfT.y+ffTop.y)/2-6};
+    ctx.strokeStyle="#16a34a";ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(apex.x,apex.y,34,v2,v1);ctx.stroke();
+    ctx.fillStyle="#15803d";ctx.font="600 13px system-ui,sans-serif";ctx.textAlign="center";
+    const nip=Math.abs((v1-v2)*180/Math.PI);
+    ctx.fillText("nip "+nip.toFixed(0)+"°",apex.x,apex.y-10);
+    // gape (top opening)
+    dimLine(sf.sfT.x,148,ffTop.x,148,"gape","#2563eb",-14);
+    // setting (bottom gap)
+    dimLine(sf.sfB.x,452,ffTip.x,452,"setting","#2563eb",16);
+    // throw (jaw travel) faint open/closed tips
+    ctx.strokeStyle="rgba(244,63,94,.5)";ctx.setLineDash([4,4]);ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(tipMin,sf.sfB.y-4);ctx.lineTo(tipMin,sf.sfB.y+30);
+    ctx.moveTo(tipMax,sf.sfB.y-4);ctx.lineTo(tipMax,sf.sfB.y+30);ctx.stroke();ctx.setLineDash([]);
+    dimLine(tipMin,sf.sfB.y+26,tipMax,sf.sfB.y+26,"throw","#f43f5e",16);
+    return nip;
+  }
+  function dimLine(x1,y,x2,yy,text,color,off){
+    ctx.strokeStyle=color;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();
+    [[x1,1],[x2,-1]].forEach(function(p){ctx.beginPath();ctx.moveTo(p[0],y);ctx.lineTo(p[0]+p[1]*6,y-4);ctx.lineTo(p[0]+p[1]*6,y+4);ctx.closePath();ctx.fillStyle=color;ctx.fill();});
+    ctx.fillStyle=color;ctx.font="600 12px system-ui,sans-serif";ctx.textAlign="center";
+    ctx.fillText(text,(x1+x2)/2,y+off);
+  }
+  function overlay(A,B,delta){
+    ctx.strokeStyle="rgba(100,116,139,.7)";ctx.setLineDash([6,5]);ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(O2.x,O2.y);ctx.lineTo(O4.x,O4.y);ctx.stroke();ctx.setLineDash([]);
+    const joints=[[O2,"O₂"],[A,"A"],[B,"B"],[O4,"O₄"]];
+    ctx.fillStyle="#1f2933";
+    for(const j of joints){ctx.beginPath();ctx.arc(j[0].x,j[0].y,5,0,Math.PI*2);ctx.fill();}
+    ctx.font="600 12px system-ui,sans-serif";ctx.textAlign="left";ctx.fillStyle="#334155";
+    ctx.fillText("O₂",O2.x-22,O2.y+4);ctx.fillText("A",A.x+10,A.y-8);
+    ctx.fillText("B",B.x-16,B.y-8);ctx.fillText("O₄",O4.x+10,O4.y);
+    // link tags
+    ctx.fillStyle="#64748b";ctx.font="11px system-ui,sans-serif";ctx.textAlign="center";
+    ctx.fillText("ground (frame)",(O2.x+O4.x)/2+30,(O2.y+O4.y)/2);
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    const {A,B,delta}=solve(crankAngle);
+    frame();
+    flywheelCrank(A);
+    pitman(A,B);
+    const sf=swingJaw(B,delta);
+    fixedJaw();
+    if(feedChk.checked) drawRocks(sf);
+    let nip=null;
+    if(annotChk.checked) nip=annotations(sf);
+    if(linkageChk.checked) overlay(A,B,delta);
+    // readouts
+    const setting=Math.round(lerpX(ffTop,ffTip,sf.sfB.y)-sf.sfB.x);
+    nipVal.textContent=(nip!==null?nip.toFixed(0):Math.abs((Math.atan2(sf.sfB.y-sf.sfT.y,sf.sfB.x-sf.sfT.x)-Math.atan2(ffTip.y-ffTop.y,ffTip.x-ffTop.x))*180/Math.PI).toFixed(0))+"°";
+    setVal.textContent=setting+" px";
+    let phase="—";
+    if(prevTip!==null){phase = sf.sfB.x>prevTip+0.05 ? "closing · crushing" : (sf.sfB.x<prevTip-0.05 ? "opening · release" : "dead center");}
+    phaseVal.textContent=phase;
+    if(running){statusEl.textContent = sf.sfB.x>(prevTip||0) ? "Power stroke — jaw closing on the rock." : "Return stroke — crushed material discharging.";
+      canvas.setAttribute("aria-label","Blake jaw crusher running. Nip angle "+nipVal.textContent+", setting "+setting+" pixels, jaw "+phase+".");}
+    prevTip=sf.sfB.x;
+  }
+
+  function loop(){crankAngle+=0.05*speedMul;render();rafId=requestAnimationFrame(loop);}
+  function play(){if(running)return;running=true;playBtn.textContent="⏸ Pause";playBtn.setAttribute("aria-pressed","true");statusEl.textContent="Running — eccentric rotating.";loop();}
+  function pause(){running=false;playBtn.textContent="▶ Play";playBtn.setAttribute("aria-pressed","false");if(rafId){cancelAnimationFrame(rafId);rafId=null;}statusEl.textContent="Paused.";}
+  function reset(){pause();crankAngle=0;prevTip=null;initRocks();render();statusEl.textContent="Reset — press Play to drive the eccentric.";}
+  function step(){if(running)pause();crankAngle+=0.1;render();statusEl.textContent="Stepped one increment.";}
+
+  playBtn.addEventListener("click",function(){running?pause():play();});
+  stepBtn.addEventListener("click",step);
+  resetBtn.addEventListener("click",reset);
+  speed.addEventListener("input",function(){speedMul=parseFloat(this.value);speedVal.textContent=speedMul.toFixed(1)+"×";});
+  [linkageChk,annotChk,feedChk].forEach(function(c){c.addEventListener("change",function(){if(!running)render();});});
+  document.addEventListener("keydown",function(e){if(e.key===" "&&document.activeElement!==speed){e.preventDefault();running?pause():play();}});
+  window.addEventListener("resize",function(){hidpi();render();});
+
+  render();
+})();
+</script>
+</body>
+</html>
