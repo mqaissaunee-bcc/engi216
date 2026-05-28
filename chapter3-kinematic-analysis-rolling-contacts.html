@@ -834,19 +834,25 @@
   <div class="card tool" aria-labelledby="ratio-tool-h">
     <div class="tool-label"><span>Gear-ratio &amp; tooth-count calculator</span></div>
     <h3 id="ratio-tool-h" style="margin-top:.3em">Compute R, n<sub>t</sub>, and n<sub>s</sub> for a train</h3>
-    <p>Enter the input speed and torque, set the tooth counts for one or more stages, and choose external or internal mesh per stage. The tool computes the overall gear ratio and the resulting output speed and torque &mdash; and shows that input power equals output power (ideal, lossless).</p>
+    <p>Enter the input speed and torque, set the tooth counts for one or more stages, and choose external or internal mesh per stage. Everything updates live as you adjust the inputs. The tool computes the overall gear ratio and the resulting output speed and torque &mdash; and shows that input power equals output power (ideal, lossless).</p>
     <div class="controls">
-      <div class="ctrl"><label for="grStages">Number of stages · <span class="val" id="grStagesv">1</span></label><input type="range" id="grStages" min="1" max="3" value="1" step="1"></div>
+      <div class="ctrl"><label for="grStages">Number of stages · <span class="val" id="grStagesv">1</span></label><input type="range" id="grStages" min="1" max="3" value="1" step="1" aria-describedby="grStagesHelp"><span id="grStagesHelp" class="visually-hidden">Slide to add or remove gear stages. Each stage adds one pair of meshing gears in series.</span></div>
       <div class="ctrl"><label for="grWin">Input speed &omega;<sub>in</sub> (rpm)</label><input type="number" id="grWin" value="1800" min="0" step="10"></div>
       <div class="ctrl"><label for="grTin">Input torque T<sub>in</sub> (N&middot;m)</label><input type="number" id="grTin" value="10" min="0" step="0.5"></div>
     </div>
     <div id="grStageWrap"></div>
-    <div class="controls">
-      <button type="button" id="grCalc">Compute ratios</button>
+
+    <div class="stage-wrap" style="margin-top:14px">
+      <svg id="grTrain" class="stage" viewBox="0 0 720 320" role="img" aria-labelledby="grTrainTitle grTrainDesc" style="aspect-ratio:720/320">
+        <title id="grTrainTitle">Live diagram of the gear train</title>
+        <desc id="grTrainDesc">A schematic showing each stage of the configured gear train. Each gear is drawn with a radius proportional to its tooth count and labeled with its tooth count. Stages are connected in series; rotation arrows show the direction of spin at each stage.</desc>
+      </svg>
+      <p class="figref" id="grTrainCaption">Live schematic — gear sizes are proportional to tooth counts.</p>
     </div>
+
     <div class="readout" id="grReadout" aria-live="polite"></div>
     <div class="verdict" id="grVerdict" aria-live="polite"></div>
-    <p class="figref">Each stage multiplies the running ratio. External mesh contributes a sign flip; internal mesh does not. Power check uses P = T&middot;&omega;.</p>
+    <p class="figref">Each stage multiplies the running ratio. External mesh contributes a sign flip; internal mesh does not. Power check uses P = T&middot;&omega;. The diagram above updates instantly as you change any input.</p>
   </div>
 
   <div class="real-world">
@@ -1013,6 +1019,14 @@
   <div class="card">
     <p><strong>Problem.</strong> A five-bar mechanism has one of its coupler links, body&nbsp;4, in <em>rolling contact with the ground</em> (body&nbsp;1). Link&nbsp;5 is the &ldquo;arm&rdquo; connecting the rolling centers. Derive the mechanism&rsquo;s position equations and deduce the number of degrees of freedom.</p>
 
+    <div class="stage-wrap">
+      <svg id="ex31fig" class="stage" viewBox="0 0 720 360" role="img" aria-labelledby="ex31figTitle ex31figDesc" style="aspect-ratio:720/360">
+        <title id="ex31figTitle">Figure for Example 3.1: five-bar mechanism with a rolling contact</title>
+        <desc id="ex31figDesc">Schematic of a five-bar mechanism. Body 1 is the hatched horizontal ground line. Body 2 is the input crank pinned to the ground on the left. Body 3 is a coupler link joining body 2 to body 4. Body 4 is a circular wheel rolling on the ground; it is the rolling body. Body 5 is the swinging arm that pins the wheel's center to a grounded pivot on the right, keeping the wheel in contact with the ground. The five vectors r̄1 along the ground, r̄2 along link 2, r̄3 along link 3, r̄4 from the wheel's contact point to its center, and r̄5 along link 5 form the closed vector loop.</desc>
+      </svg>
+      <p class="figref">Figure E3.1 &mdash; The five-bar mechanism with body 4 (the wheel) rolling on body 1 (the ground). Link 5 is the practical arm keeping the wheel down. The five vectors form the closed loop r&#772;<sub>2</sub> + r&#772;<sub>3</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>5</sub> + r&#772;<sub>1</sub> = 0&#772;.</p>
+    </div>
+
     <div class="callout">
       <span class="h">A puzzle about mobility</span>
       <p style="margin:.4em 0 0">Run Gr&uuml;bler&rsquo;s criterion on the full five links (with the arm) and you get <em>F</em>&nbsp;=&nbsp;0 &mdash; it looks locked. The arm, link&nbsp;5, is the culprit: it is not <em>kinematically</em> necessary, only <em>practically</em> necessary to keep body&nbsp;4 touching the ground. Remove link&nbsp;5 from the count and Gr&uuml;bler gives the correct <em>F</em>&nbsp;=&nbsp;1. This is a classic case where a redundant practical link fools the mobility formula.</p>
@@ -1042,6 +1056,14 @@
   <h3>Example 3.3 &mdash; Gear ratio of a single-stage simple geartrain</h3>
   <div class="card">
     <p><strong>Problem.</strong> In the single-stage simple geartrain (the two gears of &sect;3.5, with gear&nbsp;2 as input and gear&nbsp;3 as output), derive the position equation, deduce the degrees of freedom, and compute the gear ratio <em>R</em>.</p>
+
+    <div class="stage-wrap">
+      <svg id="ex33fig" class="stage" viewBox="0 0 720 320" role="img" aria-labelledby="ex33figTitle ex33figDesc" style="aspect-ratio:720/320">
+        <title id="ex33figTitle">Figure for Example 3.3: single-stage simple geartrain</title>
+        <desc id="ex33figDesc">Two meshing external gears on fixed centers. Gear 2 is the smaller input gear on the left with pitch radius rho-2; gear 3 is the larger output gear on the right with pitch radius rho-3. The two centers are pinned to the ground (body 1, which acts as the arm in the rolling-contact equation). The vector r-bar-1 connects the two fixed centers along the line of centers. The rotations theta-2 and theta-3 are shown turning in opposite directions because external mesh inverts direction.</desc>
+      </svg>
+      <p class="figref">Figure E3.3 &mdash; The single-stage simple geartrain. Body 1 (the ground / arm) holds both centers fixed at a distance r<sub>1</sub> = &rho;<sub>2</sub> + &rho;<sub>3</sub>. With body 1 fixed, &Delta;&theta;<sub>1</sub> = 0 and the rolling-contact equation alone gives R = &minus;&rho;<sub>3</sub>/&rho;<sub>2</sub> = &minus;N<sub>3</sub>/N<sub>2</sub>.</p>
+    </div>
 
     <details>
       <summary>Show the full solution</summary>
@@ -1714,58 +1736,364 @@
 
   /* ============================================================
      3.6 · GEAR-RATIO & TOOTH-COUNT CALCULATOR
+     (fully reactive — recomputes on every change, preserves
+      user values across stage changes, draws live SVG diagram)
      ============================================================ */
   (function(){
     var wrap=$("grStageWrap"); if(!wrap) return;
+    var MAX_STAGES=3;
+
+    // Persistent per-stage state — survives stage-count changes so
+    // a user's tooth counts and mesh choice are not wiped when they
+    // slide stages up and back down.
+    var stageState=[
+      { nin:18, nout:36, internal:false },
+      { nin:18, nout:24, internal:false },
+      { nin:16, nout:40, internal:false }
+    ];
+
+    function saveStageInputs(){
+      // Walk through every potentially-rendered stage (up to MAX_STAGES),
+      // not just the current slider value, so values are preserved both
+      // when sliding the stage count UP (existing stages survive) and
+      // when sliding DOWN (so the hidden stages keep their last values
+      // for the next time the user slides back up).
+      for(var i=1;i<=MAX_STAGES;i++){
+        var inEl=$("grIn"+i), outEl=$("grOut"+i), mEl=$("grMode"+i);
+        if(inEl && outEl && mEl){
+          var nin=parseInt(inEl.value,10), nout=parseInt(outEl.value,10);
+          if(!isNaN(nin) && nin>0) stageState[i-1].nin=nin;
+          if(!isNaN(nout) && nout>0) stageState[i-1].nout=nout;
+          stageState[i-1].internal = mEl.getAttribute("data-internal")==="true";
+        }
+      }
+    }
+
     function buildStages(){
-      var n=+$("grStages").value; $("grStagesv").textContent=n;
+      var n=+$("grStages").value;
+      // Clamp to the allowable range so a stuck/spoofed slider value can't
+      // walk off the end of stageState.
+      if(isNaN(n) || n<1) n=1;
+      if(n>MAX_STAGES) n=MAX_STAGES;
+      $("grStagesv").textContent=n;
       wrap.innerHTML="";
       var holder=document.createElement("div"); holder.className="controls";
       for(var i=1;i<=n;i++){
+        var st=stageState[i-1];
+
         var blockIn=document.createElement("div"); blockIn.className="ctrl";
         var labIn=document.createElement("label"); labIn.setAttribute("for","grIn"+i);
         labIn.innerHTML="Stage "+i+" input teeth N<sub>in</sub>"; blockIn.appendChild(labIn);
-        var inp=document.createElement("input"); inp.type="number"; inp.id="grIn"+i; inp.value=(i===1?18:16); inp.min=8; inp.step=1; blockIn.appendChild(inp);
+        var inp=document.createElement("input");
+        inp.type="number"; inp.id="grIn"+i; inp.value=st.nin; inp.min=8; inp.max=200; inp.step=1;
+        inp.setAttribute("inputmode","numeric");
+        blockIn.appendChild(inp);
+
         var blockOut=document.createElement("div"); blockOut.className="ctrl";
         var labOut=document.createElement("label"); labOut.setAttribute("for","grOut"+i);
         labOut.innerHTML="Stage "+i+" output teeth N<sub>out</sub>"; blockOut.appendChild(labOut);
-        var out=document.createElement("input"); out.type="number"; out.id="grOut"+i; out.value=(i===1?36:48); out.min=8; out.step=1; blockOut.appendChild(out);
+        var out=document.createElement("input");
+        out.type="number"; out.id="grOut"+i; out.value=st.nout; out.min=8; out.max=200; out.step=1;
+        out.setAttribute("inputmode","numeric");
+        blockOut.appendChild(out);
+
         var blockMode=document.createElement("div"); blockMode.className="ctrl";
-        var labMode=document.createElement("label"); labMode.setAttribute("for","grMode"+i); labMode.textContent="Stage "+i+" mesh"; blockMode.appendChild(labMode);
-        var btn=document.createElement("button"); btn.type="button"; btn.id="grMode"+i; btn.className="secondary"; btn.setAttribute("data-internal","false"); btn.textContent="External (\u2212)"; btn.style.minWidth="150px";
-        btn.addEventListener("click",function(){ var iv=this.getAttribute("data-internal")==="true"; this.setAttribute("data-internal", iv?"false":"true"); this.textContent= iv?"External (\u2212)":"Internal (+)"; });
+        var labMode=document.createElement("label"); labMode.setAttribute("for","grMode"+i);
+        labMode.textContent="Stage "+i+" mesh"; blockMode.appendChild(labMode);
+        var btn=document.createElement("button");
+        btn.type="button"; btn.id="grMode"+i; btn.className="secondary";
+        btn.setAttribute("data-internal", st.internal?"true":"false");
+        btn.setAttribute("aria-label","Stage "+i+" mesh type: "+(st.internal?"internal, no sign flip":"external, sign flip"));
+        btn.textContent= st.internal ? "Internal (+)" : "External (\u2212)";
+        btn.style.minWidth="150px";
+        btn.addEventListener("click",function(){
+          var iv=this.getAttribute("data-internal")==="true";
+          this.setAttribute("data-internal", iv?"false":"true");
+          this.textContent= iv?"External (\u2212)":"Internal (+)";
+          var sid=parseInt(this.id.replace("grMode",""),10);
+          this.setAttribute("aria-label","Stage "+sid+" mesh type: "+(iv?"external, sign flip":"internal, no sign flip"));
+          saveStageInputs(); compute(); drawTrain();
+        });
         blockMode.appendChild(btn);
+
+        // Wire reactive listeners on tooth inputs.
+        inp.addEventListener("input", function(){ saveStageInputs(); compute(); drawTrain(); });
+        out.addEventListener("input", function(){ saveStageInputs(); compute(); drawTrain(); });
+
         holder.appendChild(blockIn); holder.appendChild(blockOut); holder.appendChild(blockMode);
       }
       wrap.appendChild(holder);
     }
-    function compute(){
+
+    function readStages(){
       var n=+$("grStages").value;
-      var R=1, ok=true;
+      if(isNaN(n) || n<1) n=1;
+      if(n>MAX_STAGES) n=MAX_STAGES;
+      var arr=[];
       for(var i=1;i<=n;i++){
-        var nin=+$("grIn"+i).value, nout=+$("grOut"+i).value;
-        if(nin<=0||nout<=0){ ok=false; break; }
-        var internal=$("grMode"+i).getAttribute("data-internal")==="true";
-        var stageR=(internal?1:-1)*(nout/nin); // R = in/out rotations => Nout/Nin
+        var inEl=$("grIn"+i), outEl=$("grOut"+i), mEl=$("grMode"+i);
+        if(!inEl || !outEl || !mEl){
+          // Fall back to persisted state if a stage isn't rendered yet.
+          var st = stageState[i-1] || { nin:18, nout:36, internal:false };
+          arr.push({ nin:st.nin, nout:st.nout, internal:st.internal });
+          continue;
+        }
+        var nin=parseInt(inEl.value,10);
+        var nout=parseInt(outEl.value,10);
+        var internal=mEl.getAttribute("data-internal")==="true";
+        arr.push({ nin:nin, nout:nout, internal:internal });
+      }
+      return arr;
+    }
+
+    function compute(){
+      var stages=readStages();
+      var R=1, ok=true;
+      for(var i=0;i<stages.length;i++){
+        var s=stages[i];
+        if(!s.nin || !s.nout || s.nin<=0 || s.nout<=0 || isNaN(s.nin) || isNaN(s.nout)){ ok=false; break; }
+        var stageR=(s.internal?1:-1)*(s.nout/s.nin);
         R*=stageR;
       }
-      var win=+$("grWin").value, tin=+$("grTin").value;
-      var wout=win/R, tout=-R*tin; // n_s=1/R, n_t=-R
-      var pin=tin*win*(2*Math.PI/60), pout=tout*wout*(2*Math.PI/60);
-      if(!ok){ $("grReadout").innerHTML="<span>Please enter positive tooth counts.</span>"; $("grVerdict").className="verdict warn"; $("grVerdict").textContent="Check inputs."; return; }
+      if(!ok){
+        $("grReadout").innerHTML="<span>Please enter a positive whole-number tooth count for every gear (minimum 8 teeth recommended).</span>";
+        $("grVerdict").className="verdict warn";
+        $("grVerdict").textContent="Check inputs.";
+        return;
+      }
+      var win=parseFloat($("grWin").value)||0;
+      var tin=parseFloat($("grTin").value)||0;
+      var wout = (R===0) ? 0 : win/R;
+      var tout = -R*tin;
+      var pin = tin*win*(2*Math.PI/60);
+      var pout= tout*wout*(2*Math.PI/60);
       $("grReadout").innerHTML=
         "<span>Overall gear ratio R = <b>"+R.toFixed(3)+"</b></span>"+
         "<span>Torque ratio n\u209C = \u2212R = <b>"+(-R).toFixed(3)+"</b></span>"+
-        "<span>Speed ratio n\u209B = 1/R = <b>"+(1/R).toFixed(4)+"</b></span>"+
+        "<span>Speed ratio n\u209B = 1/R = <b>"+((R===0)?"\u221E":(1/R).toFixed(4))+"</b></span>"+
         "<span>Output speed \u03C9\u2092\u1d64\u209C = <b>"+wout.toFixed(1)+"</b> rpm</span>"+
         "<span>Output torque T\u2092\u1d64\u209C = <b>"+tout.toFixed(2)+"</b> N\u00B7m</span>";
       var match=Math.abs(pin-Math.abs(pout))<0.01*Math.max(1,Math.abs(pin));
       $("grVerdict").className="verdict "+(match?"good":"warn");
       $("grVerdict").textContent= "Power check (ideal): P_in = "+pin.toFixed(1)+" W, |P_out| = "+Math.abs(pout).toFixed(1)+" W \u2014 "+(match?"conserved \u2713 (speed traded for torque)":"see rounding");
     }
-    $("grStages").addEventListener("input",function(){ buildStages(); });
-    $("grCalc").addEventListener("click",compute);
-    buildStages(); compute();
+
+    /* ---------- live SVG diagram of the train ---------- */
+    function drawTrain(){
+      var svg=$("grTrain"); if(!svg) return;
+      clear(svg);
+      var stages=readStages();
+      var W=720, H=320;
+
+      // Defs: filter so the orange highlight rings stay legible on dark mode too.
+      // We compute layout left to right. Each stage has an input gear and an output gear;
+      // the output of stage k becomes the input of stage k+1 (shared shaft), so we render
+      // shared gears once.
+      // Strategy: build a list of "wheels" along a baseline. Wheels alternate
+      // between input and output of consecutive stages. Wheels that connect two
+      // stages get a dashed shaft-connector annotation.
+
+      // Compute radii from tooth counts (use a clamped scale so 8-tooth pinions
+      // are still visible and 200-tooth ring gears do not blow the canvas).
+      var allTeeth=[];
+      stages.forEach(function(s){ allTeeth.push(s.nin); allTeeth.push(s.nout); });
+      var maxN=Math.max.apply(null, allTeeth.concat([1]));
+      var Rmax=58; // max gear radius in px
+      var Rmin=18; // min gear radius for tiniest pinion
+      function radiusFor(N){
+        if(!N || N<=0) return Rmin;
+        var r = Rmax*(N/maxN);
+        return Math.max(Rmin, r);
+      }
+
+      // Place wheels along baseline. Distance between two meshing wheels =
+      // r_in + r_out (external) or |r_ring - r_pinion| (internal).
+      var baselineY=H*0.55;
+      var pad=46;
+      var xs=[]; // x for each wheel slot
+      var radii=[]; // radius for each wheel slot
+      var teeth=[];
+      var meshType=[]; // mesh type of the edge BEFORE this wheel (undefined for index 0)
+      var wheelRole=[]; // 'in' or 'out' for labeling
+
+      // First wheel (input of stage 1)
+      var x = pad + radiusFor(stages.length? stages[0].nin : 18);
+      xs.push(x);
+      radii.push(radiusFor(stages.length? stages[0].nin : 18));
+      teeth.push(stages.length? stages[0].nin : 0);
+      wheelRole.push('in');
+
+      for(var i=0;i<stages.length;i++){
+        var rin=radiusFor(stages[i].nin);
+        var rout=radiusFor(stages[i].nout);
+        var dx = stages[i].internal ? Math.abs(rout - rin) : (rin + rout);
+        // Position output wheel
+        var prevX=xs[xs.length-1];
+        var outX = prevX + dx;
+        xs.push(outX);
+        radii.push(rout);
+        teeth.push(stages[i].nout);
+        meshType.push(stages[i].internal?'internal':'external');
+        wheelRole.push('out');
+
+        // If another stage follows, the output gear and the next input share a shaft:
+        // add the next input wheel offset to the right (separate shaft on same axis).
+        if(i < stages.length-1){
+          var nextRin=radiusFor(stages[i+1].nin);
+          // shared-shaft offset (a separate gear on the same shaft)
+          var shaftOffset = Math.max(rout, nextRin) + 14;
+          xs.push(outX + shaftOffset);
+          radii.push(nextRin);
+          teeth.push(stages[i+1].nin);
+          meshType.push('shaft'); // shaft connector (same shaft as previous wheel)
+          wheelRole.push('in');
+        }
+      }
+
+      // Compute extents; rescale to fit canvas if needed.
+      var totalRight = xs[xs.length-1] + radii[radii.length-1] + pad;
+      var sx = totalRight > W ? W/totalRight : 1;
+      // Apply scale by translating coordinates.
+      function X(v){ return pad + (v-pad)*sx; }
+
+      // Draw baseline (very faint).
+      svg.appendChild(el("line",{x1:0,y1:baselineY,x2:W,y2:baselineY,stroke:cssVar('--grid-line'),"stroke-width":1,"stroke-dasharray":"2 4"}));
+
+      // Draw mesh-connector dashed lines between meshing wheels, and shaft connectors as a tie bar.
+      for(var k=0;k<meshType.length;k++){
+        var ax=X(xs[k]), ay=baselineY;
+        var bx=X(xs[k+1]), by=baselineY;
+        if(meshType[k]==='shaft'){
+          // Same-shaft tie: draw a thick neutral bar between hubs.
+          svg.appendChild(el("line",{x1:ax,y1:ay,x2:bx,y2:by,stroke:cssVar('--ink'),"stroke-width":5,"stroke-linecap":"round",opacity:"0.6"}));
+          var midX=(ax+bx)/2;
+          var lbl=el("text",{x:midX,y:by+22,"text-anchor":"middle","font-family":cssVar('--mono')||'monospace',"font-size":"10","fill":cssVar('--ink-soft')});
+          lbl.textContent="same shaft";
+          svg.appendChild(lbl);
+        }
+      }
+
+      // Draw each wheel.
+      var stageIndexForWheel=[]; // which stage does each wheel belong to (for color)
+      // Wheel 0 = input of stage 1. Wheel 1 = output of stage 1. Wheel 2 = input of stage 2. Wheel 3 = output of stage 2. ...
+      // Build mapping:
+      var si=0, expecting='in';
+      for(var w=0; w<xs.length; w++){
+        stageIndexForWheel.push(si);
+        if(expecting==='in'){ expecting='out'; }
+        else { expecting='in'; si++; }
+      }
+
+      var stageColors=[cssVar('--accent'), cssVar('--accent-2'), cssVar('--accent-dk')];
+
+      for(var w=0; w<xs.length; w++){
+        var cx=X(xs[w]), cy=baselineY, r=radii[w], n=teeth[w];
+        var color = stageColors[stageIndexForWheel[w] % stageColors.length];
+        // Gear teeth (decorative — count is illustrative, not exact)
+        var teethShown = Math.min(36, Math.max(8, n||16));
+        gearTeeth(svg, cx, cy, r, teethShown, 0, color);
+        // Pitch circle
+        circle(svg, cx, cy, r, color, 2);
+        // Hub
+        svg.appendChild(el("circle",{cx:cx,cy:cy,r:Math.max(3, r*0.18),fill:cssVar('--panel'),stroke:color,"stroke-width":2}));
+        svg.appendChild(el("circle",{cx:cx,cy:cy,r:2.2,fill:cssVar('--ink')}));
+
+        // Tooth-count label above wheel
+        var tlabel=el("text",{x:cx,y:cy-r-10,"text-anchor":"middle","font-family":cssVar('--mono')||'monospace',"font-size":"12","font-weight":"700","fill":cssVar('--ink')});
+        tlabel.textContent = "N = "+(n||"?");
+        svg.appendChild(tlabel);
+
+        // Role label below wheel (stage k input / stage k output)
+        var role = wheelRole[w];
+        var stageNum = stageIndexForWheel[w]+1;
+        var roleLabel = (role==='in' ? "Stage "+stageNum+" input" : "Stage "+stageNum+" output");
+        var rlabel=el("text",{x:cx,y:cy+r+18,"text-anchor":"middle","font-family":cssVar('--mono')||'monospace',"font-size":"10","fill":cssVar('--ink-soft')});
+        rlabel.textContent=roleLabel;
+        svg.appendChild(rlabel);
+      }
+
+      // Annotate the mesh type between each consecutive pair belonging to the SAME stage.
+      // We walk wheels: input(k) → output(k) is the stage k mesh; output(k) → input(k+1) is the shaft connector.
+      for(var k=0;k<meshType.length;k++){
+        if(meshType[k]==='shaft') continue;
+        var ax=X(xs[k]), bx=X(xs[k+1]);
+        var midX=(ax+bx)/2;
+        var topY=baselineY - Math.max(radii[k],radii[k+1]) - 28;
+        var tag=el("text",{x:midX,y:topY,"text-anchor":"middle","font-family":cssVar('--mono')||'monospace',"font-size":"10","fill":cssVar('--ink-soft')});
+        tag.textContent = (meshType[k]==='internal' ? "internal mesh (no flip)" : "external mesh (flip)");
+        svg.appendChild(tag);
+      }
+
+      // Rotation arrows — show the relative direction at each wheel.
+      // Direction at wheel 0 is +CCW (arbitrary input convention). Each external
+      // mesh flips it; each internal mesh preserves; same-shaft preserves.
+      var dir = +1; // +1 = CCW (arrow drawn counter-clockwise at top of gear)
+      // Place arrow at wheel 0.
+      drawRotArrow(svg, X(xs[0]), baselineY, radii[0]+12, dir);
+      for(var k=0;k<meshType.length;k++){
+        if(meshType[k]==='external') dir=-dir;
+        // internal & shaft: preserve dir
+        drawRotArrow(svg, X(xs[k+1]), baselineY, radii[k+1]+12, dir);
+      }
+
+      // Input/Output annotation banners
+      var firstX = X(xs[0]);
+      var lastX = X(xs[xs.length-1]);
+      var ibanner=el("text",{x:firstX, y:24, "text-anchor":"middle","font-family":cssVar('--serif')||'serif',"font-size":"14","font-weight":"700","fill":cssVar('--accent-dk')});
+      ibanner.textContent="INPUT \u03C9\u1D62\u2099";
+      svg.appendChild(ibanner);
+      var obanner=el("text",{x:lastX, y:24, "text-anchor":"middle","font-family":cssVar('--serif')||'serif',"font-size":"14","font-weight":"700","fill":cssVar('--accent-2')});
+      obanner.textContent="OUTPUT \u03C9\u2092\u1D64\u209C";
+      svg.appendChild(obanner);
+
+      // Caption
+      var cap=$("grTrainCaption");
+      if(cap){
+        var n=stages.length;
+        var sign = (function(){
+          // Sign of R indicates whether output spins same direction as input.
+          var s=1;
+          for(var j=0;j<stages.length;j++){ if(!stages[j].internal) s=-s; }
+          return s;
+        })();
+        cap.textContent = "Live schematic — "+n+" stage"+(n===1?"":"s")+", gear sizes scaled to tooth counts. Output spins "+(sign<0?"opposite to":"same direction as")+" the input.";
+      }
+    }
+
+    function drawRotArrow(svg, cx, cy, r, dir){
+      // Draw a small curved arrow above the gear showing rotation direction.
+      // dir = +1 → CCW (arrow head points left at top); -1 → CW (head right at top)
+      var arcR=r;
+      var startAng = dir>0 ? -30 : -150;
+      var endAng   = dir>0 ? -150 : -30;
+      var toRad=function(d){ return d*Math.PI/180; };
+      var x0=cx+arcR*Math.cos(toRad(startAng));
+      var y0=cy+arcR*Math.sin(toRad(startAng));
+      var x1=cx+arcR*Math.cos(toRad(endAng));
+      var y1=cy+arcR*Math.sin(toRad(endAng));
+      var sweep = dir>0 ? 0 : 1;
+      var color = dir>0 ? cssVar('--accent-dk') : cssVar('--accent-2');
+      svg.appendChild(el("path",{d:"M "+x0+" "+y0+" A "+arcR+" "+arcR+" 0 0 "+sweep+" "+x1+" "+y1,fill:"none",stroke:color,"stroke-width":2,"stroke-linecap":"round"}));
+      // Arrowhead at (x1,y1)
+      var headAng = dir>0 ? endAng-90 : endAng+90;
+      var ah=8;
+      var hx1=x1+ah*Math.cos(toRad(headAng-25));
+      var hy1=y1+ah*Math.sin(toRad(headAng-25));
+      var hx2=x1+ah*Math.cos(toRad(headAng+25));
+      var hy2=y1+ah*Math.sin(toRad(headAng+25));
+      svg.appendChild(el("path",{d:"M "+x1+" "+y1+" L "+hx1+" "+hy1+" M "+x1+" "+y1+" L "+hx2+" "+hy2,fill:"none",stroke:color,"stroke-width":2,"stroke-linecap":"round"}));
+    }
+
+    // Wire global reactive listeners.
+    $("grStages").addEventListener("input",function(){
+      saveStageInputs(); // capture any in-progress values from current stages first
+      buildStages(); compute(); drawTrain();
+    });
+    $("grWin").addEventListener("input", function(){ compute(); });
+    $("grTin").addEventListener("input", function(){ compute(); });
+
+    // Initial render.
+    buildStages(); compute(); drawTrain();
   })();
 
   /* ============================================================
@@ -1922,6 +2250,230 @@
     ["invPhi","invRb"].forEach(function(id){ $(id).addEventListener("input",render); });
     render();
   })();
+
+  /* ============================================================
+     WORKED-EXAMPLE FIGURES
+     Static reference drawings rendered into the SVGs above each
+     worked example. They are not animated — they just illustrate
+     the geometry the student is reading about.
+     ============================================================ */
+
+  /* ---- Example 3.1: five-bar mechanism with a rolling contact ---- */
+  (function(){
+    var stage=$("ex31fig"); if(!stage) return;
+    clear(stage);
+    var W=720, H=360;
+
+    // Layout (in viewBox units).
+    // Ground line:
+    var groundY = 250;
+    // Two fixed pivots on the ground:
+    var pivotA = { x: 110, y: groundY }; // pivot for input crank (link 2)
+    var pivotB = { x: 580, y: groundY }; // pivot for arm link 5
+    // Wheel (link 4) — rolls on the ground:
+    var wheelR = 56;
+    var wheelC = { x: 380, y: groundY - wheelR }; // center of wheel sits one radius above ground
+    var contactPt = { x: wheelC.x, y: groundY }; // contact patch on the ground
+    // Top of crank 2 (where link 3 attaches). Place above pivotA, angled to the right.
+    var crank2_angle = -55 * Math.PI/180; // up-and-to-the-right
+    var crank2_len = 110;
+    var top2 = { x: pivotA.x + crank2_len*Math.cos(crank2_angle), y: pivotA.y + crank2_len*Math.sin(crank2_angle) };
+    // Link 3 connects top of crank 2 to a point on the wheel's rim (the front of the wheel)
+    var link3_endOnWheel = { x: wheelC.x - wheelR*0.55, y: wheelC.y - wheelR*0.83 };
+
+    // ----- Ground (body 1) -----
+    // Draw a long horizontal line plus hatch marks below
+    var groundColor = cssVar('--ink');
+    stage.appendChild(el("line",{x1:30,y1:groundY,x2:W-30,y2:groundY,stroke:groundColor,"stroke-width":3}));
+    var hatchSpacing=14;
+    for(var hx=40; hx<W-30; hx+=hatchSpacing){
+      stage.appendChild(el("line",{x1:hx,y1:groundY,x2:hx-8,y2:groundY+10,stroke:groundColor,"stroke-width":1.5}));
+    }
+    // Body 1 label
+    txt(stage, W-50, groundY+24, "body 1 (ground)", cssVar('--ink-soft'), 11, "end", "700");
+
+    // ----- Link 2 (input crank), pivot A to top2 -----
+    var col2 = cssVar('--accent');
+    stage.appendChild(el("line",{x1:pivotA.x,y1:pivotA.y,x2:top2.x,y2:top2.y,stroke:col2,"stroke-width":6,"stroke-linecap":"round"}));
+    // r̄2 vector along link 2
+    txt(stage, (pivotA.x+top2.x)/2 - 18, (pivotA.y+top2.y)/2 + 4, "r\u0304\u2082", col2, 14, "middle", "700");
+    // Body 2 label
+    txt(stage, top2.x + 22, top2.y - 6, "body 2", col2, 11, "start", "700");
+
+    // ----- Link 3 (coupler), top2 to link3_endOnWheel -----
+    var col3 = cssVar('--accent-dk');
+    stage.appendChild(el("line",{x1:top2.x,y1:top2.y,x2:link3_endOnWheel.x,y2:link3_endOnWheel.y,stroke:col3,"stroke-width":6,"stroke-linecap":"round"}));
+    txt(stage, (top2.x+link3_endOnWheel.x)/2, (top2.y+link3_endOnWheel.y)/2 - 10, "r\u0304\u2083", col3, 14, "middle", "700");
+    txt(stage, (top2.x+link3_endOnWheel.x)/2, (top2.y+link3_endOnWheel.y)/2 + 18, "body 3", col3, 11, "middle", "700");
+
+    // ----- Link 4 (the wheel) -----
+    var col4 = cssVar('--accent-2');
+    // Outline circle
+    stage.appendChild(el("circle",{cx:wheelC.x,cy:wheelC.y,r:wheelR,fill:"none",stroke:col4,"stroke-width":3}));
+    // Spokes / hub
+    stage.appendChild(el("circle",{cx:wheelC.x,cy:wheelC.y,r:6,fill:cssVar('--panel'),stroke:col4,"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:wheelC.x,cy:wheelC.y,r:2.5,fill:cssVar('--ink')}));
+    // Two spokes for visual rotation indication
+    var spokeAng = -35 * Math.PI/180;
+    stage.appendChild(el("line",{
+      x1: wheelC.x + wheelR*0.92*Math.cos(spokeAng), y1: wheelC.y + wheelR*0.92*Math.sin(spokeAng),
+      x2: wheelC.x - wheelR*0.92*Math.cos(spokeAng), y2: wheelC.y - wheelR*0.92*Math.sin(spokeAng),
+      stroke:col4, "stroke-width":1.2, opacity:0.55
+    }));
+    stage.appendChild(el("line",{
+      x1: wheelC.x + wheelR*0.92*Math.cos(spokeAng+Math.PI/2), y1: wheelC.y + wheelR*0.92*Math.sin(spokeAng+Math.PI/2),
+      x2: wheelC.x - wheelR*0.92*Math.cos(spokeAng+Math.PI/2), y2: wheelC.y - wheelR*0.92*Math.sin(spokeAng+Math.PI/2),
+      stroke:col4, "stroke-width":1.2, opacity:0.55
+    }));
+    // Body 4 label inside / above the wheel
+    txt(stage, wheelC.x, wheelC.y - wheelR - 14, "body 4 (wheel)", col4, 11, "middle", "700");
+    // rho_4 radius mark (from center to contact point)
+    stage.appendChild(el("line",{x1:wheelC.x,y1:wheelC.y,x2:contactPt.x,y2:contactPt.y,stroke:col4,"stroke-width":1.5,"stroke-dasharray":"4 3"}));
+    txt(stage, wheelC.x + 8, wheelC.y + wheelR*0.55, "\u03C1\u2084", col4, 13, "start", "700");
+    // r̄4 vector — from contact point UP to wheel center (per the loop sign)
+    txt(stage, wheelC.x - 30, wheelC.y + wheelR*0.55, "r\u0304\u2084", col4, 14, "end", "700");
+    // Contact-point dot
+    stage.appendChild(el("circle",{cx:contactPt.x,cy:contactPt.y,r:3.5,fill:col4}));
+    // Small "no slip" annotation
+    txt(stage, contactPt.x, groundY + 32, "rolling contact (no slip)", cssVar('--ink-soft'), 10, "middle", "400");
+
+    // ----- Link 5 (arm), pivotB to wheelC -----
+    var col5 = cssVar('--good');
+    stage.appendChild(el("line",{x1:pivotB.x,y1:pivotB.y,x2:wheelC.x,y2:wheelC.y,stroke:col5,"stroke-width":6,"stroke-linecap":"round"}));
+    txt(stage, (pivotB.x+wheelC.x)/2 + 4, (pivotB.y+wheelC.y)/2 - 10, "r\u0304\u2085", col5, 14, "middle", "700");
+    txt(stage, (pivotB.x+wheelC.x)/2 + 4, (pivotB.y+wheelC.y)/2 + 16, "body 5 (arm)", col5, 11, "middle", "700");
+
+    // ----- r̄1 vector along the ground between the two pivots -----
+    var col1 = cssVar('--ink-soft');
+    // Draw a thin arrow along the ground between pivotA and pivotB, offset slightly below the ground line
+    var rb1y = groundY + 50;
+    stage.appendChild(el("line",{x1:pivotA.x,y1:rb1y,x2:pivotB.x,y2:rb1y,stroke:col1,"stroke-width":1.5}));
+    // Tick marks at the ends
+    stage.appendChild(el("line",{x1:pivotA.x,y1:rb1y-5,x2:pivotA.x,y2:rb1y+5,stroke:col1,"stroke-width":1.5}));
+    stage.appendChild(el("line",{x1:pivotB.x,y1:rb1y-5,x2:pivotB.x,y2:rb1y+5,stroke:col1,"stroke-width":1.5}));
+    txt(stage, (pivotA.x+pivotB.x)/2, rb1y - 6, "r\u0304\u2081 (ground vector, \u03B8\u2081 = 0)", col1, 11, "middle", "700");
+
+    // ----- Pivot pins -----
+    pin(stage, pivotA.x, pivotA.y);
+    pin(stage, pivotB.x, pivotB.y);
+    pin(stage, top2.x, top2.y);
+    pin(stage, link3_endOnWheel.x, link3_endOnWheel.y);
+    pin(stage, wheelC.x, wheelC.y);
+
+    // ----- Title / vector-loop reminder banner -----
+    txt(stage, 20, 26, "Five-bar mechanism — body 4 rolls on body 1; body 5 is the arm", cssVar('--ink'), 13, "start", "700");
+    txt(stage, 20, 46, "Vector loop:  r\u0304\u2082 + r\u0304\u2083 \u2212 r\u0304\u2084 \u2212 r\u0304\u2085 + r\u0304\u2081 = 0\u0304", cssVar('--ink-soft'), 12, "start", "400");
+
+    // ----- Rotation indicator on the wheel -----
+    // Show a small curved arrow inside the wheel hinting at \theta_4 rotation
+    var arrR = wheelR*0.55;
+    var aA=-100*Math.PI/180, aB=60*Math.PI/180;
+    var ax0=wheelC.x+arrR*Math.cos(aA), ay0=wheelC.y+arrR*Math.sin(aA);
+    var ax1=wheelC.x+arrR*Math.cos(aB), ay1=wheelC.y+arrR*Math.sin(aB);
+    stage.appendChild(el("path",{d:"M "+ax0+" "+ay0+" A "+arrR+" "+arrR+" 0 1 1 "+ax1+" "+ay1,fill:"none",stroke:col4,"stroke-width":1.6,"stroke-linecap":"round",opacity:0.7}));
+    // small arrowhead at end
+    var hA=aB+Math.PI/2;
+    stage.appendChild(el("path",{
+      d:"M "+ax1+" "+ay1+
+        " L "+(ax1+8*Math.cos(hA-0.4))+" "+(ay1+8*Math.sin(hA-0.4))+
+        " M "+ax1+" "+ay1+
+        " L "+(ax1+8*Math.cos(hA+0.4))+" "+(ay1+8*Math.sin(hA+0.4)),
+      fill:"none",stroke:col4,"stroke-width":1.6,"stroke-linecap":"round",opacity:0.7
+    }));
+    txt(stage, wheelC.x + 18, wheelC.y - 14, "\u03B8\u2084", col4, 12, "start", "700");
+  })();
+
+  /* ---- Example 3.3: single-stage simple geartrain ---- */
+  (function(){
+    var stage=$("ex33fig"); if(!stage) return;
+    clear(stage);
+    var W=720, H=320;
+
+    // Two gears on fixed centers, external mesh.
+    var baselineY = 175;
+    var r2 = 60;   // gear 2 (input) pitch radius
+    var r3 = 95;   // gear 3 (output) pitch radius
+    var gap = 30;  // visual padding
+    var c2 = { x: 230, y: baselineY };
+    var c3 = { x: c2.x + r2 + r3, y: baselineY };
+
+    // ----- Ground (body 1) — bracket holding both centers -----
+    var groundColor = cssVar('--ink');
+    // Two short ground stubs at each center hanging downward
+    var stubLen = 70;
+    var stubBase = baselineY + stubLen;
+    stage.appendChild(el("line",{x1:c2.x,y1:c2.y,x2:c2.x,y2:stubBase,stroke:groundColor,"stroke-width":2}));
+    stage.appendChild(el("line",{x1:c3.x,y1:c3.y,x2:c3.x,y2:stubBase,stroke:groundColor,"stroke-width":2}));
+    // Connecting ground bar
+    stage.appendChild(el("line",{x1:c2.x-20,y1:stubBase,x2:c3.x+20,y2:stubBase,stroke:groundColor,"stroke-width":3}));
+    // Hatch marks under the bar
+    var hatchSpacing=12;
+    for(var hx=c2.x-15; hx<c3.x+25; hx+=hatchSpacing){
+      stage.appendChild(el("line",{x1:hx,y1:stubBase,x2:hx-7,y2:stubBase+9,stroke:groundColor,"stroke-width":1.3}));
+    }
+    txt(stage, (c2.x+c3.x)/2, stubBase+28, "body 1 (ground / arm — fixed)", cssVar('--ink-soft'), 11, "middle", "700");
+
+    // ----- Gear 2 (input) -----
+    var col2 = cssVar('--accent');
+    gearTeeth(stage, c2.x, c2.y, r2, 18, 0, col2);
+    stage.appendChild(el("circle",{cx:c2.x,cy:c2.y,r:r2,fill:"none",stroke:col2,"stroke-width":2}));
+    // Hub
+    stage.appendChild(el("circle",{cx:c2.x,cy:c2.y,r:7,fill:cssVar('--panel'),stroke:col2,"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:c2.x,cy:c2.y,r:2.5,fill:cssVar('--ink')}));
+    // Pitch radius rho_2
+    var radAngle2 = 200*Math.PI/180;
+    stage.appendChild(el("line",{x1:c2.x,y1:c2.y,x2:c2.x+r2*Math.cos(radAngle2),y2:c2.y+r2*Math.sin(radAngle2),stroke:col2,"stroke-width":1.5,"stroke-dasharray":"4 3"}));
+    txt(stage, c2.x - r2*0.55, c2.y + 6, "\u03C1\u2082", col2, 14, "middle", "700");
+    // Label & angle marker
+    txt(stage, c2.x, c2.y - r2 - 14, "body 2 (input)", col2, 12, "middle", "700");
+    txt(stage, c2.x, c2.y - r2 - 30, "N\u2082 teeth", col2, 10, "middle", "400");
+    // Rotation arrow (CCW for input)
+    var arrR2 = r2*0.45;
+    stage.appendChild(el("path",{d:"M "+(c2.x+arrR2)+" "+c2.y+" A "+arrR2+" "+arrR2+" 0 1 0 "+(c2.x-arrR2)+" "+c2.y,fill:"none",stroke:col2,"stroke-width":1.8,"stroke-linecap":"round",opacity:0.75}));
+    stage.appendChild(el("path",{d:"M "+(c2.x-arrR2)+" "+c2.y+" l 6 -5 M "+(c2.x-arrR2)+" "+c2.y+" l 6 5",fill:"none",stroke:col2,"stroke-width":1.8,"stroke-linecap":"round",opacity:0.75}));
+    txt(stage, c2.x + 14, c2.y - 4, "\u03B8\u2082", col2, 13, "start", "700");
+
+    // ----- Gear 3 (output) -----
+    var col3 = cssVar('--accent-2');
+    gearTeeth(stage, c3.x, c3.y, r3, 28, 0, col3);
+    stage.appendChild(el("circle",{cx:c3.x,cy:c3.y,r:r3,fill:"none",stroke:col3,"stroke-width":2}));
+    // Hub
+    stage.appendChild(el("circle",{cx:c3.x,cy:c3.y,r:8,fill:cssVar('--panel'),stroke:col3,"stroke-width":2}));
+    stage.appendChild(el("circle",{cx:c3.x,cy:c3.y,r:3,fill:cssVar('--ink')}));
+    // Pitch radius rho_3
+    var radAngle3 = -30*Math.PI/180;
+    stage.appendChild(el("line",{x1:c3.x,y1:c3.y,x2:c3.x+r3*Math.cos(radAngle3),y2:c3.y+r3*Math.sin(radAngle3),stroke:col3,"stroke-width":1.5,"stroke-dasharray":"4 3"}));
+    txt(stage, c3.x + r3*0.55, c3.y - 12, "\u03C1\u2083", col3, 14, "middle", "700");
+    // Label
+    txt(stage, c3.x, c3.y - r3 - 14, "body 3 (output)", col3, 12, "middle", "700");
+    txt(stage, c3.x, c3.y - r3 - 30, "N\u2083 teeth", col3, 10, "middle", "400");
+    // Rotation arrow (CW for output, opposite of input)
+    var arrR3 = r3*0.4;
+    stage.appendChild(el("path",{d:"M "+(c3.x-arrR3)+" "+c3.y+" A "+arrR3+" "+arrR3+" 0 1 0 "+(c3.x+arrR3)+" "+c3.y,fill:"none",stroke:col3,"stroke-width":1.8,"stroke-linecap":"round",opacity:0.75}));
+    stage.appendChild(el("path",{d:"M "+(c3.x+arrR3)+" "+c3.y+" l -6 -5 M "+(c3.x+arrR3)+" "+c3.y+" l -6 5",fill:"none",stroke:col3,"stroke-width":1.8,"stroke-linecap":"round",opacity:0.75}));
+    txt(stage, c3.x - 14, c3.y - 4, "\u03B8\u2083", col3, 13, "end", "700");
+
+    // ----- Contact point marker -----
+    var contactX = c2.x + r2;
+    var contactPt = { x: contactX, y: baselineY };
+    stage.appendChild(el("circle",{cx:contactPt.x,cy:contactPt.y,r:4,fill:cssVar('--bad')}));
+    txt(stage, contactPt.x, contactPt.y - 14, "pitch point", cssVar('--bad'), 10, "middle", "700");
+    txt(stage, contactPt.x, contactPt.y + 18, "(external mesh)", cssVar('--ink-soft'), 10, "middle", "400");
+
+    // ----- r̄1 (ground vector) between centers -----
+    var col1 = cssVar('--ink-soft');
+    var rb1y = baselineY + 35;
+    // Only draw the visible portion between hubs (not occluded by gears) — use a label above the bottom
+    stage.appendChild(el("line",{x1:c2.x,y1:rb1y,x2:c3.x,y2:rb1y,stroke:col1,"stroke-width":1.4,"stroke-dasharray":"5 3"}));
+    stage.appendChild(el("line",{x1:c2.x,y1:rb1y-5,x2:c2.x,y2:rb1y+5,stroke:col1,"stroke-width":1.4}));
+    stage.appendChild(el("line",{x1:c3.x,y1:rb1y-5,x2:c3.x,y2:rb1y+5,stroke:col1,"stroke-width":1.4}));
+    txt(stage, (c2.x+c3.x)/2, rb1y - 6, "r\u0304\u2081 = \u03C1\u2082 + \u03C1\u2083  (line of centers)", col1, 11, "middle", "700");
+
+    // ----- Title banner -----
+    txt(stage, 20, 26, "Single-stage simple geartrain — body 1 is fixed, so \u0394\u03B8\u2081 = 0", cssVar('--ink'), 13, "start", "700");
+    txt(stage, 20, 46, "Rolling-contact equation:  \u03C1\u2083\u0394\u03B8\u2083 = \u2212\u03C1\u2082\u0394\u03B8\u2082   \u2192   R = \u2212\u03C1\u2083/\u03C1\u2082 = \u2212N\u2083/N\u2082", cssVar('--ink-soft'), 12, "start", "400");
+  })();
+
 
   /* ============================================================
      QUIZ
@@ -2113,222 +2665,6 @@
       var max=doc.scrollHeight - doc.clientHeight;
       var p=max>0?Math.min(100,Math.round(window.scrollY/max*100)):0;
       if(prog){ prog.value=p; pct.textContent=p+"%"; }
-    }
-    window.addEventListener("scroll",onScroll,{passive:true});
-    window.addEventListener("resize",onScroll);
-    onScroll();
-    var tw=$("tocWrap");
-    if(tw){
-      tw.addEventListener("keydown",function(e){
-        if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
-        var i=links.indexOf(document.activeElement); if(i<0) return;
-        e.preventDefault();
-        var ni=e.key==="ArrowRight"?Math.min(links.length-1,i+1):Math.max(0,i-1);
-        links[ni].focus();
-      });
-    }
-  })();
-
-})();
-</script>
-</body>
-</html>
-
-  /* ============================================================
-     SELF-CHECK QUIZ (build + shuffle + instant feedback)
-     ============================================================ */
-  (function(){
-    var mount=$("quizMount"); if(!mount) return;
-    var bank=[
-      {q:"For two EXTERNALLY contacting rolling bodies (no slip), how do the contacting surfaces move relative to each other and what sign relates their rotations?",
-       opts:["Same direction; positive sign","Opposite directions; negative sign","Same direction; negative sign","They cannot rotate"],
-       correct:1, fb:"External contact reverses sense: the bodies spin in opposite directions, so \\u03C1\\u2093\\u0394\\u03B8\\u2093/\\u1D63 = \\u2212\\u03C1\\u1D67\\u0394\\u03B8\\u1D67/\\u1D63 \\u2014 the minus sign (Eq 3.1)."},
-      {q:"For two INTERNALLY contacting rolling bodies (a smaller body inside a larger ring), the no-slip equation carries which sign, and what does that mean physically?",
-       opts:["Negative; opposite rotation","Positive; same direction of rotation","Negative; same direction","No sign \\u2014 they don't roll"],
-       correct:1, fb:"Internal contact keeps the same sense of rotation, so the equation takes the PLUS sign (Eq 3.6): both turn the same way."},
-      {q:"In the rolling-contact equations, the subscript on \\u0394\\u03B8/z refers to rotation measured relative to which body?",
-       opts:["The ground frame always","The arm (link z) that carries the contact","The faster gear","The point of interest"],
-       correct:1, fb:"Rotations are measured relative to the ARM (link z) joining the two centers \\u2014 that is what \\u0394\\u03B8\\u2093/\\u1D63 denotes. When the arm is fixed to ground it reduces to absolute rotation."},
-      {q:"A rack and pinion is the limiting case of rolling contact where one body has a flat surface. This corresponds to a circle of:",
-       opts:["Zero radius","Infinite radius","Negative radius","Unit radius"],
-       correct:1, fb:"A flat surface is a circle of infinite radius. The rack's linear travel equals the pinion's arc length: r\\u1D67\\u2212r\\u1D67\\u1D62 = \\u03C1\\u2093\\u0394\\u03B8\\u2093/\\u1D63 (Eq 3.8)."},
-      {q:"Two identical rolling-contact assemblies start at DIFFERENT initial angles but undergo the SAME change in input. The no-slip CHANGE equation tells us their outputs will:",
-       opts:["Differ in change but keep their initial offset","Become identical regardless of start","Reverse direction","Stop moving"],
-       correct:0, fb:"The equation governs the CHANGE \\u0394\\u03B8, not the absolute angle. Equal input change \\u2192 equal output change, but the initial-value (assembly) offset is preserved (\\u00A7 3.4)."},
-      {q:"A geartrain is built fundamentally from which elements?",
-       opts:["Springs and dampers","Rolling contacts plus arms","Cams and followers","Hydraulic cylinders"],
-       correct:1, fb:"A geartrain is just an assembly of rolling contacts connected by arms (links). Gear teeth simply enforce the no-slip pitch-circle rolling."},
-      {q:"What distinguishes a SIMPLE geartrain from a PLANETARY (epicyclic) geartrain?",
-       opts:["Simple has teeth, planetary doesn't","In a simple train the arms are fixed to ground; in a planetary train an arm (carrier) moves","Planetary trains have only one gear","Simple trains cannot change speed"],
-       correct:1, fb:"Simple geartrain = all arms grounded (axes fixed). Planetary = at least one arm (the carrier) is free to move, so gear centers orbit (\\u00A7 3.5)."},
-      {q:"The gear ratio is defined as R = \\u0394\\u03B8\\u1D62\\u2099 / \\u0394\\u03B8\\u2092\\u1D64\\u209C. How do the torque ratio n\\u209C and speed ratio n\\u209B relate to R?",
-       opts:["n\\u209C = R and n\\u209B = R","n\\u209C = \\u2212R and n\\u209B = 1/R","n\\u209C = 1/R and n\\u209B = \\u2212R","They are unrelated to R"],
-       correct:1, fb:"The master relationship is R = \\u2212n\\u209C = 1/n\\u209B. So the torque ratio is \\u2212R and the speed ratio is 1/R (Eqs 3.18\\u20133.24)."},
-      {q:"For a single external mesh, the gear ratio can be written in terms of tooth counts as:",
-       opts:["R = +N\\u2083/N\\u2082","R = \\u2212N\\u2083/N\\u2082","R = N\\u2082\\u00B7N\\u2083","R = N\\u2082\\u2212N\\u2083"],
-       correct:1, fb:"Because pitch radius is proportional to tooth count (\\u03C1\\u2093/\\u03C1\\u1D67 = N\\u2093/N\\u1D67) and external contact gives a minus sign: R = \\u2212\\u03C1\\u2083/\\u03C1\\u2082 = \\u2212N\\u2083/N\\u2082 (Eq 3.25)."},
-      {q:"In a planetary set, the ring tooth count is constrained by the sun and planet counts. That geometric fit relation is:",
-       opts:["N_ring = N_sun \\u2212 N_planet","N_ring = N_sun + 2\\u00B7N_planet","N_ring = 2\\u00B7N_sun","N_ring = N_planet/2"],
-       correct:1, fb:"For the planets to mesh both sun and ring, the radii must fit: N_ring = N_sun + 2\\u00B7N_planet."},
-      {q:"The number of STAGES in a geartrain equals the number of:",
-       opts:["Gears","Rolling contacts (meshes)","Arms fixed to ground","Degrees of freedom"],
-       correct:1, fb:"Each rolling contact (mesh) is one stage; the overall ratio is the product of the stage ratios."},
-      {q:"In Worked Example 3.1, a naive Gr\\u00FCbler count gave F = 0, but the rolling contact actually makes the true mobility:",
-       opts:["F = 0 (structure)","F = 1 (one DOF)","F = 2","F = \\u22121"],
-       correct:1, fb:"The rolling contact adds a constraint that Gr\\u00FCbler miscounts here; the corrected analysis (3 equations, 4 unknowns) yields F = 1 \\u2014 a working one-DOF mechanism."}
-    ];
-    var answered=0, correctCount=0;
-    function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
-    function updateScore(){ $("quizScore").textContent=correctCount+" / "+answered; }
-    function build(){
-      mount.innerHTML=""; answered=0; correctCount=0; updateScore();
-      bank.forEach(function(item,qi){
-        var order=shuffle(item.opts.map(function(_,i){return i;}));
-        var wrap=document.createElement("div"); wrap.className="q";
-        var stem=document.createElement("p"); stem.className="stem"; stem.textContent=(qi+1)+". "+item.q; wrap.appendChild(stem);
-        var opts=document.createElement("div"); opts.className="opts"; opts.setAttribute("role","group");
-        opts.setAttribute("aria-label","Answer choices for question "+(qi+1));
-        var done=false;
-        order.forEach(function(origIdx){
-          var lbl=document.createElement("label"); lbl.className="opt";
-          var inp=document.createElement("input"); inp.type="radio"; inp.name="q"+qi;
-          var span=document.createElement("span"); span.textContent=item.opts[origIdx];
-          lbl.appendChild(inp); lbl.appendChild(span);
-          inp.addEventListener("change",function(){
-            if(done) return; done=true; answered++;
-            var isRight=(origIdx===item.correct);
-            if(isRight){ correctCount++; lbl.classList.add("correct"); }
-            else{
-              lbl.classList.add("incorrect");
-              Array.prototype.forEach.call(opts.querySelectorAll(".opt"),function(o){
-                if(o.querySelector("span").textContent===item.opts[item.correct]) o.classList.add("correct");
-              });
-            }
-            Array.prototype.forEach.call(opts.querySelectorAll("input"),function(x){ x.disabled=true; });
-            fb.className="fb show "+(isRight?"right":"wrong");
-            fb.textContent=(isRight?"Correct. ":"Not quite. ")+item.fb;
-            updateScore();
-          });
-          opts.appendChild(lbl);
-        });
-        wrap.appendChild(opts);
-        var fb=document.createElement("div"); fb.className="fb"; wrap.appendChild(fb);
-        mount.appendChild(wrap);
-      });
-    }
-    $("quizReset").addEventListener("click",build);
-    build();
-  })();
-
-  /* ============================================================
-     GLOSSARY (build + filter)
-     ============================================================ */
-  (function(){
-    var list=$("glossList"); if(!list) return;
-    var terms=[
-      ["Rolling contact","Two bodies touching along a line or point that roll on each other without slipping, so contacting arc lengths match.","\\u00A7 3.0 Rolling Contacts"],
-      ["No-slip condition","The kinematic constraint that contacting surfaces have equal arc length (and equal contact-point velocity): \\u03C1\\u2093\\u0394\\u03B8\\u2093 = \\u00B1\\u03C1\\u1D67\\u0394\\u03B8\\u1D67.","\\u00A7 3.0 Rolling Contacts"],
-      ["Arc length","Distance traveled along a circular edge, \\u03C1\\u00B7\\u0394\\u03B8; equal arc lengths at the contact express no slip.","\\u00A7 3.0 Rolling Contacts"],
-      ["Arm (link z)","The link connecting the two rolling-body centers; rotations in the contact equations are measured relative to this arm.","\\u00A7 3.0 Rolling Contacts"],
-      ["Pitch circle","The effective rolling circle of a gear; gears mesh as if these circles rolled together without slip.","\\u00A7 3.0 Foundations"],
-      ["Pitch point","The single contact point where gear-tooth motion is pure rolling; everywhere else there is sliding.","\\u00A7 3.0 Foundations"],
-      ["Involute profile","The standard gear-tooth curve that makes meshing teeth behave kinematically like rolling pitch circles.","\\u00A7 3.0 Foundations"],
-      ["External contact","Two bodies touching on the outsides of their circles; they rotate in OPPOSITE senses (minus sign).","\\u00A7 3.1 External Contact"],
-      ["Internal contact","A body rolling inside a ring/annulus; both rotate in the SAME sense (plus sign).","\\u00A7 3.2 Internal Contact"],
-      ["Flat surface contact","Limiting case where one body is a straight edge (a circle of infinite radius), e.g. a rack.","\\u00A7 3.3 Flat Surface"],
-      ["Rack and pinion","A pinion (gear) rolling on a rack (flat toothed bar); converts rotation to straight-line motion via r\\u1D67\\u2212r\\u1D67\\u1D62 = \\u03C1\\u2093\\u0394\\u03B8\\u2093/\\u1D63.","\\u00A7 3.3 Flat Surface"],
-      ["Assembly configuration","The set of initial angles (\\u03B8\\u1D62) at which a mechanism is put together; sets the constant offset preserved through motion.","\\u00A7 3.4 Assembly"],
-      ["Initial-value term","The starting-angle constant in the integrated rolling equation; equal input CHANGES give equal output changes about different starts.","\\u00A7 3.4 Assembly"],
-      ["Geartrain","An assembly of rolling contacts joined by arms that transmits rotation with a fixed ratio between input and output.","\\u00A7 3.5 Geartrains"],
-      ["Stage","A single rolling contact (mesh) in a geartrain; the overall ratio is the product of the stage ratios.","\\u00A7 3.5 Geartrains"],
-      ["Simple geartrain","A geartrain whose arms are all fixed to ground, so every gear axis is stationary.","\\u00A7 3.5 Geartrains"],
-      ["Planetary (epicyclic) geartrain","A geartrain in which a carrier arm moves, so gear centers orbit; built from sun, planets, ring, and carrier.","\\u00A7 3.7 Planetary"],
-      ["Sun gear","The central gear of a planetary set, meshing externally with the planets.","\\u00A7 3.7 Planetary"],
-      ["Planet gear","A gear that meshes with both sun and ring while its center orbits on the carrier.","\\u00A7 3.7 Planetary"],
-      ["Ring (annulus) gear","The internally toothed outer gear of a planetary set; meshes internally with the planets.","\\u00A7 3.7 Planetary"],
-      ["Carrier","The arm linking the planet centers; when free to rotate it makes the train planetary.","\\u00A7 3.7 Planetary"],
-      ["Gear ratio R","R = \\u0394\\u03B8\\u1D62\\u2099/\\u0394\\u03B8\\u2092\\u1D64\\u209C, the ratio of input rotation to output rotation; for one external mesh R = \\u2212N\\u2092\\u1D64\\u209C/N\\u1D62\\u2099.","\\u00A7 3.6 Ratios"],
-      ["Torque ratio n\\u209C","The output-to-input torque factor; related to the gear ratio by n\\u209C = \\u2212R.","\\u00A7 3.6 Ratios"],
-      ["Speed ratio n\\u209B","The output-to-input speed factor; related to the gear ratio by n\\u209B = 1/R.","\\u00A7 3.6 Ratios"],
-      ["Tooth count N","Number of teeth on a gear; proportional to pitch radius, so \\u03C1\\u2093/\\u03C1\\u1D67 = N\\u2093/N\\u1D67.","\\u00A7 3.6 Ratios"],
-      ["Power conservation","An ideal geartrain neither creates nor destroys power: speed gained is paid for in torque (P = \\u03C9\\u00B7\\u03C4 constant).","\\u00A7 3.6 Ratios"],
-      ["Degrees of freedom (DOF)","Independent inputs needed to drive a mechanism; rolling contacts add constraints that Gr\\u00FCbler's count can miss.","\\u00A7 3.8 Example 3.1"]
-    ];
-    terms.sort(function(a,b){ return a[0].toLowerCase().localeCompare(b[0].toLowerCase()); });
-    function render(filter){
-      list.innerHTML=""; var f=(filter||"").trim().toLowerCase(), n=0;
-      terms.forEach(function(t){
-        if(f && t[0].toLowerCase().indexOf(f)<0 && t[1].toLowerCase().indexOf(f)<0) return;
-        n++;
-        var item=document.createElement("div"); item.className="gloss-item";
-        var dt=document.createElement("dt"); dt.textContent=t[0];
-        var dd=document.createElement("dd"); dd.textContent=t[1];
-        var tg=document.createElement("span"); tg.className="tag"; tg.textContent=t[2];
-        item.appendChild(dt); item.appendChild(dd); item.appendChild(tg);
-        list.appendChild(item);
-      });
-      $("glossEmpty").hidden = (n>0);
-      $("glossCount").textContent = f ? (n+" of "+terms.length+" terms shown") : (terms.length+" terms");
-    }
-    $("glossInput").addEventListener("input",function(){ render(this.value); });
-    render("");
-  })();
-
-  /* ============================================================
-     EXTERNAL RESOURCES (build cards)
-     ============================================================ */
-  (function(){
-    var data={
-      resTextbooks:[
-        ["Epicyclic gearing (overview)","Background on sun/planet/ring/carrier, the three fixed-member ratios, and how pitch circles roll without slip.","en.wikipedia.org","https://en.wikipedia.org/wiki/Epicyclic_gearing"],
-        ["Gear train (ratios & stages)","How meshes combine into a train, the velocity ratio, and the role of idler gears.","en.wikipedia.org","https://en.wikipedia.org/wiki/Gear_train"],
-        ["Rack and pinion","The flat-surface limiting case: turning rotation into straight-line travel, with the geometry behind it.","en.wikipedia.org","https://en.wikipedia.org/wiki/Rack_and_pinion"]
-      ],
-      resSimulators:[
-        ["Planetary Gearbox Speed & Torque Calculator","Vary sun, planet, and ring tooth counts and see output speed and torque for each fixed-member configuration.","firgelliauto.com","https://www.firgelliauto.com/blogs/mechanisms/epicyclic-planetary-gear-train"],
-        ["Gears (Wood Gears) \\u2014 how gears mesh","Clear visual explanations of gear meshing, tooth counts, and ratio, with build-it-yourself planetary examples.","woodgears.ca","https://woodgears.ca/gear/"],
-        ["tec-science: Planetary gear","Animated explanation of planetary kinematics and the general ratio equation (Willis formula).","tec-science.com","https://www.tec-science.com/mechanical-power-transmission/planetary-gear/how-does-a-planetary-gear-work/"]
-      ],
-      resConcepts:[
-        ["Involute gear teeth","Why the involute profile makes meshing teeth act like rolling pitch circles \\u2014 the link between Chapter 3 and real gears.","en.wikipedia.org","https://en.wikipedia.org/wiki/Involute_gear"],
-        ["Gear ratio (fundamentals)","A refresher on R as the ratio of rotations, its inverse speed ratio, and the torque trade-off.","en.wikipedia.org","https://en.wikipedia.org/wiki/Gear_ratio"],
-        ["KHK: Gear technical reference","Manufacturer reference on tooth counts, module, pitch, and how they set the rolling geometry.","khkgears.net","https://khkgears.net/new/gear_knowledge/"]
-      ]
-    };
-    Object.keys(data).forEach(function(mountId){
-      var mount=$(mountId); if(!mount) return;
-      data[mountId].forEach(function(r){
-        var a=document.createElement("a");
-        a.className="res-link"; a.href=r[3]; a.target="_blank"; a.rel="noopener noreferrer";
-        var name=document.createElement("span"); name.className="name";
-        name.appendChild(document.createTextNode(r[0]+" "));
-        var ext=document.createElement("span"); ext.className="ext"; ext.textContent="\\u2197 new tab";
-        name.appendChild(ext);
-        var desc=document.createElement("span"); desc.className="desc"; desc.textContent=r[1];
-        var hs=document.createElement("span"); hs.className="host"; hs.textContent=r[2];
-        a.appendChild(name); a.appendChild(desc); a.appendChild(hs);
-        a.setAttribute("aria-label", r[0]+" \\u2014 opens "+r[2]+" in a new tab");
-        mount.appendChild(a);
-      });
-    });
-  })();
-
-  /* ============================================================
-     NAV ACTIVE STATE + READING PROGRESS + ARROW-KEY NAV
-     ============================================================ */
-  (function(){
-    var links=Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
-    var sections=links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
-    var prog=$("readprog"), pct=$("readpct");
-    function onScroll(){
-      var y=window.scrollY+90;
-      var active=sections[0];
-      sections.forEach(function(s){ if(s.offsetTop<=y) active=s; });
-      links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href")==="#"+active.id); });
-      var doc=document.documentElement;
-      var max=doc.scrollHeight - doc.clientHeight;
-      var p=max>0?Math.min(100,Math.round(window.scrollY/max*100)):0;
-      if(prog){ prog.value=p; if(pct) pct.textContent=p+"%"; }
     }
     window.addEventListener("scroll",onScroll,{passive:true});
     window.addEventListener("resize",onScroll);
