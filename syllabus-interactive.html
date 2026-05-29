@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENGI 216 · Kinematics &amp; Dynamics of Machinery — Interactive Syllabus</title>
+<meta name="description" content="Interactive, accessible syllabus for ENGI 216: Kinematics and Dynamics of Machinery at Brookdale Community College. Includes a live grade calculator, grade-scale lookup, outcome tracker, and a topic-to-module map.">
+<style>
+  /* ============================================================
+     THEME TOKENS — engineering-blueprint / technical drafting
+     (locked design standard, shared with all chapter modules)
+     ============================================================ */
+  :root{
+    --ink:        #10243a;   /* deep drafting ink */
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;   /* drafting paper */
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;   /* textbook cyan */
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;   /* rust / annotation orange */
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --muted-bg:   #ece9db;
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --muted-bg:   #182833;
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } *{ transition:none !important; animation:none !important; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-48px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- masthead ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:40px 20px 34px; position:relative; overflow:hidden;
+    border-bottom:3px solid var(--accent);
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:2; }
+  header.site::after{
+    content:""; position:absolute; inset:0; z-index:1; opacity:.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent-dk); background:#f3f1e7;
+    padding:5px 12px; border-radius:30px; font-weight:700; margin-bottom:14px;
+  }
+  @media (prefers-color-scheme: dark){ .chip{ background:#cfe7ef; color:#06384a; } }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; margin:.1em 0 .18em;
+    font-size:clamp(1.8rem, 4.8vw, 3.0rem); line-height:1.08; color:#fff;
+  }
+  header.site .sub{ font-size:clamp(1rem,2.2vw,1.22rem); color:#d6e6ee; max-width:62ch; }
+  .meta-row{ margin-top:20px; display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:.78rem; color:#bcd2dd; }
+  .meta-row span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- sticky nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50;
+    background:var(--panel); border-bottom:1px solid var(--panel-line);
+    box-shadow:0 2px 8px rgba(16,36,58,.06);
+  }
+  nav.toc .wrap{ max-width:var(--maxw); margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:8px 12px; }
+  nav.toc a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink-soft);
+    font-family:var(--mono); font-size:.76rem; font-weight:600; letter-spacing:.02em;
+    padding:8px 12px; border-radius:7px; white-space:nowrap; min-height:36px; display:inline-flex; align-items:center;
+  }
+  nav.toc a:hover{ background:var(--paper-2); color:var(--ink); }
+  nav.toc a:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  nav.toc a.active{ background:var(--accent); color:#fff; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:10px 18px 60px; }
+
+  section{ padding:40px 0 12px; scroll-margin-top:64px; border-top:1px dashed var(--panel-line); }
+  section:first-of-type{ border-top:none; }
+
+  .sec-tag{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h2{ font-family:var(--serif); font-size:clamp(1.45rem,3.4vw,2.1rem); line-height:1.12; margin:.18em 0 .5em; color:var(--ink); }
+  h3{ font-family:var(--sans); font-weight:700; font-size:1.18rem; margin:1.4em 0 .4em; color:var(--ink); }
+  h4{ font-family:var(--mono); font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:1.2em 0 .4em; }
+  p{ margin:.6em 0 1em; }
+  a{ color:var(--accent-dk); }
+  .lead{ font-size:1.12rem; color:var(--ink); max-width:72ch; }
+
+  /* ---------- cards & panels ---------- */
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:20px 22px; margin:16px 0; box-shadow:var(--shadow);
+  }
+  .card.tool{ border-top:3px solid var(--accent); }
+  .tool-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .tool-label::before{ content:"▸ INTERACTIVE"; }
+
+  .defn{ border-left:4px solid var(--accent); background:var(--paper-2); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .defn strong{ color:var(--accent-dk); }
+
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+  .callout p:last-child{ margin-bottom:0; }
+
+  /* ---------- analogy & real-world callouts (locked standard) ---------- */
+  .analogy{ border-left:4px solid var(--accent); background:linear-gradient(180deg, var(--paper-2), var(--panel)); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; }
+  .analogy::before{ content:"\1F4A1"; position:absolute; left:14px; top:13px; font-size:1.2rem; line-height:1; }
+  .analogy .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; margin-bottom:3px; }
+  .analogy p:last-child{ margin-bottom:0; }
+
+  .realworld{ border:1px solid var(--panel-line); border-left:4px solid var(--accent-2); background:var(--panel); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; box-shadow:var(--shadow); }
+  .realworld::before{ content:"\1F527"; position:absolute; left:14px; top:13px; font-size:1.15rem; line-height:1; }
+  .realworld .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:3px; }
+  .realworld p:last-child{ margin-bottom:0; }
+  .realworld ul{ margin:.4em 0 0; padding-left:1.1em; }
+  .realworld li{ margin:.3em 0; }
+
+  /* ---------- identity grid ---------- */
+  .id-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0 6px; }
+  @media (max-width:760px){ .id-grid{ grid-template-columns:1fr 1fr; } }
+  .id-card{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow); }
+  .id-card .lab{ font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  .id-card .val{ font-family:var(--serif); font-size:1.45rem; line-height:1.1; margin-top:4px; color:var(--ink); }
+  .id-card .note{ font-size:.82rem; color:var(--ink-soft); margin-top:2px; }
+
+  /* ---------- outcomes checklist ---------- */
+  .oc-progress{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-family:var(--mono); font-size:.82rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; padding:10px 14px; margin:6px 0 14px; }
+  .oc-progress b{ color:var(--accent-dk); }
+  ul.outcomes{ list-style:none; padding:0; margin:8px 0; display:grid; gap:8px; }
+  ul.outcomes li{ background:var(--panel); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; }
+  ul.outcomes label{ display:flex; align-items:flex-start; gap:12px; padding:12px 14px; cursor:pointer; min-height:44px; }
+  ul.outcomes input[type=checkbox]{ width:22px; height:22px; margin-top:2px; accent-color:var(--accent); flex:0 0 auto; cursor:pointer; }
+  ul.outcomes label:focus-within{ outline:3px solid var(--accent); outline-offset:2px; border-radius:0 8px 8px 0; }
+  ul.outcomes .tx{ flex:1; }
+  ul.outcomes input:checked ~ .tx{ color:var(--ink-soft); }
+  ul.outcomes input:checked ~ .tx .done-tag{ display:inline; }
+  .done-tag{ display:none; font-family:var(--mono); font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; color:var(--good); font-weight:700; margin-left:6px; }
+  .btn-reset{ font-family:var(--mono); font-size:.74rem; font-weight:700; background:var(--panel); border:1.5px solid var(--panel-line); color:var(--ink); border-radius:8px; padding:8px 12px; min-height:40px; cursor:pointer; }
+  .btn-reset:hover{ border-color:var(--accent); color:var(--accent-dk); }
+  .btn-reset:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+  /* ---------- topic -> module map ---------- */
+  .map-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+  @media (max-width:760px){ .map-grid{ grid-template-columns:1fr; } }
+  .topic{ background:var(--panel); border:1px solid var(--panel-line); border-left:5px solid var(--accent); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow); display:flex; flex-direction:column; }
+  .topic .tnum{ font-family:var(--mono); font-weight:700; font-size:.72rem; letter-spacing:.1em; color:#fff; background:var(--accent); border-radius:6px; padding:3px 8px; align-self:flex-start; }
+  .topic h3{ font-family:var(--serif); font-size:1.12rem; margin:.55em 0 .2em; }
+  .topic p{ font-size:.92rem; color:var(--ink-soft); margin:.1em 0 .8em; flex:1; }
+  .modlink{ display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:.74rem; font-weight:700; text-decoration:none; color:var(--accent-dk); border:1.5px solid var(--accent); border-radius:20px; padding:5px 12px; min-height:36px; align-self:flex-start; }
+  .modlink:hover{ background:var(--accent); color:#fff; }
+  .modlink:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .modlink.soon{ color:var(--ink-soft); border-color:var(--panel-line); border-style:dashed; cursor:default; }
+  .modlink.soon:hover{ background:transparent; color:var(--ink-soft); }
+  .ext-ind{ font-weight:700; }
+
+  /* ---------- grading weights ---------- */
+  .weights{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:14px 0; }
+  @media (max-width:640px){ .weights{ grid-template-columns:1fr 1fr; } }
+  .wt{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:14px; text-align:center; box-shadow:var(--shadow); }
+  .wt.final{ border-top:3px solid var(--accent-2); }
+  .wt .pct{ font-family:var(--serif); font-size:2rem; color:var(--accent-dk); line-height:1; }
+  .wt.final .pct{ color:var(--accent-2); }
+  .wt .nm{ font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin-top:4px; }
+
+  /* ---------- grade calculator ---------- */
+  .calc-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:10px 0 4px; }
+  @media (max-width:640px){ .calc-grid{ grid-template-columns:1fr 1fr; } }
+  .field label{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; margin-bottom:4px; }
+  .field input{ width:100%; font-family:var(--mono); font-size:1.05rem; padding:10px 12px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--panel); color:var(--ink); min-height:46px; }
+  .field input:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+  .field .wgt{ font-family:var(--mono); font-size:.66rem; color:var(--accent); }
+  .calc-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .btn{ font-family:var(--mono); font-size:.8rem; font-weight:700; letter-spacing:.04em; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:11px 18px; min-height:46px; cursor:pointer; }
+  .btn:hover{ background:var(--accent-dk); }
+  .btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .btn.ghost{ background:var(--panel); color:var(--ink); border:1.5px solid var(--panel-line); }
+  .btn.ghost:hover{ border-color:var(--accent); color:var(--accent-dk); }
+
+  .calc-out{ margin-top:14px; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; padding:16px 18px; }
+  .calc-out .row{ display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .calc-out .score{ font-family:var(--serif); font-size:2.4rem; line-height:1; color:var(--ink); }
+  .calc-out .letter{ font-family:var(--serif); font-size:2.4rem; line-height:1; color:var(--accent-dk); font-weight:700; }
+  .calc-out .lbl{ font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
+  .calc-msg{ font-size:.92rem; margin-top:10px; color:var(--ink-soft); }
+  .calc-msg.ok{ color:var(--good); font-weight:600; }
+  .calc-msg.warn{ color:var(--bad); font-weight:600; }
+
+  /* ---------- grade scale table ---------- */
+  .scale-look{ display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; margin:8px 0 14px; }
+  .scale-look .field{ flex:0 0 220px; }
+  .scale-out{ font-family:var(--mono); font-size:.9rem; padding:10px 14px; border-radius:8px; background:var(--paper-2); border:1px solid var(--panel-line); min-height:46px; display:inline-flex; align-items:center; }
+  .scale-out b{ color:var(--accent-dk); font-size:1.1rem; }
+  table.scale{ width:100%; border-collapse:collapse; margin:10px 0; font-size:.96rem; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; overflow:hidden; }
+  table.scale caption{ text-align:left; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); padding:6px 4px; }
+  table.scale th, table.scale td{ text-align:left; padding:9px 14px; border-bottom:1px solid var(--panel-line); }
+  table.scale th{ font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); background:var(--paper-2); }
+  table.scale td.lt{ font-family:var(--serif); font-weight:700; font-size:1.05rem; color:var(--ink); width:90px; }
+  table.scale tr:last-child td{ border-bottom:0; }
+  table.scale tr.hit td{ background:var(--good-bg); }
+  table.scale tr.hit td.lt{ color:var(--good); }
+  table.scale tr.passline td{ box-shadow:inset 4px 0 0 var(--accent-2); }
+
+  /* ---------- accordion (policies) ---------- */
+  .acc{ border:1px solid var(--panel-line); border-radius:var(--radius); overflow:hidden; margin:12px 0; background:var(--panel); box-shadow:var(--shadow); }
+  .acc-btn{ width:100%; text-align:left; background:var(--panel); border:0; border-bottom:1px solid transparent; padding:15px 18px; font-family:var(--sans); font-size:1.04rem; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:52px; }
+  .acc-btn:hover{ background:var(--paper-2); }
+  .acc-btn:focus-visible{ outline:3px solid var(--accent); outline-offset:-3px; }
+  .acc-btn .ico{ font-family:var(--mono); font-size:1.3rem; color:var(--accent); transition:transform .15s ease; flex:0 0 auto; }
+  .acc-btn[aria-expanded="true"]{ border-bottom-color:var(--panel-line); background:var(--paper-2); }
+  .acc-btn[aria-expanded="true"] .ico{ transform:rotate(45deg); }
+  .acc-panel{ padding:4px 18px 16px; }
+  .acc-panel[hidden]{ display:none; }
+  .acc-panel a{ word-break:break-word; }
+
+  .phone-list{ list-style:none; padding:0; margin:8px 0; display:grid; gap:8px; }
+  .phone-list li{ background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; padding:10px 14px; font-size:.95rem; }
+  .phone-list .svc{ font-weight:700; color:var(--accent-dk); }
+  .phone-list .num{ font-family:var(--mono); }
+
+  /* ---------- resources ---------- */
+  .res-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:12px 0; }
+  @media (max-width:760px){ .res-grid{ grid-template-columns:1fr; } }
+  .res-cat{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+  .res-cat h3{ margin:0 0 .3em; font-family:var(--serif); font-size:1.12rem; }
+  .res-cat ul{ list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+  .res-cat a{ display:inline-flex; align-items:baseline; gap:6px; text-decoration:none; color:var(--accent-dk); font-weight:600; }
+  .res-cat a:hover{ text-decoration:underline; }
+  .res-cat a:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; border-radius:4px; }
+  .res-cat .desc{ display:block; font-size:.84rem; color:var(--ink-soft); font-weight:400; margin-top:1px; }
+
+  /* ---------- progress dock ---------- */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+  #readpct{ font-family:var(--mono); font-size:.78rem; color:var(--accent-dk); font-weight:700; min-width:42px; text-align:right; }
+
+  /* ---------- footer ---------- */
+  footer.site{ border-top:1px solid var(--panel-line); margin-top:24px; padding:26px 18px 60px; text-align:center; color:var(--ink-soft); font-size:.86rem; }
+  footer.site .program{ color:var(--accent-dk); font-weight:700; }
+  footer.site .refs{ font-family:var(--mono); font-size:.72rem; max-width:74ch; margin:10px auto 0; line-height:1.6; }
+
+  /* ---------- print: formula-card style clean print ---------- */
+  @media print{
+    nav.toc, .progress-dock, .calc-actions, .btn, .btn-reset, .skip-link{ display:none !important; }
+    body{ background:#fff; color:#000; font-size:12pt; }
+    .card, .topic, .res-cat, .acc{ box-shadow:none; }
+    .acc-panel[hidden]{ display:block !important; }
+    a{ color:#000; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Engineering &amp; Technologies</span>
+    <h1>Kinematics &amp; Dynamics of Machinery</h1>
+    <p class="sub">Course syllabus — the design approach applied to cams and followers, speed changers, geared transmissions, planetary gear systems, and linkages, using graphical, analytical, and digital computer methods.</p>
+    <div class="meta-row">
+      <span>◆ 3 Credits</span>
+      <span>◷ 3 Lecture · 0 Lab</span>
+      <span>▦ 10-week term</span>
+      <span>▣ STEM Institute · Brookdale Community College</span>
+      <span>⌨ Interactive · keyboard accessible</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Syllabus sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#description">Description</a>
+    <a href="#outcomes">Outcomes</a>
+    <a href="#content">Topics &amp; Modules</a>
+    <a href="#textbook">Textbook</a>
+    <a href="#grading">Grading</a>
+    <a href="#scale">Grade Scale</a>
+    <a href="#policies">Policies</a>
+    <a href="#support">Support &amp; Resources</a>
+    <a href="#refs">References</a>
+  </div>
+</nav>
+
+<main id="main">
+
+  <!-- ===================== START / AT A GLANCE ===================== -->
+  <section id="start" aria-labelledby="start-h">
+    <span class="sec-tag">Course at a glance</span>
+    <h2 id="start-h">ENGI 216 — Course Identity</h2>
+    <p class="lead">This interactive syllabus collects everything you need to navigate ENGI 216: what the course covers, how you'll be graded, the policies that protect you, and where to get help. The grade calculator, scale lookup, and outcome tracker below are live — try them.</p>
+
+    <div class="id-grid">
+      <div class="id-card"><span class="lab">Code</span><div class="val">ENGI&nbsp;216</div><div class="note">STEM Institute</div></div>
+      <div class="id-card"><span class="lab">Credits</span><div class="val">3</div><div class="note">3 lecture · 0 lab/studio</div></div>
+      <div class="id-card"><span class="lab">Prerequisites</span><div class="val">None</div><div class="note">No corequisites</div></div>
+      <div class="id-card"><span class="lab">Term</span><div class="val">10 Weeks</div><div class="note">Accelerated schedule</div></div>
+      <div class="id-card"><span class="lab">Department</span><div class="val" style="font-size:1.05rem; padding-top:6px">Engineering &amp; Technologies</div><div class="note">Brookdale Community College</div></div>
+    </div>
+
+    <div class="defn">
+      <strong>How this course is taught.</strong> Concepts are developed in lecture across a fast-paced <strong>ten-week term</strong> and reinforced by a set of self-contained, interactive modules (linked under <a href="#content">Topics &amp; Modules</a>). The course uses three methods side by side — <em>graphical</em>, <em>analytical</em>, and <em>digital computer</em> (MATLAB) — so you see each idea from more than one angle.
+    </div>
+
+    <div class="callout">
+      <span class="h">Living document</span>
+      <p>This syllabus is a guide to what may be covered during the semester and will be followed as closely as possible. Your instructor reserves the right to modify, supplement, and make changes as the need arises.</p>
+    </div>
+  </section>
+
+  <!-- ===================== DESCRIPTION ===================== -->
+  <section id="description" aria-labelledby="desc-h">
+    <span class="sec-tag">What you'll study</span>
+    <h2 id="desc-h">Course Description</h2>
+    <p>The design approach is applied to machines such as the <strong>cam and follower</strong>, <strong>speed changers</strong>, <strong>geared transmissions</strong>, <strong>planetary gear systems</strong>, and <strong>linkages</strong> for generating a specific type of motion. Graphic, analytical, and digital computer methods are used throughout.</p>
+
+    <div class="analogy">
+      <span class="h">Analogy · The relay team</span>
+      <p>A machine is a team of rigid parts (called <em>links</em>) passing motion from one to the next like runners in a relay race — each joint is the baton hand-off. Kinematics studies <em>where</em> and <em>how fast</em> the baton travels; dynamics asks <em>how hard</em> each runner must push to keep it moving. This course teaches you to predict both before a single part is machined.</p>
+    </div>
+
+    <div class="realworld">
+      <span class="h">Real-world · You're surrounded by this</span>
+      <ul>
+        <li><strong>Cam &amp; follower</strong> — the lobes on an engine camshaft open and close valves with split-second timing.</li>
+        <li><strong>Planetary gear systems</strong> — the heart of an automatic transmission and of e-bike and power-tool hub gears.</li>
+        <li><strong>Linkages</strong> — a car hood hinge, a folding chair, a backhoe arm, and a bicycle drivetrain are all linkages designed for a "specific type of motion."</li>
+        <li><strong>Geared transmissions &amp; speed changers</strong> — every drill, mixer, and wind-turbine nacelle trades speed for torque with gears.</li>
+      </ul>
+    </div>
+
+    <h3>The three methods, and why all three</h3>
+    <p>Engineers rarely trust a single tool. A <strong>graphical</strong> construction gives fast intuition and a sanity check you can sketch by hand; an <strong>analytical</strong> (vector/equation) model gives exact, general answers; and a <strong>digital computer</strong> model lets you sweep an entire range of motion in seconds. You'll practice moving fluidly between them.</p>
+
+    <div class="analogy">
+      <span class="h">Analogy · Three maps of the same city</span>
+      <p>Think of the graphical, analytical, and computer methods as a paper map, a written set of directions, and live GPS. Each describes the same streets, but you reach for a different one depending on whether you need the big picture, an exact route, or a thousand routes at once. Knowing all three makes you hard to get lost.</p>
+    </div>
+  </section>
+
+  <!-- ===================== OUTCOMES ===================== -->
+  <section id="outcomes" aria-labelledby="out-h">
+    <span class="sec-tag">Objectives recap</span>
+    <h2 id="out-h">Course Learning Outcomes</h2>
+    <p>Upon completion of this course, you will be able to do everything on this list. Use it as a self-check: tick each skill as you gain confidence — your progress is saved in this browser.</p>
+
+    <div class="oc-progress">
+      <span><b id="ocCount">0</b> of <b>5</b> outcomes marked confident</span>
+      <span aria-hidden="true">·</span>
+      <button type="button" class="btn-reset" id="ocReset">Reset checklist</button>
+      <span id="ocLive" class="visually-hidden" aria-live="polite" style="position:absolute;left:-9999px;">0 of 5 marked</span>
+    </div>
+
+    <ul class="outcomes" id="outcomeList">
+      <li><label><input type="checkbox" data-oc="1"><span class="tx">Use <strong>graphical and analytical techniques</strong> to perform kinematic analysis of linkages.<span class="done-tag">✓ confident</span></span></label></li>
+      <li><label><input type="checkbox" data-oc="2"><span class="tx"><strong>Design planar linkages.</strong><span class="done-tag">✓ confident</span></span></label></li>
+      <li><label><input type="checkbox" data-oc="3"><span class="tx">Analyze and design <strong>basic mechanisms involving cams.</strong><span class="done-tag">✓ confident</span></span></label></li>
+      <li><label><input type="checkbox" data-oc="4"><span class="tx">Analyze <strong>gear trains</strong> containing spur, helical, bevel, and worm gears.<span class="done-tag">✓ confident</span></span></label></li>
+      <li><label><input type="checkbox" data-oc="5"><span class="tx">Analyze <strong>forces in mechanisms.</strong><span class="done-tag">✓ confident</span></span></label></li>
+    </ul>
+
+    <div class="analogy">
+      <span class="h">Analogy · Filling a toolbox</span>
+      <p>Each outcome is a tool you're adding to a kinematics toolbox. By the final exam the box should be full, and you should know not just that each tool exists but <em>which</em> one to grab for a given machine.</p>
+    </div>
+  </section>
+
+  <!-- ===================== CONTENT / TOPIC -> MODULE MAP ===================== -->
+  <section id="content" aria-labelledby="content-h">
+    <span class="sec-tag">Course content</span>
+    <h2 id="content-h">Topics &amp; Interactive Modules</h2>
+    <p>The official course content is listed below, mapped to the interactive module that supports it. This sequence is <em>tentative</em> — your instructor may reorder or adjust it. Module links open in a new tab.</p>
+
+    <div class="map-grid">
+
+      <div class="topic">
+        <span class="tnum">TOPIC 1</span>
+        <h3>Introduction to Kinematics</h3>
+        <p>Links and joints, kinematic chains, mobility, and the vocabulary of mechanisms vs. machines.</p>
+        <a class="modlink" href="chapter1-introduction-to-mechanisms.html" target="_blank" rel="noopener noreferrer">Ch 1 · Intro to Mechanisms <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+      </div>
+
+      <div class="topic">
+        <span class="tnum">TOPIC 2</span>
+        <h3>Graphical Position, Velocity &amp; Acceleration Analysis</h3>
+        <p>Graphical constructions for linkage motion, supported by the analytical position framework.</p>
+        <a class="modlink" href="chapter2-vector-loop-method.html" target="_blank" rel="noopener noreferrer">Ch 2 · Vector Loop Method <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+      </div>
+
+      <div class="topic">
+        <span class="tnum">TOPIC 3</span>
+        <h3>Analytical Linkage Analysis</h3>
+        <p>Vector-loop equations, rolling contacts, and the kinematic-coefficient method for velocity and acceleration.</p>
+        <a class="modlink" href="chapter3-kinematic-analysis-rolling-contacts.html" target="_blank" rel="noopener noreferrer">Ch 3 · Rolling Contacts <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+        <a class="modlink" href="chapter4-kinematic-coefficients.html" target="_blank" rel="noopener noreferrer" style="margin-top:8px">Ch 4 · Kinematic Coefficients <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+      </div>
+
+      <div class="topic">
+        <span class="tnum">TOPIC 4</span>
+        <h3>Planar Linkage Design</h3>
+        <p>Synthesizing four-bar and crank-slider mechanisms with Freudenstein's equation to generate a prescribed motion.</p>
+        <a class="modlink" href="chapter8-mechanism-synthesis-i-four-bar.html" target="_blank" rel="noopener noreferrer">Ch 8·I · Four-Bar Synthesis <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+        <a class="modlink" href="chapter8-mechanism-synthesis-ii-crank-slider.html" target="_blank" rel="noopener noreferrer" style="margin-top:8px">Ch 8·II · Crank-Slider <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+      </div>
+
+      <div class="topic">
+        <span class="tnum">TOPIC 5</span>
+        <h3>Spur, Helical, Bevel &amp; Worm Gears</h3>
+        <p>Gear geometry and the rolling-contact constraint that makes gears transmit motion without slipping.</p>
+        <a class="modlink" href="chapter3-kinematic-analysis-rolling-contacts.html" target="_blank" rel="noopener noreferrer">Ch 3 · Rolling &amp; Gears <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+        <span class="modlink soon" aria-disabled="true">Dedicated gears module · in development</span>
+      </div>
+
+      <div class="topic">
+        <span class="tnum">TOPIC 6</span>
+        <h3>Gear Trains</h3>
+        <p>Simple, compound, and planetary trains; speed ratios and torque multiplication.</p>
+        <span class="modlink soon" aria-disabled="true">Lecture + module in development</span>
+      </div>
+
+      <div class="topic">
+        <span class="tnum">TOPIC 7</span>
+        <h3>Mechanism Force Analysis</h3>
+        <p>Newton–Euler inverse dynamics, joint and driving forces, and the power equation with efficiency.</p>
+        <a class="modlink" href="chapter5-inverse-dynamics.html" target="_blank" rel="noopener noreferrer">Ch 5 · Inverse Dynamics <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+        <a class="modlink" href="chapter7-power-equation.html" target="_blank" rel="noopener noreferrer" style="margin-top:8px">Ch 7 · Power Equation <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+      </div>
+
+      <div class="topic">
+        <span class="tnum">TOOLKIT</span>
+        <h3>Digital Computer Methods</h3>
+        <p>A just-enough MATLAB primer: vectors and matrices, solving linear systems, Newton's method, and plotting motion.</p>
+        <a class="modlink" href="matlab-for-engi216.html" target="_blank" rel="noopener noreferrer">MATLAB for ENGI 216 <span class="ext-ind" aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>
+      </div>
+
+    </div>
+
+    <p style="margin-top:14px"><a href="index.html" target="_blank" rel="noopener noreferrer">Open the full Course Home module hub <span aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a></p>
+  </section>
+
+  <!-- ===================== TEXTBOOK ===================== -->
+  <section id="textbook" aria-labelledby="text-h">
+    <span class="sec-tag">Required materials</span>
+    <h2 id="text-h">Textbook &amp; Materials</h2>
+
+    <div class="card">
+      <h4>Required textbook</h4>
+      <p style="margin:.2em 0"><strong>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</strong>, 1st edition.<br>
+      Michael M. Stanisic. Cengage Learning, 2015. ISBN-13 978-1-133-94391-4 · ISBN-10 1-133-94391-8.</p>
+      <p style="font-size:.92rem; color:var(--ink-soft); margin:.4em 0 0">This text is built around the <strong>vector loop method</strong> and <strong>kinematic coefficients</strong> — the same two tools the interactive modules use — and it deliberately teaches <strong>synthesis first, then analysis</strong>, so you learn to design a mechanism before taking one apart.</p>
+    </div>
+
+    <div class="card">
+      <h4>Software · MATLAB</h4>
+      <p style="margin:.2em 0">This course also uses <strong>MATLAB</strong>. Students are provided <strong>free MATLAB access</strong>: you'll receive an email at your Brookdale address (from MathWorks) with instructions for downloading and installing it.</p>
+      <p style="font-size:.92rem; color:var(--ink-soft); margin:.4em 0 0">If the email hasn't arrived by the first week, check your Brookdale spam folder, then contact your instructor. A short primer is linked under <a href="#content">Topics &amp; Modules</a>.</p>
+    </div>
+
+    <div class="callout">
+      <span class="h">Additional time requirements</span>
+      <p>None other than completing class assignments.</p>
+    </div>
+
+    <div class="realworld">
+      <span class="h">Real-world · Why a "vector approach" matters</span>
+      <p>Industry kinematics software (the motion solvers inside CAD packages and robotics toolkits) is built on exactly the vector-loop and kinematic-coefficient ideas in this text. Learning the method by hand and in MATLAB — and practicing synthesis before analysis, the way the book is organized — is what lets you trust, and debug, the software later.</p>
+    </div>
+  </section>
+
+  <!-- ===================== GRADING ===================== -->
+  <section id="grading" aria-labelledby="grade-h">
+    <span class="sec-tag">Assessment</span>
+    <h2 id="grade-h">Grading &amp; the Grade Calculator</h2>
+    <p>Your grade is built from four equally weighted components — two exams, your quizzes, and your homework:</p>
+
+    <div class="weights">
+      <div class="wt"><div class="pct">25%</div><div class="nm">Exam 1</div></div>
+      <div class="wt"><div class="pct">25%</div><div class="nm">Exam 2</div></div>
+      <div class="wt"><div class="pct">25%</div><div class="nm">Quizzes</div></div>
+      <div class="wt"><div class="pct">25%</div><div class="nm">Homework</div></div>
+    </div>
+
+    <div class="analogy">
+      <span class="h">Analogy · A four-cylinder engine</span>
+      <p>Picture your grade as a four-cylinder engine: the two exams, your quizzes, and your homework each fire one power stroke worth <strong>25%</strong>. No single cylinder carries the engine, so one weak stroke doesn't stall you — but the ride is only smooth when all four fire steadily. Skipping homework or coasting on quizzes is like running on three cylinders: the engine still turns over, just rough and down on power.</p>
+    </div>
+
+    <div class="card tool">
+      <span class="tool-label">Course Grade Calculator</span>
+      <p style="margin:.2em 0 .8em; font-size:.95rem; color:var(--ink-soft)">Enter your scores (0–100) for any components you've completed. Leave exactly one component blank to ask "what do I need on that piece?"</p>
+
+      <div class="calc-grid">
+        <div class="field"><label for="exam1">Exam 1 <span class="wgt">×25%</span></label><input type="number" id="exam1" min="0" max="100" step="0.1" inputmode="decimal" placeholder="–"></div>
+        <div class="field"><label for="exam2">Exam 2 <span class="wgt">×25%</span></label><input type="number" id="exam2" min="0" max="100" step="0.1" inputmode="decimal" placeholder="–"></div>
+        <div class="field"><label for="quiz">Quizzes <span class="wgt">×25%</span></label><input type="number" id="quiz" min="0" max="100" step="0.1" inputmode="decimal" placeholder="–"></div>
+        <div class="field"><label for="hw">Homework <span class="wgt">×25%</span></label><input type="number" id="hw" min="0" max="100" step="0.1" inputmode="decimal" placeholder="–"></div>
+      </div>
+
+      <div class="field" style="margin-top:12px; max-width:260px">
+        <label for="target">Target course grade (for "needed on the blank piece")</label>
+        <input type="number" id="target" min="0" max="100" step="1" inputmode="numeric" value="70">
+      </div>
+
+      <div class="calc-actions">
+        <button type="button" class="btn" id="calcBtn">Calculate</button>
+        <button type="button" class="btn ghost" id="calcClear">Clear</button>
+      </div>
+
+      <div class="calc-out" id="calcOut" aria-live="polite">
+        <div class="row">
+          <div><div class="lbl">Course grade so far</div><span class="score" id="outScore">—</span></div>
+          <div style="text-align:right"><div class="lbl">Letter</div><span class="letter" id="outLetter">—</span></div>
+        </div>
+        <p class="calc-msg" id="calcMsg">Enter at least one score to begin.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="h">How the calculator works</span>
+      <p>With all four scores entered it computes <strong>0.25·Exam 1 + 0.25·Exam 2 + 0.25·Quizzes + 0.25·Homework</strong> and shows your letter grade. Leave exactly one component blank and it uses your other scores plus your target to report the score you'd need on that remaining piece. Results are rounded to the nearest whole percent for the letter grade and are an estimate only — your instructor's official gradebook governs.</p>
+    </div>
+  </section>
+
+  <!-- ===================== GRADE SCALE ===================== -->
+  <section id="scale" aria-labelledby="scale-h">
+    <span class="sec-tag">Grade scale</span>
+    <h2 id="scale-h">Grading Standard &amp; Scale</h2>
+    <p>Type a percentage to highlight its band, or use the Calculate button above — your result lights up the matching row.</p>
+
+    <div class="scale-look">
+      <div class="field">
+        <label for="lookup">Look up a percentage</label>
+        <input type="number" id="lookup" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 83">
+      </div>
+      <div class="scale-out" id="lookupOut" aria-live="polite">Letter grade: <b id="lookupLetter" style="margin-left:6px">—</b></div>
+    </div>
+
+    <table class="scale" id="scaleTable">
+      <caption>Letter-grade bands (percent of course total)</caption>
+      <thead><tr><th scope="col">Letter</th><th scope="col">Percent range</th></tr></thead>
+      <tbody>
+        <tr data-min="90"><td class="lt">A</td><td>90 – 100</td></tr>
+        <tr data-min="87"><td class="lt">A–</td><td>87 – 89</td></tr>
+        <tr data-min="85"><td class="lt">B+</td><td>85 – 86</td></tr>
+        <tr data-min="80"><td class="lt">B</td><td>80 – 84</td></tr>
+        <tr data-min="77"><td class="lt">B–</td><td>77 – 79</td></tr>
+        <tr data-min="75"><td class="lt">C+</td><td>75 – 76</td></tr>
+        <tr data-min="70" class="passline"><td class="lt">C</td><td>70 – 74</td></tr>
+        <tr data-min="65"><td class="lt">D</td><td>65 – 69</td></tr>
+        <tr data-min="0"><td class="lt">F</td><td>64 and below</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <span class="h">The "C or higher" gate</span>
+      <p>You must earn a grade of <strong>C or higher</strong> before taking any course for which ENGI 216 is a prerequisite. The C line (70%) is marked with the orange rule in the table.</p>
+    </div>
+
+    <div class="analogy">
+      <span class="h">Analogy · The clutch engagement threshold</span>
+      <p>A clutch doesn't transmit any torque to the next stage of a drivetrain until it's pressed past a certain engagement point. The "C or higher" rule is that engagement threshold: reach it, and the next course in your sequence engages; fall short, and the drive doesn't transfer until you do.</p>
+    </div>
+  </section>
+
+  <!-- ===================== POLICIES ===================== -->
+  <section id="policies" aria-labelledby="pol-h">
+    <span class="sec-tag">Department &amp; college policies</span>
+    <h2 id="pol-h">Policies</h2>
+    <p>Select a heading to expand it. These reflect Brookdale Community College policy as stated in the syllabus; always consult the current BCC Student Handbook and Catalog for the authoritative version.</p>
+
+    <div class="acc">
+      <button type="button" class="acc-btn" aria-expanded="false" aria-controls="pol-college" id="btn-college">College Policies <span class="ico" aria-hidden="true">+</span></button>
+      <div class="acc-panel" id="pol-college" role="region" aria-labelledby="btn-college" hidden>
+        <p>As an academic institution, Brookdale facilitates the free exchange of ideas, upholds the virtues of civil discourse, and honors diverse perspectives informed by credible sources. The College values all students and strives for inclusion and safety regardless of a student's disability, age, sex, gender identity, sexual orientation, race, ethnicity, country of origin, immigration status, religious affiliation, political orientation, socioeconomic standing, and veteran status.</p>
+        <p>For additional information, support services, and engagement opportunities, visit <a href="https://www.brookdalecc.edu/support" target="_blank" rel="noopener noreferrer">brookdalecc.edu/support <span aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>.</p>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button type="button" class="acc-btn" aria-expanded="false" aria-controls="pol-integrity" id="btn-integrity">Academic Integrity &amp; Conduct <span class="ico" aria-hidden="true">+</span></button>
+      <div class="acc-panel" id="pol-integrity" role="region" aria-labelledby="btn-integrity" hidden>
+        <p>For information regarding Brookdale's Academic Integrity Code, the Student Conduct Code, and the Student Grade Appeal Process, refer to the BCC Student Handbook and BCC Catalog.</p>
+        <p>Browse the official catalog: <a href="https://catalog.brookdalecc.edu/" target="_blank" rel="noopener noreferrer">catalog.brookdalecc.edu <span aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>.</p>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button type="button" class="acc-btn" aria-expanded="false" aria-controls="pol-access" id="btn-access">Students with Disabilities &amp; Accommodations <span class="ico" aria-hidden="true">+</span></button>
+      <div class="acc-panel" id="pol-access" role="region" aria-labelledby="btn-access" hidden>
+        <p>Brookdale offers reasonable accommodations and/or services to persons with disabilities. Students who wish to self-identify must contact the office to provide appropriate documentation and request specific accommodations or services. If a student qualifies, reasonable accommodations recommended in the documentation can be approved.</p>
+        <ul class="phone-list">
+          <li><span class="svc">Accessibility Services Office</span> — Lincroft campus, Main Academic Complex, MAC 111. <span class="num">732-224-2730</span> (voice) · <span class="num">732-842-4211</span> (TTY)</li>
+        </ul>
+        <p style="font-size:.9rem">Current information: <a href="https://www.brookdalecc.edu/accessibility-services/" target="_blank" rel="noopener noreferrer">Accessibility Services <span aria-hidden="true">↗</span><span style="position:absolute;left:-9999px">opens in a new tab</span></a>. <em>(The office formerly known as Disability Services.)</em></p>
+      </div>
+    </div>
+
+    <div class="acc">
+      <button type="button" class="acc-btn" aria-expanded="false" aria-controls="pol-mh" id="btn-mh">Mental Health &amp; Crisis Support <span class="ico" aria-hidden="true">+</span></button>
+      <div class="acc-panel" id="pol-mh" role="region" aria-labelledby="btn-mh" hidden>
+        <p>If you are struggling, support is available. You deserve help, and reaching out is a sign of strength.</p>
+        <ul class="phone-list">
+          <li><span class="svc">Mental Health Crisis Support</span> — dial <span class="num">5555</span> from a campus phone, or <span class="num">732-224-2329</span> from an external line. Off-hours calls are forwarded to BCC Police (<span class="num">2222</span> from a campus phone).</li>
+          <li><span class="svc">Psychological Counseling Services</span> — <span class="num">732-224-2986</span> to schedule an appointment during regular hours.</li>
+          <li><span class="svc">988 Suicide &amp; Crisis Lifeline</span> — call or text <span class="num">988</span> anytime, anywhere in the U.S.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SUPPORT & RESOURCES ===================== -->
+  <section id="support" aria-labelledby="sup-h">
+    <span class="sec-tag">Help &amp; further reading</span>
+    <h2 id="sup-h">Support &amp; External Resources</h2>
+    <p>Categorized links to college support and to foundational and supplementary material for the course. All links open in a new tab and are marked with <span aria-hidden="true">↗</span>.</p>
+
+    <div class="res-grid">
+
+      <div class="res-cat">
+        <h3>Brookdale student support</h3>
+        <ul>
+          <li><a href="https://www.brookdalecc.edu/support" target="_blank" rel="noopener noreferrer">Student Support &amp; Services <span aria-hidden="true">↗</span><span class="desc">Advising, tutoring, and engagement opportunities</span></a></li>
+          <li><a href="https://www.brookdalecc.edu/accessibility-services/" target="_blank" rel="noopener noreferrer">Accessibility Services <span aria-hidden="true">↗</span><span class="desc">Accommodations &amp; documentation (MAC 111)</span></a></li>
+          <li><a href="https://catalog.brookdalecc.edu/" target="_blank" rel="noopener noreferrer">BCC Catalog &amp; Handbook <span aria-hidden="true">↗</span><span class="desc">Official integrity, conduct &amp; appeal policies</span></a></li>
+        </ul>
+      </div>
+
+      <div class="res-cat">
+        <h3>Textbook companion</h3>
+        <ul>
+          <li><a href="https://www.cengage.com/c/mechanisms-and-machines-kinematics-dynamics-and-synthesis-1e-stanisic/9781133943914/" target="_blank" rel="noopener noreferrer">Stanisic textbook page (Cengage) <span aria-hidden="true">↗</span><span class="desc">Publisher page for the required 1st edition</span></a></li>
+        </ul>
+      </div>
+
+      <div class="res-cat">
+        <h3>Foundational refreshers</h3>
+        <ul>
+          <li><a href="https://www.khanacademy.org/science/physics/two-dimensional-motion" target="_blank" rel="noopener noreferrer">Khan Academy · Vectors &amp; 2-D motion <span aria-hidden="true">↗</span><span class="desc">Position, velocity, acceleration prerequisites</span></a></li>
+          <li><a href="https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:vectors" target="_blank" rel="noopener noreferrer">Khan Academy · Vectors <span aria-hidden="true">↗</span><span class="desc">Components, addition, magnitude &amp; angle</span></a></li>
+          <li><a href="https://www.mathworks.com/help/matlab/getting-started-with-matlab.html" target="_blank" rel="noopener noreferrer">MathWorks · Getting Started with MATLAB <span aria-hidden="true">↗</span><span class="desc">For the digital-computer method</span></a></li>
+        </ul>
+      </div>
+
+      <div class="res-cat">
+        <h3>Supplementary topics</h3>
+        <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Four-bar_linkage" target="_blank" rel="noopener noreferrer">Four-bar linkage (overview) <span aria-hidden="true">↗</span><span class="desc">Background on planar linkage design</span></a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Epicyclic_gearing" target="_blank" rel="noopener noreferrer">Epicyclic (planetary) gearing <span aria-hidden="true">↗</span><span class="desc">Background for gear trains</span></a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Cam" target="_blank" rel="noopener noreferrer">Cams &amp; followers <span aria-hidden="true">↗</span><span class="desc">Background for cam mechanism design</span></a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="callout">
+      <span class="h">Link note</span>
+      <p>External links lead to third-party sites that may change or update over time. The publisher and college pages are authoritative; the foundational and supplementary links are provided to fill gaps and are not a substitute for the assigned text or your instructor's materials.</p>
+    </div>
+  </section>
+
+  <!-- ===================== REFERENCES ===================== -->
+  <section id="refs" aria-labelledby="ref-h">
+    <span class="sec-tag">Attribution</span>
+    <h2 id="ref-h">References &amp; Notes</h2>
+    <p style="font-size:.94rem">Syllabus content is adapted from the official <strong>ENGI 216 — Kinematics and Dynamics of Machinery</strong> syllabus, STEM Institute, Department of Engineering and Technologies, Brookdale Community College. The required text, grading standard (four equal components), and ten-week term reflect the current course offering. Required text: Stanisic, M. M. (2015). <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em> (1st ed.). Cengage Learning. ISBN 978-1-133-94391-4. Phone numbers, office locations, and policy language reflect the source syllabus and were cross-checked against the current Brookdale Accessibility Services page. Interactive features (grade calculator, scale lookup, outcome tracker) are original instructional tools.</p>
+  </section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Reading progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+    <span id="readpct" aria-live="polite">0%</span>
+  </div>
+</div>
+
+<footer class="site">
+  <p>Built for <span class="program">ENGI 216 · Kinematics &amp; Dynamics of Machinery</span> · Brookdale Community College · 2026</p>
+  <p class="refs">Interactive, accessible syllabus. Estimates from the grade calculator are for planning only; your instructor's official gradebook is authoritative. Designed to WCAG 2.1 AA guidance with dark-mode and reduced-motion support.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  function $(id){ return document.getElementById(id); }
+
+  /* ============================================================
+     GRADE-SCALE BANDS (single source of truth)
+     ============================================================ */
+  var BANDS = [
+    {min:90,label:"A"}, {min:87,label:"A\u2013"}, {min:85,label:"B+"},
+    {min:80,label:"B"}, {min:77,label:"B\u2013"}, {min:75,label:"C+"},
+    {min:70,label:"C"}, {min:65,label:"D"},  {min:0, label:"F"}
+  ];
+  function letterFor(score){
+    var s = Math.round(score);
+    for(var i=0;i<BANDS.length;i++){ if(s>=BANDS[i].min) return BANDS[i].label; }
+    return "F";
+  }
+  function bandMinFor(score){
+    var s = Math.round(score);
+    for(var i=0;i<BANDS.length;i++){ if(s>=BANDS[i].min) return BANDS[i].min; }
+    return 0;
+  }
+
+  /* ============================================================
+     OUTCOME CHECKLIST (localStorage persisted)
+     ============================================================ */
+  (function(){
+    var KEY = "engi216-syllabus-outcomes-v1";
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('#outcomeList input[type=checkbox]'));
+    var countEl = $("ocCount"), liveEl = $("ocLive"), resetBtn = $("ocReset");
+    if(!boxes.length) return;
+
+    function load(){
+      try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; }
+    }
+    function save(state){
+      try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+    }
+    function refresh(){
+      var n = boxes.filter(function(b){ return b.checked; }).length;
+      countEl.textContent = n;
+      liveEl.textContent = n + " of " + boxes.length + " outcomes marked confident";
+    }
+    var state = load();
+    boxes.forEach(function(b){
+      var k = b.getAttribute("data-oc");
+      if(state[k]) b.checked = true;
+      b.addEventListener("change", function(){
+        state[k] = b.checked; save(state); refresh();
+      });
+    });
+    resetBtn.addEventListener("click", function(){
+      boxes.forEach(function(b){ b.checked = false; });
+      state = {}; save(state); refresh();
+    });
+    refresh();
+  })();
+
+  /* ============================================================
+     GRADE-SCALE LOOKUP (type a number, highlight band)
+     ============================================================ */
+  var scaleRows = Array.prototype.slice.call(document.querySelectorAll("#scaleTable tbody tr"));
+  function highlightBand(minVal){
+    scaleRows.forEach(function(tr){
+      tr.classList.toggle("hit", parseInt(tr.getAttribute("data-min"),10) === minVal);
+    });
+  }
+  function clearBand(){ scaleRows.forEach(function(tr){ tr.classList.remove("hit"); }); }
+
+  (function(){
+    var input = $("lookup"), out = $("lookupLetter");
+    function go(){
+      var v = parseFloat(input.value);
+      if(isNaN(v) || input.value === ""){ out.textContent = "\u2014"; clearBand(); return; }
+      v = Math.max(0, Math.min(100, v));
+      out.textContent = letterFor(v);
+      highlightBand(bandMinFor(v));
+    }
+    input.addEventListener("input", go);
+  })();
+
+  /* ============================================================
+     COURSE GRADE CALCULATOR
+     ============================================================ */
+  (function(){
+    var target=$("target");
+    var outScore=$("outScore"), outLetter=$("outLetter"), msg=$("calcMsg");
+    // Four equally weighted components (single source of truth).
+    var COMP = [
+      { el:$("exam1"), w:0.25, name:"Exam 1" },
+      { el:$("exam2"), w:0.25, name:"Exam 2" },
+      { el:$("quiz"),  w:0.25, name:"Quizzes" },
+      { el:$("hw"),    w:0.25, name:"Homework" }
+    ];
+
+    function val(input){
+      if(input.value === "") return null;
+      var v = parseFloat(input.value);
+      if(isNaN(v)) return null;
+      return Math.max(0, Math.min(100, v));
+    }
+    function setMsg(text, cls){
+      msg.textContent = text;
+      msg.className = "calc-msg" + (cls ? " " + cls : "");
+    }
+
+    function calc(){
+      var filled = COMP.filter(function(c){ return val(c.el) !== null; });
+      var blanks = COMP.filter(function(c){ return val(c.el) === null; });
+
+      if(filled.length === 0){
+        outScore.textContent="\u2014"; outLetter.textContent="\u2014";
+        setMsg("Enter at least one score to begin."); clearBand(); return;
+      }
+
+      // Weighted points banked from the components entered so far.
+      var sum=0, wEntered=0;
+      COMP.forEach(function(c){
+        var v = val(c.el);
+        if(v !== null){ sum += v * c.w; wEntered += c.w; }
+      });
+      var banked = Math.round(sum*10)/10;
+
+      // All four present -> full course grade, letter, and band highlight.
+      if(blanks.length === 0){
+        outScore.textContent = banked + "%";
+        outLetter.textContent = letterFor(sum);
+        highlightBand(bandMinFor(sum));
+        var pass = sum >= 70;
+        setMsg("Full course grade computed from all four equally weighted components. "
+               + (pass ? "This meets the C-or-higher requirement to advance."
+                       : "This is below the C (70%) needed to take a course for which ENGI 216 is a prerequisite."),
+               pass ? "ok" : "warn");
+        return;
+      }
+
+      // Partial: show points banked, but no letter/band yet (grade isn't final).
+      outScore.textContent = banked + "%";
+      outLetter.textContent = "\u2014";
+      clearBand();
+
+      var tline = "So far you've banked " + banked + " of 100 points from "
+                + Math.round(wEntered*100) + "% of the course.";
+
+      // Exactly one component blank -> "what do I need on that piece?"
+      if(blanks.length === 1){
+        var b = blanks[0];
+        var tgt = val(target); if(tgt===null) tgt = 70;
+        var needed = (tgt - sum) / b.w;
+        if(needed <= 0){
+          setMsg(tline + " You've already locked in a " + tgt + "% course grade even with a 0 on "
+                 + b.name + " \u2014 a strong score there still lifts your letter.", "ok");
+        } else if(needed > 100){
+          setMsg(tline + " Reaching " + tgt + "% would require " + (Math.round(needed*10)/10)
+                 + "% on " + b.name + ", which is above 100%. Lift another component or set a lower target.", "warn");
+        } else {
+          setMsg(tline + " To finish at " + tgt + "% overall you need about " + (Math.round(needed*10)/10)
+                 + "% on " + b.name + " (worth 25%).", "ok");
+        }
+        return;
+      }
+
+      // Two or more blank -> just report current standing.
+      setMsg(tline + " Fill in all but one component to see exactly what you need on the last piece.");
+    }
+
+    function clearAll(){
+      COMP.forEach(function(c){ c.el.value = ""; });
+      target.value = "70";
+      outScore.textContent="\u2014"; outLetter.textContent="\u2014";
+      setMsg("Enter at least one score to begin."); clearBand();
+      COMP[0].el.focus();
+    }
+
+    $("calcBtn").addEventListener("click", calc);
+    COMP.map(function(c){ return c.el; }).concat([target]).forEach(function(el){
+      el.addEventListener("keydown", function(e){ if(e.key==="Enter") calc(); });
+    });
+    $("calcClear").addEventListener("click", clearAll);
+  })();
+
+  /* ============================================================
+     POLICY ACCORDION
+     ============================================================ */
+  (function(){
+    var btns = Array.prototype.slice.call(document.querySelectorAll(".acc-btn"));
+    btns.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var panel = document.getElementById(btn.getAttribute("aria-controls"));
+        var open = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", String(!open));
+        if(open){ panel.hidden = true; } else { panel.hidden = false; }
+      });
+    });
+  })();
+
+  /* ============================================================
+     NAV ACTIVE STATE + READING PROGRESS
+     ============================================================ */
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+    var sections = links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+    var prog = $("readprog"), pct = $("readpct");
+    function onScroll(){
+      var y = window.scrollY + 90;
+      var active = sections[0];
+      sections.forEach(function(s){ if(s && s.offsetTop <= y) active = s; });
+      links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href") === "#" + active.id); });
+      var doc = document.documentElement;
+      var max = doc.scrollHeight - doc.clientHeight;
+      var p = max > 0 ? Math.min(100, Math.round(window.scrollY / max * 100)) : 0;
+      if(prog){ prog.value = p; pct.textContent = p + "%"; }
+    }
+    window.addEventListener("scroll", onScroll, {passive:true});
+    window.addEventListener("resize", onScroll);
+    onScroll();
+
+    // keyboard arrow nav within the toc strip
+    var tw = $("tocWrap");
+    if(tw){
+      tw.addEventListener("keydown", function(e){
+        if(e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        var i = links.indexOf(document.activeElement);
+        if(i < 0) return;
+        e.preventDefault();
+        var ni = e.key === "ArrowRight" ? Math.min(links.length-1, i+1) : Math.max(0, i-1);
+        links[ni].focus();
+      });
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
