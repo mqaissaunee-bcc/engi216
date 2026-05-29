@@ -260,6 +260,16 @@
   .stage-wrap{ position:relative; }
   svg text{ font-family:var(--mono); }
 
+  /* ---------- reference figures (redrawn from the text) ---------- */
+  .figbox{ background:var(--panel); border:1px solid var(--panel-line); border-left:4px solid var(--accent-2);
+           border-radius:var(--radius); padding:12px 14px 10px; margin:14px 0; box-shadow:var(--shadow); }
+  .figbox .figcap{ font-family:var(--mono); font-size:.74rem; letter-spacing:.04em; color:var(--ink-soft); margin:8px 2px 0; line-height:1.4; }
+  .figbox .fignum{ color:var(--accent-dk); font-weight:700; }
+  .figgrid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:760px){ .figgrid{ grid-template-columns:1fr; } }
+  .veclegend{ display:flex; flex-wrap:wrap; gap:8px 16px; font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin:6px 2px 0; }
+  .veclegend span b{ color:var(--ink); }
+
   /* ---------- readouts ---------- */
   .readout{
     margin-top:10px; padding:12px 14px; background:var(--paper-2); border-radius:8px;
@@ -685,9 +695,9 @@
   <p>An IDP free body diagram (FBD) is not just a picture of forces &mdash; it is a <strong>bookkeeping language</strong>. The <em>style</em> of each arrow tells you instantly what is known and what you still have to solve for. The textbook&rsquo;s convention (Figure&nbsp;5.4):</p>
 
   <div class="veckey" aria-hidden="true">
-    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20"><line x1="4" y1="10" x2="42" y2="10" stroke="#c2541d" stroke-width="2.5"/><polygon points="52,10 42,5 42,15" fill="#c2541d"/></svg> solid</span>
-    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20"><line x1="4" y1="10" x2="42" y2="10" stroke="#0a7ea4" stroke-width="2.5" stroke-dasharray="5 4"/><polygon points="52,10 42,5 42,15" fill="#0a7ea4"/></svg> dashed</span>
-    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20"><path d="M4,10 q5,-7 10,0 q5,7 10,0 q5,-7 10,0" fill="none" stroke="#10243a" stroke-width="2.2"/><polygon points="52,10 42,5 42,15" fill="#10243a"/></svg> squiggly</span>
+    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><line x1="4" y1="10" x2="42" y2="10" stroke="#c2541d" stroke-width="2.5"/><polygon points="52,10 42,5 42,15" fill="#c2541d"/></svg> solid</span>
+    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><line x1="4" y1="10" x2="42" y2="10" stroke="#0a7ea4" stroke-width="2.5" stroke-dasharray="5 4"/><polygon points="52,10 42,5 42,15" fill="#0a7ea4"/></svg> dashed</span>
+    <span class="vk"><svg width="56" height="20" viewBox="0 0 56 20" aria-hidden="true"><path d="M4,10 q5,-7 10,0 q5,7 10,0 q5,-7 10,0" fill="none" stroke="#10243a" stroke-width="2.2"/><polygon points="52,10 42,5 42,15" fill="#10243a"/></svg> squiggly</span>
   </div>
 
   <table>
@@ -770,6 +780,27 @@
       <tr><td><strong>shortfall</strong></td><td class="mono"><strong>2</strong></td><td>more unknowns than equations</td></tr>
     </tbody>
   </table>
+  <details>
+    <summary>Show the referenced equations (5.30&ndash;5.32)</summary>
+    <div class="body">
+      <p>Stani&scaron;i&cacute; carries every joint load as a full 3-D vector and writes the in-plane (<i>Z</i>) component explicitly so the bookkeeping is unambiguous. The three moving links share four pin joints; each pin hides an unknown force and an unknown moment, and the driver adds one unknown torque.</p>
+      <div class="eqn" role="img" aria-label="Equation 5.30: the four unknown joint forces F12, F23, F43 and F14, each a column vector with unknown x and y components and zero z component, giving eight unknown force components.">
+        <span class="vec">F</span><sub>12</sub> = [ F<sub>12x</sub> ; F<sub>12y</sub> ; 0 ] &nbsp;&nbsp; <span class="vec">F</span><sub>23</sub> = [ F<sub>23x</sub> ; F<sub>23y</sub> ; 0 ]<br>
+        <span class="vec">F</span><sub>43</sub> = [ F<sub>43x</sub> ; F<sub>43y</sub> ; 0 ] &nbsp;&nbsp; <span class="vec">F</span><sub>14</sub> = [ F<sub>14x</sub> ; F<sub>14y</sub> ; 0 ]
+        <span class="lbl">(5.30) &rarr; 8 unknown force components</span>
+      </div>
+      <div class="eqn" role="img" aria-label="Equation 5.31: the four unknown joint moments M12, M23, M43 and M14, each with unknown x and y components and zero z component, giving eight unknown moment components.">
+        <span class="vec">M</span><sub>12</sub> = [ M<sub>12x</sub> ; M<sub>12y</sub> ; 0 ] &nbsp;&nbsp; <span class="vec">M</span><sub>23</sub> = [ M<sub>23x</sub> ; M<sub>23y</sub> ; 0 ]<br>
+        <span class="vec">M</span><sub>43</sub> = [ M<sub>43x</sub> ; M<sub>43y</sub> ; 0 ] &nbsp;&nbsp; <span class="vec">M</span><sub>14</sub> = [ M<sub>14x</sub> ; M<sub>14y</sub> ; 0 ]
+        <span class="lbl">(5.31) &rarr; 8 unknown moment components</span>
+      </div>
+      <div class="eqn" role="img" aria-label="Equation 5.32: the unknown driving torque T2 is a column vector zero, zero, T2 z, contributing one unknown.">
+        <span class="vec">T</span><sub>2</sub> = [ 0 ; 0 ; T<sub>2z</sub> ]
+        <span class="lbl">(5.32) &rarr; 1 unknown torque component</span>
+      </div>
+      <p style="margin:.4em 0 0"><strong>8 + 8 + 1 = 17</strong> unknowns set against <strong>5 equilibrium equations per moving link &times; 3 moving links = 15</strong>. The 17&nbsp;&minus;&nbsp;15&nbsp;=&nbsp;<strong>2</strong> gap is exactly the shortfall in the table.</p>
+    </div>
+  </details>
   <p>Two more unknowns than equations &rArr; the problem is <strong>statically indeterminate</strong>. The resolution is physical: although the four joint axes are <em>nominally</em> all along <i>Z</i>, manufacturing tolerances leave tiny <strong>angular misalignments</strong> between them. Supplying those known misalignments provides the two missing pieces of information and closes the gap.</p>
 
   <div class="real-world">
@@ -882,6 +913,10 @@
     <div class="tool-label">Tool 6 <span>&middot; Which bucket dominates?</span></div>
     <h3 style="margin-top:.3em">Spin a crank from slow to fast</h3>
     <p>A slider-crank part of mass <i>m</i> is driven at angular speed &omega;. Its inertia force scales with <i>m&nbsp;r&nbsp;&omega;&sup2;</i>, while its weight <i>mg</i> stays put. Slide the speed and watch the bar chart tip from &ldquo;static regime&rdquo; to &ldquo;inertia regime,&rdquo; and see the recommendation switch.</p>
+    <div class="figbox">
+      <svg id="domRef" class="stage" viewBox="0 0 640 220" role="img" aria-label="Reference sketch of the rotating part: a crank of radius r pinned to ground at O carries the mass center G. Rotation at angular speed omega throws G outward with inertia force m r omega squared, while gravity pulls G down with weight m g."></svg>
+      <p class="figcap"><span class="fignum">Reference</span> &mdash; the part being spun. A crank of radius <i>r</i> is pinned to ground at <i>O</i>; its mass center <i>G</i> rides at the rim. At speed <i>&omega;</i> the centripetal demand shows up as an inertia force <i>m&nbsp;r&nbsp;&omega;&sup2;</i> pointing outward (rust), competing with the fixed weight <i>m&nbsp;g</i> (cyan). The sliders below set <i>r</i>, <i>&omega;</i> and <i>m</i>; the bars compare those two arrows.</p>
+    </div>
     <div class="controls">
       <div class="ctrl">
         <label for="domRpm">crank speed (rpm) &mdash; <span class="val" id="domRpmv">300</span></label>
@@ -987,6 +1022,10 @@
     <div class="tool-label">Tool 8 <span>&middot; Friction-drive no-slip checker</span></div>
     <h3 style="margin-top:.3em">Will it grip, or slip?</h3>
     <p>A friction drive must satisfy <i>F<sup>t</sup></i>&nbsp;&le;&nbsp;<i>&mu;&nbsp;F<sup>n</sup></i>. Set the preload <i>F<sup>n</sup></i>, the friction coefficient &mu;, and the demanded drive force <i>F<sup>t</sup></i>. The tool shows the available friction ceiling against the demand and declares grip or slip &mdash; the live form of Figure&nbsp;5.29.</p>
+    <div class="figbox">
+      <svg id="slRef" class="stage" viewBox="0 0 640 230" role="img" aria-label="Reference sketch of a friction drive: a driver wheel 2 and a driven wheel 3 pressed into rolling contact at point P. The contact force resolves into a normal preload F n along the line of centers and a tangential drive force F t. Slip is avoided while F t stays below mu times F n."></svg>
+      <p class="figcap"><span class="fignum">Reference</span> &mdash; a friction drive (Fig.&nbsp;5.29). Driver <i>2</i> is pressed against driven wheel <i>3</i> at contact <i>P</i>. The squeeze supplies the <strong>normal preload</strong> <i>F<sup>n</sup></i>; friction at <i>P</i> transmits the <strong>tangential drive</strong> <i>F<sup>t</sup></i>. The wheels grip only while <i>F<sup>t</sup>&nbsp;&le;&nbsp;&mu;F<sup>n</sup></i> &mdash; the ceiling the sliders below test.</p>
+    </div>
     <div class="controls">
       <div class="ctrl">
         <label for="slFn">preload F<sup>n</sup> (N) &mdash; <span class="val" id="slFnv">120</span></label>
@@ -1020,6 +1059,19 @@
     <div class="tool-label">Example 5.3 <span>&middot; Positive-drive wiper mechanism &mdash; count the unknowns</span></div>
     <h3 style="margin-top:.3em">Find the driving torque <span class="vec">T</span><sub>2</sub></h3>
     <p>A motor drives crank link&nbsp;2; through a positive-drive rolling contact (gears, pressure angle 20&deg;) between links&nbsp;3 and 5, it moves the wiper on gear&nbsp;5. The load torque <i><span class="vec">T</span><sub>5</sub></i> is known. We want the driving torque <i><span class="vec">T</span><sub>2</sub></i>. Step through the reasoning:</p>
+    <div class="figbox">
+      <svg id="ex53mech" class="stage" viewBox="0 0 640 300" role="img" aria-label="Redrawn Figure 5.32: the rear-window wiper drive. A driver crank labelled 2 is pinned to ground at the right and turns gear 3. Gear 3 rolls against output gear 5 at a contact point; arm 4 connects the two gear centers. Gear 5 is grounded at its center, carries the wiper, and bears the known load torque T5. The driving torque T2 acts on the crank."></svg>
+      <p class="figcap"><span class="fignum">Figure&nbsp;5.32 (redrawn)</span> &mdash; the rear-window wiper drive. Motor crank&nbsp;<i>2</i> (ground pivot at right) turns gear&nbsp;<i>3</i>; gear&nbsp;<i>3</i> drives output gear&nbsp;<i>5</i> through a positive geared contact; arm&nbsp;<i>4</i> holds the two gear centers a fixed distance apart. Gear&nbsp;<i>5</i> is grounded and carries the wiper with the known load torque <i>T</i><sub>5</sub>. The unknown we want is the drive torque <i>T</i><sub>2</sub>.</p>
+    </div>
+    <div class="figbox">
+      <svg id="ex53fbd" class="stage" viewBox="0 0 640 340" role="img" aria-label="Redrawn Figure 5.33: the four links shown as separate free bodies. Link 3 carries a known-direction gear contact force and the two-force arm force, plus an unknown pin force to the crank. Link 5 carries the equal-and-opposite gear contact force, an unknown ground pin force, and the known load torque. Link 4 is a two-force member with collinear forces of known direction. Link 2, the crank, carries two unknown pin forces and the unknown drive torque."></svg>
+      <p class="figcap"><span class="fignum">Figure&nbsp;5.33 (redrawn)</span> &mdash; free body diagrams of the four links, pulled apart. Squiggly arrows are pin reactions of unknown magnitude <em>and</em> direction; dashed arrows have a known line of action (the gear contact and the two-force arm); curved arrows are torques (dashed when unknown). Tallying these against the equilibrium equations is the whole point of the example.</p>
+      <div class="veclegend">
+        <span><b>squiggly</b> &mdash; unknown magnitude &amp; direction</span>
+        <span><b>dashed</b> &mdash; known direction</span>
+        <span><b>curved</b> &mdash; torque (dashed if unknown)</span>
+      </div>
+    </div>
     <div class="stepper" id="ex53dots" role="tablist" aria-label="Example 5.3 steps"></div>
     <div class="step-body card" id="ex53body" aria-live="polite" style="background:var(--paper-2); box-shadow:none"></div>
     <div class="step-nav">
@@ -1438,6 +1490,38 @@
       (x1-h*Math.cos(tang+0.4))+","+(y1-h*Math.sin(tang+0.4))
     ].join(" "),fill:color}));
   }
+  // ---- font-independent vector over-arrow for SVG <text> ----
+  // The mono SVG font lacks the combining-arrow glyph (U+20D7), so we draw
+  // the over-arrow as real geometry above the chosen character(s).
+  function overArrow(stage,x1,x2,topY,color){
+    line(stage,x1,topY,x2,topY,color,1.3);
+    stage.appendChild(el("polygon",{points:[
+      (x2+1.6)+","+topY,
+      (x2-2.6)+","+(topY-2.5),
+      (x2-2.6)+","+(topY+2.5)
+    ].join(" "),fill:color}));
+  }
+  // draw text s and place a small over-arrow above each character index in vecIdx[]
+  function txtVec(stage,x,y,s,vecIdx,color,size,anchor,weight){
+    var t=txt(stage,x,y,s,color,size,anchor,weight);
+    if(!vecIdx||!vecIdx.length) return t;
+    var col=color||cssVar('--ink'), sz=size||12;
+    try{
+      vecIdx.forEach(function(ci){
+        var ext=t.getExtentOfChar(ci);
+        overArrow(stage, ext.x, ext.x+ext.width, ext.y-Math.max(2,sz*0.16), col);
+      });
+    }catch(e){
+      try{
+        var total=t.getComputedTextLength(), per=total/s.length;
+        var startX = anchor==="end"? x-total : (anchor==="middle"? x-total/2 : x);
+        vecIdx.forEach(function(ci){
+          overArrow(stage, startX+ci*per+per*0.12, startX+(ci+1)*per-per*0.12, y-sz*0.92, col);
+        });
+      }catch(e2){}
+    }
+    return t;
+  }
 
   /* ============================================================
      TOOL 1 · IDP / FDP FLIPPER
@@ -1461,7 +1545,7 @@
       if(motionKnown){ arrow(stage,242,125,398,125,cssVar('--good'),3); }
       else{ arrow(stage,398,125,242,125,cssVar('--good'),3); }
       txt(stage,320,108,"Newton's Laws",cssVar('--ink-soft'),13,"middle","700");
-      txt(stage,320,150,"\u03A3F = m a\u20D7g , \u03A3M = Ig\u03B1",cssVar('--ink-soft'),12,"middle");
+      txtVec(stage,320,150,"\u03A3F = m ag , \u03A3M = Ig\u03B1",[1,7],cssVar('--ink-soft'),12,"middle");
       txt(stage,320,40,motionKnown?"INVERSE DYNAMICS PROBLEM (IDP)":"FORWARD DYNAMICS PROBLEM (FDP)",cssVar('--accent-dk'),16,"middle","700");
       txt(stage,320,210,motionKnown?"solve algebraically \u2192 size motors & bearings":"integrate in time \u2192 predict / simulate motion",cssVar('--ink-soft'),12,"middle");
       $("flipOut").innerHTML = motionKnown
@@ -1496,13 +1580,13 @@
       var aScale=5.5;
       var axe=Gx+ag*aScale*Math.cos(dir), aye=Gy-ag*aScale*Math.sin(dir);
       arrow(stage,Gx,Gy,axe,aye,cssVar('--accent'),3);
-      txt(stage,axe+8*Math.cos(dir),aye-8*Math.sin(dir),"a\u20D7g",cssVar('--accent-dk'),12,"middle","700");
+      txtVec(stage,axe+8*Math.cos(dir),aye-8*Math.sin(dir),"ag",[0],cssVar('--accent-dk'),12,"middle","700");
       // required net force m*ag (slightly thicker, rust), shown offset for clarity
       var F=m*ag;
       var fScale=2.6;
       var ox=-26*Math.sin(dir), oy=-26*Math.cos(dir);
       arrow(stage,Gx+ox,Gy+oy, Gx+ox+F*fScale*Math.cos(dir), Gy+oy-F*fScale*Math.sin(dir), cssVar('--accent-2'),3.4);
-      txt(stage, Gx+ox+F*fScale*Math.cos(dir)+10, Gy+oy-F*fScale*Math.sin(dir), "\u03A3F = m a\u20D7g", cssVar('--rw-h'),12,"start","700");
+      txtVec(stage, Gx+ox+F*fScale*Math.cos(dir)+10, Gy+oy-F*fScale*Math.sin(dir), "\u03A3F = m ag", [1,7], cssVar('--rw-h'),12,"start","700");
       // moment arc scaled by Ig*alpha
       var Mz=Ig*alpha;
       var arcR=46;
@@ -1529,7 +1613,7 @@
     function render(){
       clear(stage);
       var pick=$("pvPoint").value;
-      var Ax=120, Ay=150, Bx=520, By=150, Gx=(Ax+Bx)/2, Gy=150;
+      var Ax=160, Ay=150, Bx=560, By=150, Gx=(Ax+Bx)/2, Gy=150;
       // ground at A
       groundHatch(stage,Ax,Ay+0,40);
       // the link
@@ -1540,22 +1624,23 @@
       txt(stage,Gx,Gy+28,"G",cssVar('--ink'),12,"middle","700");
       txt(stage,Bx,By+28,"B",cssVar('--ink'),12,"middle","700");
       // unknown pin reaction at A (squiggly)
-      squiggle(stage,Ax,Ay,Ax-46,Ay-40,cssVar('--accent-2'),2.6);
-      txt(stage,Ax-52,Ay-46,"R\u20D7A (unknown)",cssVar('--rw-h'),11,"end","700");
+      squiggle(stage,Ax,Ay,Ax-44,Ay-46,cssVar('--accent-2'),2.6);
+      txtVec(stage,Ax-42,Ay-62,"RA (unknown)",[0],cssVar('--rw-h'),11,"middle","700");
       // known applied force at B (solid)
       arrow(stage,Bx,By,Bx,By-66,cssVar('--accent'),3.2);
-      txt(stage,Bx+8,By-60,"F (known)",cssVar('--accent-dk'),11,"start","700");
+      txtVec(stage,Bx+8,By-60,"F (known)",[0],cssVar('--accent-dk'),11,"start","700");
       // highlight chosen pivot + moment-arm cue
       var P = pick==="A"?{x:Ax,y:Ay}: pick==="G"?{x:Gx,y:Gy}:{x:Bx,y:By};
       stage.appendChild(el("circle",{cx:P.x,cy:P.y,r:15,fill:"none",stroke:cssVar('--good'),"stroke-width":2.5,"stroke-dasharray":"4 3"}));
-      txt(stage,P.x,P.y-22,"\u2211M here",cssVar('--good'),11,"middle","700");
+      line(stage,P.x,P.y+16,P.x,232,cssVar('--good'),1.4,"3 3");
+      txt(stage,P.x,248,"\u2211M about "+pick,cssVar('--good'),12,"middle","700");
       var msg;
       if(pick==="A"){
-        msg="<b>Smart.</b> R\u20D7A passes through A, so it contributes <b>zero</b> moment. The moment equation contains only the known force F \u2014 you solve for the unknown torque/force directly, in one line.";
+        msg="<b>Smart.</b> <span class='vec'>R</span>A passes through A, so it contributes <b>zero</b> moment. The moment equation contains only the known force F \u2014 you solve for the unknown torque/force directly, in one line.";
       } else if(pick==="G"){
-        msg="Summing about G keeps R\u20D7A's moment arm (A\u2013G) in the equation, so the unknown reaction stays in. You'll need the \u03A3F equations as well to finish \u2014 more work.";
+        msg="Summing about G keeps <span class='vec'>R</span>A's moment arm (A\u2013G) in the equation, so the unknown reaction stays in. You'll need the \u03A3F equations as well to finish \u2014 more work.";
       } else {
-        msg="Summing about B removes F's moment (it passes through B) but keeps R\u20D7A in. Useful if F is the nuisance unknown, but here R\u20D7A is what we wanted to drop.";
+        msg="Summing about B removes F's moment (it passes through B) but keeps <span class='vec'>R</span>A in. Useful if F is the nuisance unknown, but here <span class='vec'>R</span>A is what we wanted to drop.";
       }
       $("pvOut").innerHTML=msg;
     }
@@ -1666,6 +1751,30 @@
       $("domOut").innerHTML = "Spinning at "+rpm+" rpm ( \u03C9 = "+w.toFixed(1)+" rad/s ): inertia force \u2248 <b>"+Fin.toFixed(1)+" N</b> vs weight <b>"+Fg.toFixed(1)+" N</b>. "+advice;
     }
     ["domRpm","domR","domM"].forEach(function(id){ $(id).addEventListener("input",render); });
+    function drawDomRef(){
+      var ref=$("domRef"); if(!ref) return;
+      clear(ref);
+      var Ox=170, Oy=150, L=150, th=30*Math.PI/180;
+      var Gx=Ox+L*Math.cos(th), Gy=Oy-L*Math.sin(th);
+      groundHatch(ref,Ox,Oy,46);
+      line(ref,Ox,Oy,Gx,Gy,cssVar('--ink'),5);
+      pin(ref,Ox,Oy);
+      ref.appendChild(el("circle",{cx:Gx,cy:Gy,r:8,fill:cssVar('--ink')}));
+      txt(ref,Ox,Oy+34,"O (ground pivot)",cssVar('--ink'),12,"middle","700");
+      txt(ref,Gx+14,Gy-8,"G (mass center)",cssVar('--ink'),12,"start","700");
+      txt(ref,(Ox+Gx)/2-10,(Oy+Gy)/2-8,"r",cssVar('--ink-soft'),14,"middle","700");
+      // rotation sense at O
+      momentArc(ref,Ox,Oy,56,-1.15,0.7,cssVar('--good'),2.4);
+      txt(ref,Ox+70,Oy-34,"\u03C9",cssVar('--good'),16,"start","700");
+      // inertia force radially outward from G
+      var ux=Math.cos(th), uy=-Math.sin(th);
+      arrow(ref,Gx,Gy,Gx+88*ux,Gy+88*uy,cssVar('--accent-2'),3.2);
+      txt(ref,Gx+88*ux+8,Gy+88*uy-4,"m r \u03C9\u00B2",cssVar('--rw-h'),12,"start","700");
+      // weight straight down from G
+      arrow(ref,Gx,Gy,Gx,Gy+66,cssVar('--accent'),3.2);
+      txt(ref,Gx+10,Gy+60,"m g",cssVar('--accent-dk'),12,"start","700");
+    }
+    drawDomRef();
     render();
   })();
 
@@ -1732,6 +1841,34 @@
         "Demand is <b>"+Ft+" N</b>. "+(ok? "There is margin \u2014 raise demand or drop preload to find the edge." : "Increase the preload F\u207F (stiffer compliance spring) or \u03BC to restore grip.");
     }
     ["slFn","slMu","slFt"].forEach(function(id){ $(id).addEventListener("input",render); });
+    function drawSlRef(){
+      var ref=$("slRef"); if(!ref) return;
+      clear(ref);
+      var C2x=205,C3x=337,Cy=120,rr=64;
+      var Px=(C2x+rr+C3x-rr)/2; // contact point on the line of centers
+      // the two wheels
+      ref.appendChild(el("circle",{cx:C2x,cy:Cy,r:rr,fill:"none",stroke:cssVar('--ink-soft'),"stroke-width":2.5}));
+      ref.appendChild(el("circle",{cx:C3x,cy:Cy,r:rr,fill:"none",stroke:cssVar('--ink-soft'),"stroke-width":2.5}));
+      ref.appendChild(el("circle",{cx:C2x,cy:Cy,r:3.5,fill:cssVar('--ink')}));
+      ref.appendChild(el("circle",{cx:C3x,cy:Cy,r:3.5,fill:cssVar('--ink')}));
+      txt(ref,C2x,Cy+rr+22,"2 \u00B7 driver",cssVar('--ink'),12,"middle","700");
+      txt(ref,C3x,Cy+rr+22,"3 \u00B7 driven",cssVar('--ink'),12,"middle","700");
+      // driving torque on wheel 2
+      momentArc(ref,C2x,Cy,rr+14,-2.3,0.9,cssVar('--good'),2.6);
+      txt(ref,C2x-rr-22,Cy,"T\u2082",cssVar('--good'),15,"end","700");
+      // contact point + leader to the free-body inset
+      ref.appendChild(el("circle",{cx:Px,cy:Cy,r:4,fill:cssVar('--accent-2')}));
+      line(ref,Px,Cy,498,Cy,cssVar('--ink-soft'),1.3,"4 4");
+      // free body of the contact (resolved forces) in the open space at right
+      var Qx=520,Qy=128;
+      ref.appendChild(el("circle",{cx:Qx,cy:Qy,r:4,fill:cssVar('--accent-2')}));
+      arrow(ref,Qx,Qy,Qx+56,Qy,cssVar('--accent'),3);            // normal preload (along centers)
+      txt(ref,Qx+60,Qy+4,"F\u207F (preload)",cssVar('--accent-dk'),11,"start","700");
+      arrow(ref,Qx,Qy,Qx,Qy-58,cssVar('--accent-2'),3);          // tangential drive
+      txt(ref,Qx-6,Qy-62,"F\u1D57 (drive)",cssVar('--rw-h'),11,"end","700");
+      txt(ref,Qx,Qy+30,"grip while F\u1D57 \u2264 \u03BC F\u207F",cssVar('--ink-soft'),11,"middle","700");
+    }
+    drawSlRef();
     render();
   })();
 
@@ -1742,19 +1879,19 @@
     var dots=$("ex53dots"); if(!dots) return;
     var steps=[
       {t:"Set up the position problem",
-       h:"The wiper drive is a one-DOF mechanism: motor crank (2), arm/gear (3 &amp; 4), output gear (5), tied by a vector loop r\u20D7\u2082 + r\u20D7\u2083 \u2212 r\u20D7\u2084 \u2212 r\u20D7\u2081 = 0 plus a rolling-contact constraint. Three position equations, four unknown angles \u2192 one DOF. The input \u03B8\u2082 is given; solve the rest (you did this back in Ch. 3/4)."},
+       h:"The wiper drive is a one-DOF mechanism: motor crank (2), arm/gear (3 &amp; 4), output gear (5), tied by a vector loop <span class='vec'>r</span>\u2082 + <span class='vec'>r</span>\u2083 \u2212 <span class='vec'>r</span>\u2084 \u2212 <span class='vec'>r</span>\u2081 = 0 plus a rolling-contact constraint. Three position equations, four unknown angles \u2192 one DOF. The input \u03B8\u2082 is given; solve the rest (you did this back in Ch. 3/4)."},
       {t:"Choose the analysis: static, neglect gravity",
        h:"We perform a <b>static</b> force analysis and neglect gravity (the load torque dominates). Use the same coordinate frame as the vector loop. This drops the inertia terms and lets us count cleanly."},
       {t:"Recognize the two-force member",
-       h:"Link 4 (the arm carrying the rolling contact) is loaded at only two points and carries no torque \u2192 it's a <b>two-force member</b>. Its force F\u20D7\u2084 acts along the line between its pins \u2014 <b>direction known</b>, drawn dashed. That single recognition removes unknowns before any algebra."},
+       h:"Link 4 (the arm carrying the rolling contact) is loaded at only two points and carries no torque \u2192 it's a <b>two-force member</b>. Its force <span class='vec'>F</span>\u2084 acts along the line between its pins \u2014 <b>direction known</b>, drawn dashed. That single recognition removes unknowns before any algebra."},
       {t:"Draw the free body diagrams (Fig 5.33)",
-       h:"Isolate links 2, 3, and 5. The two gear-force components F\u20D7\u207F\u2083\u2085 and F\u20D7\u1D57\u2083\u2085 have <b>known directions</b> (set by the pitch geometry) \u2014 dashed. Pin reactions F\u20D7\u2081\u2085, F\u20D7\u2081\u2082, F\u20D7\u2083\u2082 are fully unknown \u2014 squiggly. T\u20D7\u2082 is the unknown torque \u2014 dashed arc. T\u20D7\u2085 is the known load."},
+       h:"Isolate links 2, 3, and 5. The two gear-force components <span class='vec'>F</span>\u207F\u2083\u2085 and <span class='vec'>F</span>\u1D57\u2083\u2085 have <b>known directions</b> (set by the pitch geometry) \u2014 dashed. Pin reactions <span class='vec'>F</span>\u2081\u2085, <span class='vec'>F</span>\u2081\u2082, <span class='vec'>F</span>\u2083\u2082 are fully unknown \u2014 squiggly. <span class='vec'>T</span>\u2082 is the unknown torque \u2014 dashed arc. <span class='vec'>T</span>\u2085 is the known load."},
       {t:"Count the unknowns",
        h:"Magnitudes of F\u2084, F\u207F\u2083\u2085, F\u1D57\u2083\u2085 (3) + mag &amp; dir of F\u2081\u2085, F\u2081\u2082, F\u2083\u2082 (6) + magnitude of T\u2082 (1) = <b>10 unknowns</b>. T\u2085 is known."},
       {t:"Count the equations",
        h:"Links 2, 3, 5 each give 2 force + 1 moment = 3 scalar equations \u2192 <b>9 equations</b>. Link 4 gives none new (we already used its three to recognize it as a two-force member). We're one equation short."},
       {t:"Close it with the pressure-angle relation",
-       h:"The missing equation is the positive-drive relation applied here: <b>F\u207F\u2083\u2085 = F\u1D57\u2083\u2085 tan\u03A6</b> (Eq 5.48), with \u03A6 = 20\u00B0 the known pressure angle. Now it's <b>10 equations in 10 unknowns</b> \u2014 determinate. Solve the linear system for T\u20D7\u2082 (and every bearing load along the way)."}
+       h:"The missing equation is the positive-drive relation applied here: <b>F\u207F\u2083\u2085 = F\u1D57\u2083\u2085 tan\u03A6</b> (Eq 5.48), with \u03A6 = 20\u00B0 the known pressure angle. Now it's <b>10 equations in 10 unknowns</b> \u2014 determinate. Solve the linear system for <span class='vec'>T</span>\u2082 (and every bearing load along the way)."}
     ];
     var i=0;
     function build(){
@@ -1991,7 +2128,7 @@
     $("scPlay").addEventListener("click",function(){
       if(reduceMotion){ var c=(+$("scTheta").value+15)%360; $("scTheta").value=c; render(); return; }
       spinning=!spinning; this.setAttribute("aria-pressed",spinning?"true":"false");
-      this.textContent=spinning?"\u275A\u275A Pause":"\u25B6 Animate";
+      this.textContent=spinning?"\u25AE\u25AE Pause":"\u25B6 Animate";
       if(spinning) step(); else cancelAnimationFrame(raf);
     });
     ["scTheta","scW"].forEach(function(id){ $(id).addEventListener("input",render); });
@@ -2200,6 +2337,98 @@
         links[ni].focus();
       });
     }
+  })();
+
+  /* ============================================================
+     EXAMPLE 5.3 · REDRAWN TEXTBOOK FIGURES (Fig 5.32 + Fig 5.33)
+     ============================================================ */
+  (function(){
+    var ink=cssVar('--ink'), soft=cssVar('--ink-soft'), good=cssVar('--good'),
+        cyan=cssVar('--accent-dk'), rust=cssVar('--rw-h'), unk=cssVar('--accent-2');
+
+    /* ---- Fig 5.32: mechanism schematic ---- */
+    (function(){
+      var s=$("ex53mech"); if(!s) return;
+      function pitch(cx,cy,r){ s.appendChild(el("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:cyan,"stroke-width":1.5,"stroke-dasharray":"5 4"})); }
+      var G3x=250,G3y=88,r3=56, G5x=250,G5y=204,r5=60, Cx=250,Cy=144;
+      // arm 4 (offset bar carrying the two axles)
+      var armX=150;
+      line(s,armX,G3y,G3x,G3y,soft,3);
+      line(s,armX,G5y,G5x,G5y,soft,3);
+      line(s,armX,G3y,armX,G5y,soft,9);
+      txt(s,armX-10,(G3y+G5y)/2,"4 \u00B7 arm",ink,12,"end","700");
+      // gears: pitch circle (dashed) + body outline + axle pin
+      pitch(G3x,G3y,r3); circle(s,G3x,G3y,r3-9,soft,2); pin(s,G3x,G3y);
+      pitch(G5x,G5y,r5); circle(s,G5x,G5y,r5-9,soft,2); pin(s,G5x,G5y);
+      txt(s,G3x+r3+10,G3y-2,"3 \u00B7 gear",ink,12,"start","700");
+      txt(s,G5x+r5+10,G5y-4,"5 \u00B7 output gear",ink,12,"start","700");
+      txt(s,G5x+r5+10,G5y+13,"(grounded)",soft,11,"start","700");
+      // ground support under gear 5
+      line(s,G5x,G5y,G5x,G5y+r5+16,soft,2);
+      groundHatch(s,G5x,G5y+r5+16,42);
+      // rolling / gear contact
+      line(s,Cx-80,Cy,Cx+80,Cy,cyan,1.3,"4 3");
+      s.appendChild(el("circle",{cx:Cx,cy:Cy,r:4,fill:good}));
+      txt(s,Cx+88,Cy-6,"rolling contact 3\u20135",good,11,"start","700");
+      // load torque on output gear 5
+      momentArc(s,G5x,G5y,r5-24,0.5,2.5,rust,2.6);
+      txt(s,G5x+r5+10,G5y+30,"T\u2085 (load)",rust,12,"start","700");
+      // wiper carried by gear 5
+      line(s,G5x,G5y,G5x-44,G5y+r5+4,ink,3);
+      txt(s,G5x-50,G5y+r5+14,"wiper",ink,11,"end","700");
+      // driver crank 2 from a ground pivot at right
+      var O2x=540,O2y=152, P23x=294,P23y=72;
+      line(s,O2x,O2y,P23x,P23y,rust,5);
+      pin(s,P23x,P23y);
+      groundHatch(s,O2x,O2y+6,42); pin(s,O2x,O2y);
+      txt(s,420,116,"2 \u00B7 driver crank",rust,12,"start","700");
+      momentArc(s,O2x,O2y,30,-2.0,0.7,good,2.6);
+      txt(s,O2x,O2y+48,"T\u2082 (drive)",good,12,"middle","700");
+    })();
+
+    /* ---- Fig 5.33: four separated free body diagrams ---- */
+    (function(){
+      var s=$("ex53fbd"); if(!s) return;
+      function dash(x1,y1,x2,y2,c){ arrow(s,x1,y1,x2,y2,c||cyan,2.4,"5 4"); }
+      // cell labels
+      txt(s,150,40,"Link 3 \u00B7 gear + arm",ink,12,"middle","700");
+      txt(s,470,40,"Link 5 \u00B7 output gear",ink,12,"middle","700");
+      txt(s,150,196,"Link 4 \u00B7 two-force arm",ink,12,"middle","700");
+      txt(s,470,196,"Link 2 \u00B7 crank",ink,12,"middle","700");
+
+      // --- Link 3 (top-left) ---
+      var b3x=150,b3y=110,r=28;
+      circle(s,b3x,b3y,r,soft,2.5);
+      squiggle(s,b3x,b3y,b3x+58,b3y-34,unk,2.4); txt(s,b3x+62,b3y-38,"F\u2083\u2082",rust,11,"start","700");
+      dash(b3x,b3y,b3x-58,b3y+8); txt(s,b3x-62,b3y+6,"F\u2084",cyan,11,"end","700");
+      dash(b3x,b3y,b3x,b3y+56); txt(s,b3x+6,b3y+58,"F\u207F\u2083\u2085",cyan,11,"start","700");
+      dash(b3x,b3y,b3x+46,b3y+34); txt(s,b3x+50,b3y+44,"F\u1D57\u2083\u2085",cyan,11,"start","700");
+
+      // --- Link 5 (top-right) ---
+      var b5x=470,b5y=110;
+      circle(s,b5x,b5y,r,soft,2.5);
+      dash(b5x,b5y,b5x,b5y-56); txt(s,b5x+6,b5y-58,"F\u207F\u2083\u2085",cyan,11,"start","700");
+      dash(b5x,b5y,b5x-46,b5y-34); txt(s,b5x-50,b5y-40,"F\u1D57\u2083\u2085",cyan,11,"end","700");
+      squiggle(s,b5x,b5y,b5x+58,b5y+30,unk,2.4); txt(s,b5x+62,b5y+38,"F\u2081\u2085",rust,11,"start","700");
+      momentArc(s,b5x,b5y,r+10,0.4,2.5,good,2.4); txt(s,b5x-r-14,b5y+2,"T\u2085",good,12,"end","700");
+
+      // --- Link 4 (bottom-left): two-force member ---
+      var l4x1=92,l4x2=216,l4y=268;
+      line(s,l4x1,l4y,l4x2,l4y,soft,7);
+      pin(s,l4x1,l4y); pin(s,l4x2,l4y);
+      dash(l4x1,l4y,l4x1-44,l4y); txt(s,l4x1-48,l4y-6,"\u2212F\u2084",cyan,11,"end","700");
+      dash(l4x2,l4y,l4x2+44,l4y); txt(s,l4x2+48,l4y-6,"F\u2084",cyan,11,"start","700");
+      txt(s,(l4x1+l4x2)/2,l4y+24,"forces collinear \u2192 direction known",soft,10,"middle");
+
+      // --- Link 2 (bottom-right): crank ---
+      var oGx=548,oGy=300, pUx=410,pUy=240;
+      line(s,oGx,oGy,pUx,pUy,soft,5);
+      groundHatch(s,oGx,oGy,40); pin(s,oGx,oGy); pin(s,pUx,pUy);
+      squiggle(s,pUx,pUy,pUx-52,pUy-28,unk,2.4); txt(s,pUx-56,pUy-30,"F\u2083\u2082",rust,11,"end","700");
+      squiggle(s,oGx,oGy,oGx+48,oGy-30,unk,2.4); txt(s,oGx+52,oGy-32,"F\u2081\u2082",rust,11,"start","700");
+      momentArc(s,(oGx+pUx)/2,(oGy+pUy)/2,30,-2.1,0.7,good,2.4,"4 3");
+      txt(s,(oGx+pUx)/2-2,(oGy+pUy)/2+48,"T\u2082 (unknown)",good,11,"middle","700");
+    })();
   })();
 
 })();
