@@ -208,6 +208,22 @@
   .eqn .m{ color:#9fe6c4; }       /* highlighted secondary term */
   @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
 
+
+  /* ---------- vector over-arrow (font-independent, CSP-safe) ----------
+     Replaces the combining-arrow glyph (U+20D7) that fell back to tofu boxes
+     in serif/system fonts. Drawn with CSS borders, uses currentColor so it
+     adapts to both light body text and the dark .eqn blocks. */
+  .vec{ position:relative; }
+  .vec::before{ content:""; position:absolute; left:-0.04em; right:0.14em; top:-0.02em;
+    border-top:0.075em solid currentColor; pointer-events:none; }
+  .vec::after{ content:""; position:absolute; right:-0.06em; top:-0.16em;
+    border-top:0.13em solid transparent; border-bottom:0.13em solid transparent;
+    border-left:0.2em solid currentColor; pointer-events:none; }
+
+  /* ---------- redrawn textbook reference figures ---------- */
+  figure.exfig{ max-width:620px; margin:10px auto 18px; }
+  figure.exfig .figref{ text-align:center; }
+
   /* ---------- grids ---------- */
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -967,6 +983,10 @@
   <div class="card" id="ex71">
     <h3 style="margin-top:.2em">Example 7.1 &mdash; Kinematic coefficient of elevation <span class="pill p1">PE term</span></h3>
     <p><strong>Problem.</strong> A four&#8209;bar linkage has a coupler (body&nbsp;3) with mass center at <i>G</i><sub>3</sub>. Find the kinematic coefficient of elevation, <i>f<sub>e</sub></i>, for body&nbsp;3 &mdash; the number you need for that body&rsquo;s potential&#8209;energy term <i>mg f<sub>e</sub>S&#775;<sub>i</sub></i>.</p>
+    <figure class="exfig">
+      <svg id="fig71" class="stage" viewBox="0 0 560 360" role="img" aria-label="Figure 7.3, redrawn: a four-bar linkage showing the vector loop, the triangular coupler body 3 with mass center G3, the elevation unit vector, gravity, and the link angles."></svg>
+      <figcaption class="figref">Figure&nbsp;7.3 (redrawn) &mdash; finding the elevation coefficient f<sub>e</sub> for the coupler&rsquo;s mass center G<sub>3</sub> of a four&#8209;bar mechanism.</figcaption>
+    </figure>
     <div class="stepper" id="ex71dots" role="list" aria-label="Example 7.1 steps"></div>
     <div class="step-body" id="ex71body" aria-live="polite"></div>
     <div class="step-nav">
@@ -980,6 +1000,10 @@
   <div class="card" id="ex72">
     <h3 style="margin-top:.2em">Example 7.2 &mdash; Kinematic coefficient of a spring <span class="pill p1">PE term</span></h3>
     <p><strong>Problem.</strong> A spring connects a moving point on body&nbsp;3 to a fixed point on the frame in a six&#8209;bar hood&#8209;lift linkage (textbook Fig.&nbsp;1.13). Find the spring&rsquo;s kinematic coefficient <i>f<sub>s</sub></i> for a given input angle &theta;<sub>2</sub>, so you can evaluate the spring term <i>F<sub>s</sub>f<sub>s</sub>S&#775;<sub>i</sub></i>.</p>
+    <figure class="exfig">
+      <svg id="fig72" class="stage" viewBox="0 0 560 380" role="img" aria-label="Figure 7.6, redrawn: a spring with one fixed end spanning from a fixed pivot to a moving point on body 3, with the additional vector loop r7, r6, r-prime-3, r2."></svg>
+      <figcaption class="figref">Figure&nbsp;7.6 (redrawn) &mdash; the additional vector loop that spans the spring (one fixed end on the frame).</figcaption>
+    </figure>
     <div class="stepper" id="ex72dots" role="list" aria-label="Example 7.2 steps"></div>
     <div class="step-body" id="ex72body" aria-live="polite"></div>
     <div class="step-nav">
@@ -993,6 +1017,10 @@
   <div class="card" id="ex710">
     <h3 style="margin-top:.2em">Example 7.10 &mdash; Mechanical advantage of a wrench <span class="pill p2">MA procedure</span></h3>
     <p><strong>Problem.</strong> A wrench of length <i>r</i><sub>2</sub> turns a seated bolt. A driving force <i>F<sub>driver</sub></i> is applied at the handle; a resisting load torque <i>T<sub>load</sub></i> opposes turning. Use the six&#8209;step power&#8209;equation procedure to find <i>M<sub>a</sub></i> &mdash; you can already sense the answer is <i>M<sub>a</sub></i>&nbsp;=&nbsp;<i>r</i><sub>2</sub>.</p>
+    <figure class="exfig">
+      <svg id="fig710" class="stage" viewBox="0 0 560 360" role="img" aria-label="Figure 7.21, redrawn: a wrench of length r2 on a bolt head, with driving force F-driver applied perpendicular at the handle and a resisting load torque T-load."></svg>
+      <figcaption class="figref">Figure&nbsp;7.21 (redrawn) &mdash; mechanical advantage of a wrench: M<sub>a</sub> = r<sub>2</sub>.</figcaption>
+    </figure>
     <div class="stepper" id="ex710dots" role="list" aria-label="Example 7.10 steps"></div>
     <div class="step-body" id="ex710body" aria-live="polite"></div>
     <div class="step-nav">
@@ -1308,6 +1336,118 @@
     ].join(" "), fill:color});
     stage.appendChild(p);
   }
+
+  /* ============================================================
+     TEXTBOOK REFERENCE FIGURES  (redrawn, theme-aware)
+     Original schematic redraws of Fig 7.3 (Ex 7.1), Fig 7.6 (Ex 7.2),
+     and Fig 7.21 (Ex 7.10). Built on the same SVG helpers; vector marks
+     are drawn (not glyphs), so they never fall back to tofu boxes.
+     ============================================================ */
+  function fPoly(s,pts,f,st,w){var o={points:pts,fill:f||"none"};if(st){o.stroke=st;o["stroke-width"]=w||1.5;}s.appendChild(el("polygon",o));}
+  function fText(s,x,y,str,c,sz,an,it,w){var t=el("text",{x:x,y:y,fill:c||cssVar('--ink'),"font-size":sz||12,"text-anchor":an||"middle"});if(it)t.setAttribute("font-style","italic");if(w)t.setAttribute("font-weight",w);t.textContent=str;s.appendChild(t);return t;}
+  function fDash(s,x1,y1,x2,y2,c,w){line(s,x1,y1,x2,y2,c||cssVar('--ink-soft'),w||1.1,"5 4");}
+  function fArc(s,cx,cy,r,a1,a2,c,w){var n=Math.max(2,Math.round(Math.abs(a2-a1)/0.1)),p=[];for(var i=0;i<=n;i++){var a=a1+(a2-a1)*i/n;p.push((cx+r*Math.cos(a)).toFixed(1)+","+(cy-r*Math.sin(a)).toFixed(1));}s.appendChild(el("polyline",{points:p.join(" "),fill:"none",stroke:c||cssVar('--ink-soft'),"stroke-width":w||1.3}));}
+  function fCg(s,x,y,r){r=r||6;circle(s,x,y,r,cssVar('--ink'),1.5,cssVar('--panel'));line(s,x-r,y,x+r,y,cssVar('--ink'),1.1);line(s,x,y-r,x,y+r,cssVar('--ink'),1.1);}
+  function fSpring(s,x1,y1,x2,y2,c,coils){coils=coils||8;var dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);if(len<1)return;var ux=dx/len,uy=dy/len,px=-uy,py=ux,lead=len*0.18,amp=6;var pts=[[x1,y1]];var sx=x1+ux*lead,sy=y1+uy*lead,ex=x2-ux*lead,ey=y2-uy*lead;pts.push([sx,sy]);var seg=(len-2*lead)/coils;for(var i=0;i<coils;i++){var cxp=sx+ux*seg*(i+0.5),cyp=sy+uy*seg*(i+0.5),sgn=(i%2===0)?1:-1;pts.push([cxp+px*amp*sgn,cyp+py*amp*sgn]);}pts.push([ex,ey]);pts.push([x2,y2]);s.appendChild(el("polyline",{points:pts.map(function(p){return p[0].toFixed(1)+","+p[1].toFixed(1);}).join(" "),fill:"none",stroke:c,"stroke-width":2}));}
+  function fVec(s,x,y,base,sub,c,o){o=o||{};var sz=o.size||15;c=c||cssVar('--accent-2');fText(s,x,y,base,c,sz,"start",true,o.weight||"400");var bw=sz*(o.w||(base==="\u03C9"?0.74:base==="F"?0.6:base==="T"?0.58:0.5));var ax=x+bw,ay=y-sz*0.96;if(o.prime){fText(s,ax,y,"\u2032",c,sz*0.95,"start",true);ax+=sz*0.2;}if(sub){fText(s,ax+1,y+sz*0.26,sub,c,sz*0.68,"start");}var s2=x+bw*0.98;line(s,x-1,ay,s2,ay,c,1.5);var hh=3;fPoly(s,[(s2+3.4)+","+ay,(s2-2.6)+","+(ay-hh),(s2-2.6)+","+(ay+hh)].join(" "),c);}
+  function fAng(s,x,y,gl,sub,c){c=c||cssVar('--ink');fText(s,x,y,gl,c,14,"start",true);if(sub)fText(s,x+8,y+4,sub,c,10,"start");}
+  function fMeta(s,t,d){var T=el("title");T.textContent=t;s.appendChild(T);var D=el("desc");D.textContent=d;s.appendChild(D);}
+  function fClear(n){while(n&&n.firstChild)n.removeChild(n.firstChild);}
+
+  function drawFig71(){var s=$("fig71");if(!s)return;fClear(s);
+    var INK=cssVar('--ink'),SOFT=cssVar('--ink-soft'),VEC=cssVar('--accent-2'),BODY=cssVar('--accent');
+    fMeta(s,"Figure 7.3 \u2014 four-bar linkage","A four-bar linkage: ground link r1 between two pinned grounds; input link 2 (r2) at angle theta-2; a triangular coupler body 3 carrying mass center G3 located from the left joint by r-prime-3; output link 4 (r4) at theta-4. The coupler vector r3 makes angle theta-3 with the horizontal and r-prime-3 makes offset angle phi-3 with r3. A unit elevation vector u-hat-e at angle theta-e and gravity g point are also shown.");
+    var O2={x:95,y:290},O4={x:430,y:290},B={x:178,y:138},D={x:372,y:120},T={x:290,y:60},G3={x:283,y:103};
+    line(s,O2.x,O2.y,O4.x,O4.y,SOFT,1.5);
+    groundHatch(s,O2.x,O2.y+9,34);groundHatch(s,O4.x,O4.y+9,34);
+    fPoly(s,[B.x+","+B.y,T.x+","+T.y,D.x+","+D.y].join(" "),"rgba(10,126,164,.14)",BODY,1.6);
+    arrow(s,O2.x,O2.y,O2.x+78,O2.y,SOFT,1.4);fText(s,O2.x+84,O2.y+4,"X",SOFT,13,"start",true);
+    arrow(s,O2.x,O2.y,O2.x,O2.y-82,SOFT,1.4);fText(s,O2.x-6,O2.y-86,"Y",SOFT,13,"end",true);
+    arrow(s,O2.x,O2.y,O4.x,O4.y,VEC,2.2);fVec(s,255,O2.y+20,"r","1",VEC);
+    arrow(s,O2.x,O2.y,B.x,B.y,VEC,2.4);fVec(s,108,205,"r","2",VEC);
+    arrow(s,B.x,B.y,D.x,D.y,VEC,2.4);fVec(s,268,150,"r","3",VEC);
+    arrow(s,O4.x,O4.y,D.x,D.y,VEC,2.4);fVec(s,406,210,"r","4",VEC);
+    arrow(s,B.x,B.y,G3.x,G3.y,VEC,2.2);fVec(s,232,96,"r","3",VEC,{prime:true});
+    fCg(s,G3.x,G3.y,6);fText(s,G3.x+10,G3.y-6,"G",INK,13,"start",true);fText(s,G3.x+19,G3.y-2,"3",INK,9,"start");
+    pin(s,O2.x,O2.y);pin(s,O4.x,O4.y);pin(s,B.x,B.y);pin(s,D.x,D.y);
+    fArc(s,O2.x,O2.y,30,0,1.071,INK,1.3);fAng(s,O2.x+34,O2.y-16,"\u03B8","2",INK);
+    fArc(s,O4.x,O4.y,30,0,1.90,INK,1.3);fAng(s,O4.x-2,O4.y-34,"\u03B8","4",INK);
+    fDash(s,B.x,B.y,B.x+74,B.y,SOFT,1.1);
+    fArc(s,B.x,B.y,58,0.092,0.321,INK,1.3);fAng(s,B.x+60,B.y-10,"\u03C6","3",INK);
+    fArc(s,B.x,B.y,40,0,0.092,INK,1.1);fAng(s,B.x+44,B.y+10,"\u03B8","3",INK);
+    var P={x:235,y:228},te=68*Math.PI/180;
+    fDash(s,P.x,P.y,P.x+44,P.y,SOFT,1.1);
+    arrow(s,P.x,P.y,P.x+32*Math.cos(te),P.y-32*Math.sin(te),INK,1.8);
+    fText(s,P.x+34*Math.cos(te)+2,P.y-32*Math.sin(te)-2,"\u00FB",INK,14,"start",true);fText(s,P.x+34*Math.cos(te)+10,P.y-32*Math.sin(te)+2,"e",INK,9,"start");
+    fArc(s,P.x,P.y,24,0,te,INK,1.2);fAng(s,P.x+26,P.y-6,"\u03B8","e",INK);
+    arrow(s,322,206,322,256,INK,1.8);fVec(s,330,238,"g",null,INK,{w:0.5});
+    fText(s,126,202,"2",BODY,13,"start",false,"700");fText(s,300,68,"3",BODY,13,"start",false,"700");
+    fText(s,410,176,"4",BODY,13,"start",false,"700");fText(s,148,310,"1",BODY,13,"start",false,"700");
+  }
+
+  function drawFig72(){var s=$("fig72");if(!s)return;fClear(s);
+    var INK=cssVar('--ink'),SOFT=cssVar('--ink-soft'),VEC=cssVar('--accent-2'),BODY=cssVar('--accent');
+    fMeta(s,"Figure 7.6 \u2014 spring with one fixed end","A linkage with a spring connecting a fixed pivot at the upper left to a moving point on coupler body 3. The additional vector loop is r7 from the frame origin to the fixed pivot, r6 spanning the spring, r-prime-3 from the left coupler joint to the spring point, and r2 the input link. Link angles theta-2, theta-4, and the coupler offset angle phi-3 are shown, with three pinned grounds.");
+    var O2={x:150,y:295},O4={x:445,y:312},P7={x:112,y:82},B={x:255,y:188},D={x:420,y:150},T={x:345,y:108},E={x:300,y:140};
+    line(s,O2.x,O2.y,O4.x,O4.y,SOFT,1.5);
+    groundHatch(s,O2.x,O2.y+9,32);groundHatch(s,O4.x,O4.y+9,32);groundHatch(s,P7.x,P7.y-9,30);
+    fPoly(s,[B.x+","+B.y,T.x+","+T.y,D.x+","+D.y].join(" "),"rgba(10,126,164,.14)",BODY,1.6);
+    arrow(s,O2.x,O2.y,O2.x+70,O2.y,SOFT,1.4);fText(s,O2.x+76,O2.y+4,"X",SOFT,13,"start",true);
+    arrow(s,O2.x,O2.y,O2.x,O2.y-72,SOFT,1.4);fText(s,O2.x-6,O2.y-76,"Y",SOFT,13,"end",true);
+    fSpring(s,P7.x,P7.y,E.x,E.y,SOFT,8);
+    arrow(s,P7.x,P7.y,E.x,E.y,VEC,2.0);fVec(s,196,104,"r","6",VEC);
+    arrow(s,O2.x,O2.y,O4.x,O4.y,VEC,2.2);fVec(s,300,O2.y+24,"r","1",VEC);
+    arrow(s,O2.x,O2.y,B.x,B.y,VEC,2.4);fVec(s,188,236,"r","2",VEC);
+    arrow(s,B.x,B.y,D.x,D.y,VEC,2.4);fVec(s,330,160,"r","3",VEC);
+    arrow(s,O4.x,O4.y,D.x,D.y,VEC,2.4);fVec(s,448,232,"r","4",VEC);
+    arrow(s,B.x,B.y,E.x,E.y,VEC,2.2);fVec(s,262,160,"r","3",VEC,{prime:true});
+    arrow(s,O2.x,O2.y,P7.x,P7.y,VEC,2.2);fVec(s,98,190,"r","7",VEC);
+    pin(s,O2.x,O2.y);pin(s,O4.x,O4.y);pin(s,B.x,B.y);pin(s,D.x,D.y);pin(s,P7.x,P7.y);
+    circle(s,E.x,E.y,3.4,VEC,0,VEC);
+    fArc(s,O2.x,O2.y,28,0,0.93,INK,1.3);fAng(s,O2.x+30,O2.y-14,"\u03B8","2",INK);
+    fArc(s,O4.x,O4.y,28,0,2.00,INK,1.3);fAng(s,O4.x-4,O4.y-32,"\u03B8","4",INK);
+    fDash(s,B.x,B.y,B.x+70,B.y,SOFT,1.1);
+    fArc(s,B.x,B.y,52,0.108,0.42,INK,1.3);fAng(s,B.x+54,B.y-8,"\u03C6","3",INK);
+    fText(s,200,228,"2",BODY,13,"start",false,"700");fText(s,352,118,"3",BODY,13,"start",false,"700");
+    fText(s,452,204,"4",BODY,13,"start",false,"700");fText(s,238,310,"1",BODY,13,"start",false,"700");
+  }
+
+  function drawFig710(){var s=$("fig710");if(!s)return;fClear(s);
+    var INK=cssVar('--ink'),SOFT=cssVar('--ink-soft'),VEC=cssVar('--accent-2');
+    fMeta(s,"Figure 7.21 \u2014 mechanical advantage of a wrench","A box-end wrench of length r2 grips a hexagonal bolt head at the origin. The driving force F-driver is applied at the handle end A, perpendicular to the handle. A resisting load torque T-load opposes the turn. The wrench makes angle theta-2 with the X axis. The mechanical advantage equals r2.");
+    var C={x:380,y:172},R=34,A={x:120,y:300};
+    circle(s,C.x,C.y,50,SOFT,3,cssVar('--panel'));
+    var hx=C.x-44,hy=C.y+15,dx=A.x-hx,dy=A.y-hy,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,px=-uy,py=ux,wbar=8;
+    fPoly(s,[(hx+px*wbar)+","+(hy+py*wbar),(A.x+px*wbar)+","+(A.y+py*wbar),(A.x-px*wbar)+","+(A.y-py*wbar),(hx-px*wbar)+","+(hy-py*wbar)].join(" "),cssVar('--panel'),SOFT,3);
+    circle(s,A.x,A.y,wbar,SOFT,3,cssVar('--panel'));
+    var hp=[];for(var k=0;k<6;k++){var a=(90+k*60)*Math.PI/180;hp.push((C.x+R*Math.cos(a)).toFixed(1)+","+(C.y-R*Math.sin(a)).toFixed(1));}
+    fPoly(s,hp.join(" "),cssVar('--paper-2'),INK,2);
+    circle(s,C.x,C.y,2.4,INK,0,INK);
+    arrow(s,C.x,C.y,C.x+78,C.y,SOFT,1.4);fText(s,C.x+84,C.y+4,"X",SOFT,13,"start",true);
+    arrow(s,C.x,C.y,C.x,C.y-74,SOFT,1.4);fText(s,C.x-6,C.y-78,"Y",SOFT,13,"end",true);
+    var r=58;fArc(s,C.x,C.y,r,0.5,2.1,VEC,2.2);
+    var ae=2.1,ex=C.x+r*Math.cos(ae),ey=C.y-r*Math.sin(ae),tang=ae+Math.PI/2;
+    fPoly(s,[ex+","+ey,(ex+9*Math.cos(tang-0.5))+","+(ey-9*Math.sin(tang-0.5)),(ex+9*Math.cos(tang+0.5))+","+(ey-9*Math.sin(tang+0.5))].join(" "),VEC);
+    fVec(s,C.x+38,C.y-58,"T","load",VEC,{w:0.58});
+    arrow(s,C.x,C.y,A.x,A.y,VEC,2.2);fVec(s,248,250,"r","2",VEC);
+    var fdx=-px,fdy=-py;
+    arrow(s,A.x,A.y,A.x+fdx*56,A.y+fdy*56,VEC,2.4);fVec(s,A.x+fdx*56+4,A.y+fdy*56+4,"F","driver",VEC,{w:0.6});
+    fDash(s,C.x,C.y,C.x+60,C.y,SOFT,1.1);
+    fArc(s,C.x,C.y,40,0,0.46,INK,1.3);fAng(s,C.x+44,C.y-12,"\u03B8","2",INK);
+    fText(s,A.x-12,A.y+4,"A",INK,13,"end",false,"700");
+    fText(s,548,150,"Head of a bolt",INK,11,"end");line(s,452,150,C.x+30,C.y-30,SOFT,1);
+    fText(s,250,205,"Wrench",SOFT,12,"middle");
+  }
+
+  (function(){
+    function drawAllFigs(){drawFig71();drawFig72();drawFig710();}
+    drawAllFigs();
+    if(window.matchMedia){
+      var mq=window.matchMedia('(prefers-color-scheme: dark)');
+      if(mq.addEventListener) mq.addEventListener('change',drawAllFigs);
+      else if(mq.addListener) mq.addListener(drawAllFigs);
+    }
+  })();
 
   /* ============================================================
      TOOL 1 · POWER-BALANCE EXPLORER
@@ -1668,23 +1808,23 @@
   }
 
   buildStepper("ex71",[
-    {t:"Set up the loop", h:"<p>Treat the four&#8209;bar with the standard vector loop r\u20D7\u2082 + r\u20D7\u2083 \u2212 r\u20D7\u2084 \u2212 r\u20D7\u2081 = 0\u20D7. Take \u03B8\u2082 as the input S\u1D62; \u03B8\u2083 and \u03B8\u2084 are the outputs. Solve the position problem, then differentiate the loop to get the basic first&#8209;order coefficients h\u2083 = d\u03B8\u2083/d\u03B8\u2082 and h\u2084 = d\u03B8\u2084/d\u03B8\u2082 (Chapters 2 &amp; 4).</p>"},
-    {t:"Coefficients of the mass center G\u2083", h:"<p>G\u2083 sits on the coupler, located by r\u20D7\u2082 then r\u20D7\u2032\u2083 at offset angle \u03C6\u2083. Its position components differentiate (Eqs. 7.11\u20137.12) into the mass&#8209;center coefficients:</p><div class='eqn'>f<sub>g3x</sub> = \u2212r\u2082 sin\u03B8\u2082 \u2212 r\u2032\u2083 sin(\u03B8\u2083+\u03C6\u2083)h\u2083</div><div class='eqn'>f<sub>g3y</sub> = r\u2082 cos\u03B8\u2082 + r\u2032\u2083 cos(\u03B8\u2083+\u03C6\u2083)h\u2083</div><p>These say how fast G\u2083 moves in x and y per unit of input \u2014 built entirely from the basic coefficients.</p>"},
+    {t:"Set up the loop", h:"<p>Treat the four&#8209;bar with the standard vector loop <span class='vec'>r</span>\u2082 + <span class='vec'>r</span>\u2083 \u2212 <span class='vec'>r</span>\u2084 \u2212 <span class='vec'>r</span>\u2081 = <span class='vec'>0</span>. Take \u03B8\u2082 as the input S\u1D62; \u03B8\u2083 and \u03B8\u2084 are the outputs. Solve the position problem, then differentiate the loop to get the basic first&#8209;order coefficients h\u2083 = d\u03B8\u2083/d\u03B8\u2082 and h\u2084 = d\u03B8\u2084/d\u03B8\u2082 (Chapters 2 &amp; 4).</p>"},
+    {t:"Coefficients of the mass center G\u2083", h:"<p>G\u2083 sits on the coupler, located by <span class='vec'>r</span>\u2082 then <span class='vec'>r</span>\u2032\u2083 at offset angle \u03C6\u2083. Its position components differentiate (Eqs. 7.11\u20137.12) into the mass&#8209;center coefficients:</p><div class='eqn'>f<sub>g3x</sub> = \u2212r\u2082 sin\u03B8\u2082 \u2212 r\u2032\u2083 sin(\u03B8\u2083+\u03C6\u2083)h\u2083</div><div class='eqn'>f<sub>g3y</sub> = r\u2082 cos\u03B8\u2082 + r\u2032\u2083 cos(\u03B8\u2083+\u03C6\u2083)h\u2083</div><p>These say how fast G\u2083 moves in x and y per unit of input \u2014 built entirely from the basic coefficients.</p>"},
     {t:"Project onto the \u201cup\u201d direction", h:"<p>The elevation coefficient is the part of G\u2083\u2019s motion along the vertical \u00FB\u2091 (at angle \u03B8\u2091). Project the velocity coefficients onto that direction (Eq. 7.9):</p><div class='eqn'>f<sub>e3</sub> = f<sub>g3x</sub> cos\u03B8\u2091 + f<sub>g3y</sub> sin\u03B8\u2091</div><div class='analogy'><span class='h'>Think of it like\u2026</span><p>\u2026reading only the <em>vertical speedometer</em>. G\u2083 moves on a 2&#8209;D path, but gravity only cares about the up&ndash;down part. The dot product with \u00FB\u2091 keeps exactly that component.</p></div>"},
     {t:"Use it in the PE term", h:"<p>Done. The coupler\u2019s contribution to the potential&#8209;energy rate is simply</p><div class='eqn'>dU<sub>e3</sub>/dt = m\u2083 g f<sub>e3</sub> S\u0307\u1D62</div><p>If bodies 2 and 4 also rise/fall, repeat for each (hence the subscript: f<sub>e3</sub>). Add all the elevation terms into dU/dt of the power equation. <b>Takeaway:</b> any \u201cgeneralized\u201d coefficient you need for the power equation comes from the same differentiate&#8209;the&#8209;loop machinery you already know.</p>"}
   ]);
 
   buildStepper("ex72",[
     {t:"Why a second loop?", h:"<p>The spring connects a moving point on body 3 to a fixed point on the frame. Its stretch r<sub>s</sub> isn\u2019t one of the basic loop variables, so we need its kinematic coefficient f<sub>s</sub> = dr<sub>s</sub>/d\u03B8\u2082. The clean way: write an <em>additional</em> vector loop that spans the spring.</p>"},
-    {t:"Write the spring loop", h:"<p>With r\u20D7\u2086 spanning the spring, the second loop (Fig. 7.6) is r\u20D7\u2087 + r\u20D7\u2086 \u2212 r\u20D7\u2032\u2083 \u2212 r\u20D7\u2082 = 0\u20D7. Its x and y components (Eqs. 7.17\u20137.18) are:</p><div class='eqn'>r\u2087cos\u03B8\u2087 + r\u2086cos\u03B8\u2086 \u2212 r\u2032\u2083cos(\u03B8\u2083+\u03C6\u2083) \u2212 r\u2082cos\u03B8\u2082 = 0</div><div class='eqn'>r\u2087sin\u03B8\u2087 + r\u2086sin\u03B8\u2086 \u2212 r\u2032\u2083sin(\u03B8\u2083+\u03C6\u2083) \u2212 r\u2082sin\u03B8\u2082 = 0</div><p>Solve these two for the two unknowns r\u2086 (the spring length) and \u03B8\u2086, given the already&#8209;known \u03B8\u2083.</p>"},
+    {t:"Write the spring loop", h:"<p>With <span class='vec'>r</span>\u2086 spanning the spring, the second loop (Fig. 7.6) is <span class='vec'>r</span>\u2087 + <span class='vec'>r</span>\u2086 \u2212 <span class='vec'>r</span>\u2032\u2083 \u2212 <span class='vec'>r</span>\u2082 = <span class='vec'>0</span>. Its x and y components (Eqs. 7.17\u20137.18) are:</p><div class='eqn'>r\u2087cos\u03B8\u2087 + r\u2086cos\u03B8\u2086 \u2212 r\u2032\u2083cos(\u03B8\u2083+\u03C6\u2083) \u2212 r\u2082cos\u03B8\u2082 = 0</div><div class='eqn'>r\u2087sin\u03B8\u2087 + r\u2086sin\u03B8\u2086 \u2212 r\u2032\u2083sin(\u03B8\u2083+\u03C6\u2083) \u2212 r\u2082sin\u03B8\u2082 = 0</div><p>Solve these two for the two unknowns r\u2086 (the spring length) and \u03B8\u2086, given the already&#8209;known \u03B8\u2083.</p>"},
     {t:"Differentiate for the coefficients", h:"<p>Differentiate both component equations with respect to \u03B8\u2082. That yields two linear equations in the two unknown coefficients f\u2086 (= f<sub>s</sub>, the spring\u2019s) and h\u2086:</p><div class='eqn'>[ cos\u03B8\u2086  \u2212r\u2086 sin\u03B8\u2086 ; sin\u03B8\u2086  r\u2086 cos\u03B8\u2086 ] [ f\u2086 ; h\u2086 ] = [ \u2212r\u2032\u2083 sin(\u03B8\u2083+\u03C6\u2083)h\u2083 \u2212 r\u2082 sin\u03B8\u2082 ; r\u2032\u2083 cos(\u03B8\u2083+\u03C6\u2083)h\u2083 + r\u2082 cos\u03B8\u2082 ]</div><p>The right&#8209;hand side uses the basic coefficient h\u2083 you already found.</p>"},
     {t:"Solve &amp; use it", h:"<p>Solve the 2&times;2 system (Cramer\u2019s rule or elimination) for f<sub>s</sub> = f\u2086. Then the spring\u2019s contribution to the power equation is</p><div class='eqn'>dU<sub>s</sub>/dt = F<sub>s</sub> f<sub>s</sub> S\u0307\u1D62</div><div class='real-world'><span class='h'>In the real world</span><p>This is the math behind a self&#8209;supporting car hood or hatchback. Engineers pick the spring\u2019s F<sub>s</sub> and mounting geometry so F<sub>s</sub>f<sub>s</sub> cancels the lid\u2019s mg&middot;f<sub>e</sub> through the whole swing \u2014 the lid floats to any position.</p></div>"}
   ]);
 
   buildStepper("ex710",[
-    {t:"Steps 1\u20132: geometry &amp; driver point", h:"<p>The wrench has no internal degrees of freedom \u2014 the \u201cloop\u201d r\u20D7\u2082 \u2212 r\u20D7\u2082 = 0\u20D7 is trivial, so there are no S<sub>k</sub> outputs and no nontrivial coefficients. Take \u03B8\u2082 as the input. The driving force acts at the handle point A = r\u20D7\u2082, whose coefficients are (Eq. 7.48):</p><div class='eqn'>f<sub>ax</sub> = \u2212r\u2082 sin\u03B8\u2082 , &nbsp; f<sub>ay</sub> = r\u2082 cos\u03B8\u2082</div>"},
-    {t:"Steps 3\u20134: the two velocities", h:"<p><b>Step 3 \u2014</b> the load torque acts on body 2, whose angular velocity is \u03C9\u20D7\u2082 = [0,0,1]\u02B7 \u03B8\u0307\u2082. <b>Step 4 \u2014</b> the driver point A moves with velocity v\u20D7<sub>a</sub> = [f<sub>ax</sub>, f<sub>ay</sub>, 0]\u02B7 \u03B8\u0307\u2082 (Eqs. 7.49\u20137.50). Both are expressed through the single input speed \u03B8\u0307\u2082.</p>"},
-    {t:"Step 5: write the power", h:"<p>Total power is driver power plus load power, P = F\u20D7<sub>driver</sub>&middot;v\u20D7<sub>a</sub> + T\u20D7<sub>load</sub>&middot;\u03C9\u20D7\u2082 (Eq. 7.51). With F\u20D7<sub>driver</sub> perpendicular to the handle (Eq. 7.52) and T\u20D7<sub>load</sub> opposing rotation (Eq. 7.53), substitute the coefficients (Eq. 7.48):</p><div class='eqn'>P = (\u2212F<sub>driver</sub> r\u2082 + T<sub>load</sub>) \u03B8\u0307\u2082 &nbsp;(7.54)</div>"},
+    {t:"Steps 1\u20132: geometry &amp; driver point", h:"<p>The wrench has no internal degrees of freedom \u2014 the \u201cloop\u201d <span class='vec'>r</span>\u2082 \u2212 <span class='vec'>r</span>\u2082 = <span class='vec'>0</span> is trivial, so there are no S<sub>k</sub> outputs and no nontrivial coefficients. Take \u03B8\u2082 as the input. The driving force acts at the handle point A = <span class='vec'>r</span>\u2082, whose coefficients are (Eq. 7.48):</p><div class='eqn'>f<sub>ax</sub> = \u2212r\u2082 sin\u03B8\u2082 , &nbsp; f<sub>ay</sub> = r\u2082 cos\u03B8\u2082</div>"},
+    {t:"Steps 3\u20134: the two velocities", h:"<p><b>Step 3 \u2014</b> the load torque acts on body 2, whose angular velocity is <span class='vec'>\u03C9</span>\u2082 = [0,0,1]\u02B7 \u03B8\u0307\u2082. <b>Step 4 \u2014</b> the driver point A moves with velocity <span class='vec'>v</span><sub>a</sub> = [f<sub>ax</sub>, f<sub>ay</sub>, 0]\u02B7 \u03B8\u0307\u2082 (Eqs. 7.49\u20137.50). Both are expressed through the single input speed \u03B8\u0307\u2082.</p>"},
+    {t:"Step 5: write the power", h:"<p>Total power is driver power plus load power, P = <span class='vec'>F</span><sub>driver</sub>&middot;<span class='vec'>v</span><sub>a</sub> + <span class='vec'>T</span><sub>load</sub>&middot;<span class='vec'>\u03C9</span>\u2082 (Eq. 7.51). With <span class='vec'>F</span><sub>driver</sub> perpendicular to the handle (Eq. 7.52) and <span class='vec'>T</span><sub>load</sub> opposing rotation (Eq. 7.53), substitute the coefficients (Eq. 7.48):</p><div class='eqn'>P = (\u2212F<sub>driver</sub> r\u2082 + T<sub>load</sub>) \u03B8\u0307\u2082 &nbsp;(7.54)</div>"},
     {t:"Step 6: set P = 0, solve M\u2090", h:"<p>For the idealized balance, set P = 0. The input speed \u03B8\u0307\u2082 cancels, leaving:</p><div class='eqn'>M\u2090 = T<sub>load</sub> / F<sub>driver</sub> = r\u2082</div><p>The mechanical advantage of a wrench is just its length \u2014 exactly what intuition said. <b>Takeaway:</b> the procedure looks long for an obvious answer, but it <em>proves</em> the method and generalizes to linkages where M\u2090 is far from obvious and can even go to zero or infinity.</p><div class='analogy'><span class='h'>Think of it like\u2026</span><p>\u2026a longer wrench breaking a stuck bolt. Double the handle length, double M\u2090 \u2014 the same hand force delivers twice the torque. A \u201Ccheater bar\u201D is mechanical advantage you can hold.</p></div>"}
   ]);
 
