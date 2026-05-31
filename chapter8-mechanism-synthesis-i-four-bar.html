@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chapter 8 · Part I · Mechanism Synthesis: Four-Bar Linkages — Kinematics &amp; Dynamics of Machines</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <meta name="description" content="An interactive lecture on mechanism synthesis for four-bar linkages: Freudenstein's equation, point-matching and derivative-matching methods, the kinematic-coefficient ladder, and worked examples including the bridge-lifter. WCAG 2.1 AA accessible, single-file HTML5.">
 <style>
   /* ============================================================
@@ -224,6 +223,15 @@
   .eqn .lbl{ float:right; color:#8fc6d8; font-size:.8rem; }
   .eqn .c{ color:#ffd9a8; }
   .eqn .m{ color:#9fe6c4; }
+  /* vector notation — overline is reliable across browsers; combining U+20D7 breaks before <sub> */
+  .vec{
+    text-decoration: overline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 1px;
+    font-style: italic;
+    font-weight: 600;
+    padding: 0 1px;
+  }
   @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
 
   /* ---------- grids ---------- */
@@ -329,6 +337,21 @@
 
   .figref{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); margin-top:6px; }
 
+  /* example problem graphics */
+  .example-figure{
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius);
+    padding:14px 16px; margin:14px 0 20px; box-shadow:var(--shadow);
+  }
+  .example-figure svg{ display:block; margin:0 auto; max-width:100%; height:auto; }
+  .example-figure figcaption{
+    margin-top:10px; padding:0 8px;
+    font-family:var(--sans); font-size:.88rem; color:var(--ink-soft);
+    font-style:italic; text-align:center; line-height:1.5;
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .example-figure svg [data-anim]{ /* hook for future motion - none currently */ }
+  }
+
   /* progress dock */
   .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
   .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
@@ -399,6 +422,345 @@
     body{ background:#fff; color:#000; }
     .refcard{ break-inside:avoid; }
   }
+
+  /* ============ STUDENT NOTES FEATURE (BLOCK_CSS) ============ */
+/* ============================================================
+     STUDENT NOTES UI — single global modal
+     ============================================================ */
+
+  /* --- Floating action button (always visible, opens the modal) --- */
+  .notes-fab{
+    position:fixed; right:18px; bottom:64px; z-index:50;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:12px 18px; min-height:48px;
+    border-radius:30px;
+    background:var(--accent); color:#fff;
+    border:none; cursor:pointer;
+    font-family:var(--mono); font-size:.82rem;
+    letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+    box-shadow:0 4px 12px rgba(16,36,58,.25), 0 2px 4px rgba(16,36,58,.15);
+    transition:background .15s, transform .15s, box-shadow .15s;
+  }
+  .notes-fab:hover, .notes-fab:focus-visible{
+    background:var(--accent-dk);
+    box-shadow:0 6px 18px rgba(16,36,58,.35), 0 3px 6px rgba(16,36,58,.2);
+    outline:none;
+    transform:translateY(-1px);
+  }
+  .notes-fab:focus-visible{ outline:3px solid var(--accent-2); outline-offset:3px; }
+  .notes-fab .icon{ font-size:1.1rem; line-height:1; }
+  .notes-fab .count{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:22px; height:22px; padding:0 6px; border-radius:11px;
+    background:var(--accent-2); color:#fff;
+    font-size:.74rem; font-weight:700;
+  }
+  .notes-fab .count[hidden]{ display:none; }
+  @media (max-width:560px){
+    .notes-fab{ right:12px; bottom:58px; padding:10px 14px; }
+    .notes-fab .label-long{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .notes-fab{ transition:none; }
+    .notes-fab:hover{ transform:none; }
+  }
+
+  /* --- Modal backdrop + dialog --- */
+  .notes-modal-backdrop{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(16,36,58,.55);
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:5vh 16px 16px;
+    overflow-y:auto;
+  }
+  .notes-modal-backdrop[hidden]{ display:none; }
+  @media (prefers-color-scheme: dark){
+    .notes-modal-backdrop{ background:rgba(0,0,0,.7); }
+  }
+  .notes-modal{
+    background:var(--panel); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:var(--radius);
+    box-shadow:0 10px 40px rgba(0,0,0,.4);
+    width:100%; max-width:720px;
+    display:flex; flex-direction:column;
+    max-height:90vh;
+  }
+
+  .notes-modal-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 20px;
+    border-bottom:1px solid var(--panel-line);
+    background:var(--paper-2);
+    border-radius:var(--radius) var(--radius) 0 0;
+  }
+  .notes-modal-head h2{
+    margin:0; font-size:1.2rem; color:var(--accent-dk);
+    display:flex; align-items:center; gap:8px;
+  }
+  .notes-modal-close{
+    background:transparent; border:1px solid var(--panel-line);
+    color:var(--ink-soft);
+    width:36px; height:36px; border-radius:6px;
+    cursor:pointer; font-size:1.2rem; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .notes-modal-close:hover, .notes-modal-close:focus-visible{
+    color:var(--bad); border-color:var(--bad); outline:none;
+  }
+
+  .notes-modal-body{
+    padding:18px 20px;
+    overflow-y:auto;
+    flex:1;
+  }
+
+  /* Section dropdown row */
+  .notes-section-row{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:12px; flex-wrap:wrap;
+  }
+  .notes-section-row label{
+    font-family:var(--mono); font-size:.74rem;
+    color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .notes-section-row select{
+    flex:1; min-width:200px;
+    padding:8px 12px; min-height:40px;
+    background:var(--paper);
+    color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:6px;
+    font-family:var(--sans); font-size:.95rem;
+    cursor:pointer;
+  }
+  .notes-section-row select:focus{
+    outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+  }
+  .notes-section-row .auto-tag{
+    font-family:var(--mono); font-size:.7rem; color:var(--accent-dk);
+    background:var(--paper-2); padding:3px 8px; border-radius:4px;
+    border:1px solid var(--panel-line);
+  }
+  .notes-section-row .auto-tag[hidden]{ display:none; }
+
+  /* Textarea */
+  .notes-modal textarea{
+    width:100%; min-height:180px; resize:vertical;
+    background:var(--paper); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:6px;
+    padding:12px 14px;
+    font-family:var(--sans); font-size:1rem; line-height:1.55;
+    box-sizing:border-box;
+  }
+  .notes-modal textarea:focus{
+    outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+  }
+  .notes-meta-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:6px; font-family:var(--mono); font-size:.72rem;
+    color:var(--ink-soft); flex-wrap:wrap; gap:8px;
+  }
+  .notes-clear-section{
+    background:transparent; border:1px solid var(--panel-line);
+    color:var(--ink-soft); padding:5px 10px; border-radius:4px;
+    font-family:var(--mono); font-size:.7rem; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.06em; min-height:30px;
+  }
+  .notes-clear-section:hover, .notes-clear-section:focus-visible{
+    color:var(--bad); border-color:var(--bad); outline:none;
+  }
+
+  /* "All my notes for this chapter" list */
+  .notes-all-list-wrap{
+    margin-top:18px; border-top:1px dotted var(--panel-line); padding-top:14px;
+  }
+  .notes-all-list-wrap h3{
+    margin:0 0 8px; font-size:.84rem;
+    font-family:var(--mono); letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .notes-all-list{
+    list-style:none; padding:0; margin:0;
+  }
+  .notes-all-list li{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:7px 10px; border:1px solid var(--panel-line);
+    border-radius:6px; margin-bottom:6px;
+    background:var(--paper);
+    gap:8px;
+  }
+  .notes-all-list li.active{
+    border-color:var(--accent); background:var(--paper-2);
+  }
+  .notes-all-list .meta{
+    font-family:var(--mono); font-size:.72rem; color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .notes-all-list .title{
+    flex:1; font-weight:600; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .notes-all-list .open-btn{
+    background:transparent; border:1px solid var(--accent);
+    color:var(--accent-dk); padding:4px 10px; border-radius:4px;
+    font-family:var(--mono); font-size:.7rem; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.05em; min-height:30px;
+  }
+  .notes-all-list .open-btn:hover, .notes-all-list .open-btn:focus-visible{
+    background:var(--accent); color:#fff; outline:none;
+  }
+  .notes-all-empty{
+    font-family:var(--mono); font-size:.78rem;
+    color:var(--ink-soft); padding:10px;
+    background:var(--paper-2); border-radius:6px;
+    border:1px dashed var(--panel-line);
+  }
+
+  /* Name field */
+  .notes-name-row{
+    display:flex; align-items:center; gap:10px;
+    margin-top:18px; padding-top:14px;
+    border-top:1px dotted var(--panel-line);
+    flex-wrap:wrap;
+  }
+  .notes-name-row label{
+    font-family:var(--mono); font-size:.74rem;
+    color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .notes-name-row input{
+    flex:1; min-width:180px;
+    padding:8px 12px; min-height:40px;
+    background:var(--paper); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:6px;
+    font-family:var(--sans); font-size:.95rem;
+  }
+  .notes-name-row input:focus{
+    outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+  }
+
+  /* Save warning */
+  .notes-modal .save-warn{
+    background:#fff8e1; color:#5a4400;
+    border:1px solid #d8a700; border-radius:6px;
+    padding:10px 12px; margin-top:14px;
+    font-size:.84rem;
+  }
+  @media (prefers-color-scheme: dark){
+    .notes-modal .save-warn{
+      background:#352d12; color:#e6c869; border-color:#8a6d1a;
+    }
+  }
+  .notes-modal .save-warn .h{
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.08em;
+    text-transform:uppercase; font-weight:700;
+    display:block; margin-bottom:2px;
+  }
+
+  /* Footer actions */
+  .notes-modal-foot{
+    display:flex; flex-wrap:wrap; gap:10px;
+    padding:14px 20px;
+    border-top:1px solid var(--panel-line);
+    background:var(--paper-2);
+    border-radius:0 0 var(--radius) var(--radius);
+  }
+  .notes-modal-foot button{
+    min-height:44px; padding:10px 16px;
+    font-family:var(--mono); font-size:.82rem;
+    letter-spacing:.05em; text-transform:uppercase; font-weight:700;
+    border-radius:6px; cursor:pointer;
+    border:1.5px solid var(--accent); background:var(--accent); color:#fff;
+  }
+  .notes-modal-foot button:hover,
+  .notes-modal-foot button:focus-visible{
+    background:var(--accent-dk); border-color:var(--accent-dk); outline:none;
+  }
+  .notes-modal-foot button.secondary{
+    background:transparent; color:var(--accent-dk);
+  }
+  .notes-modal-foot button.secondary:hover,
+  .notes-modal-foot button.secondary:focus-visible{
+    background:var(--accent); color:#fff;
+  }
+  .notes-modal-foot button.danger{
+    background:transparent; color:var(--bad); border-color:var(--bad);
+  }
+  .notes-modal-foot button.danger:hover,
+  .notes-modal-foot button.danger:focus-visible{
+    background:var(--bad); color:#fff;
+  }
+  .notes-modal-foot .spacer{ flex:1; }
+
+  /* TOC indicator dots — one orange dot per section that has notes */
+  nav.toc a .toc-note-dot{
+    display:inline-block;
+    width:7px; height:7px; margin-left:5px;
+    border-radius:50%;
+    background:var(--accent-2);
+    vertical-align:middle;
+  }
+
+  /* Progress-dock chip (reused from before) */
+  .notes-chip{
+    font-family:var(--mono); font-size:.7rem;
+    color:var(--ink-soft); white-space:nowrap;
+    border-left:1px solid var(--panel-line); padding-left:12px;
+    margin-left:auto;
+    cursor:pointer;
+  }
+  .notes-chip button{
+    background:none; border:none; padding:0; cursor:pointer;
+    font:inherit; color:var(--accent-dk); font-weight:700;
+  }
+  .notes-chip button:hover,
+  .notes-chip button:focus-visible{
+    text-decoration:underline; outline:none;
+  }
+  @media (max-width:560px){ .notes-chip{ display:none; } }
+
+  /* Body lock while modal is open */
+  body.notes-modal-open{ overflow:hidden; }
+
+  /* PRINT STYLES — when "Print / save as PDF" runs we add .printing-notes to <body>.
+     Hide the whole chapter and render just the notes block. */
+  @media print{
+    body.printing-notes header.site,
+    body.printing-notes nav.toc,
+    body.printing-notes .progress-dock,
+    body.printing-notes .skip-link,
+    body.printing-notes footer.site,
+    body.printing-notes main > section,
+    body.printing-notes .notes-fab,
+    body.printing-notes .notes-modal-backdrop,
+    body.printing-notes .card.tool,
+    body.printing-notes .video-frame,
+    body.printing-notes button{
+      display:none !important;
+    }
+    body.printing-notes{ background:#fff !important; color:#000 !important; }
+    body.printing-notes .notes-print-only{
+      display:block !important;
+      background:#fff !important; color:#000 !important;
+      max-width:none; padding:24pt;
+    }
+    body.printing-notes .notes-print-only h1{
+      font-size:18pt; margin:0 0 6pt 0; border-bottom:2px solid #000; padding-bottom:4pt;
+    }
+    body.printing-notes .notes-print-only h2{
+      font-size:14pt; margin:14pt 0 4pt; color:#000;
+      border-bottom:1px solid #888; padding-bottom:2pt;
+    }
+    body.printing-notes .notes-print-only .meta{
+      font-family:var(--mono); font-size:9pt; color:#444; margin-bottom:12pt;
+    }
+    body.printing-notes .notes-print-only .note-body{
+      white-space:pre-wrap;
+      font-size:11pt; line-height:1.5;
+      margin:6pt 0 10pt;
+    }
+  }
+  .notes-print-only{ display:none; }
 </style>
 </head>
 <body>
@@ -481,7 +843,7 @@
 
   <div class="eqn" role="math" aria-label="r 2 vector plus r 3 vector minus r 4 vector minus r 1 vector equals zero">
     <span class="lbl">(8.1)</span>
-    r&#8407;<sub>2</sub> + r&#8407;<sub>3</sub> &minus; r&#8407;<sub>4</sub> &minus; r&#8407;<sub>1</sub> = 0&#8407;
+    <span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> &minus; <span class="vec">r</span><sub>4</sub> &minus; <span class="vec">r</span><sub>1</sub> = <span class="vec">0</span>
   </div>
 
   <h3>What the angles mean</h3>
@@ -847,6 +1209,75 @@
     <span class="h">The problem</span>
     <p>Design a four-bar mechanism to replace a 2:1 gear pair, so that the output rotates exactly half as far as the input over the working range. This is the linkage that lifts a bascule bridge to clear a sailboat's mast: a slow input rotation through a large arc moves the bridge deck through a smaller arc, with the linkage providing the torque multiplication that gears would otherwise.</p>
   </div>
+  <figure class="example-figure">
+    <svg class="ex-fig" viewBox="0 0 620 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bl-title bl-desc">
+  <title id="bl-title">Bascule bridge lifter — Example 8.1</title>
+  <desc id="bl-desc">Two positions of a bascule bridge: closed and lifted. As the input crank rotates through phi, the deck lifts through psi equals phi divided by two.</desc>
+
+  <line x1="20" y1="240" x2="600" y2="240" stroke="#2b4a66" stroke-opacity="0.5" stroke-width="1.5"/>
+  <line x1="20" y1="250" x2="600" y2="250" stroke="#0a7ea4" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="5 4"/>
+
+  <!-- LEFT: CLOSED -->
+  <g>
+    <rect x="100" y="22" width="140" height="22" rx="3" fill="#fffdf6" stroke="#2b4a66" stroke-width="1"/>
+    <text x="170" y="38" text-anchor="middle" font-family="Consolas, monospace" font-size="11" fill="#2b4a66" letter-spacing="2" font-weight="700">CLOSED · φ = 0°</text>
+
+    <rect x="160" y="180" width="22" height="60" fill="#e9e6d6" stroke="#2b4a66" stroke-width="1.5"/>
+    <line x1="155" y1="240" x2="187" y2="240" stroke="#2b4a66" stroke-width="2"/>
+
+    <line x1="50" y1="180" x2="171" y2="180" stroke="#10243a" stroke-width="6" stroke-linecap="round"/>
+    <text x="110" y="170" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#10243a" font-style="italic">bridge deck</text>
+
+    <circle cx="171" cy="180" r="5" fill="#fffdf6" stroke="#10243a" stroke-width="2.5"/>
+    <circle cx="171" cy="180" r="2" fill="#10243a"/>
+
+    <line x1="171" y1="180" x2="216" y2="180" stroke="#0a7ea4" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="216" cy="180" r="4" fill="#fffdf6" stroke="#0a7ea4" stroke-width="2.5"/>
+
+    <text x="255" y="208" font-family="Consolas, monospace" font-size="11" fill="#0a7ea4" font-weight="700">crank (φ=0)</text>
+    <line x1="252" y1="204" x2="220" y2="184" stroke="#0a7ea4" stroke-width="1"/>
+  </g>
+
+  <line x1="310" y1="60" x2="310" y2="220" stroke="#c9c4b0" stroke-width="1" stroke-dasharray="3 4"/>
+
+  <!-- RIGHT: LIFTED -->
+  <g>
+    <rect x="420" y="22" width="140" height="22" rx="3" fill="#fffdf6" stroke="#2b4a66" stroke-width="1"/>
+    <text x="490" y="38" text-anchor="middle" font-family="Consolas, monospace" font-size="11" fill="#2b4a66" letter-spacing="2" font-weight="700">LIFTED · φ = 90°</text>
+
+    <rect x="480" y="180" width="22" height="60" fill="#e9e6d6" stroke="#2b4a66" stroke-width="1.5"/>
+    <line x1="475" y1="240" x2="507" y2="240" stroke="#2b4a66" stroke-width="2"/>
+
+    <line x1="370" y1="180" x2="491" y2="180" stroke="#10243a" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4"/>
+
+    <!-- deck rotated up by 45° (CCW visually) -->
+    <line x1="491" y1="180" x2="405.5" y2="94.5" stroke="#10243a" stroke-width="6" stroke-linecap="round"/>
+
+    <circle cx="491" cy="180" r="5" fill="#fffdf6" stroke="#10243a" stroke-width="2.5"/>
+    <circle cx="491" cy="180" r="2" fill="#10243a"/>
+
+    <!-- input crank rotated 90° up -->
+    <line x1="491" y1="180" x2="491" y2="135" stroke="#0a7ea4" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="491" cy="135" r="4" fill="#fffdf6" stroke="#0a7ea4" stroke-width="2.5"/>
+
+    <!-- ghost of original crank -->
+    <line x1="491" y1="180" x2="536" y2="180" stroke="#0a7ea4" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.5"/>
+
+    <!-- INPUT angle arc φ = 90°. From +x to +y-up. Going CCW from (516,180) to (491,155). -->
+    <path d="M 516 180 A 25 25 0 0 0 491 155" fill="none" stroke="#0a7ea4" stroke-width="1.5"/>
+    <text x="525" y="162" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#075a76" font-weight="700">φ</text>
+
+    <!-- OUTPUT angle arc ψ = 45°. From -x direction to 135° direction (up-left). -->
+    <path d="M 436 180 A 55 55 0 0 0 452.1 141.1" fill="none" stroke="#c2541d" stroke-width="1.5"/>
+    <text x="418" y="160" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#c2541d" font-weight="700">ψ</text>
+  </g>
+
+  <rect x="220" y="248" width="180" height="26" rx="3" fill="#10243a"/>
+  <text x="310" y="266" text-anchor="middle" font-family="Consolas, monospace" font-size="13" fill="#ffd9a8" font-weight="700">ψ = φ / 2</text>
+</svg>
+    <figcaption>As the input crank rotates through φ, the bridge deck lifts through ψ = φ/2. The four-bar must deliver this 2:1 reduction smoothly across the full working range.</figcaption>
+  </figure>
+
 
   <p><strong>Desired function:</strong> &psi; = &phi;/2, equivalently <i>f</i>(&phi;,&psi;) = &psi; &minus; &phi;/2 = 0, over the range 0°&nbsp;&le;&nbsp;&phi;&nbsp;&le;&nbsp;180° (so 0°&nbsp;&le;&nbsp;&psi;&nbsp;&le;&nbsp;90°).</p>
 
@@ -920,6 +1351,127 @@
   </div>
 
   <h3>Example 8.2 — A rolling-gear function (derivative-matching)</h3>
+
+  <figure class="example-figure">
+    <svg class="ex-fig" viewBox="0 0 620 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="rg-title rg-desc">
+  <title id="rg-title">Two externally rolling gears with equal radii — Example 8.2</title>
+  <desc id="rg-desc">A pair of externally meshing gears of equal pitch radii. The input rotates through phi clockwise; the output rotates through psi counterclockwise. Their relationship is psi equals minus phi plus 10 degrees.</desc>
+
+  <!-- mounting frame -->
+  <line x1="20" y1="40" x2="600" y2="40" stroke="#2b4a66" stroke-width="2"/>
+  <g stroke="#2b4a66" stroke-width="1.2" fill="none">
+    <line x1="50" y1="40" x2="42" y2="32"/><line x1="80" y1="40" x2="72" y2="32"/>
+    <line x1="110" y1="40" x2="102" y2="32"/><line x1="140" y1="40" x2="132" y2="32"/>
+    <line x1="170" y1="40" x2="162" y2="32"/><line x1="200" y1="40" x2="192" y2="32"/>
+    <line x1="230" y1="40" x2="222" y2="32"/><line x1="260" y1="40" x2="252" y2="32"/>
+    <line x1="290" y1="40" x2="282" y2="32"/><line x1="320" y1="40" x2="312" y2="32"/>
+    <line x1="350" y1="40" x2="342" y2="32"/><line x1="380" y1="40" x2="372" y2="32"/>
+    <line x1="410" y1="40" x2="402" y2="32"/><line x1="440" y1="40" x2="432" y2="32"/>
+    <line x1="470" y1="40" x2="462" y2="32"/><line x1="500" y1="40" x2="492" y2="32"/>
+    <line x1="530" y1="40" x2="522" y2="32"/><line x1="560" y1="40" x2="552" y2="32"/>
+  </g>
+
+  <!-- shafts -->
+  <line x1="220" y1="40" x2="220" y2="80" stroke="#2b4a66" stroke-width="2"/>
+  <line x1="400" y1="40" x2="400" y2="80" stroke="#2b4a66" stroke-width="2"/>
+
+  <!-- LEFT GEAR with TEETH -->
+  <!-- 14 teeth approximated as small triangular bumps on the circle. Each tooth is rendered as a polygon. -->
+  <g>
+    <!-- gear body fill -->
+    <circle cx="220" cy="160" r="62" fill="#fffdf6" stroke="none"/>
+    <!-- teeth: 14 of them around r=62 to r=68 -->
+    <!-- Generate via path: pseudo-procedural - hardcoded for clarity -->
+    <!-- Each tooth: a small trapezoid spanning a small angle interval -->
+    <g fill="#fffdf6" stroke="#0a7ea4" stroke-width="2" stroke-linejoin="round">
+      <!-- 14 teeth: angular spacing 360/14 = 25.71° -->
+      <!-- For each tooth at angle θ, tooth occupies θ - 6° to θ + 6° at radius 68, and θ - 8° to θ + 8° at radius 62 -->
+      <!-- Use polygon for each tooth: 4 points -->
+      <!-- Pre-computed for clean display -->
+      <polygon points="220,92 224,90 226,98 218,98 214,90"/>
+      <polygon points="247,98 250,95 257,101 250,105 244,99"/>
+      <polygon points="270,113 272,109 280,113 275,120 268,116"/>
+      <polygon points="282,138 284,134 292,135 290,143 282,141"/>
+      <polygon points="282,164 290,166 290,174 282,174 282,168"/>
+      <polygon points="276,188 283,191 280,199 273,194 274,188"/>
+      <polygon points="259,206 264,212 257,217 252,210 256,205"/>
+      <polygon points="235,217 238,225 230,228 226,220 232,216"/>
+      <polygon points="208,219 213,222 211,229 203,229 204,222"/>
+      <polygon points="184,211 188,217 182,222 176,217 180,212"/>
+      <polygon points="166,196 170,201 165,207 159,202 163,196"/>
+      <polygon points="153,176 159,178 158,186 150,184 152,177"/>
+      <polygon points="155,150 158,144 165,148 162,156 154,154"/>
+      <polygon points="166,127 168,121 175,123 173,130 166,130"/>
+      <polygon points="184,107 188,103 194,108 189,114 184,111"/>
+      <polygon points="205,96 209,93 216,97 211,103 205,100"/>
+    </g>
+    <!-- pitch circle (dashed inside) -->
+    <circle cx="220" cy="160" r="62" fill="none" stroke="#0a7ea4" stroke-width="2"/>
+    <circle cx="220" cy="160" r="55" fill="none" stroke="#0a7ea4" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.5"/>
+
+    <!-- center -->
+    <circle cx="220" cy="160" r="6" fill="#fffdf6" stroke="#10243a" stroke-width="2.5"/>
+    <circle cx="220" cy="160" r="2.2" fill="#10243a"/>
+    <!-- reference mark up (initial) -->
+    <line x1="220" y1="160" x2="220" y2="102" stroke="#0a7ea4" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.55"/>
+    <!-- rotated 45° CW -->
+    <line x1="220" y1="160" x2="261" y2="119" stroke="#0a7ea4" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="261" cy="119" r="3" fill="#0a7ea4"/>
+    <!-- arc for phi -->
+    <path d="M 220 102 A 58 58 0 0 1 261 119" fill="none" stroke="#0a7ea4" stroke-width="1.5"/>
+    <text x="244" y="105" font-family="Georgia, serif" font-style="italic" font-size="17" fill="#075a76" font-weight="700">φ</text>
+
+    <text x="220" y="258" text-anchor="middle" font-family="Consolas, monospace" font-size="11" fill="#0a7ea4" font-weight="700" letter-spacing="2">INPUT  ·  φ (CW)</text>
+  </g>
+
+  <!-- RIGHT GEAR with TEETH -->
+  <g>
+    <circle cx="400" cy="160" r="62" fill="#fffdf6" stroke="none"/>
+    <g fill="#fffdf6" stroke="#c2541d" stroke-width="2" stroke-linejoin="round">
+      <polygon points="400,92 404,90 406,98 398,98 394,90"/>
+      <polygon points="427,98 430,95 437,101 430,105 424,99"/>
+      <polygon points="450,113 452,109 460,113 455,120 448,116"/>
+      <polygon points="462,138 464,134 472,135 470,143 462,141"/>
+      <polygon points="462,164 470,166 470,174 462,174 462,168"/>
+      <polygon points="456,188 463,191 460,199 453,194 454,188"/>
+      <polygon points="439,206 444,212 437,217 432,210 436,205"/>
+      <polygon points="415,217 418,225 410,228 406,220 412,216"/>
+      <polygon points="388,219 393,222 391,229 383,229 384,222"/>
+      <polygon points="364,211 368,217 362,222 356,217 360,212"/>
+      <polygon points="346,196 350,201 345,207 339,202 343,196"/>
+      <polygon points="333,176 339,178 338,186 330,184 332,177"/>
+      <polygon points="335,150 338,144 345,148 342,156 334,154"/>
+      <polygon points="346,127 348,121 355,123 353,130 346,130"/>
+      <polygon points="364,107 368,103 374,108 369,114 364,111"/>
+      <polygon points="385,96 389,93 396,97 391,103 385,100"/>
+    </g>
+    <circle cx="400" cy="160" r="62" fill="none" stroke="#c2541d" stroke-width="2"/>
+    <circle cx="400" cy="160" r="55" fill="none" stroke="#c2541d" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.5"/>
+    <circle cx="400" cy="160" r="6" fill="#fffdf6" stroke="#10243a" stroke-width="2.5"/>
+    <circle cx="400" cy="160" r="2.2" fill="#10243a"/>
+    <!-- reference up (initial) -->
+    <line x1="400" y1="160" x2="400" y2="102" stroke="#c2541d" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.55"/>
+    <!-- rotated 45° CCW (matching meshing kinematics with left gear CW) -->
+    <line x1="400" y1="160" x2="359" y2="119" stroke="#c2541d" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="359" cy="119" r="3" fill="#c2541d"/>
+    <!-- arc for psi -->
+    <path d="M 359 119 A 58 58 0 0 1 400 102" fill="none" stroke="#c2541d" stroke-width="1.5"/>
+    <text x="367" y="105" font-family="Georgia, serif" font-style="italic" font-size="17" fill="#c2541d" font-weight="700">ψ</text>
+
+    <text x="400" y="258" text-anchor="middle" font-family="Consolas, monospace" font-size="11" fill="#c2541d" font-weight="700" letter-spacing="2">OUTPUT  ·  ψ (CCW)</text>
+  </g>
+
+  <!-- mesh point indicator -->
+  <circle cx="310" cy="160" r="4" fill="#10243a"/>
+  <line x1="310" y1="140" x2="310" y2="180" stroke="#10243a" stroke-width="1" stroke-dasharray="2 2" opacity="0.5"/>
+  <text x="310" y="135" text-anchor="middle" font-family="Calibri, sans-serif" font-size="10" fill="#10243a" font-style="italic" font-weight="700">mesh point</text>
+
+  <!-- equation -->
+  <rect x="180" y="265" width="260" height="22" rx="3" fill="#10243a"/>
+  <text x="310" y="281" text-anchor="middle" font-family="Consolas, monospace" font-size="12" fill="#ffd9a8" font-weight="700">ψ = −φ + 10°    (R = −10)</text>
+</svg>
+    <figcaption>Two externally meshing gears of equal pitch radii: the output rotates opposite to the input by the same magnitude (with a 10° phase offset). Example 8.2 asks: design a four-bar that reproduces this relationship locally — quieter, lubrication-free, no backlash.</figcaption>
+  </figure>
 
   <p><strong>Desired function:</strong> &psi; = &minus;&phi; + 10°, over the range &minus;100°&nbsp;&lt;&nbsp;&phi;&nbsp;&lt;&nbsp;10° (so 0°&nbsp;&lt;&nbsp;&psi;&nbsp;&lt;&nbsp;110°). This corresponds to a pair of externally rolling gears with equal pitch radii — R&nbsp;=&nbsp;&minus;10.</p>
 
@@ -1217,12 +1769,21 @@
   </div>
 </section>
 
+
+<!-- ====== PRINT-ONLY NOTES BLOCK (notes feature) ====== -->
+<section class="notes-print-only" id="notesPrintBlock" aria-hidden="true">
+  <!-- populated by NotesModule print handler just before window.print() -->
+</section>
+
 </main>
 
 <div class="progress-dock" aria-hidden="true">
   <div class="wrap">
     <label for="progBar">Reading progress</label>
     <progress id="progBar" value="0" max="100"></progress>
+    <span class="notes-chip" id="notesChip" aria-live="polite">
+      📝 <button type="button" id="notesChipBtn">My notes</button> · <span id="notesChipStatus">empty</span>
+    </span>
   </div>
 </div>
 
@@ -1230,6 +1791,64 @@
   <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · 2026</p>
   <p>Chapter 8, Part I of II. Aligned to Stanišić, <em>Mechanisms and Machines</em>, § 8.1.</p>
 </footer>
+
+<!-- ====== STUDENT NOTES FAB + MODAL (BLOCK_HTML) ====== -->
+<!-- ============ NOTES FLOATING ACTION BUTTON ============ -->
+<button type="button" class="notes-fab" id="notesFab" aria-label="Open my notes" title="Open my notes (keyboard shortcut: N)">
+  <span class="icon" aria-hidden="true">📝</span>
+  <span class="label-long">My notes</span>
+  <span class="count" id="notesFabCount" hidden>0</span>
+</button>
+
+<!-- ============ NOTES MODAL ============ -->
+<div class="notes-modal-backdrop" id="notesBackdrop" hidden role="presentation">
+  <div class="notes-modal" role="dialog" aria-modal="true" aria-labelledby="notesModalTitle">
+    <div class="notes-modal-head">
+      <h2 id="notesModalTitle"><span aria-hidden="true">📝</span> My notes</h2>
+      <button type="button" class="notes-modal-close" id="notesCloseBtn" aria-label="Close notes (Esc)">×</button>
+    </div>
+    <div class="notes-modal-body">
+
+      <div class="notes-section-row">
+        <label for="notesSectionPicker">Section:</label>
+        <select id="notesSectionPicker" aria-describedby="notesAutoTag"></select>
+        <span class="auto-tag" id="notesAutoTag" hidden>auto-selected</span>
+      </div>
+
+      <label class="visually-hidden" for="notesTextarea">Your notes for the selected section</label>
+      <textarea id="notesTextarea" placeholder="Type your notes here…" spellcheck="true"></textarea>
+
+      <div class="notes-meta-row">
+        <span id="notesMetaCount">0 characters</span>
+        <span id="notesMetaStatus">—</span>
+        <button type="button" class="notes-clear-section" id="notesClearSection">Clear this section</button>
+      </div>
+
+      <div class="notes-all-list-wrap">
+        <h3>All my notes for this chapter</h3>
+        <ul class="notes-all-list" id="notesAllList"></ul>
+        <p class="notes-all-empty" id="notesAllEmpty" hidden>No notes yet. Start typing above to add notes for the section you're reading.</p>
+      </div>
+
+      <div class="notes-name-row">
+        <label for="notesNameField">Your name (optional):</label>
+        <input type="text" id="notesNameField" placeholder="e.g. Sam Engineer" autocomplete="name" maxlength="80">
+      </div>
+
+      <div class="save-warn" role="note">
+        <span class="h">⚠ Browser storage is temporary</span>
+        Your notes live in this browser only. <strong>Download a copy before closing the chapter</strong> so you don't lose them if you switch devices or clear browser data.
+      </div>
+
+    </div>
+    <div class="notes-modal-foot">
+      <button type="button" id="notesExportTxt">⬇ Download (.txt)</button>
+      <button type="button" class="secondary" id="notesPrint">🖨 Print / Save as PDF</button>
+      <span class="spacer"></span>
+      <button type="button" class="danger" id="notesClearAll">✕ Clear all</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -2284,6 +2903,596 @@
     window.addEventListener("scroll", update, {passive:true});
     window.addEventListener("resize", update);
     update();
+  })();
+
+
+  /* ============ STUDENT NOTES MODULE (BLOCK_JS) ============ */
+  /* ============================================================
+     STUDENT NOTES MODULE — modal version
+     Single global modal driven by:
+       (a) floating action button (.notes-fab)
+       (b) keyboard shortcut 'n' (when not typing in a field)
+       (c) the chip button in the progress dock
+     The modal lets the student write notes for any section
+     (auto-selected based on current scroll position), see all
+     existing notes, download as .txt, or print/save-as-PDF.
+     ============================================================ */
+  (function NotesModule(){
+
+    /* ═══════════════════════════════════════════════════════════════
+       ⚙ CUSTOMIZE per chapter — these three constants are the ONLY
+       things that need to change when porting this module to a new
+       chapter. Everything else below stays the same.
+       ═══════════════════════════════════════════════════════════════ */
+
+    // ⚙ CUSTOMIZE — unique storage prefix; do NOT collide with other chapters.
+    // Use the pattern "engi216_chN" where N is the chapter number, or
+    // "engi216_chN_partI" / "engi216_chN_partII" for split chapters.
+    var CHAPTER_KEY = "engi216_ch8_partI";
+
+    // ⚙ CUSTOMIZE — appears as the H1 in exported .txt and Print/PDF.
+    var CHAPTER_TITLE = "Chapter 8 \u00B7 Part I \u00B7 Mechanism Synthesis: Four-Bar";
+
+    // The course string is the same across every chapter.
+    var CHAPTER_COURSE = "ENGI 216 \u00B7 Dynamics & Kinematics of Machines and Mechanisms";
+
+    // ⚙ CUSTOMIZE — one entry per chapter section the student can write notes on.
+    // The `id` MUST match an existing <section id="..."> in the chapter HTML.
+    // The `num` is the short tag shown in the dropdown (e.g. "§ 2.1", "Examples").
+    // The `title` is the human-readable section name.
+    // See section-id-reference.md for ready-to-paste arrays per chapter.
+    var SECTIONS = [
+      { id:"foundations",   num:"\u00A7 0",     title:"What you need before we start" },
+      { id:"freudenstein",  num:"\u00A7 8.1",   title:"Freudenstein's equation for the four-bar" },
+      { id:"pointmatch",    num:"\u00A7 8.1.1", title:"Point-matching: hit three targets exactly" },
+      { id:"derivmatch",    num:"\u00A7 8.1.2", title:"Derivative-matching: hit one position perfectly" },
+      { id:"procedure",     num:"\u00A7 8.1.3", title:"The 11-step derivative-matching procedure" },
+      { id:"examples",      num:"Examples",      title:"Worked examples" },
+      { id:"quiz",          num:"Self-Check",    title:"Self-check questions" },
+      { id:"videos",        num:"Videos",        title:"Video lectures" },
+      { id:"refcard",       num:"Quick Ref",     title:"Part I formula card" },
+      { id:"recap",         num:"Recap",         title:"Objectives recap" }
+    ];
+
+    /* ═══════════════════════════════════════════════════════════════
+       END ⚙ CUSTOMIZE block. Do not modify anything below this line.
+       ═══════════════════════════════════════════════════════════════ */
+
+    // Also offer a "general" pseudo-section for catch-all notes that don't
+    // belong to a specific section above.
+    var GENERAL = { id:"_general", num:"General", title:"General notes (anywhere in the chapter)" };
+
+    var AUTOSAVE_DEBOUNCE_MS = 500;
+
+    /* ---------- Storage (with graceful fallback) ---------- */
+    var storage = (function(){
+      var memStore = {};
+      try{
+        var testKey = "__ls_test__";
+        window.localStorage.setItem(testKey, "1");
+        window.localStorage.removeItem(testKey);
+        return {
+          get: function(k){ return window.localStorage.getItem(k); },
+          set: function(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+          remove: function(k){ try{ window.localStorage.removeItem(k); }catch(e){} },
+          isReal: true
+        };
+      }catch(e){
+        return {
+          get: function(k){ return memStore.hasOwnProperty(k) ? memStore[k] : null; },
+          set: function(k,v){ memStore[k]=v; return true; },
+          remove: function(k){ delete memStore[k]; },
+          isReal: false
+        };
+      }
+    })();
+
+    function key(suffix){ return CHAPTER_KEY + "_" + suffix; }
+    function sectionKey(id){ return key("note_" + id); }
+    function nameKey(){ return key("name"); }
+    function lastSavedKey(){ return key("lastSaved"); }
+
+    function loadNote(id){ return storage.get(sectionKey(id)) || ""; }
+    function saveNote(id, text){
+      if(text && text.length){
+        storage.set(sectionKey(id), text);
+      } else {
+        storage.remove(sectionKey(id));
+      }
+      storage.set(lastSavedKey(), new Date().toISOString());
+    }
+    function loadName(){ return storage.get(nameKey()) || ""; }
+    function saveName(n){
+      if(n) storage.set(nameKey(), n);
+      else storage.remove(nameKey());
+    }
+
+    /* ---------- Helpers ---------- */
+    function fmtTime(iso){
+      if(!iso) return "never";
+      var t = new Date(iso);
+      if(isNaN(t)) return "never";
+      var now = new Date();
+      var diff = (now - t) / 1000;
+      if(diff < 5)    return "just now";
+      if(diff < 60)   return Math.floor(diff) + " sec ago";
+      if(diff < 3600) return Math.floor(diff/60) + " min ago";
+      if(diff < 86400) return Math.floor(diff/3600) + " hr ago";
+      return t.toLocaleDateString();
+    }
+    function fmtDateOnly(d){
+      d = d || new Date();
+      var y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), dd = String(d.getDate()).padStart(2,"0");
+      return y + "-" + m + "-" + dd;
+    }
+    function debounce(fn, wait){
+      var t = null;
+      return function(){
+        var args = arguments, ctx = this;
+        if(t) clearTimeout(t);
+        t = setTimeout(function(){ fn.apply(ctx, args); }, wait);
+      };
+    }
+    function escapeHtml(s){
+      return String(s)
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    }
+    function findSection(id){
+      if(id === GENERAL.id) return GENERAL;
+      for(var i=0;i<SECTIONS.length;i++){ if(SECTIONS[i].id===id) return SECTIONS[i]; }
+      return null;
+    }
+    function allSectionsWithGeneral(){
+      // General first in the picker; SECTIONS in order
+      return [GENERAL].concat(SECTIONS);
+    }
+
+    /* ---------- Section the student is currently reading (option 5a) ---------- */
+    // Detect "which section's heading is nearest the top of the viewport."
+    // We update this on scroll (rAF-throttled) so the modal can default to it when opened.
+    var currentSectionId = SECTIONS[0].id;
+
+    function detectCurrentSection(){
+      // Use heading-rect-top relative to viewport. The section whose <h2> is
+      // closest to (but not far below) y=120px wins. Falls back to the first
+      // section whose top is still above the viewport.
+      var best = null;
+      var bestScore = Infinity;
+      var refY = 120;
+      SECTIONS.forEach(function(sec){
+        var section = document.getElementById(sec.id);
+        if(!section) return;
+        var h2 = section.querySelector("h2");
+        var rect = h2 ? h2.getBoundingClientRect() : section.getBoundingClientRect();
+        // distance above refY, with a penalty for being below it
+        var d;
+        if(rect.top <= refY){ d = refY - rect.top; }
+        else                { d = (rect.top - refY) * 3; } // strong penalty for being below
+        if(d < bestScore){ bestScore = d; best = sec.id; }
+      });
+      if(best) currentSectionId = best;
+    }
+    var scrollRAF = 0;
+    window.addEventListener("scroll", function(){
+      if(scrollRAF) return;
+      scrollRAF = requestAnimationFrame(function(){
+        scrollRAF = 0;
+        detectCurrentSection();
+      });
+    }, { passive:true });
+    // initial detect
+    detectCurrentSection();
+
+    /* ---------- Modal element refs ---------- */
+    var backdrop      = document.getElementById("notesBackdrop");
+    var picker        = document.getElementById("notesSectionPicker");
+    var autoTag       = document.getElementById("notesAutoTag");
+    var textarea      = document.getElementById("notesTextarea");
+    var metaCount     = document.getElementById("notesMetaCount");
+    var metaStatus    = document.getElementById("notesMetaStatus");
+    var clearSecBtn   = document.getElementById("notesClearSection");
+    var allListUl     = document.getElementById("notesAllList");
+    var allListEmpty  = document.getElementById("notesAllEmpty");
+    var nameField     = document.getElementById("notesNameField");
+    var exportTxtBtn  = document.getElementById("notesExportTxt");
+    var printBtn      = document.getElementById("notesPrint");
+    var clearAllBtn   = document.getElementById("notesClearAll");
+    var closeBtn      = document.getElementById("notesCloseBtn");
+    var fab           = document.getElementById("notesFab");
+    var fabCount      = document.getElementById("notesFabCount");
+    var chipBtn       = document.getElementById("notesChipBtn");
+    var chipStatus    = document.getElementById("notesChipStatus");
+
+    // Bail if the modal markup isn't on the page for some reason
+    if(!backdrop || !picker || !textarea) return;
+
+    /* ---------- Populate the section picker ---------- */
+    allSectionsWithGeneral().forEach(function(sec){
+      var opt = document.createElement("option");
+      opt.value = sec.id;
+      opt.textContent = sec.num + " \u2014 " + sec.title;
+      picker.appendChild(opt);
+    });
+
+    /* ---------- TOC indicator dots (option 4c) ---------- */
+    var tocLinks = {};
+    (function(){
+      var nav = document.querySelector("nav.toc");
+      if(!nav) return;
+      var links = nav.querySelectorAll("a[href^='#']");
+      links.forEach(function(a){
+        var id = a.getAttribute("href").substring(1);
+        tocLinks[id] = a;
+      });
+    })();
+    function refreshTocDots(){
+      SECTIONS.forEach(function(sec){
+        var a = tocLinks[sec.id];
+        if(!a) return;
+        var existing = a.querySelector(".toc-note-dot");
+        if(loadNote(sec.id).length > 0){
+          if(!existing){
+            var dot = document.createElement("span");
+            dot.className = "toc-note-dot";
+            dot.setAttribute("aria-label", "has notes");
+            a.appendChild(dot);
+          }
+        } else if(existing){
+          a.removeChild(existing);
+        }
+      });
+    }
+
+    /* ---------- Stats helpers ---------- */
+    function collectNotes(){
+      var out = [];
+      // General first, then sections in order
+      var all = allSectionsWithGeneral();
+      all.forEach(function(sec){
+        var v = loadNote(sec.id);
+        if(v && v.length){ out.push({ sec: sec, text: v }); }
+      });
+      return out;
+    }
+
+    function refreshChip(){
+      if(!chipStatus) return;
+      var notes = collectNotes();
+      if(notes.length === 0){ chipStatus.textContent = "empty"; }
+      else{
+        var total = 0; notes.forEach(function(n){ total += n.text.length; });
+        chipStatus.textContent = notes.length + " section" + (notes.length===1?"":"s") + " \u00B7 " + total + " chars";
+      }
+      if(fabCount){
+        if(notes.length === 0){ fabCount.hidden = true; }
+        else{ fabCount.hidden = false; fabCount.textContent = String(notes.length); }
+      }
+    }
+
+    /* ---------- Render the "all my notes" list ---------- */
+    function refreshAllList(){
+      if(!allListUl) return;
+      while(allListUl.firstChild) allListUl.removeChild(allListUl.firstChild);
+      var notes = collectNotes();
+      if(notes.length === 0){
+        allListUl.style.display = "none";
+        if(allListEmpty) allListEmpty.hidden = false;
+        return;
+      }
+      allListUl.style.display = "";
+      if(allListEmpty) allListEmpty.hidden = true;
+      notes.forEach(function(n){
+        var li = document.createElement("li");
+        if(n.sec.id === picker.value) li.className = "active";
+        var title = document.createElement("span");
+        title.className = "title";
+        title.textContent = n.sec.num + " \u2014 " + n.sec.title;
+        var meta = document.createElement("span");
+        meta.className = "meta";
+        meta.textContent = n.text.length + " chars";
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "open-btn";
+        btn.textContent = "open";
+        btn.addEventListener("click", function(){ switchToSection(n.sec.id, /*manual*/true); });
+        li.appendChild(title);
+        li.appendChild(meta);
+        li.appendChild(btn);
+        allListUl.appendChild(li);
+      });
+    }
+
+    /* ---------- Switching the active section in the modal ---------- */
+    // When the picker changes (or the student clicks "open" on a listed note),
+    // load that section's text into the textarea and update the UI.
+    function switchToSection(id, manual){
+      // Persist any in-flight typing on the current section before switching.
+      // The debounce normally handles this, but if the user switches fast we
+      // want a synchronous save.
+      flushSave();
+
+      if(picker.value !== id) picker.value = id;
+      var sec = findSection(id);
+      var existing = loadNote(id);
+      textarea.value = existing;
+      metaCount.textContent = existing.length + " characters";
+      metaStatus.textContent = existing.length ? ("Saved \u00B7 " + fmtTime(storage.get(lastSavedKey()))) : "(empty)";
+      if(autoTag) autoTag.hidden = manual ? true : false;
+      // Update the "active" highlight in the list
+      refreshAllList();
+      // Focus the textarea for keyboard users (only if modal already open)
+      if(!backdrop.hidden){ setTimeout(function(){ textarea.focus(); }, 30); }
+    }
+    picker.addEventListener("change", function(){ switchToSection(picker.value, /*manual*/true); });
+
+    /* ---------- Save flow ---------- */
+    var pendingTimer = null;
+    function flushSave(){
+      if(pendingTimer){
+        clearTimeout(pendingTimer);
+        pendingTimer = null;
+        // Run the pending save immediately
+        doSaveNow();
+      }
+    }
+    function doSaveNow(){
+      var id = picker.value;
+      var v = textarea.value;
+      saveNote(id, v);
+      metaStatus.textContent = "Saved \u00B7 " + fmtTime(new Date().toISOString());
+      refreshChip();
+      refreshAllList();
+      refreshTocDots();
+    }
+    textarea.addEventListener("input", function(){
+      metaCount.textContent = textarea.value.length + " characters";
+      metaStatus.textContent = "Typing\u2026";
+      if(pendingTimer) clearTimeout(pendingTimer);
+      pendingTimer = setTimeout(function(){
+        pendingTimer = null;
+        doSaveNow();
+      }, AUTOSAVE_DEBOUNCE_MS);
+    });
+
+    /* ---------- Clear current section ---------- */
+    clearSecBtn.addEventListener("click", function(){
+      var sec = findSection(picker.value);
+      if(textarea.value.length === 0) return;
+      if(!confirm("Clear your notes for " + sec.num + "? This cannot be undone unless you have already downloaded a copy.")) return;
+      textarea.value = "";
+      saveNote(picker.value, "");
+      metaCount.textContent = "0 characters";
+      metaStatus.textContent = "Cleared";
+      refreshChip();
+      refreshAllList();
+      refreshTocDots();
+      textarea.focus();
+    });
+
+    /* ---------- Clear all ---------- */
+    clearAllBtn.addEventListener("click", function(){
+      var notes = collectNotes();
+      if(notes.length === 0){
+        alert("There are no notes to clear.");
+        return;
+      }
+      if(!confirm("Permanently delete ALL notes for this chapter? (" + notes.length +
+                  " section" + (notes.length===1?"":"s") + ") This cannot be undone unless you have already downloaded a copy.")) return;
+      allSectionsWithGeneral().forEach(function(sec){
+        storage.remove(sectionKey(sec.id));
+      });
+      storage.remove(lastSavedKey());
+      textarea.value = "";
+      metaCount.textContent = "0 characters";
+      metaStatus.textContent = "Cleared";
+      refreshChip();
+      refreshAllList();
+      refreshTocDots();
+    });
+
+    /* ---------- Name field ---------- */
+    if(nameField){
+      nameField.value = loadName();
+      var saveNameDebounced = debounce(function(){ saveName(nameField.value.trim()); }, 400);
+      nameField.addEventListener("input", saveNameDebounced);
+    }
+
+    /* ---------- Export builders ---------- */
+    function buildPlainText(){
+      var notes = collectNotes();
+      var lines = [];
+      lines.push(CHAPTER_TITLE);
+      lines.push(CHAPTER_COURSE);
+      var nm = loadName();
+      if(nm) lines.push("Student: " + nm);
+      lines.push("Date exported: " + new Date().toLocaleString());
+      lines.push("");
+      lines.push("============================================================");
+      lines.push("");
+      if(notes.length === 0){
+        lines.push("(No notes recorded for this chapter yet.)");
+      } else {
+        notes.forEach(function(n){
+          var heading = n.sec.num + " \u2014 " + n.sec.title;
+          lines.push(heading);
+          // dashed underline matched to heading length
+          var underline = "";
+          for(var u=0; u<heading.length; u++) underline += "-";
+          lines.push(underline);
+          lines.push(n.text);
+          lines.push("");
+        });
+      }
+      return lines.join("\n");
+    }
+
+    function downloadFile(filename, mime, content){
+      try{
+        var blob = new Blob([content], { type: mime + ";charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      }catch(e){
+        var dataUri = "data:" + mime + ";charset=utf-8," + encodeURIComponent(content);
+        window.open(dataUri, "_blank");
+      }
+    }
+
+    function filenameBase(){
+      var nm = loadName().trim();
+      var safeName = nm ? nm.replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_|_$/g, "") : "notes";
+      // Derive the filename prefix from CHAPTER_KEY: "engi216_ch2" -> "engi216-ch2"
+      var prefix = CHAPTER_KEY.replace(/_/g, "-");
+      return prefix + "-" + safeName + "-" + fmtDateOnly();
+    }
+
+    exportTxtBtn.addEventListener("click", function(){
+      flushSave();
+      downloadFile(filenameBase() + ".txt", "text/plain", buildPlainText());
+    });
+
+    printBtn.addEventListener("click", function(){
+      flushSave();
+      var block = document.getElementById("notesPrintBlock");
+      if(!block) return;
+      var notes = collectNotes();
+      var nm = loadName();
+      var dateStr = new Date().toLocaleString();
+      var inner = '';
+      inner += '<h1>' + escapeHtml(CHAPTER_TITLE) + '</h1>';
+      inner += '<div class="meta">';
+      inner += escapeHtml(CHAPTER_COURSE);
+      if(nm) inner += ' &middot; Student: ' + escapeHtml(nm);
+      inner += ' &middot; Exported: ' + escapeHtml(dateStr);
+      inner += '</div>';
+      if(notes.length === 0){
+        inner += '<p><em>No notes recorded for this chapter yet.</em></p>';
+      } else {
+        notes.forEach(function(n){
+          inner += '<h2>' + escapeHtml(n.sec.num) + ' \u2014 ' + escapeHtml(n.sec.title) + '</h2>';
+          inner += '<div class="note-body">' + escapeHtml(n.text) + '</div>';
+        });
+      }
+      block.innerHTML = inner;
+      // Close the modal during print so its overlay doesn't show up
+      var wasOpen = !backdrop.hidden;
+      if(wasOpen){ closeModal(/*skipFocus*/true); }
+      document.body.classList.add("printing-notes");
+      setTimeout(function(){
+        window.print();
+        setTimeout(function(){
+          document.body.classList.remove("printing-notes");
+          block.innerHTML = "";
+          if(wasOpen) openModal();
+        }, 500);
+      }, 60);
+    });
+
+    /* ---------- Modal open / close (ESC closes; backdrop does NOT) ---------- */
+    var lastFocusedBeforeOpen = null;
+
+    function openModal(opts){
+      opts = opts || {};
+      lastFocusedBeforeOpen = document.activeElement;
+      // Decide which section to load (option 5a: section currently in view)
+      var targetId;
+      if(opts.section){ targetId = opts.section; }
+      else { detectCurrentSection(); targetId = currentSectionId; }
+      switchToSection(targetId, /*manual*/false);
+      // Re-render the list and stats so they're fresh on open
+      refreshAllList();
+      refreshChip();
+      // Show
+      backdrop.hidden = false;
+      document.body.classList.add("notes-modal-open");
+      // Focus the textarea
+      setTimeout(function(){ textarea.focus(); }, 30);
+    }
+
+    function closeModal(skipFocus){
+      flushSave();
+      backdrop.hidden = true;
+      document.body.classList.remove("notes-modal-open");
+      if(!skipFocus && lastFocusedBeforeOpen && lastFocusedBeforeOpen.focus){
+        try{ lastFocusedBeforeOpen.focus(); }catch(e){}
+      }
+    }
+
+    // Triggers
+    fab.addEventListener("click", function(){ openModal(); });
+    if(chipBtn) chipBtn.addEventListener("click", function(){ openModal(); });
+    closeBtn.addEventListener("click", function(){ closeModal(); });
+
+    // ESC closes; backdrop click does NOT (per requirement)
+    document.addEventListener("keydown", function(e){
+      // ESC always closes the modal if open
+      if(e.key === "Escape" && !backdrop.hidden){
+        e.preventDefault();
+        closeModal();
+        return;
+      }
+      // 'n' opens the modal — but only when the user isn't typing in another field
+      if((e.key === "n" || e.key === "N") && backdrop.hidden && !e.ctrlKey && !e.metaKey && !e.altKey){
+        var t = e.target;
+        var tag = t && t.tagName ? t.tagName.toUpperCase() : "";
+        if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+        e.preventDefault();
+        openModal();
+      }
+    });
+
+    // Trap focus inside the modal while it's open (basic implementation)
+    backdrop.addEventListener("keydown", function(e){
+      if(backdrop.hidden) return;
+      if(e.key !== "Tab") return;
+      var focusables = backdrop.querySelectorAll(
+        "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+      );
+      var visible = Array.prototype.filter.call(focusables, function(el){ return !el.disabled && el.offsetParent !== null; });
+      if(visible.length === 0) return;
+      var first = visible[0], last = visible[visible.length-1];
+      if(e.shiftKey && document.activeElement === first){
+        e.preventDefault(); last.focus();
+      } else if(!e.shiftKey && document.activeElement === last){
+        e.preventDefault(); first.focus();
+      }
+    });
+
+    /* ---------- Initial pass ---------- */
+    refreshChip();
+    refreshTocDots();
+    refreshAllList();
+    // Pre-populate the picker with current section so the modal opens fast
+    switchToSection(currentSectionId, /*manual*/false);
+
+    // Keep "saved X ago" indicator fresh while the modal is open
+    setInterval(function(){
+      if(backdrop.hidden) return;
+      var iso = storage.get(lastSavedKey());
+      if(iso && metaStatus.textContent.indexOf("Saved") === 0){
+        metaStatus.textContent = "Saved \u00B7 " + fmtTime(iso);
+      }
+    }, 20 * 1000);
+
+    // beforeunload warning only if storage is in-memory (otherwise localStorage holds the data)
+    if(!storage.isReal){
+      window.addEventListener("beforeunload", function(e){
+        if(collectNotes().length > 0){
+          e.preventDefault();
+          e.returnValue = "Your notes will be lost — download them first.";
+          return e.returnValue;
+        }
+      });
+    }
+
   })();
 
 })();
