@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chapter 5 · Machine Dynamics I: The Inverse Dynamics Problem — Kinematics &amp; Dynamics of Machines</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <meta name="description" content="An interactive lecture on the inverse dynamics problem (IDP): finding the forces and torques that produce a known motion. Covers planar kinetics, moments about an arbitrary point, free-body-diagram notation, the partially three-dimensional nature of planar machines, the Newton–Euler equations, static vs. inertia force analysis, and force analysis of friction- and positive-drive rolling contacts, with worked examples, analogies, and real-world applications.">
 <style>
   /* ============================================================
@@ -414,6 +413,345 @@
   /* ---------- FBD vector-notation key chips ---------- */
   .veckey{ display:flex; flex-wrap:wrap; gap:10px; margin:10px 0; }
   .veckey .vk{ display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:.8rem; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:6px 12px; }
+
+  /* ===== STUDENT NOTES FEATURE (integrated v1.0) ===== */
+/* ============================================================
+     STUDENT NOTES UI — single global modal
+     ============================================================ */
+
+  /* --- Floating action button (always visible, opens the modal) --- */
+  .notes-fab{
+    position:fixed; right:18px; bottom:64px; z-index:50;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:12px 18px; min-height:48px;
+    border-radius:30px;
+    background:var(--accent); color:#fff;
+    border:none; cursor:pointer;
+    font-family:var(--mono); font-size:.82rem;
+    letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+    box-shadow:0 4px 12px rgba(16,36,58,.25), 0 2px 4px rgba(16,36,58,.15);
+    transition:background .15s, transform .15s, box-shadow .15s;
+  }
+  .notes-fab:hover, .notes-fab:focus-visible{
+    background:var(--accent-dk);
+    box-shadow:0 6px 18px rgba(16,36,58,.35), 0 3px 6px rgba(16,36,58,.2);
+    outline:none;
+    transform:translateY(-1px);
+  }
+  .notes-fab:focus-visible{ outline:3px solid var(--accent-2); outline-offset:3px; }
+  .notes-fab .icon{ font-size:1.1rem; line-height:1; }
+  .notes-fab .count{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:22px; height:22px; padding:0 6px; border-radius:11px;
+    background:var(--accent-2); color:#fff;
+    font-size:.74rem; font-weight:700;
+  }
+  .notes-fab .count[hidden]{ display:none; }
+  @media (max-width:560px){
+    .notes-fab{ right:12px; bottom:58px; padding:10px 14px; }
+    .notes-fab .label-long{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .notes-fab{ transition:none; }
+    .notes-fab:hover{ transform:none; }
+  }
+
+  /* --- Modal backdrop + dialog --- */
+  .notes-modal-backdrop{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(16,36,58,.55);
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:5vh 16px 16px;
+    overflow-y:auto;
+  }
+  .notes-modal-backdrop[hidden]{ display:none; }
+  @media (prefers-color-scheme: dark){
+    .notes-modal-backdrop{ background:rgba(0,0,0,.7); }
+  }
+  .notes-modal{
+    background:var(--panel); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:var(--radius);
+    box-shadow:0 10px 40px rgba(0,0,0,.4);
+    width:100%; max-width:720px;
+    display:flex; flex-direction:column;
+    max-height:90vh;
+  }
+
+  .notes-modal-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 20px;
+    border-bottom:1px solid var(--panel-line);
+    background:var(--paper-2);
+    border-radius:var(--radius) var(--radius) 0 0;
+  }
+  .notes-modal-head h2{
+    margin:0; font-size:1.2rem; color:var(--accent-dk);
+    display:flex; align-items:center; gap:8px;
+  }
+  .notes-modal-close{
+    background:transparent; border:1px solid var(--panel-line);
+    color:var(--ink-soft);
+    width:36px; height:36px; border-radius:6px;
+    cursor:pointer; font-size:1.2rem; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .notes-modal-close:hover, .notes-modal-close:focus-visible{
+    color:var(--bad); border-color:var(--bad); outline:none;
+  }
+
+  .notes-modal-body{
+    padding:18px 20px;
+    overflow-y:auto;
+    flex:1;
+  }
+
+  /* Section dropdown row */
+  .notes-section-row{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:12px; flex-wrap:wrap;
+  }
+  .notes-section-row label{
+    font-family:var(--mono); font-size:.74rem;
+    color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .notes-section-row select{
+    flex:1; min-width:200px;
+    padding:8px 12px; min-height:40px;
+    background:var(--paper);
+    color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:6px;
+    font-family:var(--sans); font-size:.95rem;
+    cursor:pointer;
+  }
+  .notes-section-row select:focus{
+    outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+  }
+  .notes-section-row .auto-tag{
+    font-family:var(--mono); font-size:.7rem; color:var(--accent-dk);
+    background:var(--paper-2); padding:3px 8px; border-radius:4px;
+    border:1px solid var(--panel-line);
+  }
+  .notes-section-row .auto-tag[hidden]{ display:none; }
+
+  /* Textarea */
+  .notes-modal textarea{
+    width:100%; min-height:180px; resize:vertical;
+    background:var(--paper); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:6px;
+    padding:12px 14px;
+    font-family:var(--sans); font-size:1rem; line-height:1.55;
+    box-sizing:border-box;
+  }
+  .notes-modal textarea:focus{
+    outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+  }
+  .notes-meta-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:6px; font-family:var(--mono); font-size:.72rem;
+    color:var(--ink-soft); flex-wrap:wrap; gap:8px;
+  }
+  .notes-clear-section{
+    background:transparent; border:1px solid var(--panel-line);
+    color:var(--ink-soft); padding:5px 10px; border-radius:4px;
+    font-family:var(--mono); font-size:.7rem; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.06em; min-height:30px;
+  }
+  .notes-clear-section:hover, .notes-clear-section:focus-visible{
+    color:var(--bad); border-color:var(--bad); outline:none;
+  }
+
+  /* "All my notes for this chapter" list */
+  .notes-all-list-wrap{
+    margin-top:18px; border-top:1px dotted var(--panel-line); padding-top:14px;
+  }
+  .notes-all-list-wrap h3{
+    margin:0 0 8px; font-size:.84rem;
+    font-family:var(--mono); letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .notes-all-list{
+    list-style:none; padding:0; margin:0;
+  }
+  .notes-all-list li{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:7px 10px; border:1px solid var(--panel-line);
+    border-radius:6px; margin-bottom:6px;
+    background:var(--paper);
+    gap:8px;
+  }
+  .notes-all-list li.active{
+    border-color:var(--accent); background:var(--paper-2);
+  }
+  .notes-all-list .meta{
+    font-family:var(--mono); font-size:.72rem; color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .notes-all-list .title{
+    flex:1; font-weight:600; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .notes-all-list .open-btn{
+    background:transparent; border:1px solid var(--accent);
+    color:var(--accent-dk); padding:4px 10px; border-radius:4px;
+    font-family:var(--mono); font-size:.7rem; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.05em; min-height:30px;
+  }
+  .notes-all-list .open-btn:hover, .notes-all-list .open-btn:focus-visible{
+    background:var(--accent); color:#fff; outline:none;
+  }
+  .notes-all-empty{
+    font-family:var(--mono); font-size:.78rem;
+    color:var(--ink-soft); padding:10px;
+    background:var(--paper-2); border-radius:6px;
+    border:1px dashed var(--panel-line);
+  }
+
+  /* Name field */
+  .notes-name-row{
+    display:flex; align-items:center; gap:10px;
+    margin-top:18px; padding-top:14px;
+    border-top:1px dotted var(--panel-line);
+    flex-wrap:wrap;
+  }
+  .notes-name-row label{
+    font-family:var(--mono); font-size:.74rem;
+    color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .notes-name-row input{
+    flex:1; min-width:180px;
+    padding:8px 12px; min-height:40px;
+    background:var(--paper); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:6px;
+    font-family:var(--sans); font-size:.95rem;
+  }
+  .notes-name-row input:focus{
+    outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+  }
+
+  /* Save warning */
+  .notes-modal .save-warn{
+    background:#fff8e1; color:#5a4400;
+    border:1px solid #d8a700; border-radius:6px;
+    padding:10px 12px; margin-top:14px;
+    font-size:.84rem;
+  }
+  @media (prefers-color-scheme: dark){
+    .notes-modal .save-warn{
+      background:#352d12; color:#e6c869; border-color:#8a6d1a;
+    }
+  }
+  .notes-modal .save-warn .h{
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.08em;
+    text-transform:uppercase; font-weight:700;
+    display:block; margin-bottom:2px;
+  }
+
+  /* Footer actions */
+  .notes-modal-foot{
+    display:flex; flex-wrap:wrap; gap:10px;
+    padding:14px 20px;
+    border-top:1px solid var(--panel-line);
+    background:var(--paper-2);
+    border-radius:0 0 var(--radius) var(--radius);
+  }
+  .notes-modal-foot button{
+    min-height:44px; padding:10px 16px;
+    font-family:var(--mono); font-size:.82rem;
+    letter-spacing:.05em; text-transform:uppercase; font-weight:700;
+    border-radius:6px; cursor:pointer;
+    border:1.5px solid var(--accent); background:var(--accent); color:#fff;
+  }
+  .notes-modal-foot button:hover,
+  .notes-modal-foot button:focus-visible{
+    background:var(--accent-dk); border-color:var(--accent-dk); outline:none;
+  }
+  .notes-modal-foot button.secondary{
+    background:transparent; color:var(--accent-dk);
+  }
+  .notes-modal-foot button.secondary:hover,
+  .notes-modal-foot button.secondary:focus-visible{
+    background:var(--accent); color:#fff;
+  }
+  .notes-modal-foot button.danger{
+    background:transparent; color:var(--bad); border-color:var(--bad);
+  }
+  .notes-modal-foot button.danger:hover,
+  .notes-modal-foot button.danger:focus-visible{
+    background:var(--bad); color:#fff;
+  }
+  .notes-modal-foot .spacer{ flex:1; }
+
+  /* TOC indicator dots — one orange dot per section that has notes */
+  nav.toc a .toc-note-dot{
+    display:inline-block;
+    width:7px; height:7px; margin-left:5px;
+    border-radius:50%;
+    background:var(--accent-2);
+    vertical-align:middle;
+  }
+
+  /* Progress-dock chip (reused from before) */
+  .notes-chip{
+    font-family:var(--mono); font-size:.7rem;
+    color:var(--ink-soft); white-space:nowrap;
+    border-left:1px solid var(--panel-line); padding-left:12px;
+    margin-left:auto;
+    cursor:pointer;
+  }
+  .notes-chip button{
+    background:none; border:none; padding:0; cursor:pointer;
+    font:inherit; color:var(--accent-dk); font-weight:700;
+  }
+  .notes-chip button:hover,
+  .notes-chip button:focus-visible{
+    text-decoration:underline; outline:none;
+  }
+  @media (max-width:560px){ .notes-chip{ display:none; } }
+
+  /* Body lock while modal is open */
+  body.notes-modal-open{ overflow:hidden; }
+
+  /* PRINT STYLES — when "Print / save as PDF" runs we add .printing-notes to <body>.
+     Hide the whole chapter and render just the notes block. */
+  @media print{
+    body.printing-notes header.site,
+    body.printing-notes nav.toc,
+    body.printing-notes .progress-dock,
+    body.printing-notes .skip-link,
+    body.printing-notes footer.site,
+    body.printing-notes main > section,
+    body.printing-notes .notes-fab,
+    body.printing-notes .notes-modal-backdrop,
+    body.printing-notes .card.tool,
+    body.printing-notes .video-frame,
+    body.printing-notes button{
+      display:none !important;
+    }
+    body.printing-notes{ background:#fff !important; color:#000 !important; }
+    body.printing-notes .notes-print-only{
+      display:block !important;
+      background:#fff !important; color:#000 !important;
+      max-width:none; padding:24pt;
+    }
+    body.printing-notes .notes-print-only h1{
+      font-size:18pt; margin:0 0 6pt 0; border-bottom:2px solid #000; padding-bottom:4pt;
+    }
+    body.printing-notes .notes-print-only h2{
+      font-size:14pt; margin:14pt 0 4pt; color:#000;
+      border-bottom:1px solid #888; padding-bottom:2pt;
+    }
+    body.printing-notes .notes-print-only .meta{
+      font-family:var(--mono); font-size:9pt; color:#444; margin-bottom:12pt;
+    }
+    body.printing-notes .notes-print-only .note-body{
+      white-space:pre-wrap;
+      font-size:11pt; line-height:1.5;
+      margin:6pt 0 10pt;
+    }
+  }
+  .notes-print-only{ display:none; }
 </style>
 </head>
 <body>
@@ -1387,6 +1725,12 @@
   </ul>
 </section>
 
+<!-- ============ PRINT-ONLY NOTES BLOCK ============ -->
+<!-- Hidden in normal view; filled in + shown by JS for "Print / Save as PDF". -->
+<section class="notes-print-only" id="notesPrintBlock" aria-hidden="true">
+  <!-- JS fills this in just before window.print() is called -->
+</section>
+
 </main>
 
 
@@ -1395,6 +1739,9 @@
     <label for="readprog">Lecture progress</label>
     <progress id="readprog" value="0" max="100"></progress>
     <span class="ext-note" id="readpct" aria-live="off">0%</span>
+    <span class="notes-chip" id="notesChip" aria-live="polite">
+      📝 <button type="button" id="notesChipBtn">My notes</button> · <span id="notesChipStatus">empty</span>
+    </span>
   </div>
 </div>
 
@@ -1402,6 +1749,63 @@
   <p>Built for <span class="program">ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · <span class="year">2026</span></p>
   <p class="ext-note">Chapter 5 of 8 · Engineering-blueprint module series · Self-contained, offline-capable except for YouTube video embeds.</p>
 </footer>
+
+<!-- ============ NOTES FLOATING ACTION BUTTON ============ -->
+<button type="button" class="notes-fab" id="notesFab" aria-label="Open my notes" title="Open my notes (keyboard shortcut: N)">
+  <span class="icon" aria-hidden="true">📝</span>
+  <span class="label-long">My notes</span>
+  <span class="count" id="notesFabCount" hidden>0</span>
+</button>
+
+<!-- ============ NOTES MODAL ============ -->
+<div class="notes-modal-backdrop" id="notesBackdrop" hidden role="presentation">
+  <div class="notes-modal" role="dialog" aria-modal="true" aria-labelledby="notesModalTitle">
+    <div class="notes-modal-head">
+      <h2 id="notesModalTitle"><span aria-hidden="true">📝</span> My notes</h2>
+      <button type="button" class="notes-modal-close" id="notesCloseBtn" aria-label="Close notes (Esc)">×</button>
+    </div>
+    <div class="notes-modal-body">
+
+      <div class="notes-section-row">
+        <label for="notesSectionPicker">Section:</label>
+        <select id="notesSectionPicker" aria-describedby="notesAutoTag"></select>
+        <span class="auto-tag" id="notesAutoTag" hidden>auto-selected</span>
+      </div>
+
+      <label class="visually-hidden" for="notesTextarea">Your notes for the selected section</label>
+      <textarea id="notesTextarea" placeholder="Type your notes here…" spellcheck="true"></textarea>
+
+      <div class="notes-meta-row">
+        <span id="notesMetaCount">0 characters</span>
+        <span id="notesMetaStatus">—</span>
+        <button type="button" class="notes-clear-section" id="notesClearSection">Clear this section</button>
+      </div>
+
+      <div class="notes-all-list-wrap">
+        <h3>All my notes for this chapter</h3>
+        <ul class="notes-all-list" id="notesAllList"></ul>
+        <p class="notes-all-empty" id="notesAllEmpty" hidden>No notes yet. Start typing above to add notes for the section you're reading.</p>
+      </div>
+
+      <div class="notes-name-row">
+        <label for="notesNameField">Your name (optional):</label>
+        <input type="text" id="notesNameField" placeholder="e.g. Sam Engineer" autocomplete="name" maxlength="80">
+      </div>
+
+      <div class="save-warn" role="note">
+        <span class="h">⚠ Browser storage is temporary</span>
+        Your notes live in this browser only. <strong>Download a copy before closing the chapter</strong> so you don't lose them if you switch devices or clear browser data.
+      </div>
+
+    </div>
+    <div class="notes-modal-foot">
+      <button type="button" id="notesExportTxt">⬇ Download (.txt)</button>
+      <button type="button" class="secondary" id="notesPrint">🖨 Print / Save as PDF</button>
+      <span class="spacer"></span>
+      <button type="button" class="danger" id="notesClearAll">✕ Clear all</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -2430,6 +2834,599 @@
       momentArc(s,(oGx+pUx)/2,(oGy+pUy)/2,30,-2.1,0.7,good,2.4,"4 3");
       txt(s,(oGx+pUx)/2-2,(oGy+pUy)/2+48,"T\u2082 (unknown)",good,11,"middle","700");
     })();
+  })();
+
+  /* ─── STUDENT NOTES MODULE (integrated v1.0) ─── */
+  /* ============================================================
+     STUDENT NOTES MODULE — modal version
+     Single global modal driven by:
+       (a) floating action button (.notes-fab)
+       (b) keyboard shortcut 'n' (when not typing in a field)
+       (c) the chip button in the progress dock
+     The modal lets the student write notes for any section
+     (auto-selected based on current scroll position), see all
+     existing notes, download as .txt, or print/save-as-PDF.
+     ============================================================ */
+  (function NotesModule(){
+
+    /* ═══════════════════════════════════════════════════════════════
+       ⚙ CUSTOMIZE per chapter — these three constants are the ONLY
+       things that need to change when porting this module to a new
+       chapter. Everything else below stays the same.
+       ═══════════════════════════════════════════════════════════════ */
+
+    // ⚙ CUSTOMIZE — unique storage prefix; do NOT collide with other chapters.
+    // Use the pattern "engi216_chN" where N is the chapter number, or
+    // "engi216_chN_partI" / "engi216_chN_partII" for split chapters.
+    var CHAPTER_KEY = "engi216_ch5";
+
+    // ⚙ CUSTOMIZE — appears as the H1 in exported .txt and Print/PDF.
+    var CHAPTER_TITLE = "Chapter 5 \u00B7 Inverse Dynamics";
+
+    // The course string is the same across every chapter.
+    var CHAPTER_COURSE = "ENGI 216 \u00B7 Dynamics & Kinematics of Machines and Mechanisms";
+
+    // ⚙ CUSTOMIZE — one entry per chapter section the student can write notes on.
+    // The `id` MUST match an existing <section id="..."> in the chapter HTML.
+    // The `num` is the short tag shown in the dropdown (e.g. "§ 2.1", "Examples").
+    // The `title` is the human-readable section name.
+    // See section-id-reference.md for ready-to-paste arrays per chapter.
+    var SECTIONS = [
+      { id:"foundations",   num:"\u00A7 0",          title:"The mechanics you\u2019ll lean on" },
+      { id:"idpfdp",        num:"Two Problems",      title:"Inverse vs. forward dynamics" },
+      { id:"kinetics",      num:"\u00A7 5.1",        title:"Review of planar kinetics" },
+      { id:"moments",       num:"\u00A7 5.1 cont.",  title:"Moments about an arbitrary point" },
+      { id:"fbd",           num:"FBD",               title:"Reading a free body diagram" },
+      { id:"threed",        num:"\u00A7 5.2",        title:"Why a planar machine is partially 3D" },
+      { id:"newtoneuler",   num:"\u00A7 5.2 cont.",  title:"The Newton\u2013Euler equations" },
+      { id:"staticinertia", num:"\u00A7 5.3",        title:"Static vs. inertia force analysis" },
+      { id:"rolling",       num:"\u00A7 5.4",        title:"Force analysis of rolling contacts" },
+      { id:"examples",      num:"Examples",          title:"Worked examples" },
+      { id:"quiz",          num:"Self-Check",        title:"Self-check questions" },
+      { id:"videos",        num:"Videos",            title:"Video lectures" },
+      { id:"refcard",       num:"Quick Ref",         title:"Chapter 5 formula card" },
+      { id:"recap",         num:"Recap",             title:"Objectives recap" }
+    ];
+
+    /* ═══════════════════════════════════════════════════════════════
+       END ⚙ CUSTOMIZE block. Do not modify anything below this line.
+       ═══════════════════════════════════════════════════════════════ */
+
+    // Also offer a "general" pseudo-section for catch-all notes that don't
+    // belong to a specific section above.
+    var GENERAL = { id:"_general", num:"General", title:"General notes (anywhere in the chapter)" };
+
+    var AUTOSAVE_DEBOUNCE_MS = 500;
+
+    /* ---------- Storage (with graceful fallback) ---------- */
+    var storage = (function(){
+      var memStore = {};
+      try{
+        var testKey = "__ls_test__";
+        window.localStorage.setItem(testKey, "1");
+        window.localStorage.removeItem(testKey);
+        return {
+          get: function(k){ return window.localStorage.getItem(k); },
+          set: function(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+          remove: function(k){ try{ window.localStorage.removeItem(k); }catch(e){} },
+          isReal: true
+        };
+      }catch(e){
+        return {
+          get: function(k){ return memStore.hasOwnProperty(k) ? memStore[k] : null; },
+          set: function(k,v){ memStore[k]=v; return true; },
+          remove: function(k){ delete memStore[k]; },
+          isReal: false
+        };
+      }
+    })();
+
+    function key(suffix){ return CHAPTER_KEY + "_" + suffix; }
+    function sectionKey(id){ return key("note_" + id); }
+    function nameKey(){ return key("name"); }
+    function lastSavedKey(){ return key("lastSaved"); }
+
+    function loadNote(id){ return storage.get(sectionKey(id)) || ""; }
+    function saveNote(id, text){
+      if(text && text.length){
+        storage.set(sectionKey(id), text);
+      } else {
+        storage.remove(sectionKey(id));
+      }
+      storage.set(lastSavedKey(), new Date().toISOString());
+    }
+    function loadName(){ return storage.get(nameKey()) || ""; }
+    function saveName(n){
+      if(n) storage.set(nameKey(), n);
+      else storage.remove(nameKey());
+    }
+
+    /* ---------- Helpers ---------- */
+    function fmtTime(iso){
+      if(!iso) return "never";
+      var t = new Date(iso);
+      if(isNaN(t)) return "never";
+      var now = new Date();
+      var diff = (now - t) / 1000;
+      if(diff < 5)    return "just now";
+      if(diff < 60)   return Math.floor(diff) + " sec ago";
+      if(diff < 3600) return Math.floor(diff/60) + " min ago";
+      if(diff < 86400) return Math.floor(diff/3600) + " hr ago";
+      return t.toLocaleDateString();
+    }
+    function fmtDateOnly(d){
+      d = d || new Date();
+      var y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), dd = String(d.getDate()).padStart(2,"0");
+      return y + "-" + m + "-" + dd;
+    }
+    function debounce(fn, wait){
+      var t = null;
+      return function(){
+        var args = arguments, ctx = this;
+        if(t) clearTimeout(t);
+        t = setTimeout(function(){ fn.apply(ctx, args); }, wait);
+      };
+    }
+    function escapeHtml(s){
+      return String(s)
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    }
+    function findSection(id){
+      if(id === GENERAL.id) return GENERAL;
+      for(var i=0;i<SECTIONS.length;i++){ if(SECTIONS[i].id===id) return SECTIONS[i]; }
+      return null;
+    }
+    function allSectionsWithGeneral(){
+      // General first in the picker; SECTIONS in order
+      return [GENERAL].concat(SECTIONS);
+    }
+
+    /* ---------- Section the student is currently reading (option 5a) ---------- */
+    // Detect "which section's heading is nearest the top of the viewport."
+    // We update this on scroll (rAF-throttled) so the modal can default to it when opened.
+    var currentSectionId = SECTIONS[0].id;
+
+    function detectCurrentSection(){
+      // Use heading-rect-top relative to viewport. The section whose <h2> is
+      // closest to (but not far below) y=120px wins. Falls back to the first
+      // section whose top is still above the viewport.
+      var best = null;
+      var bestScore = Infinity;
+      var refY = 120;
+      SECTIONS.forEach(function(sec){
+        var section = document.getElementById(sec.id);
+        if(!section) return;
+        var h2 = section.querySelector("h2");
+        var rect = h2 ? h2.getBoundingClientRect() : section.getBoundingClientRect();
+        // distance above refY, with a penalty for being below it
+        var d;
+        if(rect.top <= refY){ d = refY - rect.top; }
+        else                { d = (rect.top - refY) * 3; } // strong penalty for being below
+        if(d < bestScore){ bestScore = d; best = sec.id; }
+      });
+      if(best) currentSectionId = best;
+    }
+    var scrollRAF = 0;
+    window.addEventListener("scroll", function(){
+      if(scrollRAF) return;
+      scrollRAF = requestAnimationFrame(function(){
+        scrollRAF = 0;
+        detectCurrentSection();
+      });
+    }, { passive:true });
+    // initial detect
+    detectCurrentSection();
+
+    /* ---------- Modal element refs ---------- */
+    var backdrop      = document.getElementById("notesBackdrop");
+    var picker        = document.getElementById("notesSectionPicker");
+    var autoTag       = document.getElementById("notesAutoTag");
+    var textarea      = document.getElementById("notesTextarea");
+    var metaCount     = document.getElementById("notesMetaCount");
+    var metaStatus    = document.getElementById("notesMetaStatus");
+    var clearSecBtn   = document.getElementById("notesClearSection");
+    var allListUl     = document.getElementById("notesAllList");
+    var allListEmpty  = document.getElementById("notesAllEmpty");
+    var nameField     = document.getElementById("notesNameField");
+    var exportTxtBtn  = document.getElementById("notesExportTxt");
+    var printBtn      = document.getElementById("notesPrint");
+    var clearAllBtn   = document.getElementById("notesClearAll");
+    var closeBtn      = document.getElementById("notesCloseBtn");
+    var fab           = document.getElementById("notesFab");
+    var fabCount      = document.getElementById("notesFabCount");
+    var chipBtn       = document.getElementById("notesChipBtn");
+    var chipStatus    = document.getElementById("notesChipStatus");
+
+    // Bail if the modal markup isn't on the page for some reason
+    if(!backdrop || !picker || !textarea) return;
+
+    /* ---------- Populate the section picker ---------- */
+    allSectionsWithGeneral().forEach(function(sec){
+      var opt = document.createElement("option");
+      opt.value = sec.id;
+      opt.textContent = sec.num + " \u2014 " + sec.title;
+      picker.appendChild(opt);
+    });
+
+    /* ---------- TOC indicator dots (option 4c) ---------- */
+    var tocLinks = {};
+    (function(){
+      var nav = document.querySelector("nav.toc");
+      if(!nav) return;
+      var links = nav.querySelectorAll("a[href^='#']");
+      links.forEach(function(a){
+        var id = a.getAttribute("href").substring(1);
+        tocLinks[id] = a;
+      });
+    })();
+    function refreshTocDots(){
+      SECTIONS.forEach(function(sec){
+        var a = tocLinks[sec.id];
+        if(!a) return;
+        var existing = a.querySelector(".toc-note-dot");
+        if(loadNote(sec.id).length > 0){
+          if(!existing){
+            var dot = document.createElement("span");
+            dot.className = "toc-note-dot";
+            dot.setAttribute("aria-label", "has notes");
+            a.appendChild(dot);
+          }
+        } else if(existing){
+          a.removeChild(existing);
+        }
+      });
+    }
+
+    /* ---------- Stats helpers ---------- */
+    function collectNotes(){
+      var out = [];
+      // General first, then sections in order
+      var all = allSectionsWithGeneral();
+      all.forEach(function(sec){
+        var v = loadNote(sec.id);
+        if(v && v.length){ out.push({ sec: sec, text: v }); }
+      });
+      return out;
+    }
+
+    function refreshChip(){
+      if(!chipStatus) return;
+      var notes = collectNotes();
+      if(notes.length === 0){ chipStatus.textContent = "empty"; }
+      else{
+        var total = 0; notes.forEach(function(n){ total += n.text.length; });
+        chipStatus.textContent = notes.length + " section" + (notes.length===1?"":"s") + " \u00B7 " + total + " chars";
+      }
+      if(fabCount){
+        if(notes.length === 0){ fabCount.hidden = true; }
+        else{ fabCount.hidden = false; fabCount.textContent = String(notes.length); }
+      }
+    }
+
+    /* ---------- Render the "all my notes" list ---------- */
+    function refreshAllList(){
+      if(!allListUl) return;
+      while(allListUl.firstChild) allListUl.removeChild(allListUl.firstChild);
+      var notes = collectNotes();
+      if(notes.length === 0){
+        allListUl.style.display = "none";
+        if(allListEmpty) allListEmpty.hidden = false;
+        return;
+      }
+      allListUl.style.display = "";
+      if(allListEmpty) allListEmpty.hidden = true;
+      notes.forEach(function(n){
+        var li = document.createElement("li");
+        if(n.sec.id === picker.value) li.className = "active";
+        var title = document.createElement("span");
+        title.className = "title";
+        title.textContent = n.sec.num + " \u2014 " + n.sec.title;
+        var meta = document.createElement("span");
+        meta.className = "meta";
+        meta.textContent = n.text.length + " chars";
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "open-btn";
+        btn.textContent = "open";
+        btn.addEventListener("click", function(){ switchToSection(n.sec.id, /*manual*/true); });
+        li.appendChild(title);
+        li.appendChild(meta);
+        li.appendChild(btn);
+        allListUl.appendChild(li);
+      });
+    }
+
+    /* ---------- Switching the active section in the modal ---------- */
+    // When the picker changes (or the student clicks "open" on a listed note),
+    // load that section's text into the textarea and update the UI.
+    function switchToSection(id, manual){
+      // Persist any in-flight typing on the current section before switching.
+      // The debounce normally handles this, but if the user switches fast we
+      // want a synchronous save.
+      flushSave();
+
+      if(picker.value !== id) picker.value = id;
+      var sec = findSection(id);
+      var existing = loadNote(id);
+      textarea.value = existing;
+      metaCount.textContent = existing.length + " characters";
+      metaStatus.textContent = existing.length ? ("Saved \u00B7 " + fmtTime(storage.get(lastSavedKey()))) : "(empty)";
+      if(autoTag) autoTag.hidden = manual ? true : false;
+      // Update the "active" highlight in the list
+      refreshAllList();
+      // Focus the textarea for keyboard users (only if modal already open)
+      if(!backdrop.hidden){ setTimeout(function(){ textarea.focus(); }, 30); }
+    }
+    picker.addEventListener("change", function(){ switchToSection(picker.value, /*manual*/true); });
+
+    /* ---------- Save flow ---------- */
+    var pendingTimer = null;
+    function flushSave(){
+      if(pendingTimer){
+        clearTimeout(pendingTimer);
+        pendingTimer = null;
+        // Run the pending save immediately
+        doSaveNow();
+      }
+    }
+    function doSaveNow(){
+      var id = picker.value;
+      var v = textarea.value;
+      saveNote(id, v);
+      metaStatus.textContent = "Saved \u00B7 " + fmtTime(new Date().toISOString());
+      refreshChip();
+      refreshAllList();
+      refreshTocDots();
+    }
+    textarea.addEventListener("input", function(){
+      metaCount.textContent = textarea.value.length + " characters";
+      metaStatus.textContent = "Typing\u2026";
+      if(pendingTimer) clearTimeout(pendingTimer);
+      pendingTimer = setTimeout(function(){
+        pendingTimer = null;
+        doSaveNow();
+      }, AUTOSAVE_DEBOUNCE_MS);
+    });
+
+    /* ---------- Clear current section ---------- */
+    clearSecBtn.addEventListener("click", function(){
+      var sec = findSection(picker.value);
+      if(textarea.value.length === 0) return;
+      if(!confirm("Clear your notes for " + sec.num + "? This cannot be undone unless you have already downloaded a copy.")) return;
+      textarea.value = "";
+      saveNote(picker.value, "");
+      metaCount.textContent = "0 characters";
+      metaStatus.textContent = "Cleared";
+      refreshChip();
+      refreshAllList();
+      refreshTocDots();
+      textarea.focus();
+    });
+
+    /* ---------- Clear all ---------- */
+    clearAllBtn.addEventListener("click", function(){
+      var notes = collectNotes();
+      if(notes.length === 0){
+        alert("There are no notes to clear.");
+        return;
+      }
+      if(!confirm("Permanently delete ALL notes for this chapter? (" + notes.length +
+                  " section" + (notes.length===1?"":"s") + ") This cannot be undone unless you have already downloaded a copy.")) return;
+      allSectionsWithGeneral().forEach(function(sec){
+        storage.remove(sectionKey(sec.id));
+      });
+      storage.remove(lastSavedKey());
+      textarea.value = "";
+      metaCount.textContent = "0 characters";
+      metaStatus.textContent = "Cleared";
+      refreshChip();
+      refreshAllList();
+      refreshTocDots();
+    });
+
+    /* ---------- Name field ---------- */
+    if(nameField){
+      nameField.value = loadName();
+      var saveNameDebounced = debounce(function(){ saveName(nameField.value.trim()); }, 400);
+      nameField.addEventListener("input", saveNameDebounced);
+    }
+
+    /* ---------- Export builders ---------- */
+    function buildPlainText(){
+      var notes = collectNotes();
+      var lines = [];
+      lines.push(CHAPTER_TITLE);
+      lines.push(CHAPTER_COURSE);
+      var nm = loadName();
+      if(nm) lines.push("Student: " + nm);
+      lines.push("Date exported: " + new Date().toLocaleString());
+      lines.push("");
+      lines.push("============================================================");
+      lines.push("");
+      if(notes.length === 0){
+        lines.push("(No notes recorded for this chapter yet.)");
+      } else {
+        notes.forEach(function(n){
+          var heading = n.sec.num + " \u2014 " + n.sec.title;
+          lines.push(heading);
+          // dashed underline matched to heading length
+          var underline = "";
+          for(var u=0; u<heading.length; u++) underline += "-";
+          lines.push(underline);
+          lines.push(n.text);
+          lines.push("");
+        });
+      }
+      return lines.join("\n");
+    }
+
+    function downloadFile(filename, mime, content){
+      try{
+        var blob = new Blob([content], { type: mime + ";charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      }catch(e){
+        var dataUri = "data:" + mime + ";charset=utf-8," + encodeURIComponent(content);
+        window.open(dataUri, "_blank");
+      }
+    }
+
+    function filenameBase(){
+      var nm = loadName().trim();
+      var safeName = nm ? nm.replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_|_$/g, "") : "notes";
+      // Derive the filename prefix from CHAPTER_KEY: "engi216_ch2" -> "engi216-ch2"
+      var prefix = CHAPTER_KEY.replace(/_/g, "-");
+      return prefix + "-" + safeName + "-" + fmtDateOnly();
+    }
+
+    exportTxtBtn.addEventListener("click", function(){
+      flushSave();
+      downloadFile(filenameBase() + ".txt", "text/plain", buildPlainText());
+    });
+
+    printBtn.addEventListener("click", function(){
+      flushSave();
+      var block = document.getElementById("notesPrintBlock");
+      if(!block) return;
+      var notes = collectNotes();
+      var nm = loadName();
+      var dateStr = new Date().toLocaleString();
+      var inner = '';
+      inner += '<h1>' + escapeHtml(CHAPTER_TITLE) + '</h1>';
+      inner += '<div class="meta">';
+      inner += escapeHtml(CHAPTER_COURSE);
+      if(nm) inner += ' &middot; Student: ' + escapeHtml(nm);
+      inner += ' &middot; Exported: ' + escapeHtml(dateStr);
+      inner += '</div>';
+      if(notes.length === 0){
+        inner += '<p><em>No notes recorded for this chapter yet.</em></p>';
+      } else {
+        notes.forEach(function(n){
+          inner += '<h2>' + escapeHtml(n.sec.num) + ' \u2014 ' + escapeHtml(n.sec.title) + '</h2>';
+          inner += '<div class="note-body">' + escapeHtml(n.text) + '</div>';
+        });
+      }
+      block.innerHTML = inner;
+      // Close the modal during print so its overlay doesn't show up
+      var wasOpen = !backdrop.hidden;
+      if(wasOpen){ closeModal(/*skipFocus*/true); }
+      document.body.classList.add("printing-notes");
+      setTimeout(function(){
+        window.print();
+        setTimeout(function(){
+          document.body.classList.remove("printing-notes");
+          block.innerHTML = "";
+          if(wasOpen) openModal();
+        }, 500);
+      }, 60);
+    });
+
+    /* ---------- Modal open / close (ESC closes; backdrop does NOT) ---------- */
+    var lastFocusedBeforeOpen = null;
+
+    function openModal(opts){
+      opts = opts || {};
+      lastFocusedBeforeOpen = document.activeElement;
+      // Decide which section to load (option 5a: section currently in view)
+      var targetId;
+      if(opts.section){ targetId = opts.section; }
+      else { detectCurrentSection(); targetId = currentSectionId; }
+      switchToSection(targetId, /*manual*/false);
+      // Re-render the list and stats so they're fresh on open
+      refreshAllList();
+      refreshChip();
+      // Show
+      backdrop.hidden = false;
+      document.body.classList.add("notes-modal-open");
+      // Focus the textarea
+      setTimeout(function(){ textarea.focus(); }, 30);
+    }
+
+    function closeModal(skipFocus){
+      flushSave();
+      backdrop.hidden = true;
+      document.body.classList.remove("notes-modal-open");
+      if(!skipFocus && lastFocusedBeforeOpen && lastFocusedBeforeOpen.focus){
+        try{ lastFocusedBeforeOpen.focus(); }catch(e){}
+      }
+    }
+
+    // Triggers
+    fab.addEventListener("click", function(){ openModal(); });
+    if(chipBtn) chipBtn.addEventListener("click", function(){ openModal(); });
+    closeBtn.addEventListener("click", function(){ closeModal(); });
+
+    // ESC closes; backdrop click does NOT (per requirement)
+    document.addEventListener("keydown", function(e){
+      // ESC always closes the modal if open
+      if(e.key === "Escape" && !backdrop.hidden){
+        e.preventDefault();
+        closeModal();
+        return;
+      }
+      // 'n' opens the modal — but only when the user isn't typing in another field
+      if((e.key === "n" || e.key === "N") && backdrop.hidden && !e.ctrlKey && !e.metaKey && !e.altKey){
+        var t = e.target;
+        var tag = t && t.tagName ? t.tagName.toUpperCase() : "";
+        if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+        e.preventDefault();
+        openModal();
+      }
+    });
+
+    // Trap focus inside the modal while it's open (basic implementation)
+    backdrop.addEventListener("keydown", function(e){
+      if(backdrop.hidden) return;
+      if(e.key !== "Tab") return;
+      var focusables = backdrop.querySelectorAll(
+        "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+      );
+      var visible = Array.prototype.filter.call(focusables, function(el){ return !el.disabled && el.offsetParent !== null; });
+      if(visible.length === 0) return;
+      var first = visible[0], last = visible[visible.length-1];
+      if(e.shiftKey && document.activeElement === first){
+        e.preventDefault(); last.focus();
+      } else if(!e.shiftKey && document.activeElement === last){
+        e.preventDefault(); first.focus();
+      }
+    });
+
+    /* ---------- Initial pass ---------- */
+    refreshChip();
+    refreshTocDots();
+    refreshAllList();
+    // Pre-populate the picker with current section so the modal opens fast
+    switchToSection(currentSectionId, /*manual*/false);
+
+    // Keep "saved X ago" indicator fresh while the modal is open
+    setInterval(function(){
+      if(backdrop.hidden) return;
+      var iso = storage.get(lastSavedKey());
+      if(iso && metaStatus.textContent.indexOf("Saved") === 0){
+        metaStatus.textContent = "Saved \u00B7 " + fmtTime(iso);
+      }
+    }, 20 * 1000);
+
+    // beforeunload warning only if storage is in-memory (otherwise localStorage holds the data)
+    if(!storage.isReal){
+      window.addEventListener("beforeunload", function(e){
+        if(collectNotes().length > 0){
+          e.preventDefault();
+          e.returnValue = "Your notes will be lost — download them first.";
+          return e.returnValue;
+        }
+      });
+    }
+
   })();
 
 })();
