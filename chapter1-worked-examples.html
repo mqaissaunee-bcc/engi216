@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENGI 216 · Chapter 1 Worked Examples — Mobility &amp; Degrees of Freedom</title>
+<meta name="description" content="Interactive worked-example companion for ENGI 216 Chapter 1: computing the degrees of freedom of planar mechanisms with Gruebler's criterion. Twelve animated, step-by-step examples plus a live mobility calculator, a link-and-joint counter, and self-check problems.">
+<style>
+  :root{
+    --ink:        #10243a;
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- header ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+  }
+  header.site::after{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px; pointer-events:none;
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:1; }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.14em;
+    text-transform:uppercase; background:rgba(243,241,231,.14); color:#f3f1e7;
+    padding:5px 12px; border-radius:20px; border:1px solid rgba(243,241,231,.25);
+  }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; font-size:clamp(1.7rem,4.4vw,2.6rem);
+    margin:.4em 0 .2em; line-height:1.12;
+  }
+  header.site .sub{ font-size:1.04rem; max-width:60ch; color:#e6e2d4; margin:.2em 0 1em; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:8px 22px; font-family:var(--mono); font-size:.8rem; color:#cfe0ec; }
+  .meta-row span{ white-space:nowrap; }
+
+  /* ---------- toc nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50; background:var(--panel);
+    border-bottom:1px solid var(--panel-line); box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  nav.toc .wrap{
+    max-width:var(--maxw); margin:0 auto; padding:0 8px;
+    display:flex; gap:2px; overflow-x:auto; scrollbar-width:thin;
+  }
+  nav.toc a{
+    flex:0 0 auto; font-family:var(--mono); font-size:.78rem; letter-spacing:.02em;
+    color:var(--ink-soft); text-decoration:none; padding:11px 12px; border-bottom:3px solid transparent;
+    white-space:nowrap; min-height:44px; display:flex; align-items:center;
+  }
+  nav.toc a:hover{ color:var(--accent-dk); }
+  nav.toc a.active{ color:var(--accent-dk); border-bottom-color:var(--accent); font-weight:700; }
+  nav.toc a:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; border-radius:4px; }
+
+  /* ---------- layout ---------- */
+  main{ max-width:var(--maxw); margin:0 auto; padding:8px 18px 60px; }
+  section{ padding:30px 0 8px; border-bottom:1px solid var(--panel-line); }
+  section:last-of-type{ border-bottom:none; }
+  .sec-tag{
+    display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:2px;
+  }
+  h2{ font-family:var(--serif); font-weight:700; font-size:clamp(1.4rem,3vw,2rem); line-height:1.18; margin:.1em 0 .5em; }
+  h3{ font-family:var(--serif); font-weight:700; font-size:1.22rem; margin:1.1em 0 .35em; }
+  h4{ font-family:var(--mono); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-dk); margin:1.1em 0 .3em; }
+  p{ margin:.55em 0; }
+  .lead{ font-size:1.08rem; color:var(--ink); }
+  a{ color:var(--accent-dk); }
+  strong{ color:var(--ink); }
+  em{ color:var(--ink); }
+
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:1.5em; margin:.4em 0; }
+  ul.clean li::before{ content:"▸"; position:absolute; left:0; color:var(--accent); font-weight:700; }
+
+  /* ---------- cards & boxes ---------- */
+  .card{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:18px 20px; margin:16px 0; box-shadow:var(--shadow); }
+  .grid3{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:14px 0; }
+  .defn{ background:var(--paper-2); border:1px solid var(--panel-line); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:11px 14px; font-size:.95rem; }
+  .defn strong{ color:var(--accent-dk); }
+
+  /* ---------- callouts ---------- */
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; display:block; margin-bottom:3px; }
+  .analogy{ border-left:4px solid var(--accent); background:linear-gradient(180deg, var(--paper-2), var(--panel)); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; }
+  .analogy::before{ content:"\1F4A1"; position:absolute; left:14px; top:13px; font-size:1.2rem; line-height:1; }
+  .analogy .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; margin-bottom:3px; }
+  .analogy p:last-child{ margin-bottom:0; }
+  .realworld{ border:1px solid var(--panel-line); border-left:4px solid var(--accent-2); background:var(--panel); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; box-shadow:var(--shadow); }
+  .realworld::before{ content:"\1F527"; position:absolute; left:14px; top:13px; font-size:1.15rem; line-height:1; }
+  .realworld .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:3px; }
+  .realworld p:last-child{ margin-bottom:0; }
+  .realworld ul{ margin:.4em 0 0; padding-left:1.1em; }
+  .realworld li{ margin:.3em 0; }
+
+  /* ---------- equation ---------- */
+  .eq{ font-family:var(--serif); font-size:1.18rem; text-align:center; margin:14px 0; padding:12px; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; overflow-x:auto; }
+  .eq .term{ color:var(--accent-dk); font-style:italic; }
+  .eq .op{ color:var(--accent-2); }
+  var{ font-family:var(--serif); font-style:italic; color:var(--accent-dk); }
+  sub{ font-size:.7em; }
+
+  /* ---------- tables ---------- */
+  .tbl-wrap{ overflow-x:auto; margin:14px 0; }
+  table{ border-collapse:collapse; width:100%; font-size:.93rem; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; overflow:hidden; }
+  caption{ caption-side:top; text-align:left; font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding:0 0 6px; }
+  th, td{ text-align:left; padding:9px 12px; border-bottom:1px solid var(--panel-line); vertical-align:top; }
+  thead th{ background:var(--ink); color:#f3f1e7; font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; font-weight:700; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:nth-child(even){ background:var(--paper-2); }
+  td.num, th.num{ text-align:center; font-family:var(--mono); }
+
+  /* ---------- SVG stage ---------- */
+  .stage{ width:100%; height:auto; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; display:block; }
+  .stage-wrap{ margin:0; }
+  .stage-cap{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin:6px 2px 0; }
+  text.lk{ font-family:var(--mono); font-size:13px; font-weight:700; }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:var(--mono); font-size:.82rem; font-weight:700; letter-spacing:.03em;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:0 16px; min-height:44px; min-width:44px; cursor:pointer; display:inline-flex;
+    align-items:center; justify-content:center; gap:7px; transition:background .15s ease, transform .05s ease;
+  }
+  .btn:hover{ background:var(--accent-dk); }
+  .btn:active{ transform:translateY(1px); }
+  .btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .btn[disabled]{ background:var(--panel-line); color:var(--ink-soft); cursor:not-allowed; }
+  .btn.ghost{ background:transparent; color:var(--accent-dk); border:1.5px solid var(--accent); }
+  .btn.ghost:hover{ background:var(--paper-2); }
+  .btn.rust{ background:var(--accent-2); }
+  .btn.rust:hover{ background:#9c4316; }
+  .btn.sm{ min-height:34px; font-size:.74rem; padding:0 11px; }
+
+  /* ---------- tool panel ---------- */
+  .tool{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent); border-radius:var(--radius); padding:18px 20px; margin:16px 0; box-shadow:var(--shadow); }
+  .tool .tool-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; }
+  .field-row{ display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin:12px 0; }
+  .field{ display:flex; flex-direction:column; gap:4px; }
+  .field label{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); font-weight:700; }
+  .field input[type=number]{
+    width:84px; font-family:var(--mono); font-size:1rem; padding:8px 10px; min-height:44px;
+    border:1.5px solid var(--panel-line); border-radius:8px; background:var(--paper); color:var(--ink);
+  }
+  .field input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .stepper-input{ display:flex; align-items:center; gap:6px; }
+  .stepper-input button{ font-family:var(--mono); font-size:1.1rem; min-width:38px; min-height:44px; border:1.5px solid var(--panel-line); background:var(--paper-2); color:var(--ink); border-radius:8px; cursor:pointer; }
+  .stepper-input button:hover{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .readout{ font-family:var(--serif); font-size:1.5rem; }
+  .readout .big{ font-size:2.2rem; font-weight:700; color:var(--accent-dk); }
+  .verdict{ font-family:var(--mono); font-size:.86rem; font-weight:700; padding:8px 12px; border-radius:8px; margin-top:8px; display:inline-block; }
+  .verdict.mech{ background:var(--good-bg); color:var(--good); }
+  .verdict.struct{ background:var(--warn-bg); color:var(--warn); }
+  .verdict.indet{ background:var(--bad-bg); color:var(--bad); }
+
+  /* ---------- example article ---------- */
+  .example{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:0; margin:22px 0; box-shadow:var(--shadow); overflow:hidden; }
+  .example > .ex-head{ background:linear-gradient(135deg, var(--ink), var(--ink-soft)); color:#f3f1e7; padding:14px 20px; }
+  .ex-badge{ display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; background:var(--accent-2); color:#fff; padding:3px 10px; border-radius:5px; }
+  .ex-head h3{ font-family:var(--serif); color:#fff; margin:.35em 0 0; font-size:1.25rem; }
+  .ex-body{ padding:18px 20px; }
+  .ex-prompt{ font-size:1rem; }
+  .ex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; margin-top:8px; }
+  @media (max-width:760px){ .ex-grid{ grid-template-columns:1fr; } }
+
+  .play-row{ display:flex; gap:8px; align-items:center; margin:8px 0 0; flex-wrap:wrap; }
+  .play-row .drv{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+
+  /* ---------- stepper ---------- */
+  .stepper{ border:1px solid var(--panel-line); border-radius:10px; background:var(--paper); }
+  .stepper .progress-pips{ display:flex; gap:5px; padding:12px 14px 0; flex-wrap:wrap; }
+  .pip{ width:24px; height:6px; border-radius:3px; background:var(--panel-line); }
+  .pip.done{ background:var(--accent); }
+  .pip.cur{ background:var(--accent-2); }
+  .step-track{ padding:8px 16px 4px; min-height:120px; }
+  .step{ animation:fade .25s ease; }
+  @keyframes fade{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .step{ animation:none; } }
+  .step h5{ font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-dk); margin:.2em 0 .3em; }
+  .step p{ margin:.35em 0; font-size:.96rem; }
+  .step .mini-eq{ font-family:var(--serif); font-size:1.05rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:6px; padding:7px 10px; margin:8px 0; text-align:center; overflow-x:auto; }
+  .tally{ font-family:var(--mono); font-size:.85rem; }
+  .tally b{ color:var(--accent-dk); }
+  .answer{ margin:6px 16px 14px; padding:14px 16px; border:2px solid var(--good); border-radius:10px; background:var(--good-bg); }
+  .answer.struct{ border-color:var(--warn); background:var(--warn-bg); }
+  .answer.indet{ border-color:var(--bad); background:var(--bad-bg); }
+  .answer .ans-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--good); }
+  .answer.struct .ans-h{ color:var(--warn); }
+  .answer.indet .ans-h{ color:var(--bad); }
+  .answer .big-eq{ font-family:var(--serif); font-size:1.15rem; text-align:center; margin:8px 0; overflow-x:auto; }
+  .step-controls{ display:flex; align-items:center; gap:8px; padding:8px 14px 14px; flex-wrap:wrap; border-top:1px solid var(--panel-line); }
+  .step-count{ font-family:var(--mono); font-size:.78rem; color:var(--ink-soft); margin-left:auto; }
+
+  /* ---------- self-check quiz ---------- */
+  .q{ background:var(--panel); border:1px solid var(--panel-line); border-radius:10px; padding:16px 18px; margin:14px 0; box-shadow:var(--shadow); }
+  .q .qnum{ font-family:var(--mono); font-size:.72rem; color:var(--accent-2); font-weight:700; letter-spacing:.08em; }
+  .q .qtext{ font-weight:600; margin:.2em 0 .6em; }
+  .opt{ display:block; width:100%; text-align:left; font-family:var(--sans); font-size:.95rem; background:var(--paper); border:1.5px solid var(--panel-line); border-radius:8px; padding:10px 14px; margin:6px 0; min-height:44px; cursor:pointer; color:var(--ink); }
+  .opt:hover{ border-color:var(--accent); }
+  .opt:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .opt.correct{ background:var(--good-bg); border-color:var(--good); color:var(--good); font-weight:700; }
+  .opt.wrong{ background:var(--bad-bg); border-color:var(--bad); color:var(--bad); }
+  .opt .mk{ font-weight:700; margin-right:6px; }
+  .feedback{ font-size:.9rem; margin-top:8px; padding:10px 12px; border-radius:8px; background:var(--paper-2); border-left:3px solid var(--accent); display:none; }
+  .feedback.show{ display:block; }
+
+  /* ---------- formula card ---------- */
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:12px; padding:0; margin:16px 0; overflow:hidden; }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--serif); font-size:1.15rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:16px 18px; }
+  .rc-eq{ font-family:var(--serif); font-size:1.3rem; text-align:center; padding:10px; background:var(--paper-2); border-radius:8px; margin:0 0 12px; }
+
+  /* ---------- glossary ---------- */
+  .gloss-search{ width:100%; max-width:420px; font-family:var(--sans); font-size:1rem; padding:10px 14px; min-height:44px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--paper); color:var(--ink); margin:6px 0 12px; }
+  .gloss-search:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  dl.gloss{ margin:0; }
+  dl.gloss > div{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:8px 0; background:var(--panel); }
+  dl.gloss dt{ font-family:var(--serif); font-weight:700; font-size:1.04rem; color:var(--accent-dk); }
+  dl.gloss dd{ margin:.25em 0 0; font-size:.95rem; }
+  .gloss-none{ color:var(--ink-soft); font-style:italic; }
+
+  /* ---------- resources ---------- */
+  .res-cat{ font-family:var(--mono); font-size:.76rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin:14px 0 4px; }
+  .res-list{ list-style:none; padding:0; margin:0; }
+  .res-list li{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:7px 0; background:var(--panel); }
+  .res-list a{ font-weight:700; }
+  .ext::after{ content:" \2197"; font-size:.85em; color:var(--accent-2); }
+  .res-list .desc{ display:block; font-size:.88rem; color:var(--ink-soft); margin-top:2px; }
+
+  /* ---------- progress dock ---------- */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  /* ---------- footer ---------- */
+  footer{ background:var(--ink); color:#cfe0ec; padding:22px 18px; text-align:center; font-size:.86rem; }
+  footer .program{ color:#f3f1e7; font-weight:700; }
+  footer a{ color:#9fd8ee; }
+
+  .note{ font-size:.86rem; color:var(--ink-soft); }
+  hr.soft{ border:none; border-top:1px dashed var(--panel-line); margin:18px 0; }
+
+  /* ---------- print ---------- */
+  @media print{
+    nav.toc, .progress-dock, .play-row, .step-controls, button, .gloss-search{ display:none !important; }
+    body{ background:#fff; font-size:12px; }
+    .step[hidden]{ display:block !important; }
+    .answer[hidden]{ display:block !important; }
+    .example, .card, .tool, .refcard{ box-shadow:none; break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Chapter 1 · Worked Examples</span>
+    <h1>Mobility &amp; Degrees of Freedom</h1>
+    <p class="sub">Twelve textbook examples worked step by step &mdash; counting links and joints, applying Gruebler&rsquo;s criterion, and learning where it can be fooled. Built to run live in class.</p>
+    <div class="meta-row">
+      <span>◷ ~3 hour problem session</span>
+      <span>◆ 12 animated examples</span>
+      <span>✎ Calculator · counter · self-check</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Worked-example sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#foundations">Foundations</a>
+    <a href="#calculator">Calculator</a>
+    <a href="#counter">Counter</a>
+    <a href="#grp-1">1.2&ndash;1.5 · Basics</a>
+    <a href="#grp-2">1.6&ndash;1.8 · Sliders</a>
+    <a href="#grp-3">1.9&ndash;1.11 · Contacts</a>
+    <a href="#grp-4">1.13&ndash;1.15 · Limits</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Orientation</span>
+  <h2 id="start-h">How to use this problem session</h2>
+  <p class="lead">Every example in Chapter 1 asks the same core question in a new disguise: <em>how many independent inputs does it take to fully control this device?</em> That number is its <strong>mobility</strong>, and one compact formula answers it. Today we apply that formula twelve times, watch each mechanism move, and find the two places the formula quietly lies.</p>
+
+  <div class="card">
+    <h3 style="margin-top:.2em">Each example works the same way</h3>
+    <ul class="clean">
+      <li><strong>Watch first.</strong> Press <em>Play</em> on the animated skeleton to see the motion before you count anything &mdash; your eyes should agree with the arithmetic at the end.</li>
+      <li><strong>Step through the reasoning.</strong> Use <em>Next</em> to advance one logical step at a time: identify the links, count the joints, substitute, interpret. Good for working it on the board together.</li>
+      <li><strong>Reveal the answer.</strong> On the last step, the boxed result and its physical meaning appear. Try to predict it before you reveal.</li>
+    </ul>
+    <p class="note">Everything runs offline in a single file &mdash; safe to embed in Canvas, project from a laptop with no Wi-Fi, or hand to students to replay.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; the TV remote</span>
+    <p>Mobility is the number of buttons you must press to put a system in <em>exactly</em> the pose you want. A door (one hinge) needs one button: its angle. A robot arm with three joints needs three. If a device needs <em>zero</em> independent inputs to be fully defined, it cannot move at all &mdash; it is a structure, not a mechanism.</p>
+  </div>
+
+  <div class="callout">
+    <span class="h">The one equation behind all twelve</span>
+    <div class="eq"><var>F</var> <span class="op">=</span> 3(<var>N</var> <span class="op">&minus;</span> 1) <span class="op">&minus;</span> 2<var>P</var><sub>1</sub> <span class="op">&minus;</span> <var>P</var><sub>2</sub></div>
+    <p style="margin:.3em 0 0"><var>N</var> = number of links (count the ground as one). <var>P</var><sub>1</sub> = lower pairs (1-DOF joints: pins and sliders). <var>P</var><sub>2</sub> = higher pairs (2-DOF joints: a slipping point or line contact). This is the planar <strong>Kutzbach&ndash;Gruebler criterion</strong>; Stanišić writes it exactly as above.</p>
+  </div>
+</section>
+
+<!-- ============ FOUNDATIONS ============ -->
+<section id="foundations" aria-labelledby="found-h">
+  <span class="sec-tag">Foundations · the four rules that decide every count</span>
+  <h2 id="found-h">Before you count: links, pairs, and the traps</h2>
+  <p>The formula is trivial arithmetic. The skill is the <em>counting</em>, and four recurring decisions account for nearly every wrong answer students give. Each one shows up in the examples below.</p>
+
+  <h3>Where the numbers come from</h3>
+  <div class="tbl-wrap">
+  <table>
+    <caption>Each term in Gruebler&rsquo;s equation, and the physical idea behind it</caption>
+    <thead><tr><th>Symbol</th><th>Counts</th><th>Why that coefficient</th></tr></thead>
+    <tbody>
+      <tr><td class="num"><var>3(N&minus;1)</var></td><td>Total freedom of all moving links</td><td>A free rigid body in a plane has 3 DOF (x, y, rotation). We subtract 1 link because the <strong>ground is fixed</strong> &mdash; it contributes no freedom.</td></tr>
+      <tr><td class="num"><var>&minus;2P</var><sub>1</sub></td><td>Lower pairs (pin, slider)</td><td>A 1-DOF joint <em>removes</em> 2 of the 3 freedoms between the two links it connects (it allows one motion, forbids two).</td></tr>
+      <tr><td class="num"><var>&minus;P</var><sub>2</sub></td><td>Higher pairs (slipping contact)</td><td>A 2-DOF joint allows two relative motions (roll <em>and</em> slip), so it removes only 1 freedom.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>The joint taxonomy you must recognize on sight</h3>
+  <div class="tbl-wrap">
+  <table>
+    <caption>Lower pairs vs. higher pairs in planar mechanisms</caption>
+    <thead><tr><th>Joint</th><th>Picture</th><th>Type</th><th>Counts as</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pin / revolute</strong></td><td>circle with a dot; links rotate about a shared axis</td><td>Lower pair</td><td class="num"><var>P</var><sub>1</sub></td></tr>
+      <tr><td><strong>Slider / prismatic</strong></td><td>a block on a rail; links translate along a line</td><td>Lower pair</td><td class="num"><var>P</var><sub>1</sub></td></tr>
+      <tr><td><strong>Rolling contact</strong> (hash-marked)</td><td>two curves touching with a hatch mark = <em>no slipping</em></td><td>Lower pair</td><td class="num"><var>P</var><sub>1</sub></td></tr>
+      <tr><td><strong>Slipping contact</strong> (no hash mark)</td><td>a point/line touch that can roll <em>and</em> slide</td><td>Higher pair</td><td class="num"><var>P</var><sub>2</sub></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <span class="h">Trap 1 &mdash; the hash mark decides P₁ vs P₂</span>
+    <p>A point contact <em>with</em> a hatch mark (✶) is a <strong>rolling joint</strong> &rarr; lower pair, <var>P</var><sub>1</sub>. The same picture <em>without</em> the mark is a <strong>slipping joint</strong> &rarr; higher pair, <var>P</var><sub>2</sub>. Example 1.9 (rolling) and Example 1.11 (slipping) differ by nothing but that mark.</p>
+  </div>
+
+  <div class="callout">
+    <span class="h">Trap 2 &mdash; multi-link pins count more than once</span>
+    <p>When <strong>three or more links</strong> share one pin, it is <em>not</em> one joint. Rule: a pin joining <var>k</var> links counts as <strong><var>k</var> &minus; 1 pin joints</strong>. A triple pin (3 links) = 2 lower pairs. This single rule is the difference between right and wrong in Examples 1.6 and 1.10.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; a group handshake</span>
+    <p>If two people shake hands, that&rsquo;s one handshake. If three people all clasp the same grip, how many <em>pairwise</em> connections is that? Three people sharing one pin behave like two independent pin joints, because it takes two pairings to tie all three together. That&rsquo;s the <var>k</var>&minus;1 rule.</p>
+  </div>
+
+  <div class="callout">
+    <span class="h">Trap 3 &mdash; what counts as a &ldquo;link&rdquo;</span>
+    <p>The <strong>ground/frame is one link</strong>, no matter how many separate mounting points it has. Two pillow blocks bolted to the same bench are <em>one</em> ground link. And a part that only translates (a slider block) is still a full link with its own potential 3 DOF before its joints constrain it.</p>
+  </div>
+
+  <div class="callout">
+    <span class="h">Trap 4 &mdash; F is a prediction, not always the truth</span>
+    <p>Gruebler counts joints but is <strong>blind to geometry</strong>. When links have special proportions (parallel bars, equal-radius gears, a redundant support), the real mobility <var>M</var> can differ from the computed <var>F</var>. We meet this head-on in Group E (Examples 1.13 and 1.14). When that happens, trust the <em>freezing test</em>, not the formula.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Why an engineer cares about this number</span>
+    <p>Mobility equals the number of independent <strong>actuators</strong> (motors, cylinders, hands) you must supply to control a machine. <var>F</var> = 1 means one motor fully drives it &mdash; cheap, predictable, the workhorse of industry (engines, pumps, wipers). <var>F</var> = 2 buys richer motion (the elliptical trainer that morphs between stair-stepping and striding) at the cost of a second input. <var>F</var> &le; 0 means you have accidentally designed a <em>structure</em> &mdash; useful for a bridge, useless for a linkage.</p>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR ============ -->
+<section id="calculator" aria-labelledby="calc-h">
+  <span class="sec-tag">Interactive tool</span>
+  <h2 id="calc-h">Live mobility calculator</h2>
+  <p>Type or tap in the counts and watch <var>F</var> and its interpretation update instantly. Use it to check the class&rsquo;s arithmetic on any example, or to explore &ldquo;what if we added one more link?&rdquo;</p>
+
+  <div class="tool" role="group" aria-labelledby="calc-h2">
+    <span class="tool-h" id="calc-h2">Gruebler / Kutzbach &mdash; planar</span>
+    <div class="field-row">
+      <div class="field">
+        <label for="calcN">N &mdash; links (incl. ground)</label>
+        <div class="stepper-input">
+          <button type="button" data-calc-dec="N" aria-label="Decrease number of links">&minus;</button>
+          <input type="number" id="calcN" value="4" min="1" step="1" inputmode="numeric">
+          <button type="button" data-calc-inc="N" aria-label="Increase number of links">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="calcP1">P&#8321; &mdash; lower pairs</label>
+        <div class="stepper-input">
+          <button type="button" data-calc-dec="P1" aria-label="Decrease lower pairs">&minus;</button>
+          <input type="number" id="calcP1" value="4" min="0" step="1" inputmode="numeric">
+          <button type="button" data-calc-inc="P1" aria-label="Increase lower pairs">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="calcP2">P&#8322; &mdash; higher pairs</label>
+        <div class="stepper-input">
+          <button type="button" data-calc-dec="P2" aria-label="Decrease higher pairs">&minus;</button>
+          <input type="number" id="calcP2" value="0" min="0" step="1" inputmode="numeric">
+          <button type="button" data-calc-inc="P2" aria-label="Increase higher pairs">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="eq" id="calcEq" aria-hidden="true"></div>
+    <p class="readout" aria-live="polite">F = <span class="big" id="calcF">1</span>
+      <span class="verdict mech" id="calcVerdict">one-DOF mechanism &mdash; one driver</span>
+    </p>
+    <div class="field-row" style="margin-top:6px">
+      <span class="play-row drv">Load an example:&nbsp;</span>
+      <button type="button" class="btn ghost sm" data-preset="4,3,0">1.2 robot arm</button>
+      <button type="button" class="btn ghost sm" data-preset="4,4,0">1.5 four-bar</button>
+      <button type="button" class="btn ghost sm" data-preset="3,2,1">1.7 chair</button>
+      <button type="button" class="btn ghost sm" data-preset="9,11,0">1.6 loader</button>
+      <button type="button" class="btn ghost sm" data-preset="4,3,2">1.11 clamp</button>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Read the sign of F like a traffic light</span>
+    <p><strong>F &ge; 1</strong> &rarr; green: a working mechanism, F drivers needed. <strong>F = 0</strong> &rarr; yellow: a just-rigid structure (statically determinate). <strong>F &lt; 0</strong> &rarr; red: over-constrained &mdash; redundant supports, statically indeterminate. The calculator labels each case for you.</p>
+  </div>
+</section>
+
+<!-- ============ COUNTER ============ -->
+<section id="counter" aria-labelledby="cnt-h">
+  <span class="sec-tag">Interactive tool</span>
+  <h2 id="cnt-h">Link &amp; joint counter</h2>
+  <p>Tally a mechanism the way you would at the board: add each link and each joint as you spot it. The counter applies the <var>k</var>&minus;1 rule for shared pins automatically and keeps a running <var>F</var> so mistakes surface immediately.</p>
+
+  <div class="tool" role="group" aria-labelledby="cnt-h2">
+    <span class="tool-h" id="cnt-h2">Running tally</span>
+    <div class="field-row" style="gap:8px">
+      <button type="button" class="btn sm" data-cnt="link">+ Link</button>
+      <button type="button" class="btn sm" data-cnt="pin">+ Pin (2 links)</button>
+      <button type="button" class="btn sm" data-cnt="slider">+ Slider</button>
+      <button type="button" class="btn sm" data-cnt="roll">+ Rolling (hash)</button>
+      <button type="button" class="btn sm rust" data-cnt="slip">+ Slipping</button>
+    </div>
+    <div class="field-row" style="gap:8px; align-items:flex-end">
+      <div class="field">
+        <label for="cntMulti">Shared pin: links meeting here</label>
+        <div class="stepper-input">
+          <input type="number" id="cntMulti" value="3" min="3" step="1" inputmode="numeric" style="width:70px">
+          <button type="button" class="btn sm" data-cnt="multi">Add as pin</button>
+        </div>
+      </div>
+      <button type="button" class="btn ghost sm" data-cnt="reset">Reset</button>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:10px">
+    <table>
+      <caption>Live tally</caption>
+      <thead><tr><th>Quantity</th><th class="num">Count</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Links, <var>N</var></td><td class="num" id="cntN">0</td><td class="note">includes the ground link</td></tr>
+        <tr><td>Lower pairs, <var>P</var><sub>1</sub></td><td class="num" id="cntP1">0</td><td class="note"><span id="cntPinTxt">0 pins</span>, <span id="cntSldTxt">0 sliders</span>, <span id="cntRollTxt">0 rolling</span></td></tr>
+        <tr><td>Higher pairs, <var>P</var><sub>2</sub></td><td class="num" id="cntP2">0</td><td class="note">slipping point/line contacts</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="readout" aria-live="polite">F = <span class="big" id="cntF">0</span>
+      <span class="verdict struct" id="cntVerdict">add some links to begin</span>
+    </p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Try it on a pair of scissors</span>
+    <p>Two blades + the bolt that joins them, treating one blade as ground: <em>+ Link</em> (ground blade), <em>+ Link</em> (moving blade), <em>+ Pin</em>. You get N = 2, P&#8321; = 1, F = 3(2&minus;1) &minus; 2(1) = 1. One input &mdash; your hand&rsquo;s squeeze &mdash; fully controls the cut. Every plier, clamp, and nutcracker is the same single-DOF idea.</p>
+  </div>
+</section>
+
+<!-- ============ GROUP 1 ============ -->
+<section id="grp-1" aria-labelledby="g1-h">
+  <span class="sec-tag">Worked examples · 1.2 &ndash; 1.5</span>
+  <h2 id="g1-h">Group 1 &mdash; pins only: open and closed chains</h2>
+  <p>We start where every count is unambiguous: mechanisms built from links and pin joints alone, with no sliders and no contacts. These three establish the rhythm &mdash; <em>count links, count pins, substitute</em> &mdash; and show the difference between an open chain that needs many drivers and a closed loop that needs just one.</p>
+
+  <!-- 1.2 -->
+  <article class="example" id="ex-1-2">
+    <div class="ex-head"><span class="ex-badge">Example 1.2</span><h3>A planar robot arm</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">A planar robot arm has a base link bolted to the floor and three serial segments, each joined to the next by a pin. Find the theoretical degrees of freedom.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_2" class="stage" viewBox="0 0 360 280" role="img" aria-label="A planar robot arm: a grounded base with three serial links connected by pin joints, each rotating independently."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_2">&#9654; Play</button><span class="drv" id="drv_st_1_2">3 joints rotate independently</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; illustrative motion of all three joints.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>The base is the ground link. Add the three arm segments. <span class="tally"><b>N = 4</b></span> (ground + 3 moving links).</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Count the joints</h5><p>Every connection here is a simple pin between exactly two links: base&ndash;1, 1&ndash;2, 2&ndash;3. <span class="tally"><b>P&#8321; = 3</b></span>. No sliding or rolling contacts, so <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Substitute</h5><div class="mini-eq">F = 3(4 &minus; 1) &minus; 2(3) &minus; 0</div><p>= 9 &minus; 6 = 3. Predict the result, then reveal.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 3</span>
+              <div class="big-eq">F = 3(4 &minus; 1) &minus; 2(3) &minus; 0 = <strong>3</strong></div>
+              <p>An open serial chain. You must specify the rotation at <em>each</em> of the three pins to fix the arm&rsquo;s pose &mdash; so it needs three motors. That is exactly why a basic articulated robot arm carries one actuator per joint.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; your own arm</span><p>Shoulder, elbow, wrist: three joints you can angle independently. To touch a precise point you set all three. An open chain &ldquo;spends&rdquo; one degree of freedom per pin because nothing loops back to constrain it.</p></div>
+      <div class="realworld"><span class="h">Where you see F = 3</span><p>SCARA and articulated pick-and-place robots, desk lamps, and excavator arms are open chains: each added joint adds a degree of freedom and a motor or cylinder to command it.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.4 -->
+  <article class="example" id="ex-1-4">
+    <div class="ex-head"><span class="ex-badge">Example 1.4</span><h3>An automobile hood linkage</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">A car hood is raised by a six-bar linkage that keeps the hood clear of the fender as it swings up. Count its degrees of freedom.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_4" class="stage" viewBox="0 0 360 280" role="img" aria-label="A six-bar automobile hood linkage swinging the hood open and closed, driven by a single rotating link."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_4">&#9654; Play</button><span class="drv" id="drv_st_1_4">hood swings open/closed</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; single-input opening motion.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>Six rigid pieces make up this linkage, the car body counting as the single ground link. <span class="tally"><b>N = 6</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Count the joints</h5><p>All connections are pins &mdash; seven of them &mdash; and every pin joins exactly two links. <span class="tally"><b>P&#8321; = 7</b></span>, <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Substitute</h5><div class="mini-eq">F = 3(6 &minus; 1) &minus; 2(7) &minus; 0</div><p>= 15 &minus; 14. What does that leave?</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">F = 3(6 &minus; 1) &minus; 2(7) &minus; 0 = <strong>1</strong></div>
+              <p>One degree of freedom: lifting the hood sets one angle, and the whole linkage follows. A single gas strut (or your hand) fully controls it &mdash; no second input required.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a folding ironing board</span><p>Many linked bars, but one motion: you lift, and every bar moves in lockstep to a determined pose. More links did not add freedom because the loop constrains them.</p></div>
+      <div class="realworld"><span class="h">Why six bars instead of one hinge?</span><p>A plain hinge would swing the hood&rsquo;s back edge into the windshield. Designers add links to shape the <em>path</em> while keeping mobility at 1 &mdash; complex motion, single input.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.5 -->
+  <article class="example" id="ex-1-5">
+    <div class="ex-head"><span class="ex-badge">Example 1.5</span><h3>The four-bar linkage</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">The most important mechanism in the course: four links joined in a closed loop by four pins (one link is the ground). Find F.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_5" class="stage" viewBox="0 0 360 280" role="img" aria-label="A four-bar linkage: ground, crank, coupler, and rocker forming a closed loop, the crank driving the motion."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_5">&#9654; Play</button><span class="drv" id="drv_st_1_5">crank drives the loop</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; one input angle drives all links.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>Ground, crank, coupler, rocker &mdash; four links in a closed loop. <span class="tally"><b>N = 4</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Count the joints</h5><p>Four pins close the loop, each joining two links. <span class="tally"><b>P&#8321; = 4</b></span>, <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Substitute</h5><div class="mini-eq">F = 3(4 &minus; 1) &minus; 2(4) &minus; 0</div><p>= 9 &minus; 8. Note: same N as the robot arm, but one more joint.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">F = 3(4 &minus; 1) &minus; 2(4) &minus; 0 = <strong>1</strong></div>
+              <p>Closing the chain into a loop added one joint, which cost two degrees of freedom &mdash; dropping the open arm&rsquo;s F = 3 down to F = 1. Specify the crank angle and the coupler and rocker positions are fixed. This single-input loop is the backbone of half the mechanisms you will ever analyze.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; open hand vs. clasped hands</span><p>An open three-segment chain flops freely (F = 3). Join the far end back to the frame &mdash; clasp the loop &mdash; and suddenly one motion drives everything (F = 1). Closing a loop is how engineers tame freedom.</p></div>
+      <div class="realworld"><span class="h">The four-bar is everywhere</span><p>Windshield wipers, locking pliers, bicycle brakes, the parallel-bar lamp, oil-well pump jacks, and the suspension on your car all hide a four-bar. Learn this one cold.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ GROUP 2 ============ -->
+<section id="grp-2" aria-labelledby="g2-h">
+  <span class="sec-tag">Worked examples · 1.6 &ndash; 1.8</span>
+  <h2 id="g2-h">Group 2 &mdash; sliders, shared pins, and the first higher pair</h2>
+  <p>Now the counting gets interesting. A sliding joint is still a lower pair, but a pin shared by three links is two joints (Trap 2), and a point contact with no hash mark is the first higher pair we meet (Trap 1).</p>
+
+  <!-- 1.6 -->
+  <article class="example" id="ex-1-6">
+    <div class="ex-head"><span class="ex-badge">Example 1.6</span><h3>A small front loader</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">A compact front-end loader lifts and tilts its shovel using two hydraulic cylinders. The skeleton has nine links; one pin near the shovel joins three links at once. Find F.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_6" class="stage" viewBox="0 0 360 280" role="img" aria-label="A front loader skeleton: a boom and shovel linkage driven by two hydraulic cylinders that extend independently, giving two degrees of freedom."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_6">&#9654; Play</button><span class="drv" id="drv_st_1_6">two cylinders extend independently</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; two independent slider motions.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>The skeleton diagram shows nine rigid pieces, the loader body as ground. <span class="tally"><b>N = 9</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Count the lower pairs &mdash; carefully</h5><p>There are nine pin joints, but watch the pin where links 6, 7 and 8 meet: three links on one pin counts as <em>two</em> pins (the k&minus;1 rule). Add the two sliding joints inside the hydraulic cylinders. Total <span class="tally"><b>P&#8321; = 11</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Higher pairs</h5><p>No rolling or slipping point contacts anywhere. <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 · Substitute</h5><div class="mini-eq">F = 3(9 &minus; 1) &minus; 2(11) &minus; 0</div><p>= 24 &minus; 22. How many cylinders did the photo show?</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 2</span>
+              <div class="big-eq">F = 3(9 &minus; 1) &minus; 2(11) &minus; 0 = <strong>2</strong></div>
+              <p>Two degrees of freedom &mdash; matching the two hydraulic cylinders. One sets the boom height, the other the shovel tilt; together they place the bucket anywhere in its workspace. Miss the triple-pin rule and you would compute F = 3 and expect a phantom third cylinder.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; two joysticks</span><p>An F = 2 machine is like a claw game: one stick for height, one for tilt. Two independent inputs, infinitely many combined motions. That extra degree of freedom is what lets the operator both lift <em>and</em> dump.</p></div>
+      <div class="realworld"><span class="h">Count the actuators to check yourself</span><p>On real construction equipment, F should equal the number of independent hydraulic circuits. If your formula and the cylinder count disagree, you miscounted a joint &mdash; almost always a shared pin.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.7 -->
+  <article class="example" id="ex-1-7">
+    <div class="ex-head"><span class="ex-badge">Example 1.7</span><h3>A folding chair (first higher pair)</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">A folding chair lies on its side. A pin at the end of the seat-support leg rides in a slot in the seat &mdash; a point contact with <em>no</em> hash mark, so it can slide. Treat the frame as ground and find the mobility.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_7" class="stage" viewBox="0 0 360 280" role="img" aria-label="A folding chair mechanism: a support link whose pin slides in a slot on the seat, a slipping higher-pair contact, folding the chair open and closed."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_7">&#9654; Play</button><span class="drv" id="drv_st_1_7">pin slides in the slot as it folds</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; the slot contact rolls <em>and</em> slips.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>For this to be a mechanism one link must be fixed &mdash; call it the frame (ground). With the seat and the support link, <span class="tally"><b>N = 3</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Lower pairs</h5><p>Two ordinary pin joints. <span class="tally"><b>P&#8321; = 2</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · The contact &mdash; hash mark or not?</h5><p>The pin at the end of the support rides in a slot. There is <em>no</em> hatch mark, so it can both roll and slide: it is a <strong>slipping joint</strong>, a higher pair. <span class="tally"><b>P&#8322; = 1</b></span>.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 · Substitute</h5><div class="mini-eq">F = 3(3 &minus; 1) &minus; 2(2) &minus; 1</div><p>= 6 &minus; 4 &minus; 1.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">F = 3(3 &minus; 1) &minus; 2(2) &minus; 1 = <strong>1</strong></div>
+              <p>The higher pair subtracts only <em>one</em> degree of freedom (not two), because a slipping contact still permits two relative motions. One input &mdash; the fold angle &mdash; opens and closes the chair.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="callout"><span class="h">The crucial half-point</span><p>A pin or slider removes <strong>2</strong> freedoms (coefficient 2P&#8321;). A slipping contact removes only <strong>1</strong> (coefficient 1&middot;P&#8322;). That asymmetry &mdash; written right into the equation &mdash; is the whole reason we separate lower and higher pairs.</p></div>
+      <div class="analogy"><span class="h">Analogy &mdash; a bead on a wire vs. a pin in a hole</span><p>A pin in a matched hole can only spin (1 freedom allowed, so 2 removed). A bead free to slide <em>along</em> a wire while also turning has more wiggle room (2 freedoms allowed, so only 1 removed). The slot contact is the bead-on-a-wire case.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.8 -->
+  <article class="example" id="ex-1-8">
+    <div class="ex-head"><span class="ex-badge">Example 1.8</span><h3>A racquetball-court door closer</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Viewed from above, the self-closing door at the top of a racquetball court is an <em>inverted</em> crank-slider: three pins and one sliding joint. Find F.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_8" class="stage" viewBox="0 0 360 280" role="img" aria-label="An inverted crank-slider door mechanism viewed from above: a link slides through a pivoting block as the door swings, one degree of freedom."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_8">&#9654; Play</button><span class="drv" id="drv_st_1_8">door swings; link slides in block</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; the slider is a lower pair.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>Door, connecting link, sliding link, and the wall as ground. <span class="tally"><b>N = 4</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Count the joints</h5><p>Three pin joints plus one sliding joint &mdash; and a slider is a <em>lower</em> pair, just like a pin. <span class="tally"><b>P&#8321; = 4</b></span>, <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Substitute</h5><div class="mini-eq">F = 3(4 &minus; 1) &minus; 2(4) &minus; 0</div><p>= 9 &minus; 8. Notice this matches the four-bar &mdash; swap one pin for a slider and F is unchanged.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">F = 3(4 &minus; 1) &minus; 2(4) &minus; 0 = <strong>1</strong></div>
+              <p>One degree of freedom. Because a slider and a pin each remove two freedoms, a crank-slider and a four-bar have identical mobility. The door&rsquo;s single closing motion is fully set by one angle.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a desk drawer on a slide</span><p>A drawer can only go in or out: the slide allows one motion and forbids two, exactly like a pin allows only rotation. Same constraint budget, different geometry.</p></div>
+      <div class="realworld"><span class="h">Crank-sliders run the world</span><p>Every piston engine and compressor is a crank-slider converting rotation to straight-line motion (or back). &ldquo;Inverted&rdquo; just means we picked a different link to be the ground.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ GROUP 3 ============ -->
+<section id="grp-3" aria-labelledby="g3-h">
+  <span class="sec-tag">Worked examples · 1.9 &ndash; 1.11</span>
+  <h2 id="g3-h">Group 3 &mdash; rolling vs. slipping, and two-DOF machines</h2>
+  <p>Three exercise-machine and tool problems that hinge entirely on reading contacts correctly. The same Precor product line gives a one-DOF and a two-DOF machine; a clamping tool shows how two slipping contacts together behave like a single pin.</p>
+
+  <!-- 1.9 -->
+  <article class="example" id="ex-1-9">
+    <div class="ex-head"><span class="ex-badge">Example 1.9</span><h3>Precor EFX elliptical trainer</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">An elliptical cross-trainer. One point contact carries a hash mark, indicating a rolling joint. Find the mobility.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_9" class="stage" viewBox="0 0 360 280" role="img" aria-label="An elliptical trainer linkage with a hash-marked rolling contact; a single drive produces the foot's elliptical path, one degree of freedom."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_9">&#9654; Play</button><span class="drv" id="drv_st_1_9">single drive &rarr; elliptical foot path</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; hash mark = rolling = lower pair.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>The skeleton has six links, the frame as ground. <span class="tally"><b>N = 6</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Lower pairs (don&rsquo;t miss the hidden pin)</h5><p>Six pin joints &mdash; including the easy-to-miss pin between links 3 and 4. The point contact between 4 and the frame <em>has a hash mark</em>, so it rolls without slipping: that is also a lower pair. <span class="tally"><b>P&#8321; = 7</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Higher pairs</h5><p>The only contact is the rolling one, already counted as P&#8321;. <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 · Substitute</h5><div class="mini-eq">F = 3(6 &minus; 1) &minus; 2(7) &minus; 0</div><p>= 15 &minus; 14.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">F = 3(6 &minus; 1) &minus; 2(7) &minus; 0 = <strong>1</strong></div>
+              <p>One degree of freedom. The angle of the drive arm fixes everything, so the foot follows one fixed elliptical path. The hash mark mattered: had it been a slipping contact (P&#8322;), the count would change.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a train wheel on a rail</span><p>A wheel rolling without slipping is locked to the rail at the contact: its speed is tied to its spin. That coupling is why a rolling joint behaves like a 1-DOF lower pair, not a free 2-DOF slip.</p></div>
+      <div class="realworld"><span class="h">One DOF = one fixed workout path</span><p>Because F = 1, the EFX gives every user the same stride shape. Contrast that with the next machine.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.10 -->
+  <article class="example" id="ex-1-10">
+    <div class="ex-head"><span class="ex-badge">Example 1.10</span><h3>Precor AMT adaptive trainer</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">The Adaptive Motion Trainer lets the user shift smoothly from stair-stepping to long striding. Its skeleton has seven links and a pin shared by three links. Find F &mdash; and explain why the motion feels so different from the EFX.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_10" class="stage" viewBox="0 0 360 280" role="img" aria-label="The adaptive motion trainer skeleton with a triple pin; two independent inputs let the stride morph between short stepping and long striding, two degrees of freedom."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_10">&#9654; Play</button><span class="drv" id="drv_st_1_10">stride morphs: stepping &harr; striding</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; two independent motions.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>Seven rigid links, frame as ground. <span class="tally"><b>N = 7</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Lower pairs (mind the triple pin)</h5><p>There are eight pin joints &mdash; because the pin connecting links 1, 4 and 7 joins three links and counts as two. <span class="tally"><b>P&#8321; = 8</b></span>, <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Substitute</h5><div class="mini-eq">F = 3(7 &minus; 1) &minus; 2(8) &minus; 0</div><p>= 18 &minus; 16.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 2</span>
+              <div class="big-eq">F = 3(7 &minus; 1) &minus; 2(8) &minus; 0 = <strong>2</strong></div>
+              <p>Two degrees of freedom &mdash; two independent inputs: the angle of the handle (link 7) relative to ground, and the angle of link 4. Because two inputs vary freely, the stride is no longer one fixed path but a whole family ranging from short stepping to long striding. That is the machine&rsquo;s entire selling point, and it falls straight out of F = 2.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; one DOF draws a line, two DOF fill a region</span><p>An F = 1 machine traces a single curve, like a pen on a track. Add a degree of freedom and the pen can reach a whole 2-D area &mdash; infinitely many paths. The AMT&rsquo;s second DOF is what lets a runner and a stair-climber share one machine.</p></div>
+      <div class="realworld"><span class="h">EFX vs. AMT, side by side</span><p>Same manufacturer, one joint of difference in topology, and the mobility jumps from 1 to 2. Reading the skeleton correctly &mdash; especially that triple pin &mdash; is what separates the two answers.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.11 -->
+  <article class="example" id="ex-1-11">
+    <div class="ex-head"><span class="ex-badge">Example 1.11</span><h3>A clamping tool (pin-joint equivalency)</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">A clamping tool&rsquo;s curved jaw makes <em>two</em> point contacts against the frame, neither hash-marked. Find the mobility &mdash; and notice what two slipping contacts add up to.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_11" class="stage" viewBox="0 0 360 280" role="img" aria-label="A clamping tool whose jaw touches the frame at two slipping points; together the two higher pairs constrain the jaw like a single pin, one degree of freedom."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_11">&#9654; Play</button><span class="drv" id="drv_st_1_11">jaw pivots on two slipping contacts</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; two P&#8322; contacts &asymp; one pin.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count the links</h5><p>Four links, frame as ground. <span class="tally"><b>N = 4</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Lower pairs</h5><p>Three ordinary pin joints. <span class="tally"><b>P&#8321; = 3</b></span>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Higher pairs &mdash; count both contacts</h5><p>The jaw touches the frame at two separate points, and neither has a hash mark, so both are slipping joints. <span class="tally"><b>P&#8322; = 2</b></span>.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 · Substitute</h5><div class="mini-eq">F = 3(4 &minus; 1) &minus; 2(3) &minus; 2</div><p>= 9 &minus; 6 &minus; 2.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">F = 3(4 &minus; 1) &minus; 2(3) &minus; 2 = <strong>1</strong></div>
+              <p>Two higher pairs remove 2 freedoms total &mdash; the same as one lower pair. So the two slipping contacts <em>together</em> behave like a single pin joint: <strong>pin-joint equivalency</strong>. The tool clamps with one squeezing input.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; two fingers vs. one knuckle</span><p>Press one fingertip on a marble and it can roll and slide (a higher pair). Press two fingertips on it from different sides and it is pinned in place &mdash; the two soft contacts together act like one rigid joint. That is why 2&times;P&#8322; can replace one pin.</p></div>
+      <div class="realworld"><span class="h">Designers use this on purpose</span><p>Cam mechanisms, ball detents, and self-centering chucks rely on multiple contacts to constrain a part without a machined pin &mdash; cheaper to make, and the mobility math still works out.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ GROUP 4 ============ -->
+<section id="grp-4" aria-labelledby="g4-h">
+  <span class="sec-tag">Worked examples · 1.13 &ndash; 1.15</span>
+  <h2 id="g4-h">Group 4 &mdash; where Gruebler lies, and how to check it</h2>
+  <p>The formula counts joints but never looks at <em>geometry</em>. Two examples show it giving the wrong number, and a third introduces the <strong>freezing test</strong> &mdash; a count-free way to find the true mobility <var>M</var> and confirm a Gruebler result you trust.</p>
+
+  <!-- 1.13 -->
+  <article class="example" id="ex-1-13">
+    <div class="ex-head"><span class="ex-badge">Example 1.13</span><h3>A statically indeterminate structure (F &lt; 0)</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Determine the mobility of the over-braced structure shown. Apply Gruebler, then decide whether to believe it.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_13" class="stage" viewBox="0 0 360 280" role="img" aria-label="An over-constrained, statically indeterminate structure. It cannot move; pressing play only shows it resisting and snapping back to rest."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_13">&#9654; Try to move it</button><span class="drv" id="drv_st_1_13">it resists &mdash; rigid</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; over-constrained, no motion.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count</h5><p>Reading the skeleton: <span class="tally"><b>N = 4</b></span> links joined by five lower-pair connections (pins and sliders), <span class="tally"><b>P&#8321; = 5</b></span>, <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Substitute</h5><div class="mini-eq">F = 3(4 &minus; 1) &minus; 2(5) &minus; 0</div><p>= 9 &minus; 10. The result is going to be negative.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Interpret the sign</h5><p>A negative F cannot be a count of motions. It signals <strong>more constraints than a rigid body needs</strong> &mdash; an over-braced, statically indeterminate structure. Now check reality: can it move?</p></div>
+            <div class="answer indet" data-answer hidden>
+              <span class="ans-h">F = &minus;1, but true mobility M = 0</span>
+              <div class="big-eq">F = 3(4 &minus; 1) &minus; 2(5) = <strong>&minus;1</strong> &nbsp;&rarr;&nbsp; M = 0</div>
+              <p>The structure is already immovable, so its real mobility is M = 0. Gruebler returns &minus;1 because it cannot see that one of the supports is <em>redundant</em> &mdash; it removes a constraint that was already accounted for. The formula flags &ldquo;over-constrained,&rdquo; but only inspection gives the true M.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="callout"><span class="h">What the sign of F really tells you</span><p><strong>F &ge; 1:</strong> mechanism (F motions). <strong>F = 0:</strong> a just-rigid, statically determinate structure. <strong>F &lt; 0:</strong> over-constrained / statically indeterminate &mdash; redundant supports. The number&rsquo;s sign is a design alarm even when its magnitude is untrustworthy.</p></div>
+      <div class="realworld"><span class="h">A bridge truss, on purpose</span><p>Civil structures are <em>designed</em> for F &le; 0 &mdash; you want a bridge that does not move. Redundant members (F &lt; 0) even add safety: if one fails, others carry the load. Negative mobility is a feature there, a bug in a linkage.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.14 -->
+  <article class="example" id="ex-1-14">
+    <div class="ex-head"><span class="ex-badge">Example 1.14</span><h3>A pair of meshing gears (F &ne; M)</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Two gears are pinned to a common frame and roll on each other (hash-marked, no slipping). Apply Gruebler &mdash; then watch the gears actually turn.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_14" class="stage" viewBox="0 0 360 280" role="img" aria-label="Two externally meshing gears on fixed centers rolling against each other; they clearly turn, so the real mobility is one even though Gruebler computes zero."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_14">&#9654; Play</button><span class="drv" id="drv_st_1_14">they turn &mdash; clearly M = 1</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; rolling contact (hash) = lower pair.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · Count</h5><p><span class="tally"><b>N = 3</b></span> (two gears + frame). Two pins fix the gear centers; the hash-marked rolling contact is a third lower pair. <span class="tally"><b>P&#8321; = 3</b></span>, <span class="tally"><b>P&#8322; = 0</b></span>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Substitute</h5><div class="mini-eq">F = 3(3 &minus; 1) &minus; 2(3) &minus; 0</div><p>= 6 &minus; 6 = 0. Gruebler says &ldquo;structure.&rdquo; But press Play&hellip;</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Reality check</h5><p>The gears obviously spin &mdash; turn one and the other follows. So the true mobility is M = 1, not 0. Why the disagreement?</p></div>
+            <div class="answer indet" data-answer hidden>
+              <span class="ans-h">F = 0, but true mobility M = 1</span>
+              <div class="big-eq">Gruebler: F = 6 &minus; 6 = <strong>0</strong> &nbsp;&rarr;&nbsp; reality: M = <strong>1</strong></div>
+              <p>This is a <strong>special-geometry</strong> case. With the centers fixed at the right distance, the rolling constraint and the pin constraints are not fully independent &mdash; one is partly redundant. Gruebler counts them as if independent and so under-predicts by one. The freezing test confirms M = 1: locking any one of the three lower pairs turns the pair into a structure.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; counting fence posts</span><p>Gruebler counts every constraint as if it does fresh work. But when geometry makes two constraints enforce the <em>same</em> condition (like two fences guarding one gap), the count double-charges. The formula is bookkeeping; geometry can make two entries cancel.</p></div>
+      <div class="callout"><span class="h">The takeaway for the whole chapter</span><p>Gruebler is fast and almost always right &mdash; but it is <em>blind to geometry</em>. Parallel links, equal-radius rollers, concentric pivots, and meshing gears are the classic offenders. When you suspect special geometry, fall back on the freezing test.</p></div>
+    </div>
+  </article>
+
+  <!-- 1.15 -->
+  <article class="example" id="ex-1-15">
+    <div class="ex-head"><span class="ex-badge">Example 1.15</span><h3>The freezing test &mdash; verifying the AMT</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Re-examine the AMT trainer from Example 1.10, but this time find its mobility <em>without</em> the formula: freeze joints one at a time until nothing moves, and count how many you had to freeze.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_1_15" class="stage" viewBox="0 0 360 280" role="img" aria-label="The adaptive trainer analyzed by the freezing method: it moves freely, then locking one pin removes one freedom, then locking a second pin makes the whole mechanism rigid."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_1_15">&#9654; Freeze step by step</button><span class="drv" id="drv_st_1_15">moving &rarr; lock 1 &rarr; lock 2 &rarr; rigid</span></div>
+          <p class="stage-cap">Schematic skeleton &mdash; each lock removes one DOF.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 · The idea</h5><p>The <strong>freezing test</strong>: mobility M = the number of joints you must lock to turn the mechanism into a rigid structure. No counting of links required.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 · Lock the first pin</h5><p>Lock the pin between ground (1) and link 2, fixing link 2. Now links 3 and 4 form a rigid triangle &mdash; a truss. But links 5, 6 and 7 can still move together as a four-bar. So <em>one</em> freedom remains.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 · Lock the second pin</h5><p>Now lock the pin between links 4 and 5, fixing link 5. Links 6 and 7 form another truss, and the entire mechanism is rigid.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 · Count the locks</h5><p>We froze <strong>two</strong> pins to make it immovable.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">M = 2 &mdash; confirms Example 1.10</span>
+              <div class="big-eq">locks needed = <strong>2</strong> &nbsp;&rarr;&nbsp; M = 2 = F</div>
+              <p>The freezing test gives M = 2, exactly matching Gruebler&rsquo;s F = 2 from Example 1.10. When the two methods agree, you can trust the result; when they disagree (Examples 1.13 and 1.14), the freezing test wins because it actually tests motion.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; jamming a wobbly table</span><p>A wobbly table moves in some number of ways. Stick a wedge under one leg &mdash; one wobble gone. Keep wedging until it is solid. The number of wedges you needed <em>is</em> the table&rsquo;s mobility. That is the freezing test in a sentence.</p></div>
+      <div class="realworld"><span class="h">Two tools, one answer</span><p>In practice engineers run Gruebler first (seconds) and reach for the freezing test only when geometry looks special or the sign of F surprises them. Agreement between the two is your confidence check.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ SELF CHECK ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Self-check</span>
+  <h2 id="quiz-h">Practice problems</h2>
+  <p>New mechanisms, same tools. Work each on paper first, then tap an answer to check yourself &mdash; the feedback explains the trap.</p>
+
+  <div class="q" data-q>
+    <span class="qnum">Q1 · the engine</span>
+    <p class="qtext">A single-cylinder engine is a slider-crank: ground, crank, connecting rod, and piston, joined by three pins and one sliding joint. What is its mobility?</p>
+    <button type="button" class="opt" data-correct="0"><span class="mk">A</span>F = 0</button>
+    <button type="button" class="opt" data-correct="1"><span class="mk">B</span>F = 1</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">C</span>F = 2</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">D</span>F = 3</button>
+    <div class="feedback">N = 4, P&#8321; = 4 (3 pins + 1 slider, all lower pairs), P&#8322; = 0. F = 3(4&minus;1) &minus; 2(4) = <strong>1</strong>. One crank angle sets the piston position &mdash; a single-DOF machine, like the four-bar.</div>
+  </div>
+
+  <div class="q" data-q>
+    <span class="qnum">Q2 · spot the trap</span>
+    <p class="qtext">Five links are joined only by pins: four of the pins each connect two links, and one pin is shared by three links. What is F?</p>
+    <button type="button" class="opt" data-correct="1"><span class="mk">A</span>F = 0 &mdash; a structure</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">B</span>F = 1</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">C</span>F = 2</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">D</span>F = 3</button>
+    <div class="feedback">The shared pin joins three links, so it counts as 2 joints (k&minus;1 rule). P&#8321; = 4 + 2 = 6, not 5. F = 3(5&minus;1) &minus; 2(6) = 12 &minus; 12 = <strong>0</strong> &mdash; a structure. Counting the triple pin as one joint gives the wrong answer F = 2.</div>
+  </div>
+
+  <div class="q" data-q>
+    <span class="qnum">Q3 · cam &amp; follower</span>
+    <p class="qtext">A disk cam is pinned to the frame and drives a follower that translates in a guide. The follower tip touches the cam at a single point contact with <em>no</em> hash mark. What is F?</p>
+    <button type="button" class="opt" data-correct="0"><span class="mk">A</span>F = 0</button>
+    <button type="button" class="opt" data-correct="1"><span class="mk">B</span>F = 1</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">C</span>F = 2</button>
+    <div class="feedback">N = 3 (cam, follower, frame). Lower pairs: the cam&rsquo;s pin and the follower&rsquo;s slider &rarr; P&#8321; = 2. The no-hash point contact is a slipping higher pair &rarr; P&#8322; = 1. F = 3(3&minus;1) &minus; 2(2) &minus; 1 = <strong>1</strong>. Turning the cam fully drives the follower.</div>
+  </div>
+
+  <div class="q" data-q>
+    <span class="qnum">Q4 · name the higher pair</span>
+    <p class="qtext">Which of these is a <strong>higher pair</strong> (P&#8322;)?</p>
+    <button type="button" class="opt" data-correct="0"><span class="mk">A</span>A pin joint between two links</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">B</span>A slider in a straight guide</button>
+    <button type="button" class="opt" data-correct="1"><span class="mk">C</span>Two gear teeth sliding as they mesh</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">D</span>A wheel rolling without slipping (hash-marked)</button>
+    <div class="feedback">Pins and sliders are lower pairs (remove 2 freedoms). A hash-marked rolling contact is also a lower pair. Only the meshing gear teeth, which roll <em>and</em> slide against each other, form a higher pair &mdash; removing just 1 freedom.</div>
+  </div>
+
+  <div class="q" data-q>
+    <span class="qnum">Q5 · trust, but verify</span>
+    <p class="qtext">For a parallelogram linkage, Gruebler computes F = 0, yet the linkage clearly swings (M = 1). What is going on?</p>
+    <button type="button" class="opt" data-correct="0"><span class="mk">A</span>You must have miscounted the joints</button>
+    <button type="button" class="opt" data-correct="1"><span class="mk">B</span>Gruebler is blind to special geometry; trust the freezing test</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">C</span>There is a hidden higher pair you missed</button>
+    <button type="button" class="opt" data-correct="0"><span class="mk">D</span>It really is a structure; the motion is an illusion</button>
+    <div class="feedback">The parallel link lengths make one constraint redundant &mdash; a special-geometry case the formula cannot see, exactly like the meshing gears of Example 1.14. The freezing test reveals the true mobility: lock one pin and it goes rigid, so M = 1.</div>
+  </div>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rc-h">
+  <span class="sec-tag">Quick reference</span>
+  <h2 id="rc-h">Mobility formula card</h2>
+  <p class="note">Printable. Use your browser&rsquo;s Print command to get a clean one-page reference (the navigation, controls, and animations are hidden in print).</p>
+
+  <div class="refcard">
+    <div class="rc-head"><span>Gruebler / Kutzbach &mdash; planar mobility</span><span style="font-family:var(--mono);font-size:.8rem">ENGI 216 · Ch 1</span></div>
+    <div class="rc-body">
+      <div class="rc-eq"><var>F</var> = 3(<var>N</var> &minus; 1) &minus; 2<var>P</var><sub>1</sub> &minus; <var>P</var><sub>2</sub></div>
+      <div class="tbl-wrap">
+      <table>
+        <tbody>
+          <tr><td><var>N</var></td><td>number of links &mdash; <strong>count the ground as one link</strong></td></tr>
+          <tr><td><var>P</var><sub>1</sub></td><td>lower pairs: pins, sliders, and hash-marked rolling contacts (each removes 2 freedoms)</td></tr>
+          <tr><td><var>P</var><sub>2</sub></td><td>higher pairs: slipping point/line contacts and meshing gear teeth (each removes 1 freedom)</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <h4>Reading the answer</h4>
+      <ul class="clean">
+        <li><strong>F &ge; 1</strong> &mdash; a mechanism needing F independent drivers.</li>
+        <li><strong>F = 0</strong> &mdash; a just-rigid (statically determinate) structure.</li>
+        <li><strong>F &lt; 0</strong> &mdash; over-constrained / statically indeterminate (redundant supports).</li>
+      </ul>
+      <h4>Four counting rules</h4>
+      <ul class="clean">
+        <li><strong>Hash mark = lower pair.</strong> Rolling (hatched) &rarr; P&#8321;. Slipping (no mark) &rarr; P&#8322;.</li>
+        <li><strong>Shared pins:</strong> a pin joining <var>k</var> links counts as <var>k</var> &minus; 1 pin joints.</li>
+        <li><strong>Ground is one link</strong> regardless of how many mounts it has; a slider is still a full link.</li>
+        <li><strong>F is geometry-blind.</strong> Special proportions can make the true M differ from F.</li>
+      </ul>
+      <h4>The freezing test (when in doubt)</h4>
+      <p style="margin:.2em 0">M = the number of joints you must lock to make the mechanism rigid. Use it to confirm Gruebler, or to override it in special-geometry cases.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Reference</span>
+  <h2 id="gl-h">Glossary</h2>
+  <label for="glossSearch" class="note">Filter terms:</label><br>
+  <input type="search" id="glossSearch" class="gloss-search" placeholder="Type to filter (e.g. &ldquo;higher pair&rdquo;)&hellip;" aria-label="Filter glossary terms">
+  <dl class="gloss" id="glossList">
+    <div><dt>Degree of freedom (DOF)</dt><dd>An independent motion a body or system can undergo. A free rigid body in a plane has three: two translations and one rotation.</dd></div>
+    <div><dt>Mobility (F or M)</dt><dd>The number of independent inputs (drivers) needed to fully define a mechanism&rsquo;s configuration. <var>F</var> is the value computed by Gruebler; <var>M</var> is the true value found by inspection or the freezing test.</dd></div>
+    <div><dt>Link</dt><dd>A single rigid body in a mechanism. The fixed body is the ground (or frame) link and counts as one link however many mounting points it has.</dd></div>
+    <div><dt>Kinematic pair (joint)</dt><dd>A connection between two links that permits some relative motions and forbids others.</dd></div>
+    <div><dt>Lower pair (P&#8321;)</dt><dd>A joint with surface contact that allows one relative motion and removes two freedoms: pins (revolute), sliders (prismatic), and hash-marked rolling contacts.</dd></div>
+    <div><dt>Higher pair (P&#8322;)</dt><dd>A joint with point or line contact that allows two relative motions (roll and slip) and removes only one freedom: a slipping contact or meshing gear teeth.</dd></div>
+    <div><dt>Pin / revolute joint</dt><dd>A lower pair allowing pure rotation about a shared axis.</dd></div>
+    <div><dt>Slider / prismatic joint</dt><dd>A lower pair allowing pure translation along a line.</dd></div>
+    <div><dt>Rolling joint</dt><dd>A contact that rolls without slipping, drawn with a hash mark. It is a lower pair (P&#8321;).</dd></div>
+    <div><dt>Slipping joint</dt><dd>A point or line contact free to roll <em>and</em> slide, drawn without a hash mark. It is a higher pair (P&#8322;).</dd></div>
+    <div><dt>Kinematic chain</dt><dd>An assembly of links and joints. It becomes a mechanism once one link is fixed as ground.</dd></div>
+    <div><dt>Open vs. closed chain</dt><dd>An open chain (like a serial robot arm) has free ends and high mobility; a closed chain loops back on itself, and closing the loop removes freedoms.</dd></div>
+    <div><dt>Four-bar linkage</dt><dd>Four links in a closed loop joined by four pins. The fundamental single-DOF mechanism (F = 1).</dd></div>
+    <div><dt>Crank-slider</dt><dd>A four-link mechanism with three pins and one slider (F = 1) that converts rotation to straight-line motion, as in a piston engine.</dd></div>
+    <div><dt>Gruebler / Kutzbach criterion</dt><dd>The planar mobility formula F = 3(N&minus;1) &minus; 2P&#8321; &minus; P&#8322;. Kutzbach&rsquo;s form includes higher pairs; Gruebler&rsquo;s is the special case used for constrained single-DOF design.</dd></div>
+    <div><dt>Structure</dt><dd>An assembly that cannot move: F = 0 (just rigid) or F &lt; 0 (over-constrained).</dd></div>
+    <div><dt>Statically indeterminate</dt><dd>An over-constrained structure (F &lt; 0) with redundant supports, where equilibrium equations alone cannot find all internal forces.</dd></div>
+    <div><dt>Multi-link pin (k&minus;1 rule)</dt><dd>When <var>k</var> links share one pin, it counts as <var>k</var> &minus; 1 separate pin joints.</dd></div>
+    <div><dt>Pin-joint equivalency</dt><dd>Two slipping higher pairs acting together remove two freedoms &mdash; the same as one pin &mdash; so they behave like a single revolute joint.</dd></div>
+    <div><dt>Freezing test</dt><dd>A geometry-aware way to find mobility: M equals the number of joints that must be locked to make the mechanism rigid.</dd></div>
+    <div><dt>Special geometry</dt><dd>Link proportions (parallel bars, equal-radius gears, concentric pivots) that make constraints redundant, causing Gruebler&rsquo;s F to differ from the true mobility.</dd></div>
+  </dl>
+  <p class="gloss-none" id="glossNone" hidden>No terms match that filter.</p>
+</section>
+
+<!-- ============ RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">Go deeper</span>
+  <h2 id="res-h">External resources</h2>
+  <p>Open, reputable references that cover mobility and Gruebler&rsquo;s criterion from complementary angles. All open in a new tab.</p>
+
+  <p class="res-cat">Open textbooks &amp; course notes</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://uark.pressbooks.pub/mechanicaldesign/chapter/motion-and-control-of-mechanisms/" target="_blank" rel="noopener">University of Arkansas &mdash; Motion and Control of Mechanisms</a><span class="desc">Open mechanical-design textbook chapter framing mobility as &ldquo;how many motors do I need?&rdquo; with the Chebychev&ndash;Gr&uuml;bler&ndash;Kutzbach equation.</span></li>
+    <li><a class="ext" href="https://www.mechref.org/md/Planar_mechanisms/" target="_blank" rel="noopener">UIUC MechRef &mdash; Planar Mechanisms</a><span class="desc">Concise reference on full vs. half joints and Gruebler&rsquo;s equation, with four-bar and crank-slider classifications.</span></li>
+    <li><a class="ext" href="https://wiki.wpi.edu/robotics/Linkages" target="_blank" rel="noopener">WPI Robotics Wiki &mdash; Linkages</a><span class="desc">Plain-language treatment of mobility/DOF, link naming (crank, coupler, rocker), and four- and six-bar families.</span></li>
+  </ul>
+
+  <p class="res-cat">Focused tutorials</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://www.school-mechademic.com/blog/kutzbach-mobility-criteria-for-mechanisms" target="_blank" rel="noopener">School Mechademic &mdash; Kutzbach Mobility Criteria</a><span class="desc">Worked walk-through of the criterion on a robot arm and a four-bar, with the &ldquo;mobility &le; 0 means a structure&rdquo; rule.</span></li>
+  </ul>
+
+  <div class="callout"><span class="h">A note on these links</span><p>These reinforce the same equation from other instructors&rsquo; phrasings &mdash; useful when a different explanation makes an idea click. The authoritative source for ENGI 216 remains Stanišić&rsquo;s textbook and the worked examples above.</p></div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section id="refs" aria-labelledby="refs-h">
+  <span class="sec-tag">Attribution</span>
+  <h2 id="refs-h">References &amp; notes</h2>
+  <ul class="clean">
+    <li>All twelve examples are drawn from <strong>Stanišić, M. M., <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em></strong> (Cengage Learning, 2015), Chapter 1. Problem statements here are paraphrased; example numbers (1.2&ndash;1.15) follow the textbook.</li>
+    <li>The mechanism diagrams in this module are <strong>original schematic redrawings</strong> created for teaching. They illustrate link/joint topology and degrees of freedom; they are not the textbook&rsquo;s figures and are not exact kinematic solutions. For precise position, velocity, and force analysis, use the separate Mechanism Workbench tool.</li>
+    <li>The mobility formula <var>F</var> = 3(<var>N</var>&minus;1) &minus; 2<var>P</var><sub>1</sub> &minus; <var>P</var><sub>2</sub> is the planar Kutzbach&ndash;Gruebler criterion, presented in Stanišić&rsquo;s notation.</li>
+  </ul>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Session progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+  </div>
+</div>
+
+<footer>
+  <p>Built for <span class="program">ENGI 216 &mdash; Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · <span class="year">2026</span></p>
+  <p class="note" style="color:#9fb6c8">Chapter 1 worked-examples companion · mobility &amp; degrees of freedom · runs entirely offline.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){ var n=document.createElementNS(SVGNS, tag); if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); } return n; }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  /* ---------- SVG drawing helpers ---------- */
+  function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+  function bar(svg,x1,y1,x2,y2,opts){ opts=opts||{}; svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:opts.color||cssVar('--link-fill'),'stroke-width':opts.w||6,'stroke-linecap':'round',opacity:(opts.op==null?1:opts.op)})); }
+  function tri(svg,pts,opts){ opts=opts||{}; var s=''; for(var i=0;i<pts.length;i++){ s+=pts[i][0]+','+pts[i][1]+' '; } svg.appendChild(el('polygon',{points:s,fill:opts.fill||'rgba(10,126,164,.18)',stroke:opts.color||cssVar('--link-fill'),'stroke-width':opts.w||4,'stroke-linejoin':'round'})); }
+  function label(svg,x,y,t,color){ var tx=el('text',{x:x,y:y,'text-anchor':'middle','dominant-baseline':'middle','class':'lk',fill:color||cssVar('--ink')}); tx.textContent=t; svg.appendChild(tx); }
+  function caption(svg,x,y,t,color){ var tx=el('text',{x:x,y:y,'text-anchor':'middle',fill:color||cssVar('--ink-soft'),'font-family':cssVar('--mono'),'font-size':'11px'}); tx.textContent=t; svg.appendChild(tx); }
+  function rail(svg,x1,y1,x2,y2){ svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:cssVar('--ink-soft'),'stroke-width':1.5,'stroke-dasharray':'4 4',opacity:.7})); }
+  function groundPin(svg,x,y){
+    svg.appendChild(el('circle',{cx:x,cy:y,r:7,fill:'none',stroke:cssVar('--ground-fill'),'stroke-width':2.5}));
+    svg.appendChild(el('circle',{cx:x,cy:y,r:2.5,fill:cssVar('--ground-fill')}));
+    svg.appendChild(el('line',{x1:x-16,y1:y+8,x2:x+16,y2:y+8,stroke:cssVar('--ground-fill'),'stroke-width':2}));
+    for(var i=-14;i<=14;i+=7){ svg.appendChild(el('line',{x1:x+i,y1:y+8,x2:x+i-6,y2:y+16,stroke:cssVar('--ground-fill'),'stroke-width':1.4})); }
+  }
+  function freePin(svg,x,y,r){ r=r||5.5; svg.appendChild(el('circle',{cx:x,cy:y,r:r,fill:cssVar('--panel'),stroke:cssVar('--ink'),'stroke-width':2.2})); svg.appendChild(el('circle',{cx:x,cy:y,r:1.8,fill:cssVar('--ink')})); }
+  function block(svg,cx,cy,ang,w,h,opts){ opts=opts||{}; var g=el('g',{transform:'translate('+cx+','+cy+') rotate('+(ang*180/Math.PI)+')'}); g.appendChild(el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:2,fill:opts.fill||cssVar('--panel'),stroke:opts.color||cssVar('--ink'),'stroke-width':2})); svg.appendChild(g); }
+  function cylinder(svg,a,b){ var ang=Math.atan2(b.y-a.y,b.x-a.x); var L=Math.hypot(b.x-a.x,b.y-a.y); svg.appendChild(el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:cssVar('--ink-soft'),'stroke-width':4})); block(svg,a.x+Math.cos(ang)*L*0.3,a.y+Math.sin(ang)*L*0.3,ang,Math.max(20,L*0.5),12,{fill:cssVar('--paper-2')}); freePin(svg,b.x,b.y,4); }
+  function gear(svg,cx,cy,r,teeth,phase,fill){ svg.appendChild(el('circle',{cx:cx,cy:cy,r:r,fill:fill||'rgba(10,126,164,.12)',stroke:cssVar('--link-fill'),'stroke-width':3})); for(var i=0;i<teeth;i++){ var a=phase+i*2*Math.PI/teeth; svg.appendChild(el('line',{x1:cx+Math.cos(a)*r,y1:cy+Math.sin(a)*r,x2:cx+Math.cos(a)*(r+5),y2:cy+Math.sin(a)*(r+5),stroke:cssVar('--link-fill'),'stroke-width':2.5,'stroke-linecap':'round'})); } }
+  function hash(svg,x,y){ for(var i=-1;i<=1;i++){ svg.appendChild(el('line',{x1:x+i*4-2,y1:y+5,x2:x+i*4+2,y2:y+11,stroke:cssVar('--accent-2'),'stroke-width':1.6})); } }
+
+  function circInt(p0,r0,p1,r1,sign){ var dx=p1.x-p0.x,dy=p1.y-p0.y,d=Math.hypot(dx,dy); if(d>r0+r1||d<Math.abs(r0-r1)||d===0) return null; var a=(r0*r0-r1*r1+d*d)/(2*d); var h2=r0*r0-a*a; if(h2<0)h2=0; var h=Math.sqrt(h2); var xm=p0.x+a*dx/d, ym=p0.y+a*dy/d; return {x:xm+sign*h*(-dy)/d, y:ym+sign*h*dx/d}; }
+  function fourbar(O2,O4,r2,r3,r4,th2,sign){ var A={x:O2.x+r2*Math.cos(th2),y:O2.y+r2*Math.sin(th2)}; return {A:A, C:circInt(A,r3,O4,r4,sign||1)}; }
+
+  /* ---------- stage renderers ---------- */
+  var STAGES={};
+
+  STAGES.st_1_2=function(svg,t){ clear(svg); var O={x:70,y:230}, TT=t*2*Math.PI;
+    var a1=-Math.PI*0.55+0.5*Math.sin(TT);
+    var a2=a1+(-0.5+0.7*Math.sin(TT*1.7));
+    var a3=a2+(0.4+0.9*Math.sin(TT*2.3));
+    var L1=80,L2=65,L3=48;
+    var j1={x:O.x+L1*Math.cos(a1),y:O.y+L1*Math.sin(a1)};
+    var j2={x:j1.x+L2*Math.cos(a2),y:j1.y+L2*Math.sin(a2)};
+    var j3={x:j2.x+L3*Math.cos(a3),y:j2.y+L3*Math.sin(a3)};
+    bar(svg,O.x,O.y,j1.x,j1.y); bar(svg,j1.x,j1.y,j2.x,j2.y); bar(svg,j2.x,j2.y,j3.x,j3.y);
+    svg.appendChild(el('circle',{cx:j3.x,cy:j3.y,r:6,fill:'none',stroke:cssVar('--accent-2'),'stroke-width':3}));
+    groundPin(svg,O.x,O.y); freePin(svg,j1.x,j1.y); freePin(svg,j2.x,j2.y);
+    label(svg,O.x-14,O.y-4,'1'); label(svg,(O.x+j1.x)/2-7,(O.y+j1.y)/2-7,'2'); label(svg,(j1.x+j2.x)/2-7,(j1.y+j2.y)/2-7,'3'); label(svg,(j2.x+j3.x)/2,(j2.y+j3.y)/2-9,'4');
+    caption(svg,200,265,'Open chain — 3 independent joint angles'); };
+
+  STAGES.st_1_4=function(svg,t){ var O2={x:90,y:225},O4={x:170,y:225},r2=70,r3=92,r4=72; var TT=t*2*Math.PI; var th2=-Math.PI*0.5+0.4*Math.sin(TT)-0.15; var fb=fourbar(O2,O4,r2,r3,r4,th2,1); var A=fb.A,C=fb.C; if(!C) return; clear(svg);
+    var dx=C.x-A.x,dy=C.y-A.y,dl=Math.hypot(dx,dy)||1; dx/=dl;dy/=dl; var H={x:C.x+dx*120,y:C.y+dy*120}; var G6={x:250,y:225};
+    bar(svg,O2.x,O2.y,O4.x,O4.y,{color:cssVar('--ink-soft'),w:5});
+    bar(svg,O2.x,O2.y,A.x,A.y); bar(svg,A.x,A.y,C.x,C.y); bar(svg,O4.x,O4.y,C.x,C.y);
+    bar(svg,A.x,A.y,H.x,H.y,{w:8,color:cssVar('--accent')}); bar(svg,G6.x,G6.y,H.x,H.y);
+    groundPin(svg,O2.x,O2.y); groundPin(svg,O4.x,O4.y); groundPin(svg,G6.x,G6.y);
+    freePin(svg,A.x,A.y); freePin(svg,C.x,C.y); freePin(svg,H.x,H.y);
+    label(svg,130,240,'1'); label(svg,(A.x+H.x)/2+8,(A.y+H.y)/2,'5');
+    caption(svg,180,265,'Six links, one input — hood follows a set path'); };
+
+  STAGES.st_1_5=function(svg,t){ var O2={x:100,y:215},O4={x:260,y:215},r2=46,r3=150,r4=92; var th2=t*2*Math.PI; var fb=fourbar(O2,O4,r2,r3,r4,th2,1); var A=fb.A,C=fb.C; if(!C) return; clear(svg);
+    bar(svg,O2.x,O2.y,O4.x,O4.y,{color:cssVar('--ink-soft'),w:5});
+    bar(svg,O2.x,O2.y,A.x,A.y); bar(svg,A.x,A.y,C.x,C.y); bar(svg,O4.x,O4.y,C.x,C.y);
+    groundPin(svg,O2.x,O2.y); groundPin(svg,O4.x,O4.y); freePin(svg,A.x,A.y); freePin(svg,C.x,C.y);
+    label(svg,180,232,'1'); label(svg,(O2.x+A.x)/2-9,(O2.y+A.y)/2,'2'); label(svg,(A.x+C.x)/2,(A.y+C.y)/2-9,'3'); label(svg,(O4.x+C.x)/2+9,(O4.y+C.y)/2,'4');
+    caption(svg,180,262,'Crank 2 drives the closed loop — F = 1'); };
+
+  STAGES.st_1_6=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var base={x:80,y:205};
+    var boomAng=-0.5+0.32*Math.sin(TT), boomLen=150;
+    var elbow={x:base.x+boomLen*Math.cos(boomAng),y:base.y+boomLen*Math.sin(boomAng)};
+    var tilt=-0.2+0.6*Math.sin(TT*1.6+1), sl=34;
+    var s2={x:elbow.x+sl*Math.cos(tilt),y:elbow.y+sl*Math.sin(tilt)};
+    var s3={x:elbow.x+sl*Math.cos(tilt+1.5),y:elbow.y+sl*Math.sin(tilt+1.5)};
+    var g1={x:60,y:150}, midb={x:base.x+boomLen*0.45*Math.cos(boomAng),y:base.y+boomLen*0.45*Math.sin(boomAng)};
+    var g2={x:elbow.x-46,y:elbow.y-34};
+    svg.appendChild(el('line',{x1:52,y1:120,x2:52,y2:235,stroke:cssVar('--ground-fill'),'stroke-width':3}));
+    bar(svg,base.x,base.y,elbow.x,elbow.y,{w:8}); cylinder(svg,g1,midb);
+    tri(svg,[[elbow.x,elbow.y],[s2.x,s2.y],[s3.x,s3.y]],{}); cylinder(svg,g2,s3);
+    groundPin(svg,base.x,base.y); groundPin(svg,g1.x,g1.y); freePin(svg,elbow.x,elbow.y);
+    label(svg,base.x-12,base.y,'1'); label(svg,elbow.x+9,elbow.y+5,'6'); label(svg,s2.x+7,s2.y,'9');
+    caption(svg,200,265,'Two cylinders move independently — F = 2'); };
+
+  STAGES.st_1_7=function(svg,t){ var TT=t*2*Math.PI; var Sh={x:120,y:215},G2={x:80,y:215};
+    var seatAng=-Math.PI*0.5+0.32*Math.sin(TT)-0.12, seatLen=140;
+    var sdx=Math.cos(seatAng), sdy=Math.sin(seatAng);
+    var seatEnd={x:Sh.x+seatLen*sdx,y:Sh.y+seatLen*sdy};
+    var Lsup=120, ex=Sh.x-G2.x, ey=Sh.y-G2.y;
+    var bq=2*(ex*sdx+ey*sdy), cq=ex*ex+ey*ey-Lsup*Lsup, disc=bq*bq-4*cq; if(disc<0) return; var u=(-bq+Math.sqrt(disc))/2;
+    var Cc={x:Sh.x+u*sdx,y:Sh.y+u*sdy}; clear(svg);
+    svg.appendChild(el('line',{x1:Sh.x,y1:Sh.y,x2:seatEnd.x,y2:seatEnd.y,stroke:cssVar('--panel-line'),'stroke-width':12,'stroke-linecap':'round',opacity:.7}));
+    bar(svg,Sh.x,Sh.y,seatEnd.x,seatEnd.y,{w:4,color:cssVar('--ink-soft')});
+    bar(svg,G2.x,G2.y,Cc.x,Cc.y);
+    groundPin(svg,Sh.x,Sh.y); groundPin(svg,G2.x,G2.y);
+    svg.appendChild(el('circle',{cx:Cc.x,cy:Cc.y,r:5,fill:cssVar('--accent-2'),stroke:cssVar('--ink'),'stroke-width':1.5}));
+    label(svg,Sh.x+12,Sh.y+14,'1'); label(svg,(Sh.x+seatEnd.x)/2,(Sh.y+seatEnd.y)/2-11,'3'); label(svg,(G2.x+Cc.x)/2-9,(G2.y+Cc.y)/2,'2');
+    caption(svg,195,262,'Pin slides in the seat slot (no hash = slipping)'); };
+
+  STAGES.st_1_8=function(svg,t){ clear(svg); var O={x:90,y:150},r2=42,r3=150; var TT=t*2*Math.PI; var th2=Math.PI-(0.5+0.5*Math.sin(TT));
+    var A={x:O.x+r2*Math.cos(th2),y:O.y+r2*Math.sin(th2)}; var dy=A.y-O.y; var dx=Math.sqrt(Math.max(0,r3*r3-dy*dy)); var S={x:A.x+dx,y:O.y};
+    rail(svg,O.x+20,O.y,335,O.y);
+    bar(svg,O.x,O.y,A.x,A.y); bar(svg,A.x,A.y,S.x,S.y); block(svg,S.x,S.y,0,30,18);
+    groundPin(svg,O.x,O.y); freePin(svg,A.x,A.y); freePin(svg,S.x,S.y);
+    label(svg,O.x-13,O.y+4,'1'); label(svg,(O.x+A.x)/2-9,(O.y+A.y)/2,'2'); label(svg,(A.x+S.x)/2,(A.y+S.y)/2-9,'3'); label(svg,S.x,S.y-17,'4');
+    caption(svg,185,250,'Crank → coupler → slider (door closer) — F = 1'); };
+
+  STAGES.st_1_9=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var piv={x:130,y:90},r=34; var A={x:piv.x+r*Math.cos(TT),y:piv.y+r*Math.sin(TT)};
+    var footPiv={x:95,y:205}, footLen=120, footAng=-0.2+0.5*Math.sin(TT);
+    var footEnd={x:footPiv.x+footLen*Math.cos(footAng),y:footPiv.y+footLen*Math.sin(footAng)};
+    svg.appendChild(el('line',{x1:40,y1:235,x2:325,y2:235,stroke:cssVar('--ground-fill'),'stroke-width':2}));
+    for(var i=50;i<320;i+=18){ svg.appendChild(el('line',{x1:i,y1:235,x2:i-8,y2:243,stroke:cssVar('--ground-fill'),'stroke-width':1})); }
+    bar(svg,piv.x,piv.y,A.x,A.y); bar(svg,A.x,A.y,footEnd.x,footEnd.y); bar(svg,footPiv.x,footPiv.y,footEnd.x,footEnd.y,{w:8,color:cssVar('--accent')});
+    var wx=footPiv.x+25*Math.sin(TT); svg.appendChild(el('circle',{cx:wx,cy:225,r:10,fill:'none',stroke:cssVar('--link-fill'),'stroke-width':3})); hash(svg,wx,235);
+    groundPin(svg,piv.x,piv.y); groundPin(svg,footPiv.x,footPiv.y); freePin(svg,A.x,A.y); freePin(svg,footEnd.x,footEnd.y);
+    label(svg,footEnd.x+9,footEnd.y,'3');
+    caption(svg,195,262,'Hash-marked rolling contact = lower pair — F = 1'); };
+
+  function drawAMT(svg,A,B,fz){ fz=fz||{}; var Gl={x:95,y:205},Gr={x:255,y:80}; var cL=70,cR=70;
+    var L={x:Gl.x+cL*Math.cos(A),y:Gl.y+cL*Math.sin(A)}; var R={x:Gr.x+cR*Math.cos(B),y:Gr.y+cR*Math.sin(B)};
+    var mid={x:(L.x+R.x)/2,y:(L.y+R.y)/2}; var foot={x:mid.x,y:mid.y+52};
+    var c1=fz.l?cssVar('--accent-2'):cssVar('--link-fill'); var c2=fz.r?cssVar('--accent-2'):cssVar('--link-fill');
+    bar(svg,Gl.x,Gl.y,L.x,L.y,{color:c1}); bar(svg,Gr.x,Gr.y,R.x,R.y,{color:c2}); bar(svg,L.x,L.y,R.x,R.y);
+    bar(svg,L.x,L.y,foot.x,foot.y,{w:8,color:cssVar('--accent')}); bar(svg,R.x,R.y,foot.x,foot.y);
+    groundPin(svg,Gl.x,Gl.y); groundPin(svg,Gr.x,Gr.y); freePin(svg,L.x,L.y); freePin(svg,R.x,R.y); freePin(svg,foot.x,foot.y);
+    label(svg,Gl.x-12,Gl.y,'1'); label(svg,Gr.x+12,Gr.y-5,'7'); label(svg,foot.x+11,foot.y,'6'); }
+
+  STAGES.st_1_10=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var A=-Math.PI*0.4+0.5*Math.sin(TT); var B=Math.PI*0.7+0.6*Math.sin(TT*1.7+0.8); drawAMT(svg,A,B); caption(svg,180,262,'Two independent inputs (handle 7 + link 4) — F = 2'); };
+
+  STAGES.st_1_15=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var ph=(t<0.4)?0:((t<0.7)?1:2); var A,B,fz={},cap='';
+    if(ph===0){ A=-Math.PI*0.4+0.5*Math.sin(TT); B=Math.PI*0.7+0.6*Math.sin(TT*1.7); cap='Moving freely — mobility 2'; }
+    else if(ph===1){ A=-Math.PI*0.4; B=Math.PI*0.7+0.6*Math.sin(t*2*Math.PI*3); fz.l=true; cap='Lock pin 1–2 → still 1 DOF left'; }
+    else { A=-Math.PI*0.4; B=Math.PI*0.7+0.3; fz.l=true; fz.r=true; cap='Lock pin 4–5 → rigid (M = 2)'; }
+    drawAMT(svg,A,B,fz); caption(svg,180,262,cap, ph===2?cssVar('--accent-2'):null); };
+
+  STAGES.st_1_11=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var sq=0.5+0.45*Math.sin(TT);
+    svg.appendChild(el('line',{x1:250,y1:70,x2:250,y2:210,stroke:cssVar('--ground-fill'),'stroke-width':4}));
+    var Hp={x:80,y:170}, hAng=-0.3-0.4*sq; var Hend={x:Hp.x+90*Math.cos(hAng),y:Hp.y+90*Math.sin(hAng)}; var Jp={x:170,y:120};
+    bar(svg,Hp.x,Hp.y,Hend.x,Hend.y); bar(svg,Hend.x,Hend.y,Jp.x,Jp.y);
+    var cy1=104,cy2=150; bar(svg,Jp.x,Jp.y,248,(cy1+cy2)/2,{w:8,color:cssVar('--accent')});
+    svg.appendChild(el('circle',{cx:248,cy:cy1,r:4,fill:cssVar('--accent-2')})); svg.appendChild(el('circle',{cx:248,cy:cy2,r:4,fill:cssVar('--accent-2')}));
+    groundPin(svg,Hp.x,Hp.y); freePin(svg,Hend.x,Hend.y); freePin(svg,Jp.x,Jp.y);
+    label(svg,Hp.x-4,Hp.y+17,'2'); label(svg,Jp.x+5,Jp.y-11,'3'); label(svg,233,127,'4'); label(svg,263,127,'1');
+    caption(svg,160,250,'Two slipping contacts \u2248 one pin — F = 1'); };
+
+  STAGES.st_1_13=function(svg,t){ clear(svg); var jit=2*Math.sin(t*2*Math.PI*3);
+    var A={x:120+jit*0.3,y:80},B={x:230,y:110},C={x:200+jit*0.3,y:210},D={x:110,y:200};
+    bar(svg,A.x,A.y,B.x,B.y); bar(svg,B.x,B.y,C.x,C.y); bar(svg,C.x,C.y,D.x,D.y); bar(svg,D.x,D.y,A.x,A.y);
+    bar(svg,A.x,A.y,C.x,C.y,{color:cssVar('--accent-2'),w:4});
+    groundPin(svg,D.x,D.y); groundPin(svg,C.x,C.y); freePin(svg,A.x,A.y); freePin(svg,B.x,B.y);
+    label(svg,A.x-11,A.y,'2'); label(svg,B.x+11,B.y,'3'); label(svg,(A.x+C.x)/2+11,(A.y+C.y)/2,'4'); label(svg,D.x-7,D.y+15,'1'); label(svg,C.x+8,C.y+15,'1');
+    caption(svg,175,250,'Redundant brace (rust) — cannot move (M = 0)'); };
+
+  STAGES.st_1_14=function(svg,t){ clear(svg); var ph=t*2*Math.PI; var c1={x:140,y:135},r1=58,c2={x:250,y:135},r2=42;
+    gear(svg,c1.x,c1.y,r1,16,ph); gear(svg,c2.x,c2.y,r2,12,-ph*(r1/r2));
+    groundPin(svg,c1.x,c1.y); groundPin(svg,c2.x,c2.y); hash(svg,c1.x+r1+1,c1.y);
+    label(svg,c1.x,c1.y-r1-13,'2'); label(svg,c2.x,c2.y-r2-13,'3'); label(svg,195,205,'1');
+    caption(svg,195,250,'They turn — M = 1, though Gruebler gives F = 0', cssVar('--accent-2')); };
+
+  /* ---------- stage controller ---------- */
+  function makeStage(id,draw,opts){ var svg=$(id); if(!svg) return; opts=opts||{}; var t=opts.t0||0; var speed=opts.speed||0.006; var raf=null,playing=false;
+    var btn=document.querySelector('[data-play="'+id+'"]'); var origLabel=btn?btn.innerHTML:'';
+    function render(){ draw(svg,t); }
+    function frame(){ t+=speed; if(t>=1) t-=1; draw(svg,t); if(playing) raf=requestAnimationFrame(frame); }
+    function play(){ if(reduceMotion){ t=(t+(opts.step||0.12))%1; render(); return; } playing=true; if(btn) btn.innerHTML='\u258D\u258D Pause'; if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(frame); }
+    function pause(){ playing=false; if(raf) cancelAnimationFrame(raf); if(btn) btn.innerHTML=origLabel; }
+    render();
+    if(btn) btn.addEventListener('click',function(){ if(reduceMotion){ play(); return; } if(playing) pause(); else play(); });
+    if('IntersectionObserver' in window){ var io=new IntersectionObserver(function(en){ en.forEach(function(e){ if(!e.isIntersecting && playing) pause(); }); }); io.observe(svg); }
+  }
+
+  /* ---------- stepper engine ---------- */
+  function initSteppers(){
+    var steppers=document.querySelectorAll('[data-stepper]');
+    Array.prototype.forEach.call(steppers,function(st){
+      var steps=Array.prototype.slice.call(st.querySelectorAll('.step'));
+      var answer=st.querySelector('[data-answer]');
+      var prev=st.querySelector('[data-prev]'), next=st.querySelector('[data-next]'), reveal=st.querySelector('[data-reveal]');
+      var curEl=st.querySelector('[data-cur]'), totEl=st.querySelector('[data-total]'), pips=st.querySelector('.progress-pips');
+      var idx=0, revealed=false, total=steps.length;
+      if(totEl) totEl.textContent=total;
+      var pipEls=[]; if(pips){ for(var i=0;i<total;i++){ var p=document.createElement('span'); p.className='pip'; pips.appendChild(p); pipEls.push(p);} }
+      function update(){
+        for(var i=0;i<steps.length;i++){ steps[i].hidden=(i!==idx)||revealed; }
+        if(answer) answer.hidden=!revealed;
+        if(curEl) curEl.textContent=revealed?total:(idx+1);
+        for(var j=0;j<pipEls.length;j++){ pipEls[j].className='pip'+( (revealed||j<idx)?' done':'')+((j===idx&&!revealed)?' cur':''); }
+        var onLast=(idx===total-1);
+        if(prev) prev.disabled=(idx===0&&!revealed);
+        if(next) next.hidden=onLast||revealed;
+        if(reveal) reveal.hidden=(!onLast)||revealed;
+      }
+      if(next) next.addEventListener('click',function(){ if(idx<total-1){ idx++; update(); } });
+      if(prev) prev.addEventListener('click',function(){ if(revealed){ revealed=false; update(); return;} if(idx>0){ idx--; update(); } });
+      if(reveal) reveal.addEventListener('click',function(){ revealed=true; update(); });
+      update();
+    });
+  }
+
+  /* ---------- calculator ---------- */
+  function initCalc(){
+    var N=$('calcN'),P1=$('calcP1'),P2=$('calcP2'),eq=$('calcEq'),F=$('calcF'),V=$('calcVerdict'); if(!N) return;
+    function cv(inp,min){ var v=parseInt(inp.value,10); if(isNaN(v))v=min; if(v<min)v=min; inp.value=v; return v; }
+    function calc(){ var n=cv(N,1),p1=cv(P1,0),p2=cv(P2,0); var f=3*(n-1)-2*p1-p2;
+      if(eq) eq.innerHTML='F = 3('+n+' &minus; 1) &minus; 2('+p1+') &minus; '+p2+' = '+f;
+      if(F) F.textContent=f;
+      if(V){ if(f>=1){ V.className='verdict mech'; V.textContent=(f===1?'one-DOF mechanism — one driver':f+'-DOF mechanism — '+f+' drivers'); } else if(f===0){ V.className='verdict struct'; V.textContent='F = 0 — a rigid structure'; } else { V.className='verdict indet'; V.textContent='F < 0 — over-constrained / indeterminate'; } }
+    }
+    [N,P1,P2].forEach(function(inp){ inp.addEventListener('input',calc); inp.addEventListener('change',calc); });
+    var inc=document.querySelectorAll('[data-calc-inc]'), dec=document.querySelectorAll('[data-calc-dec]'); var map={N:N,P1:P1,P2:P2};
+    Array.prototype.forEach.call(inc,function(b){ b.addEventListener('click',function(){ var inp=map[b.getAttribute('data-calc-inc')]; inp.value=(parseInt(inp.value,10)||0)+1; calc(); }); });
+    Array.prototype.forEach.call(dec,function(b){ b.addEventListener('click',function(){ var k=b.getAttribute('data-calc-dec'); var inp=map[k]; var min=(k==='N')?1:0; inp.value=Math.max(min,(parseInt(inp.value,10)||0)-1); calc(); }); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-preset]'),function(b){ b.addEventListener('click',function(){ var v=b.getAttribute('data-preset').split(','); N.value=v[0]; P1.value=v[1]; P2.value=v[2]; calc(); }); });
+    calc();
+  }
+
+  /* ---------- counter ---------- */
+  function initCounter(){
+    var s={N:0,pins:0,sliders:0,rolling:0,slip:0};
+    var elN=$('cntN'),elP1=$('cntP1'),elP2=$('cntP2'),elF=$('cntF'),elV=$('cntVerdict'),pinTxt=$('cntPinTxt'),sldTxt=$('cntSldTxt'),rollTxt=$('cntRollTxt'),multi=$('cntMulti'); if(!elN) return;
+    function upd(){ var p1=s.pins+s.sliders+s.rolling; var f=3*(s.N-1)-2*p1-s.slip;
+      elN.textContent=s.N; elP1.textContent=p1; elP2.textContent=s.slip;
+      pinTxt.textContent=s.pins+(s.pins===1?' pin':' pins'); sldTxt.textContent=s.sliders+(s.sliders===1?' slider':' sliders'); rollTxt.textContent=s.rolling+' rolling';
+      if(s.N===0){ elF.textContent=0; elV.className='verdict struct'; elV.textContent='add some links to begin'; return; }
+      elF.textContent=f;
+      if(f>=1){ elV.className='verdict mech'; elV.textContent=(f===1?'mechanism — 1 DOF':'mechanism — '+f+' DOF'); } else if(f===0){ elV.className='verdict struct'; elV.textContent='structure (F = 0)'; } else { elV.className='verdict indet'; elV.textContent='over-constrained (F < 0)'; }
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-cnt]'),function(b){ b.addEventListener('click',function(){ var k=b.getAttribute('data-cnt');
+      if(k==='link') s.N++; else if(k==='pin') s.pins++; else if(k==='slider') s.sliders++; else if(k==='roll') s.rolling++; else if(k==='slip') s.slip++;
+      else if(k==='multi'){ var m=parseInt(multi.value,10)||3; if(m<2)m=2; s.pins+=(m-1); } else if(k==='reset'){ s={N:0,pins:0,sliders:0,rolling:0,slip:0}; }
+      upd(); }); });
+    upd();
+  }
+
+  /* ---------- quiz ---------- */
+  function initQuiz(){ Array.prototype.forEach.call(document.querySelectorAll('[data-q]'),function(q){ var opts=Array.prototype.slice.call(q.querySelectorAll('.opt')); var fb=q.querySelector('.feedback'); var done=false;
+    opts.forEach(function(o){ o.addEventListener('click',function(){ if(done) return; done=true; var correct=o.getAttribute('data-correct')==='1';
+      if(correct){ o.classList.add('correct'); } else { o.classList.add('wrong'); opts.forEach(function(x){ if(x.getAttribute('data-correct')==='1') x.classList.add('correct'); }); }
+      if(fb) fb.classList.add('show'); }); });
+  }); }
+
+  /* ---------- glossary filter ---------- */
+  function initGloss(){ var inp=$('glossSearch'),list=$('glossList'),none=$('glossNone'); if(!inp||!list) return; var items=Array.prototype.slice.call(list.querySelectorAll('div'));
+    inp.addEventListener('input',function(){ var qv=inp.value.trim().toLowerCase(),any=false; items.forEach(function(it){ var m=it.textContent.toLowerCase().indexOf(qv)!==-1; it.hidden=!m; if(m)any=true; }); if(none) none.hidden=any; });
+  }
+
+  /* ---------- nav active + reading progress ---------- */
+  function initNavProgress(){ var prog=$('readprog'); var sections=Array.prototype.slice.call(document.querySelectorAll('main section[id]')); var links=Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    function onScroll(){ var h=document.documentElement; var scrolled=h.scrollTop||document.body.scrollTop||window.pageYOffset||0; var max=(h.scrollHeight-h.clientHeight)||1; if(prog) prog.value=Math.min(100,Math.max(0,scrolled/max*100));
+      var cur=sections.length?sections[0].id:null, mid=scrolled+h.clientHeight*0.3;
+      sections.forEach(function(sec){ if(sec.offsetTop<=mid) cur=sec.id; });
+      links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href')==='#'+cur); });
+    }
+    window.addEventListener('scroll',onScroll,{passive:true}); window.addEventListener('resize',onScroll); onScroll();
+  }
+
+  /* ---------- boot ---------- */
+  function boot(){
+    initSteppers(); initCalc(); initCounter(); initQuiz(); initGloss(); initNavProgress();
+    makeStage('st_1_2',STAGES.st_1_2); makeStage('st_1_4',STAGES.st_1_4); makeStage('st_1_5',STAGES.st_1_5);
+    makeStage('st_1_6',STAGES.st_1_6); makeStage('st_1_7',STAGES.st_1_7); makeStage('st_1_8',STAGES.st_1_8);
+    makeStage('st_1_9',STAGES.st_1_9); makeStage('st_1_10',STAGES.st_1_10); makeStage('st_1_11',STAGES.st_1_11);
+    makeStage('st_1_13',STAGES.st_1_13,{speed:0.01}); makeStage('st_1_14',STAGES.st_1_14); makeStage('st_1_15',STAGES.st_1_15,{speed:0.004});
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',boot); } else { boot(); }
+})();
+</script>
+</body>
+</html>
