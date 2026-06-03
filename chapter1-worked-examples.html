@@ -1235,7 +1235,11 @@
     var j2={x:j1.x+L2*Math.cos(a2),y:j1.y+L2*Math.sin(a2)};
     var j3={x:j2.x+L3*Math.cos(a3),y:j2.y+L3*Math.sin(a3)};
     bar(svg,O.x,O.y,j1.x,j1.y); bar(svg,j1.x,j1.y,j2.x,j2.y); bar(svg,j2.x,j2.y,j3.x,j3.y);
-    svg.appendChild(el('circle',{cx:j3.x,cy:j3.y,r:6,fill:'none',stroke:cssVar('--accent-2'),'stroke-width':3}));
+    var gd={x:Math.cos(a3),y:Math.sin(a3)}, gp={x:-Math.sin(a3),y:Math.cos(a3)};
+    var b1={x:j3.x+gp.x*8,y:j3.y+gp.y*8}, b2={x:j3.x-gp.x*8,y:j3.y-gp.y*8};
+    bar(svg,b1.x,b1.y,b2.x,b2.y,{w:3,color:cssVar('--accent-2')});
+    bar(svg,b1.x,b1.y,b1.x+gd.x*12,b1.y+gd.y*12,{w:3,color:cssVar('--accent-2')});
+    bar(svg,b2.x,b2.y,b2.x+gd.x*12,b2.y+gd.y*12,{w:3,color:cssVar('--accent-2')});
     groundPin(svg,O.x,O.y); freePin(svg,j1.x,j1.y); freePin(svg,j2.x,j2.y);
     label(svg,O.x-14,O.y-4,'1'); label(svg,(O.x+j1.x)/2-7,(O.y+j1.y)/2-7,'2'); label(svg,(j1.x+j2.x)/2-7,(j1.y+j2.y)/2-7,'3'); label(svg,(j2.x+j3.x)/2,(j2.y+j3.y)/2-9,'4');
     caption(svg,200,265,'Open chain — 3 independent joint angles'); };
@@ -1400,22 +1404,23 @@
     label(svg,Hp.x-4,Hp.y+17,'2'); label(svg,Jp.x+5,Jp.y-11,'3'); label(svg,233,127,'4'); label(svg,263,127,'1');
     caption(svg,160,250,'Two slipping contacts \u2248 one pin — F = 1'); };
 
-  STAGES.st_1_13=function(svg,t){ clear(svg); var jit=1.5*Math.sin(t*2*Math.PI*3);
-    var Gll={x:150,y:215}, Gr={x:286,y:150};               /* two ground pivots (1) */
-    var T={x:200+jit*0.3,y:70};                            /* top pin */
-    var S2={x:176+jit*0.2,y:148};                          /* slider block on link 2 */
-    var S3={x:244+jit*0.2,y:118};                          /* slider block on link 3 */
-    bar(svg,Gll.x,Gll.y,T.x,T.y);                          /* link 2 (carries slider S2) */
-    bar(svg,T.x,T.y,Gr.x,Gr.y);                            /* link 3 (carries slider S3) */
-    bar(svg,S2.x,S2.y,Gr.x,Gr.y,{color:cssVar('--accent-2'),w:4}); /* link 4 (redundant diagonal) */
-    block(svg,S2.x,S2.y,Math.atan2(T.y-Gll.y,T.x-Gll.x),18,11,{fill:cssVar('--ink')});
-    block(svg,S3.x,S3.y,Math.atan2(Gr.y-T.y,Gr.x-T.x),18,11,{fill:cssVar('--ink')});
+  STAGES.st_1_13=function(svg,t){ clear(svg); var jit=1.4*Math.sin(t*2*Math.PI*3);
+    var T={x:198+jit*0.3,y:64};                            /* top pin: link 2 meets link 3 */
+    var Gll={x:208,y:224}, Gr={x:292,y:150};               /* ground pivots (1): link 2 base, link 3 base */
+    bar(svg,Gll.x,Gll.y,T.x,T.y);                          /* link 2 */
+    bar(svg,T.x,T.y,Gr.x,Gr.y);                            /* link 3 */
+    var S2={x:Gll.x+(T.x-Gll.x)*0.5,y:Gll.y+(T.y-Gll.y)*0.5};  /* slider block on link 2 */
+    var S3={x:T.x+(Gr.x-T.x)*0.5,y:T.y+(Gr.y-T.y)*0.5};        /* slider block on link 3 */
+    var d4=Math.atan2(S3.y-S2.y,S3.x-S2.x);
+    bar(svg,S2.x,S2.y,S3.x,S3.y,{color:cssVar('--accent-2'),w:4}); /* link 4: diagonal sliding through both blocks */
+    block(svg,S2.x,S2.y,d4,20,12,{fill:cssVar('--ink')});  /* slider 2-4 */
+    block(svg,S3.x,S3.y,d4,20,12,{fill:cssVar('--ink')});  /* slider 3-4 */
     groundPin(svg,Gll.x,Gll.y); groundPin(svg,Gr.x,Gr.y); freePin(svg,T.x,T.y);
-    label(svg,T.x+9,T.y,'3'); label(svg,(Gll.x+S2.x)/2-11,(Gll.y+S2.y)/2,'2');
-    label(svg,(S2.x+Gr.x)/2,(S2.y+Gr.y)/2+13,'4'); label(svg,Gll.x-6,Gll.y+15,'1'); label(svg,Gr.x+11,Gr.y,'1');
-    caption(svg,185,250,'Pins + sliders, over-constrained — F = \u22121 (rigid)'); };
+    label(svg,(Gll.x+T.x)/2-13,(Gll.y+T.y)/2,'2'); label(svg,(T.x+Gr.x)/2,(T.y+Gr.y)/2-12,'3');
+    label(svg,(S2.x+S3.x)/2-2,(S2.y+S3.y)/2+13,'4'); label(svg,Gll.x-4,Gll.y+15,'1'); label(svg,Gr.x+11,Gr.y,'1');
+    caption(svg,185,250,'Pins + two sliders, over-constrained — F = \u22121'); };
 
-  STAGES.st_1_14=function(svg,t){ clear(svg); var ph=t*2*Math.PI; var c1={x:140,y:135},r1=58,c2={x:250,y:135},r2=42;
+  STAGES.st_1_14=function(svg,t){ clear(svg); var ph=t*2*Math.PI; var c1={x:140,y:135},r1=58,c2={x:240,y:135},r2=42;
     gear(svg,c1.x,c1.y,r1,16,ph); gear(svg,c2.x,c2.y,r2,12,-ph*(r1/r2));
     groundPin(svg,c1.x,c1.y); groundPin(svg,c2.x,c2.y); hash(svg,c1.x+r1+1,c1.y);
     label(svg,c1.x,c1.y-r1-13,'2'); label(svg,c2.x,c2.y-r2-13,'3'); label(svg,195,205,'1');
