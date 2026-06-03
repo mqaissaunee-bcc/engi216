@@ -1240,15 +1240,27 @@
     label(svg,O.x-14,O.y-4,'1'); label(svg,(O.x+j1.x)/2-7,(O.y+j1.y)/2-7,'2'); label(svg,(j1.x+j2.x)/2-7,(j1.y+j2.y)/2-7,'3'); label(svg,(j2.x+j3.x)/2,(j2.y+j3.y)/2-9,'4');
     caption(svg,200,265,'Open chain — 3 independent joint angles'); };
 
-  STAGES.st_1_4=function(svg,t){ var O2={x:90,y:225},O4={x:170,y:225},r2=70,r3=92,r4=72; var TT=t*2*Math.PI; var th2=-Math.PI*0.5+0.4*Math.sin(TT)-0.15; var fb=fourbar(O2,O4,r2,r3,r4,th2,1); var A=fb.A,C=fb.C; if(!C) return; clear(svg);
-    var dx=C.x-A.x,dy=C.y-A.y,dl=Math.hypot(dx,dy)||1; dx/=dl;dy/=dl; var H={x:C.x+dx*120,y:C.y+dy*120}; var G6={x:250,y:225};
-    bar(svg,O2.x,O2.y,O4.x,O4.y,{color:cssVar('--ink-soft'),w:5});
-    bar(svg,O2.x,O2.y,A.x,A.y); bar(svg,A.x,A.y,C.x,C.y); bar(svg,O4.x,O4.y,C.x,C.y);
-    bar(svg,A.x,A.y,H.x,H.y,{w:8,color:cssVar('--accent')}); bar(svg,G6.x,G6.y,H.x,H.y);
-    groundPin(svg,O2.x,O2.y); groundPin(svg,O4.x,O4.y); groundPin(svg,G6.x,G6.y);
-    freePin(svg,A.x,A.y); freePin(svg,C.x,C.y); freePin(svg,H.x,H.y);
-    label(svg,130,240,'1'); label(svg,(A.x+H.x)/2+8,(A.y+H.y)/2,'5');
-    caption(svg,180,265,'Six links, one input — hood follows a set path'); };
+  STAGES.st_1_4=function(svg,t){
+    var O2={x:115,y:215}, O4={x:272,y:202};               /* ground pins: 1-2 (triangle base), 1-5 */
+    var d=0.26*Math.sin(t*2*Math.PI);                      /* input: ternary link 2 rocks about O2 */
+    var ca=Math.cos(d), sa=Math.sin(d);
+    function rot(lx,ly){ return {x:O2.x+lx*ca-ly*sa, y:O2.y+lx*sa+ly*ca}; }
+    var V1=rot(-6,-54), V2=rot(36,-12);                    /* triangle vertices -> link 3, link 6 */
+    var B=circInt(O4,72,V2,58,1); if(!B) return;           /* hood-right pin (4-5-6 triple pin) */
+    var A=circInt(V1,72,B,132,-1); if(!A) return;          /* hood-left pin (3-4) */
+    clear(svg);
+    bar(svg,O2.x,O2.y,O4.x,O4.y,{color:cssVar('--ink-soft'),w:3,op:.45});
+    tri(svg,[[O2.x,O2.y],[V1.x,V1.y],[V2.x,V2.y]],{});     /* ternary link 2 */
+    bar(svg,V1.x,V1.y,A.x,A.y);                            /* link 3 */
+    bar(svg,A.x,A.y,B.x,B.y,{w:8,color:cssVar('--accent')}); /* hood = link 4 */
+    bar(svg,O4.x,O4.y,B.x,B.y);                            /* link 5 */
+    bar(svg,V2.x,V2.y,B.x,B.y);                            /* link 6 */
+    groundPin(svg,O2.x,O2.y); groundPin(svg,O4.x,O4.y);
+    freePin(svg,V1.x,V1.y); freePin(svg,V2.x,V2.y); freePin(svg,A.x,A.y); freePin(svg,B.x,B.y);
+    label(svg,O2.x+6,O2.y-24,'2'); label(svg,(V1.x+A.x)/2-10,(V1.y+A.y)/2,'3');
+    label(svg,(A.x+B.x)/2,(A.y+B.y)/2-10,'4'); label(svg,(O4.x+B.x)/2+10,(O4.y+B.y)/2,'5');
+    label(svg,(V2.x+B.x)/2+2,(V2.y+B.y)/2+11,'6'); label(svg,O2.x-14,O2.y+3,'1'); label(svg,O4.x+14,O4.y,'1');
+    caption(svg,180,262,'Hood = link 4; ternary link 2 drives it — F = 1'); };
 
   STAGES.st_1_5=function(svg,t){ var O2={x:100,y:215},O4={x:260,y:215},r2=46,r3=150,r4=92; var th2=t*2*Math.PI; var fb=fourbar(O2,O4,r2,r3,r4,th2,1); var A=fb.A,C=fb.C; if(!C) return; clear(svg);
     bar(svg,O2.x,O2.y,O4.x,O4.y,{color:cssVar('--ink-soft'),w:5});
@@ -1257,20 +1269,34 @@
     label(svg,180,232,'1'); label(svg,(O2.x+A.x)/2-9,(O2.y+A.y)/2,'2'); label(svg,(A.x+C.x)/2,(A.y+C.y)/2-9,'3'); label(svg,(O4.x+C.x)/2+9,(O4.y+C.y)/2,'4');
     caption(svg,180,262,'Crank 2 drives the closed loop — F = 1'); };
 
-  STAGES.st_1_6=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var base={x:80,y:205};
-    var boomAng=-0.5+0.32*Math.sin(TT), boomLen=150;
-    var elbow={x:base.x+boomLen*Math.cos(boomAng),y:base.y+boomLen*Math.sin(boomAng)};
-    var tilt=-0.2+0.6*Math.sin(TT*1.6+1), sl=34;
-    var s2={x:elbow.x+sl*Math.cos(tilt),y:elbow.y+sl*Math.sin(tilt)};
-    var s3={x:elbow.x+sl*Math.cos(tilt+1.5),y:elbow.y+sl*Math.sin(tilt+1.5)};
-    var g1={x:60,y:150}, midb={x:base.x+boomLen*0.45*Math.cos(boomAng),y:base.y+boomLen*0.45*Math.sin(boomAng)};
-    var g2={x:elbow.x-46,y:elbow.y-34};
-    svg.appendChild(el('line',{x1:52,y1:120,x2:52,y2:235,stroke:cssVar('--ground-fill'),'stroke-width':3}));
-    bar(svg,base.x,base.y,elbow.x,elbow.y,{w:8}); cylinder(svg,g1,midb);
-    tri(svg,[[elbow.x,elbow.y],[s2.x,s2.y],[s3.x,s3.y]],{}); cylinder(svg,g2,s3);
-    groundPin(svg,base.x,base.y); groundPin(svg,g1.x,g1.y); freePin(svg,elbow.x,elbow.y);
-    label(svg,base.x-12,base.y,'1'); label(svg,elbow.x+9,elbow.y+5,'6'); label(svg,s2.x+7,s2.y,'9');
-    caption(svg,200,265,'Two cylinders move independently — F = 2'); };
+  STAGES.st_1_6=function(svg,t){ clear(svg); var TT=t*2*Math.PI;
+    var Gu={x:62,y:96}, Gl={x:62,y:150};                  /* ground: upper boom pivot, lower cyl base */
+    var boom=0.30+0.22*Math.sin(TT), Lb=185;              /* input 1: lift cylinder -> boom angle */
+    var E={x:Gu.x+Lb*Math.cos(boom),y:Gu.y+Lb*Math.sin(boom)};            /* boom wrist */
+    var M={x:Gu.x+Lb*0.46*Math.cos(boom),y:Gu.y+Lb*0.46*Math.sin(boom)}; /* lift-cyl pin on boom */
+    var nx=-Math.sin(boom), ny=Math.cos(boom);
+    var Eo={x:Gu.x+Lb*0.6*Math.cos(boom)+nx*26,y:Gu.y+Lb*0.6*Math.sin(boom)+ny*26}; /* boom 3rd vertex (ternary) */
+    var tilt=0.7+0.5*Math.sin(TT*1.7+0.6);                /* input 2: tilt cylinder -> shovel */
+    var J7={x:E.x+34*Math.cos(boom+1.4+0.25*Math.sin(TT*1.7)),y:E.y+34*Math.sin(boom+1.4+0.25*Math.sin(TT*1.7))};
+    var J8={x:E.x-15*Math.cos(boom),y:E.y-15*Math.sin(boom)};
+    tri(svg,[[Gu.x,Gu.y],[E.x,E.y],[Eo.x,Eo.y]],{fill:'rgba(10,126,164,.14)'}); /* boom = link 4 */
+    cylinder(svg,Gl,M);                                   /* lift cylinder: link 2 (rod) + link 3 (barrel) */
+    cylinder(svg,Eo,J7);                                  /* tilt cylinder: link 5 + link 6 */
+    bar(svg,J7.x,J7.y,J8.x,J8.y);                         /* link 7 */
+    var sx=Math.cos(tilt), sy=Math.sin(tilt);
+    var s2={x:E.x+42*sx,y:E.y+42*sy};
+    var s3={x:E.x+30*(sx*Math.cos(1.6)-sy*Math.sin(1.6)),y:E.y+30*(sx*Math.sin(1.6)+sy*Math.cos(1.6))};
+    bar(svg,J8.x,J8.y,s3.x,s3.y);                         /* link 8 */
+    tri(svg,[[E.x,E.y],[s2.x,s2.y],[s3.x,s3.y]],{fill:'rgba(194,84,29,.16)',color:cssVar('--accent-2')}); /* shovel = link 9 */
+    groundPin(svg,Gu.x,Gu.y); groundPin(svg,Gl.x,Gl.y);
+    freePin(svg,E.x,E.y); freePin(svg,M.x,M.y); freePin(svg,J7.x,J7.y);
+    label(svg,Gu.x-12,Gu.y,'1'); label(svg,Gl.x-12,Gl.y,'1');
+    label(svg,(Gu.x+E.x)/2-4,(Gu.y+E.y)/2-13,'4');
+    label(svg,(Gl.x+M.x)/2-2,(Gl.y+M.y)/2+13,'2'); label(svg,(Gl.x+M.x)/2+20,(Gl.y+M.y)/2-3,'3');
+    label(svg,(Eo.x+J7.x)/2-9,(Eo.y+J7.y)/2,'5'); label(svg,(Eo.x+J7.x)/2+8,(Eo.y+J7.y)/2+9,'6');
+    label(svg,(J7.x+J8.x)/2,(J7.y+J8.y)/2-8,'7'); label(svg,(J8.x+s3.x)/2+7,(J8.y+s3.y)/2,'8');
+    label(svg,s2.x+9,s2.y+5,'9');
+    caption(svg,185,266,'Boom (4) + two cylinders (2-3, 5-6) + shovel 9 — F = 2'); };
 
   STAGES.st_1_7=function(svg,t){ var TT=t*2*Math.PI; var Sh={x:120,y:215},G2={x:80,y:215};
     var seatAng=-Math.PI*0.5+0.32*Math.sin(TT)-0.12, seatLen=140;
@@ -1287,41 +1313,82 @@
     label(svg,Sh.x+12,Sh.y+14,'1'); label(svg,(Sh.x+seatEnd.x)/2,(Sh.y+seatEnd.y)/2-11,'3'); label(svg,(G2.x+Cc.x)/2-9,(G2.y+Cc.y)/2,'2');
     caption(svg,195,262,'Pin slides in the seat slot (no hash = slipping)'); };
 
-  STAGES.st_1_8=function(svg,t){ clear(svg); var O={x:90,y:150},r2=42,r3=150; var TT=t*2*Math.PI; var th2=Math.PI-(0.5+0.5*Math.sin(TT));
-    var A={x:O.x+r2*Math.cos(th2),y:O.y+r2*Math.sin(th2)}; var dy=A.y-O.y; var dx=Math.sqrt(Math.max(0,r3*r3-dy*dy)); var S={x:A.x+dx,y:O.y};
-    rail(svg,O.x+20,O.y,335,O.y);
-    bar(svg,O.x,O.y,A.x,A.y); bar(svg,A.x,A.y,S.x,S.y); block(svg,S.x,S.y,0,30,18);
-    groundPin(svg,O.x,O.y); freePin(svg,A.x,A.y); freePin(svg,S.x,S.y);
-    label(svg,O.x-13,O.y+4,'1'); label(svg,(O.x+A.x)/2-9,(O.y+A.y)/2,'2'); label(svg,(A.x+S.x)/2,(A.y+S.y)/2-9,'3'); label(svg,S.x,S.y-17,'4');
-    caption(svg,185,250,'Crank → coupler → slider (door closer) — F = 1'); };
+  STAGES.st_1_8=function(svg,t){
+    var O4={x:120,y:72}, O2={x:255,y:72};                  /* O4 = door hinge (wall), O2 = link-2 hinge (wall) */
+    var phi=Math.PI/2+0.30*Math.sin(t*2*Math.PI);          /* door swings about vertical (points down) */
+    var u={x:Math.cos(phi),y:Math.sin(phi)};
+    var w={x:O4.x-O2.x,y:O4.y-O2.y};
+    var uw=u.x*w.x+u.y*w.y, ww=w.x*w.x+w.y*w.y;
+    var disc=uw*uw-(ww-150*150); if(disc<0) return;        /* L2 = 150 (always reaches) */
+    var dd=-uw+Math.sqrt(disc);
+    var S={x:O4.x+dd*u.x,y:O4.y+dd*u.y};                   /* slider block 3 on the door */
+    clear(svg);
+    var i,j;
+    svg.appendChild(el('line',{x1:O4.x-34,y1:60,x2:O4.x+30,y2:60,stroke:cssVar('--ground-fill'),'stroke-width':3}));
+    for(i=-30;i<=26;i+=8){ svg.appendChild(el('line',{x1:O4.x+i,y1:60,x2:O4.x+i-6,y2:52,stroke:cssVar('--ground-fill'),'stroke-width':1.2})); }
+    svg.appendChild(el('line',{x1:O2.x-30,y1:60,x2:O2.x+34,y2:60,stroke:cssVar('--ground-fill'),'stroke-width':3}));
+    for(j=-26;j<=30;j+=8){ svg.appendChild(el('line',{x1:O2.x+j,y1:60,x2:O2.x+j-6,y2:52,stroke:cssVar('--ground-fill'),'stroke-width':1.2})); }
+    var doorEnd={x:O4.x+u.x*185,y:O4.y+u.y*185};
+    bar(svg,O4.x,O4.y,doorEnd.x,doorEnd.y,{w:6});          /* door = link 4 */
+    bar(svg,O2.x,O2.y,S.x,S.y);                            /* link 2 */
+    block(svg,S.x,S.y,phi,30,17,{fill:cssVar('--panel')}); /* slider block 3 (aligned to door) */
+    groundPin(svg,O4.x,O4.y); groundPin(svg,O2.x,O2.y); freePin(svg,S.x,S.y);
+    caption(svg,180,44,'View from above the door');
+    label(svg,O4.x-11,O4.y+11,'1'); label(svg,O2.x+11,O2.y+11,'1');
+    label(svg,O4.x+u.x*120-14,O4.y+u.y*120,'4'); label(svg,(O2.x+S.x)/2,(O2.y+S.y)/2-10,'2'); label(svg,S.x+15,S.y,'3');
+    caption(svg,180,266,'Inverted slider-crank: block 3 slides on door 4 — F = 1'); };
 
-  STAGES.st_1_9=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var piv={x:130,y:90},r=34; var A={x:piv.x+r*Math.cos(TT),y:piv.y+r*Math.sin(TT)};
-    var footPiv={x:95,y:205}, footLen=120, footAng=-0.2+0.5*Math.sin(TT);
-    var footEnd={x:footPiv.x+footLen*Math.cos(footAng),y:footPiv.y+footLen*Math.sin(footAng)};
-    svg.appendChild(el('line',{x1:40,y1:235,x2:325,y2:235,stroke:cssVar('--ground-fill'),'stroke-width':2}));
-    for(var i=50;i<320;i+=18){ svg.appendChild(el('line',{x1:i,y1:235,x2:i-8,y2:243,stroke:cssVar('--ground-fill'),'stroke-width':1})); }
-    bar(svg,piv.x,piv.y,A.x,A.y); bar(svg,A.x,A.y,footEnd.x,footEnd.y); bar(svg,footPiv.x,footPiv.y,footEnd.x,footEnd.y,{w:8,color:cssVar('--accent')});
-    var wx=footPiv.x+25*Math.sin(TT); svg.appendChild(el('circle',{cx:wx,cy:225,r:10,fill:'none',stroke:cssVar('--link-fill'),'stroke-width':3})); hash(svg,wx,235);
-    groundPin(svg,piv.x,piv.y); groundPin(svg,footPiv.x,footPiv.y); freePin(svg,A.x,A.y); freePin(svg,footEnd.x,footEnd.y);
-    label(svg,footEnd.x+9,footEnd.y,'3');
-    caption(svg,195,262,'Hash-marked rolling contact = lower pair — F = 1'); };
+  STAGES.st_1_9=function(svg,t){ var TT=t*2*Math.PI;
+    var Gl={x:70,y:175}, Gm={x:172,y:206}, Gr={x:300,y:96};   /* three ground pivots (link 1) */
+    var P2={x:Gl.x+40*Math.cos(TT),y:Gl.y+40*Math.sin(TT)};   /* top of crank link 2 */
+    var C=circInt(P2,150,Gr,96,1); if(!C) return; clear(svg);
+    var mid={x:(P2.x+C.x)*0.5,y:(P2.y+C.y)*0.5};
+    var diskC={x:mid.x,y:mid.y-22};
+    svg.appendChild(el('path',{d:'M '+(diskC.x-52)+' '+(diskC.y-30)+' Q '+diskC.x+' '+(diskC.y-56)+' '+(diskC.x+52)+' '+(diskC.y-30),fill:'none',stroke:cssVar('--ink-soft'),'stroke-dasharray':'4 4',opacity:.55}));
+    bar(svg,Gl.x,Gl.y,P2.x,P2.y);                            /* link 2 */
+    var cang=Math.atan2(C.y-P2.y,C.x-P2.x);
+    block(svg,P2.x+(C.x-P2.x)*0.34,P2.y+(C.y-P2.y)*0.34,cang,16,9,{fill:cssVar('--ink')}); /* link 3 slider on coupler */
+    bar(svg,P2.x,P2.y,C.x,C.y,{w:7,color:cssVar('--accent')}); /* link 4 (disk carrier) */
+    bar(svg,Gr.x,Gr.y,C.x,C.y);                              /* link 6 */
+    bar(svg,Gm.x,Gm.y,mid.x,mid.y);                          /* link 5 */
+    bar(svg,diskC.x,diskC.y,mid.x,mid.y,{w:2,color:cssVar('--accent')});
+    svg.appendChild(el('circle',{cx:diskC.x,cy:diskC.y,r:16,fill:'rgba(10,126,164,.14)',stroke:cssVar('--link-fill'),'stroke-width':3}));
+    svg.appendChild(el('line',{x1:diskC.x,y1:diskC.y,x2:diskC.x+14*Math.cos(TT*1.4),y2:diskC.y+14*Math.sin(TT*1.4),stroke:cssVar('--link-fill'),'stroke-width':2}));
+    hash(svg,diskC.x,diskC.y-16);                            /* rolling contact (lower pair) */
+    groundPin(svg,Gl.x,Gl.y); groundPin(svg,Gm.x,Gm.y); groundPin(svg,Gr.x,Gr.y);
+    freePin(svg,P2.x,P2.y); freePin(svg,C.x,C.y);
+    label(svg,Gl.x-12,Gl.y+4,'1'); label(svg,Gm.x,Gm.y+16,'1'); label(svg,Gr.x+12,Gr.y,'1');
+    label(svg,(Gl.x+P2.x)/2-10,(Gl.y+P2.y)/2,'2'); label(svg,P2.x+(C.x-P2.x)*0.34+6,P2.y+(C.y-P2.y)*0.34+13,'3');
+    label(svg,diskC.x,diskC.y-26,'4'); label(svg,(Gm.x+mid.x)/2+9,(Gm.y+mid.y)/2,'5'); label(svg,(Gr.x+C.x)/2+9,(Gr.y+C.y)/2,'6');
+    caption(svg,185,262,'Link 4 carries a rolling disk (hash = lower pair) — F = 1'); };
 
-  function drawAMT(svg,A,B,fz){ fz=fz||{}; var Gl={x:95,y:205},Gr={x:255,y:80}; var cL=70,cR=70;
-    var L={x:Gl.x+cL*Math.cos(A),y:Gl.y+cL*Math.sin(A)}; var R={x:Gr.x+cR*Math.cos(B),y:Gr.y+cR*Math.sin(B)};
-    var mid={x:(L.x+R.x)/2,y:(L.y+R.y)/2}; var foot={x:mid.x,y:mid.y+52};
-    var c1=fz.l?cssVar('--accent-2'):cssVar('--link-fill'); var c2=fz.r?cssVar('--accent-2'):cssVar('--link-fill');
-    bar(svg,Gl.x,Gl.y,L.x,L.y,{color:c1}); bar(svg,Gr.x,Gr.y,R.x,R.y,{color:c2}); bar(svg,L.x,L.y,R.x,R.y);
-    bar(svg,L.x,L.y,foot.x,foot.y,{w:8,color:cssVar('--accent')}); bar(svg,R.x,R.y,foot.x,foot.y);
-    groundPin(svg,Gl.x,Gl.y); groundPin(svg,Gr.x,Gr.y); freePin(svg,L.x,L.y); freePin(svg,R.x,R.y); freePin(svg,foot.x,foot.y);
-    label(svg,Gl.x-12,Gl.y,'1'); label(svg,Gr.x+12,Gr.y-5,'7'); label(svg,foot.x+11,foot.y,'6'); }
+  function drawAMT(svg,p1,p2,fz){ fz=fz||{};
+    var Gb={x:95,y:216}, Gt={x:176,y:78};                  /* two ground pivots: link 2 base, link 7 (diagonal) */
+    var TL={x:120+10*Math.sin(p1),y:120-6*Math.cos(p2)};
+    var TR={x:250+12*Math.sin(p2),y:96+8*Math.sin(p1)};
+    var BR={x:264+8*Math.sin(p1),y:200-6*Math.sin(p2)};
+    var BL={x:128+10*Math.sin(p2),y:210};
+    function cl(k){ return fz[k]?cssVar('--accent-2'):cssVar('--link-fill'); }
+    bar(svg,TL.x,TL.y,BL.x,BL.y,{color:cl('l3')});         /* link 3 (left) */
+    bar(svg,TL.x,TL.y,TR.x,TR.y,{color:cl('l4')});         /* link 4 (top) */
+    bar(svg,TR.x,TR.y,BR.x,BR.y,{color:cl('l5')});         /* link 5 (right) */
+    bar(svg,BR.x,BR.y,BL.x,BL.y,{color:cl('l6')});         /* link 6 (bottom) */
+    bar(svg,Gt.x,Gt.y,BL.x,BL.y,{color:cl('l7')});         /* link 7 (diagonal) */
+    bar(svg,Gb.x,Gb.y,BL.x,BL.y,{color:cl('l2')});         /* link 2 (ground stub) */
+    groundPin(svg,Gt.x,Gt.y); groundPin(svg,Gb.x,Gb.y);
+    freePin(svg,TL.x,TL.y); freePin(svg,TR.x,TR.y); freePin(svg,BR.x,BR.y); freePin(svg,BL.x,BL.y);
+    label(svg,Gt.x+11,Gt.y-5,'1'); label(svg,Gb.x-12,Gb.y+4,'1');
+    label(svg,(TL.x+BL.x)/2-11,(TL.y+BL.y)/2,'3'); label(svg,(TL.x+TR.x)/2,(TL.y+TR.y)/2-11,'4');
+    label(svg,(TR.x+BR.x)/2+11,(TR.y+BR.y)/2,'5'); label(svg,(BR.x+BL.x)/2,(BR.y+BL.y)/2+13,'6');
+    label(svg,(Gt.x+BL.x)/2-11,(Gt.y+BL.y)/2,'7'); label(svg,(Gb.x+BL.x)/2-3,(Gb.y+BL.y)/2+12,'2'); }
 
-  STAGES.st_1_10=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var A=-Math.PI*0.4+0.5*Math.sin(TT); var B=Math.PI*0.7+0.6*Math.sin(TT*1.7+0.8); drawAMT(svg,A,B); caption(svg,180,262,'Two independent inputs (handle 7 + link 4) — F = 2'); };
+  STAGES.st_1_10=function(svg,t){ clear(svg); var TT=t*2*Math.PI; drawAMT(svg,TT,TT*1.6+0.7,{}); caption(svg,180,264,'Closed 7-bar, two ground pivots — F = 2'); };
 
-  STAGES.st_1_15=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var ph=(t<0.4)?0:((t<0.7)?1:2); var A,B,fz={},cap='';
-    if(ph===0){ A=-Math.PI*0.4+0.5*Math.sin(TT); B=Math.PI*0.7+0.6*Math.sin(TT*1.7); cap='Moving freely — mobility 2'; }
-    else if(ph===1){ A=-Math.PI*0.4; B=Math.PI*0.7+0.6*Math.sin(t*2*Math.PI*3); fz.l=true; cap='Lock pin 1–2 → still 1 DOF left'; }
-    else { A=-Math.PI*0.4; B=Math.PI*0.7+0.3; fz.l=true; fz.r=true; cap='Lock pin 4–5 → rigid (M = 2)'; }
-    drawAMT(svg,A,B,fz); caption(svg,180,262,cap, ph===2?cssVar('--accent-2'):null); };
+  STAGES.st_1_15=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var ph=(t<0.4)?0:((t<0.7)?1:2); var p1,p2,fz={},cap='';
+    if(ph===0){ p1=TT; p2=TT*1.6+0.7; cap='Moving freely — mobility 2'; }
+    else if(ph===1){ p1=1.2; p2=TT*1.6+0.7; fz={l7:true}; cap='Lock one ground pin (link 7) → 1 DOF left'; }
+    else { p1=1.2; p2=2.0; fz={l7:true,l2:true,l3:true}; cap='Lock both ground pins → rigid (M = 2)'; }
+    drawAMT(svg,p1,p2,fz); caption(svg,180,264,cap, ph===2?cssVar('--accent-2'):null); };
 
   STAGES.st_1_11=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var sq=0.5+0.45*Math.sin(TT);
     svg.appendChild(el('line',{x1:250,y1:70,x2:250,y2:210,stroke:cssVar('--ground-fill'),'stroke-width':4}));
@@ -1333,13 +1400,20 @@
     label(svg,Hp.x-4,Hp.y+17,'2'); label(svg,Jp.x+5,Jp.y-11,'3'); label(svg,233,127,'4'); label(svg,263,127,'1');
     caption(svg,160,250,'Two slipping contacts \u2248 one pin — F = 1'); };
 
-  STAGES.st_1_13=function(svg,t){ clear(svg); var jit=2*Math.sin(t*2*Math.PI*3);
-    var A={x:120+jit*0.3,y:80},B={x:230,y:110},C={x:200+jit*0.3,y:210},D={x:110,y:200};
-    bar(svg,A.x,A.y,B.x,B.y); bar(svg,B.x,B.y,C.x,C.y); bar(svg,C.x,C.y,D.x,D.y); bar(svg,D.x,D.y,A.x,A.y);
-    bar(svg,A.x,A.y,C.x,C.y,{color:cssVar('--accent-2'),w:4});
-    groundPin(svg,D.x,D.y); groundPin(svg,C.x,C.y); freePin(svg,A.x,A.y); freePin(svg,B.x,B.y);
-    label(svg,A.x-11,A.y,'2'); label(svg,B.x+11,B.y,'3'); label(svg,(A.x+C.x)/2+11,(A.y+C.y)/2,'4'); label(svg,D.x-7,D.y+15,'1'); label(svg,C.x+8,C.y+15,'1');
-    caption(svg,175,250,'Redundant brace (rust) — cannot move (M = 0)'); };
+  STAGES.st_1_13=function(svg,t){ clear(svg); var jit=1.5*Math.sin(t*2*Math.PI*3);
+    var Gll={x:150,y:215}, Gr={x:286,y:150};               /* two ground pivots (1) */
+    var T={x:200+jit*0.3,y:70};                            /* top pin */
+    var S2={x:176+jit*0.2,y:148};                          /* slider block on link 2 */
+    var S3={x:244+jit*0.2,y:118};                          /* slider block on link 3 */
+    bar(svg,Gll.x,Gll.y,T.x,T.y);                          /* link 2 (carries slider S2) */
+    bar(svg,T.x,T.y,Gr.x,Gr.y);                            /* link 3 (carries slider S3) */
+    bar(svg,S2.x,S2.y,Gr.x,Gr.y,{color:cssVar('--accent-2'),w:4}); /* link 4 (redundant diagonal) */
+    block(svg,S2.x,S2.y,Math.atan2(T.y-Gll.y,T.x-Gll.x),18,11,{fill:cssVar('--ink')});
+    block(svg,S3.x,S3.y,Math.atan2(Gr.y-T.y,Gr.x-T.x),18,11,{fill:cssVar('--ink')});
+    groundPin(svg,Gll.x,Gll.y); groundPin(svg,Gr.x,Gr.y); freePin(svg,T.x,T.y);
+    label(svg,T.x+9,T.y,'3'); label(svg,(Gll.x+S2.x)/2-11,(Gll.y+S2.y)/2,'2');
+    label(svg,(S2.x+Gr.x)/2,(S2.y+Gr.y)/2+13,'4'); label(svg,Gll.x-6,Gll.y+15,'1'); label(svg,Gr.x+11,Gr.y,'1');
+    caption(svg,185,250,'Pins + sliders, over-constrained — F = \u22121 (rigid)'); };
 
   STAGES.st_1_14=function(svg,t){ clear(svg); var ph=t*2*Math.PI; var c1={x:140,y:135},r1=58,c2={x:250,y:135},r2=42;
     gear(svg,c1.x,c1.y,r1,16,ph); gear(svg,c2.x,c2.y,r2,12,-ph*(r1/r2));
