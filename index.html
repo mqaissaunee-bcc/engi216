@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ENGI 216 · Dynamics &amp; Kinematics of Machines and Mechanisms — Course Home</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <meta name="description" content="Course home for ENGI 216: an interactive, accessible series of single-file HTML lecture modules on the kinematics, dynamics, and synthesis of planar mechanisms and machines, based on the Vector Loop Method.">
 <style>
   /* ============================================================
@@ -184,6 +185,32 @@
     margin-top:8px; display:inline-flex; align-items:center; gap:5px;
   }
 
+  /* ---------- worked-examples companion sub-card ---------- */
+  /* A chapter and its examples card share one grid cell, stacked vertically,
+     so the examples card sits directly UNDER its chapter rather than beside it. */
+  .ch-stack{ display:flex; flex-direction:column; gap:9px; }
+  .ch-ex{
+    position:relative; display:flex; align-items:center; justify-content:space-between;
+    gap:14px; margin-left:22px;
+    background:var(--paper-2); border:1px solid var(--panel-line); border-left:4px solid var(--accent-2);
+    border-radius:8px; padding:10px 15px; text-decoration:none; color:inherit; box-shadow:var(--shadow);
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .ch-ex::before{
+    content:"\21B3"; position:absolute; left:-17px; top:7px;
+    color:var(--accent-2); font-weight:700; font-size:1.05rem; line-height:1;
+  }
+  a.ch-ex:hover{ transform:translateY(-2px); border-color:var(--accent-2); box-shadow:0 5px 11px rgba(16,36,58,.14); }
+  a.ch-ex:focus-visible{ outline:3px solid var(--accent-2); outline-offset:3px; }
+  .ch-ex .ex-main{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .ch-ex .ex-label{ font-family:var(--mono); font-size:.65rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; }
+  .ch-ex .ex-title{ font-weight:700; font-size:.92rem; color:var(--ink); line-height:1.25; }
+  .ch-ex .ex-meta{ font-family:var(--mono); font-size:.69rem; color:var(--ink-soft); white-space:nowrap; }
+  .ch-ex.soon{ border-left-color:var(--panel-line); }
+  .ch-ex.soon::before{ color:var(--panel-line); }
+  .ch-ex.soon .ex-label{ color:var(--ink-soft); }
+  .ch-ex.soon .ex-meta{ font-style:italic; }
+
   /* ---------- part headings ---------- */
   .part-head{
     grid-column:1 / -1; display:flex; align-items:center; gap:12px; margin:10px 0 -2px;
@@ -257,7 +284,7 @@
   <section id="chapters" aria-labelledby="chapters-h">
     <span class="sec-tag">Modules</span>
     <h2 id="chapters-h">Chapters</h2>
-    <p>Chapter modules open in a new browser tab.</p>
+    <p>Chapter modules open in a new browser tab. Where a chapter has a companion <strong>worked-examples</strong> module, it appears as a smaller card tucked directly beneath that chapter.</p>
 
     <div class="progress-line" role="img" aria-label="Course build progress: all 8 chapter modules are ready.">
       <span><b>Build status:</b> 8 of 8 modules ready</span>
@@ -273,49 +300,101 @@
       <!-- ===================== PART: FUNDAMENTALS ===================== -->
       <div class="part-head"><span class="pp">Foundations &amp; Kinematic Analysis</span><span class="rule" aria-hidden="true"></span></div>
 
-      <a class="ch available" href="chapter1-introduction-to-mechanisms.html" target="_blank" rel="noopener noreferrer"
-         aria-label="Chapter 1: Introduction to Mechanisms — open module in a new tab">
-        <div class="ch-top"><span class="ch-num">CH 1</span><span class="ch-part">Introduction</span></div>
-        <h3>Introduction to Mechanisms</h3>
-        <p class="desc">Links and joints, skeleton diagrams, mechanisms vs. machines, mobility, Gruebler's criterion, and Grashof's criterion.</p>
-        <div class="ch-foot">
-          <span class="topics">Joints · Mobility · Grashof</span>
-          <span class="status ready">Open <span class="arrow">↗</span></span>
-        </div>
-        <span class="ext-note">↗ opens in a new tab</span>
-      </a>
+      <div class="ch-stack">
+        <a class="ch available" href="chapter1-introduction-to-mechanisms.html" target="_blank" rel="noopener noreferrer"
+           aria-label="Chapter 1: Introduction to Mechanisms — open module in a new tab">
+          <div class="ch-top"><span class="ch-num">CH 1</span><span class="ch-part">Introduction</span></div>
+          <h3>Introduction to Mechanisms</h3>
+          <p class="desc">Links and joints, skeleton diagrams, mechanisms vs. machines, mobility, Gruebler's criterion, and Grashof's criterion.</p>
+          <div class="ch-foot">
+            <span class="topics">Joints · Mobility · Grashof</span>
+            <span class="status ready">Open <span class="arrow">↗</span></span>
+          </div>
+          <span class="ext-note">↗ opens in a new tab</span>
+        </a>
+        <a class="ch-ex" href="chapter1-worked-examples.html" target="_blank" rel="noopener noreferrer"
+           aria-label="Chapter 1 worked examples: Mobility and Degrees of Freedom — open in a new tab">
+          <span class="ex-main">
+            <span class="ex-label">Worked Examples</span>
+            <span class="ex-title">Mobility &amp; Degrees of Freedom</span>
+          </span>
+          <span class="ex-meta">12 examples ↗</span>
+        </a>
+      </div>
 
-      <a class="ch available" href="chapter2-vector-loop-method.html" target="_blank" rel="noopener noreferrer"
-         aria-label="Chapter 2: Kinematic Analysis Part I, Vector Loop Method — open module in a new tab">
-        <div class="ch-top"><span class="ch-num">CH 2</span><span class="ch-part">Kinematic Analysis · I</span></div>
-        <h3>Vector Loop Method</h3>
-        <p class="desc">Position analysis: drawing vector loops, writing vector loop equations, geometric constraints, knowns vs. unknowns, and the position solution.</p>
-        <div class="ch-foot">
-          <span class="topics">Vector loops · VLE · Position</span>
-          <span class="status ready">Open <span class="arrow">↗</span></span>
+      <div class="ch-stack">
+        <a class="ch available" href="chapter2-vector-loop-method.html" target="_blank" rel="noopener noreferrer"
+           aria-label="Chapter 2: Kinematic Analysis Part I, Vector Loop Method — open module in a new tab">
+          <div class="ch-top"><span class="ch-num">CH 2</span><span class="ch-part">Kinematic Analysis · I</span></div>
+          <h3>Vector Loop Method</h3>
+          <p class="desc">Position analysis: drawing vector loops, writing vector loop equations, geometric constraints, knowns vs. unknowns, and the position solution.</p>
+          <div class="ch-foot">
+            <span class="topics">Vector loops · VLE · Position</span>
+            <span class="status ready">Open <span class="arrow">↗</span></span>
+          </div>
+          <span class="ext-note">↗ opens in a new tab</span>
+        </a>
+        <div class="ch-ex soon" aria-label="Chapter 2 worked examples — coming soon">
+          <span class="ex-main">
+            <span class="ex-label">Worked Examples</span>
+            <span class="ex-title">Step-through problem set</span>
+          </span>
+          <span class="ex-meta">coming soon</span>
         </div>
-        <span class="ext-note">↗ opens in a new tab</span>
-      </a>
+      </div>
 
-      <a class="ch available" href="chapter3-kinematic-analysis-rolling-contacts.html" target="_blank" rel="noopener noreferrer"
-         aria-label="Chapter 3: Kinematic Analysis Part II, Rolling Contacts — open module in a new tab">
-        <div class="ch-top"><span class="ch-num">CH 3</span><span class="ch-part">Kinematic Analysis · II</span></div>
-        <h3>Rolling Contacts</h3>
-        <p class="desc">Rolling without slipping, rolling-contact constraints in vector loops, gears and friction wheels, and contact point kinematics.</p>
-        <div class="ch-foot">
-          <span class="topics">Rolling · No-slip · Gears</span>
-          <span class="status ready">Open <span class="arrow">↗</span></span>
+      <div class="ch-stack">
+        <a class="ch available" href="chapter3-kinematic-analysis-rolling-contacts.html" target="_blank" rel="noopener noreferrer"
+           aria-label="Chapter 3: Kinematic Analysis Part II, Rolling Contacts — open module in a new tab">
+          <div class="ch-top"><span class="ch-num">CH 3</span><span class="ch-part">Kinematic Analysis · II</span></div>
+          <h3>Rolling Contacts</h3>
+          <p class="desc">Rolling without slipping, rolling-contact constraints in vector loops, gears and friction wheels, and contact point kinematics.</p>
+          <div class="ch-foot">
+            <span class="topics">Rolling · No-slip · Gears</span>
+            <span class="status ready">Open <span class="arrow">↗</span></span>
+          </div>
+          <span class="ext-note">↗ opens in a new tab</span>
+        </a>
+        <div class="ch-ex soon" aria-label="Chapter 3 worked examples — coming soon">
+          <span class="ex-main">
+            <span class="ex-label">Worked Examples</span>
+            <span class="ex-title">Step-through problem set</span>
+          </span>
+          <span class="ex-meta">coming soon</span>
         </div>
-        <span class="ext-note">↗ opens in a new tab</span>
-      </a>
+      </div>
 
-      <a class="ch available" href="chapter4-kinematic-coefficients.html" target="_blank" rel="noopener noreferrer"
-         aria-label="Chapter 4: Kinematic Analysis Part III, Kinematic Coefficients — open module in a new tab">
-        <div class="ch-top"><span class="ch-num">CH 4</span><span class="ch-part">Kinematic Analysis · III</span></div>
-        <h3>Kinematic Coefficients</h3>
-        <p class="desc">First- and second-order kinematic coefficients, separating geometry from speed, velocity and acceleration analysis, and mechanical advantage.</p>
+      <div class="ch-stack">
+        <a class="ch available" href="chapter4-kinematic-coefficients.html" target="_blank" rel="noopener noreferrer"
+           aria-label="Chapter 4: Kinematic Analysis Part III, Kinematic Coefficients — open module in a new tab">
+          <div class="ch-top"><span class="ch-num">CH 4</span><span class="ch-part">Kinematic Analysis · III</span></div>
+          <h3>Kinematic Coefficients</h3>
+          <p class="desc">First- and second-order kinematic coefficients, separating geometry from speed, velocity and acceleration analysis, and mechanical advantage.</p>
+          <div class="ch-foot">
+            <span class="topics">First/second order · Velocity · Accel.</span>
+            <span class="status ready">Open <span class="arrow">↗</span></span>
+          </div>
+          <span class="ext-note">↗ opens in a new tab</span>
+        </a>
+        <div class="ch-ex soon" aria-label="Chapter 4 worked examples — coming soon">
+          <span class="ex-main">
+            <span class="ex-label">Worked Examples</span>
+            <span class="ex-title">Step-through problem set</span>
+          </span>
+          <span class="ex-meta">coming soon</span>
+        </div>
+      </div>
+
+      <!-- ===================== PART: MECHANISM REFERENCE ===================== -->
+      <div class="part-head"><span class="pp">Mechanism Reference</span><span class="rule" aria-hidden="true"></span></div>
+
+      <a class="ch available" href="mechanism-atlas-proto.html" target="_blank" rel="noopener noreferrer"
+         aria-label="Mechanism Atlas: a browsable gallery of machines and the kinematics beneath them — open module in a new tab">
+        <div class="ch-top"><span class="ch-num">ATLAS</span><span class="ch-part">Mechanism Reference</span></div>
+        <h3>Mechanism Atlas</h3>
+        <p class="desc">A browsable gallery of real machines and the kinematics beneath them: thirteen mechanisms across five motion families, each flipping between the machine and its skeleton diagram — carrying mobility, joints, and Grashof class along — with its own play button and a cross-link into the matching chapter.</p>
         <div class="ch-foot">
-          <span class="topics">First/second order · Velocity · Accel.</span>
+          <span class="topics">13 mechanisms · Skeleton toggle · 5 families</span>
           <span class="status ready">Open <span class="arrow">↗</span></span>
         </div>
         <span class="ext-note">↗ opens in a new tab</span>
@@ -336,44 +415,50 @@
         <span class="ext-note">↗ opens in a new tab</span>
       </a>
 
-      <a class="ch available" href="newtons-method-for-systems.html" target="_blank" rel="noopener noreferrer"
-         aria-label="Newton's Method for Nonlinear Systems: interactive tool — open module in a new tab">
-        <div class="ch-top"><span class="ch-num">TOOL</span><span class="ch-part">Computational Toolkit</span></div>
-        <h3>Newton's Method for Nonlinear Systems</h3>
-        <p class="desc">Drive Newton's method one step at a time on four systems — including a four-bar position solve with an animated linkage — and watch the residual, the Jacobian, and det(J) live. See exactly why convergence stalls at a singular (toggle / dead-center) configuration. With pseudocode, MATLAB, and Python implementations.</p>
-        <div class="ch-foot">
-          <span class="topics">Jacobian · det(J) · Toggle · Four-bar</span>
-          <span class="status ready">Open <span class="arrow">↗</span></span>
-        </div>
-        <span class="ext-note">↗ opens in a new tab</span>
-      </a>
-
       <!-- ===================== PART: MACHINE DYNAMICS ===================== -->
       <div class="part-head"><span class="pp">Machine Dynamics</span><span class="rule" aria-hidden="true"></span></div>
 
-      <a class="ch available" href="chapter5-inverse-dynamics.html" target="_blank" rel="noopener noreferrer"
-         aria-label="Chapter 5: Machine Dynamics Part I, The Inverse Dynamics Problem — open module in a new tab">
-        <div class="ch-top"><span class="ch-num">CH 5</span><span class="ch-part">Machine Dynamics · I</span></div>
-        <h3>The Inverse Dynamics Problem</h3>
-        <p class="desc">Newton–Euler equations for mechanisms, mass centers and inertia, joint and driving forces, and solving for the torque required for a prescribed motion.</p>
-        <div class="ch-foot">
-          <span class="topics">Newton–Euler · Joint forces · Torque</span>
-          <span class="status ready">Open <span class="arrow">↗</span></span>
+      <div class="ch-stack">
+        <a class="ch available" href="chapter5-inverse-dynamics.html" target="_blank" rel="noopener noreferrer"
+           aria-label="Chapter 5: Machine Dynamics Part I, The Inverse Dynamics Problem — open module in a new tab">
+          <div class="ch-top"><span class="ch-num">CH 5</span><span class="ch-part">Machine Dynamics · I</span></div>
+          <h3>The Inverse Dynamics Problem</h3>
+          <p class="desc">Newton–Euler equations for mechanisms, mass centers and inertia, joint and driving forces, and solving for the torque required for a prescribed motion.</p>
+          <div class="ch-foot">
+            <span class="topics">Newton–Euler · Joint forces · Torque</span>
+            <span class="status ready">Open <span class="arrow">↗</span></span>
+          </div>
+          <span class="ext-note">↗ opens in a new tab</span>
+        </a>
+        <div class="ch-ex soon" aria-label="Chapter 5 worked examples — coming soon">
+          <span class="ex-main">
+            <span class="ex-label">Worked Examples</span>
+            <span class="ex-title">Step-through problem set</span>
+          </span>
+          <span class="ex-meta">coming soon</span>
         </div>
-        <span class="ext-note">↗ opens in a new tab</span>
-      </a>
+      </div>
 
-      <a class="ch available" href="chapter7-power-equation.html" target="_blank" rel="noopener noreferrer"
-         aria-label="Chapter 7: Machine Dynamics Part III, The Power Equation — open module in a new tab">
-        <div class="ch-top"><span class="ch-num">CH 7</span><span class="ch-part">Machine Dynamics · III</span></div>
-        <h3>The Power Equation</h3>
-        <p class="desc">Developing the power equation, applying it to the inverse and forward dynamics problems, and mechanical advantage and efficiency.</p>
-        <div class="ch-foot">
-          <span class="topics">Power · Forward dynamics · Efficiency</span>
-          <span class="status ready">Open <span class="arrow">↗</span></span>
+      <div class="ch-stack">
+        <a class="ch available" href="chapter7-power-equation.html" target="_blank" rel="noopener noreferrer"
+           aria-label="Chapter 7: Machine Dynamics Part III, The Power Equation — open module in a new tab">
+          <div class="ch-top"><span class="ch-num">CH 7</span><span class="ch-part">Machine Dynamics · III</span></div>
+          <h3>The Power Equation</h3>
+          <p class="desc">Developing the power equation, applying it to the inverse and forward dynamics problems, and mechanical advantage and efficiency.</p>
+          <div class="ch-foot">
+            <span class="topics">Power · Forward dynamics · Efficiency</span>
+            <span class="status ready">Open <span class="arrow">↗</span></span>
+          </div>
+          <span class="ext-note">↗ opens in a new tab</span>
+        </a>
+        <div class="ch-ex soon" aria-label="Chapter 7 worked examples — coming soon">
+          <span class="ex-main">
+            <span class="ex-label">Worked Examples</span>
+            <span class="ex-title">Step-through problem set</span>
+          </span>
+          <span class="ex-meta">coming soon</span>
         </div>
-        <span class="ext-note">↗ opens in a new tab</span>
-      </a>
+      </div>
 
       <!-- ===================== PART: MECHANISM SYNTHESIS ===================== -->
       <div class="part-head"><span class="pp">Mechanism Synthesis</span><span class="rule" aria-hidden="true"></span></div>
