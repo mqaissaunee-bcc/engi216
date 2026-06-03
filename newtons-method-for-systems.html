@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Newton's Method for Nonlinear Systems · ENGI 216 · Interactive Tool</title>
+<meta name="description" content="An accessible, interactive ENGI 216 tool for Newton's method on systems of nonlinear equations: the Jacobian, the iteration, convergence and singular (toggle) configurations, with a four-bar position example, plus pseudocode, MATLAB, and Python implementations.">
+<style>
+/* ============================================================
+   ENGI 216 — Engineering-Blueprint Design System
+   (locked standard: drafting paper, ink-blue + cyan + rust)
+   ============================================================ */
+:root{
+  --paper:#f3f1e7; --panel:#ffffff; --panel-line:#c9c4b0;
+  --ink:#10243a; --ink-soft:#2b4a66;
+  --accent:#0a7ea4; --accent-dk:#075a76;
+  --rust:#c2541d; --rust-soft:#e7d3c4;
+  --link-fill:#0a7ea4; --grid-line:rgba(10,126,164,.10);
+  --good:#1f7a4d; --good-bg:#e3f3e9; --bad:#a4231f; --bad-bg:#f7e3e2;
+  --warn:#8a6d1a; --warn-bg:#f7f0d8;
+  --code-bg:#0e1820; --code-ink:#e8edf2; --code-cyan:#7fd6ee;
+  --code-rust:#f0a878; --code-green:#8fd6a8; --code-dim:#7d93a6;
+  --path:#7a3a9c; /* Newton path — violet, distinct from ink/cyan/rust */
+  --maxw:1080px; --radius:10px;
+  --shadow:0 2px 4px rgba(16,36,58,.08),0 8px 22px rgba(16,36,58,.10);
+  --serif:"Iowan Old Style","Palatino Linotype","Palatino","Georgia",serif;
+  --sans:"Optima","Segoe UI","Helvetica Neue",system-ui,sans-serif;
+  --mono:"SFMono-Regular","JetBrains Mono","Cascadia Code",Consolas,"Liberation Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0e1820; --panel:#16242f; --panel-line:#2c4150;
+    --ink:#e8edf2; --ink-soft:#aebfcf;
+    --accent:#3bb6d8; --accent-dk:#7fd6ee;
+    --rust:#e0824a; --rust-soft:#3a2417;
+    --link-fill:#3bb6d8; --grid-line:rgba(59,182,216,.12);
+    --good:#5fc78e; --good-bg:#16352a; --bad:#f08a86; --bad-bg:#3a1e1d;
+    --warn:#e6c869; --warn-bg:#352d12; --code-bg:#0a1218;
+    --path:#c39be0;
+    --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.5);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background-color:var(--paper);
+  background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+  background-size:26px 26px;color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.62;
+}
+.skip-link{position:absolute;left:-9999px;top:0;z-index:999;background:var(--accent);
+  color:#fff;padding:10px 16px;border-radius:0 0 8px 0;font-family:var(--mono);font-size:.9rem}
+.skip-link:focus{left:0}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+header.site{border-bottom:2px solid var(--ink);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 92%,transparent),transparent);
+  padding:30px 0 22px}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--rust);margin:0 0 8px;font-weight:700}
+header.site h1{font-family:var(--serif);font-weight:700;line-height:1.08;margin:0 0 10px;
+  font-size:clamp(1.8rem,4.4vw,3rem);color:var(--ink)}
+header.site .sub{font-size:clamp(1rem,2.2vw,1.2rem);color:var(--ink-soft);max-width:62ch;margin:0}
+.titleblock{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:18px;
+  font-family:var(--mono);font-size:.76rem;color:var(--ink-soft);
+  border-top:1px dashed var(--panel-line);padding-top:14px}
+.titleblock b{color:var(--ink)}
+.progress-dock{position:fixed;left:0;right:0;top:0;height:4px;z-index:60;background:transparent}
+.progress-dock .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--rust));transition:width .12s linear}
+@media (prefers-reduced-motion:reduce){.progress-dock .bar{transition:none}}
+nav.toc{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 94%,transparent);
+  backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--panel-line);margin-bottom:8px}
+nav.toc .toc-inner{max-width:var(--maxw);margin:0 auto;padding:8px 10px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin}
+nav.toc a{flex:0 0 auto;text-decoration:none;color:var(--ink-soft);font-family:var(--mono);
+  font-size:.78rem;padding:8px 11px;border-radius:7px;border:1px solid transparent;
+  white-space:nowrap;min-height:36px;display:flex;align-items:center}
+nav.toc a:hover{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--ink)}
+nav.toc a.active{background:var(--accent);color:#fff;border-color:var(--accent-dk)}
+nav.toc a:focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+main{padding:14px 0 60px}
+section{background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:30px clamp(18px,3.5vw,40px);margin:26px 0;scroll-margin-top:64px}
+section>h2{font-family:var(--serif);font-size:clamp(1.45rem,3.2vw,2rem);line-height:1.12;margin:0 0 6px;color:var(--ink)}
+section>h2 .num{font-family:var(--mono);font-size:.7em;color:var(--rust);display:block;letter-spacing:.12em;margin-bottom:4px;font-weight:700}
+section>.lead{color:var(--ink-soft);font-size:1.05rem;margin:0 0 18px;max-width:66ch}
+h3{font-family:var(--serif);font-size:1.28rem;margin:30px 0 8px;color:var(--ink)}
+h4{font-family:var(--sans);font-size:1.02rem;font-weight:700;margin:20px 0 6px;color:var(--ink)}
+p{margin:.5em 0}a{color:var(--link-fill)}
+ul,ol{padding-left:1.3em}li{margin:.32em 0}strong{color:var(--ink)}
+hr.rule{border:none;border-top:1px dashed var(--panel-line);margin:26px 0}
+/* code */
+.codewrap{margin:14px 0;border-radius:9px;overflow:hidden;border:1px solid #1d2d3a;box-shadow:var(--shadow)}
+.codebar{background:#0b141b;color:var(--code-dim);font-family:var(--mono);font-size:.72rem;
+  padding:7px 12px;display:flex;justify-content:space-between;align-items:center;letter-spacing:.05em;border-bottom:1px solid #1d2d3a}
+.codebar .fname{color:var(--code-cyan)}
+.copybtn{background:#16242f;color:var(--code-ink);border:1px solid #2c4150;border-radius:6px;
+  font-family:var(--mono);font-size:.7rem;padding:4px 9px;cursor:pointer;min-height:28px}
+.copybtn:hover{background:#1d3140}
+.copybtn:focus-visible{outline:2px solid var(--code-cyan);outline-offset:1px}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);
+  font-size:.84rem;line-height:1.6;padding:14px 16px;overflow-x:auto;tab-size:4}
+pre .cm{color:var(--code-dim);font-style:italic}
+pre .kw{color:var(--code-rust);font-weight:600}
+pre .fn{color:var(--code-cyan)}
+pre .st{color:var(--code-green)}
+pre .nm{color:#e6c869}
+pre .op{color:#c5d4e0}
+code.inline{font-family:var(--mono);font-size:.86em;background:color-mix(in srgb,var(--accent) 12%,transparent);
+  color:var(--ink);padding:1px 6px;border-radius:5px;border:1px solid color-mix(in srgb,var(--accent) 26%,transparent)}
+/* callouts */
+.callout,.analogy,.real-world,.pitfall,.tryit{border-radius:9px;padding:15px 17px 15px 46px;margin:16px 0;
+  position:relative;border:1px solid var(--panel-line);background:color-mix(in srgb,var(--accent) 6%,var(--panel))}
+.callout::before,.analogy::before,.real-world::before,.pitfall::before,.tryit::before{
+  position:absolute;left:13px;top:14px;font-size:1.1rem;line-height:1}
+.callout::before{content:"\1F4CC"}
+.callout .tag,.analogy .tag,.real-world .tag,.pitfall .tag,.tryit .tag{display:block;font-family:var(--mono);
+  font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:3px}
+.analogy{background:color-mix(in srgb,var(--accent) 9%,var(--panel));border-left:4px solid var(--accent)}
+.analogy::before{content:"\1F501"}.analogy .tag{color:var(--accent-dk)}
+.real-world{background:color-mix(in srgb,var(--rust) 9%,var(--panel));border-left:4px solid var(--rust)}
+.real-world::before{content:"\1F30D"}.real-world .tag{color:var(--rust)}
+.pitfall{background:var(--bad-bg);border-left:4px solid var(--bad)}
+.pitfall::before{content:"\26A0\FE0F"}.pitfall .tag{color:var(--bad)}
+.tryit{background:var(--good-bg);border-left:4px solid var(--good)}
+.tryit::before{content:"\1F9EA"}.tryit .tag{color:var(--good)}
+/* tables */
+.tablewrap{overflow-x:auto;margin:16px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:480px}
+caption{text-align:left;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.04em}
+th,td{border:1px solid var(--panel-line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--accent) 14%,var(--panel));font-weight:700}
+tr:nth-child(even) td{background:color-mix(in srgb,var(--ink) 3%,var(--panel))}
+td code,th code{font-family:var(--mono);font-size:.86em}
+/* numbered steps */
+.steps{counter-reset:st;list-style:none;padding:0;margin:14px 0}
+.steps li{position:relative;padding:10px 0 10px 46px;border-bottom:1px solid var(--panel-line)}
+.steps li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:10px;
+  width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+.steps li b{color:var(--ink)}
+/* matrix / equation display */
+.mateq{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.95rem;margin:16px 0;color:var(--ink);overflow-x:auto;padding:6px 0}
+.matrix{display:inline-grid;gap:4px 14px;padding:8px 4px;position:relative;
+  border-left:2px solid var(--ink);border-right:2px solid var(--ink);border-radius:3px}
+.matrix>span{padding:2px 8px;text-align:right;white-space:nowrap}
+.mateq .lbl{font-style:normal;color:var(--accent-dk);font-weight:700}
+.mateq .op{font-size:1.3rem;color:var(--ink-soft)}
+@media(prefers-color-scheme:dark){.matrix{border-color:var(--ink-soft)}}
+/* widget shell */
+.widget{border:1px solid var(--panel-line);border-radius:10px;margin:20px 0;overflow:hidden;background:color-mix(in srgb,var(--ink) 2%,var(--panel))}
+.widget-head{background:color-mix(in srgb,var(--accent) 14%,var(--panel));padding:11px 16px;
+  border-bottom:1px solid var(--panel-line);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.widget-head .wtag{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dk);font-weight:700}
+.widget-head h4{margin:0;font-size:1rem}
+.widget-body{padding:16px}
+/* sim layout */
+.sim-grid{display:grid;gap:18px;grid-template-columns:1fr}
+@media(min-width:880px){.sim-grid{grid-template-columns:minmax(0,1fr) 320px}}
+.plot-canvas{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--panel-line);border-radius:8px}
+.mech-svg{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--panel-line);border-radius:8px;margin-top:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:8px 2px 0}
+.legend .sw{display:inline-block;width:22px;height:0;border-top-width:3px;border-top-style:solid;vertical-align:middle;margin-right:6px}
+.legend .dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-right:6px}
+/* controls */
+fieldset.sysset{border:1px solid var(--panel-line);border-radius:9px;padding:10px 12px 12px;margin:0 0 14px}
+fieldset.sysset legend{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-dk);font-weight:700;padding:0 6px}
+.sysopt{display:block;border:1px solid var(--panel-line);border-radius:8px;padding:9px 11px 9px 38px;margin:7px 0;
+  position:relative;cursor:pointer;background:var(--panel);min-height:44px}
+.sysopt input{position:absolute;left:11px;top:13px;width:18px;height:18px;accent-color:var(--accent)}
+.sysopt:hover{border-color:var(--accent)}
+.sysopt:focus-within{outline:3px solid var(--rust);outline-offset:2px}
+.sysopt .nm{font-weight:700;color:var(--ink);display:block}
+.sysopt .eq{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);display:block;margin-top:2px}
+.ctrl-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.ctrl{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px}
+.ctrl label{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);letter-spacing:.03em}
+.ctrl input[type=number]{font-family:var(--mono);font-size:.92rem;padding:7px 9px;border:1px solid var(--panel-line);
+  border-radius:6px;background:var(--panel);color:var(--ink);min-height:40px;width:100%}
+.ctrl input[type=range]{width:100%;min-height:30px;accent-color:var(--accent)}
+.ctrl .val{font-family:var(--mono);font-weight:700;color:var(--accent-dk)}
+.ctrl input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font-family:var(--mono);font-size:.82rem;font-weight:700;letter-spacing:.03em;background:var(--accent);
+  color:#fff;border:1px solid var(--accent-dk);border-radius:7px;padding:9px 16px;cursor:pointer;min-height:44px}
+.btn:hover{background:var(--accent-dk)}
+.btn:focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.secondary{background:transparent;color:var(--accent-dk);border-color:var(--accent)}
+.btn.secondary:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.btn.tiny{font-size:.72rem;padding:6px 10px;min-height:36px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+/* readouts */
+.readout{border:1px solid var(--panel-line);border-radius:9px;background:var(--panel);padding:12px 14px}
+.readout h4{margin:0 0 8px;font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-dk)}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.rgrid .k{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft)}
+.rgrid .v{font-family:var(--mono);font-weight:700;color:var(--ink);font-size:.95rem}
+.status{margin-top:10px;padding:8px 11px;border-radius:7px;font-family:var(--mono);font-size:.82rem;font-weight:700;border-left:4px solid var(--ink-soft)}
+.status.iter{background:color-mix(in srgb,var(--accent) 10%,var(--panel));border-left-color:var(--accent);color:var(--accent-dk)}
+.status.close{background:var(--warn-bg);border-left-color:var(--warn);color:var(--warn)}
+.status.conv{background:var(--good-bg);border-left-color:var(--good);color:var(--good)}
+.status.sing{background:var(--bad-bg);border-left-color:var(--bad);color:var(--bad)}
+.outbox{font-family:var(--mono);font-size:.78rem;background:var(--code-bg);color:var(--code-ink);
+  border-radius:8px;padding:11px 13px;overflow:auto;max-height:200px;line-height:1.5;white-space:pre;border:1px solid #1d2d3a;margin-top:12px}
+.outbox .ok{color:var(--code-green)}.outbox .hi{color:var(--code-cyan)}
+.outbox .ru{color:var(--code-rust)}.outbox .dim{color:var(--code-dim)}
+.jacbox{margin-top:12px}
+/* language tablist */
+.langtabs{display:flex;gap:4px;border-bottom:2px solid var(--panel-line);margin:8px 0 0;flex-wrap:wrap}
+.langtabs button{font-family:var(--mono);font-size:.8rem;font-weight:700;background:transparent;border:1px solid transparent;
+  border-bottom:none;color:var(--ink-soft);padding:9px 15px;cursor:pointer;border-radius:7px 7px 0 0;min-height:42px}
+.langtabs button[aria-selected=true]{background:var(--panel);color:var(--accent-dk);border-color:var(--panel-line);
+  border-bottom:2px solid var(--panel);margin-bottom:-2px}
+.langtabs button:hover{color:var(--ink)}
+.langtabs button:focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+.langpanel[hidden]{display:none}
+/* objectives pills */
+.pill{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+  background:color-mix(in srgb,var(--accent) 15%,var(--panel));color:var(--accent-dk);border-radius:20px;
+  padding:3px 10px;margin:2px 4px 2px 0;border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.obj-list{list-style:none;padding:0;margin:0}
+.obj-list li{padding:10px 0 10px 34px;position:relative;border-bottom:1px solid var(--panel-line)}
+.obj-list li::before{content:"\2713";position:absolute;left:6px;top:9px;color:var(--good);font-weight:700;font-size:1.1rem}
+footer.site{border-top:2px solid var(--ink);padding:24px 0 40px;color:var(--ink-soft);font-size:.86rem}
+footer.site .refs{font-size:.78rem;line-height:1.5;margin-top:14px;font-family:var(--mono)}
+footer.site a{color:var(--link-fill)}
+.kbd{font-family:var(--mono);font-size:.78em;background:var(--panel);border:1px solid var(--panel-line);
+  border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+@media print{
+  nav.toc,.progress-dock,header.site .titleblock,.copybtn,.btnrow,.btn{display:none!important}
+  body{background:#fff}section{box-shadow:none;border:1px solid #999;page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="progress-dock" aria-hidden="true"><div class="bar" id="progressBar"></div></div>
+
+<header class="site">
+  <div class="wrap">
+    <p class="eyebrow">ENGI 216 · Computational Toolkit</p>
+    <h1>Newton's Method for Nonlinear Systems</h1>
+    <p class="sub">The engine behind position analysis of mechanisms. Build the Jacobian, take the step, watch it converge &mdash; and see exactly what happens when a linkage reaches a toggle position and the method stalls. With pseudocode, MATLAB, and Python.</p>
+    <div class="titleblock">
+      <span><b>Course:</b> ENGI 216 &mdash; Dynamics &amp; Kinematics of Machines and Mechanisms</span>
+      <span><b>Type:</b> Interactive tool</span>
+      <span><b>Pairs with:</b> Ch. 2 (Vector Loop) &middot; MATLAB Primer Part 5</span>
+      <span><b>Text:</b> Stani&scaron;i&cacute;, <i>Mechanisms and Machines</i></span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Tool sections">
+  <div class="toc-inner" id="tocInner">
+    <a href="#intro" class="active">Overview</a>
+    <a href="#theory">1 &middot; Theory</a>
+    <a href="#sim">2 &middot; Simulation</a>
+    <a href="#code">3 &middot; Code</a>
+  </div>
+</nav>
+
+<main id="main">
+  <div class="wrap">
+
+  <!-- ===================== OVERVIEW ===================== -->
+  <section id="intro">
+    <h2><span class="num">Overview</span>What this tool is for</h2>
+    <p class="lead">Almost every mechanism position problem in this course comes down to the same move: a small set of nonlinear equations that must equal zero at the same time. Newton's method is how we solve them.</p>
+    <p>In Chapter&nbsp;2 your text is blunt: most mechanisms have no closed-form position solution, so we solve the loop-closure equations numerically with <strong>Newton's method</strong>. This tool lets you drive that method by hand, one step at a time, on four different systems &mdash; including a real four-bar linkage &mdash; and watch every quantity that matters: the residual, the Jacobian, its determinant, and the convergence path.</p>
+    <h3>You should leave able to&hellip;</h3>
+    <ul class="obj-list">
+      <li>Write the residual vector <code class="inline">F(x)</code> and the Jacobian <code class="inline">J(x)</code> for a 2&times;2 nonlinear system.</li>
+      <li>Carry out one Newton step by hand: evaluate, solve <code class="inline">J&middot;&Delta;x = &minus;F</code>, update.</li>
+      <li>Explain why convergence is normally fast (quadratic) and why it collapses to a crawl near a <strong>singular Jacobian</strong>.</li>
+      <li>Recognize that a four-bar's Jacobian goes singular at its <strong>toggle (dead-center) positions</strong>, and connect that to <code class="inline">det(J)=0</code>.</li>
+      <li>Implement the method in pseudocode, MATLAB, and Python, and know when to hand it to a built-in solver.</li>
+    </ul>
+    <p>
+      <span class="pill">Jacobian</span><span class="pill">Residual</span><span class="pill">Quadratic convergence</span>
+      <span class="pill">Singular / toggle</span><span class="pill">Four-bar position</span><span class="pill">MATLAB &amp; Python</span>
+    </p>
+  </section>
+
+  <!-- ===================== THEORY ===================== -->
+  <section id="theory">
+    <h2><span class="num">Part 1</span>The method, the Jacobian, and convergence</h2>
+    <p class="lead">Newton's method extends root-finding from one equation to a whole system. The derivative is replaced by a matrix of partial derivatives &mdash; the Jacobian.</p>
+
+    <h3>From one equation to a system</h3>
+    <p>For a single equation you know the scalar Newton step: stand on the curve, follow the tangent down to the axis, repeat. For a <em>system</em> of <span class="mono">n</span> equations in <span class="mono">n</span> unknowns,</p>
+    <div class="mateq">
+      <span class="lbl">F(x)</span><span class="op">=</span>
+      <span class="matrix"><span>f&#8321;(x&#8321;,&hellip;,x&#8345;)</span><span>f&#8322;(x&#8321;,&hellip;,x&#8345;)</span><span>&#8942;</span><span>f&#8345;(x&#8321;,&hellip;,x&#8345;)</span></span>
+      <span class="op">=</span><span class="lbl">0</span>
+    </div>
+    <p>the single derivative becomes the <strong>Jacobian matrix</strong> &mdash; every function differentiated with respect to every variable. For a 2&times;2 system in <span class="mono">x, y</span>:</p>
+    <div class="mateq">
+      <span class="lbl">J</span><span class="op">=</span>
+      <span class="matrix"><span>&part;f&#8321;/&part;x</span><span>&part;f&#8321;/&part;y</span><span>&part;f&#8322;/&part;x</span><span>&part;f&#8322;/&part;y</span></span>
+    </div>
+
+    <div class="analogy">
+      <span class="tag">Analogy &middot; A topographic map and a compass</span>
+      Picture each equation as a curve drawn on a contour map &mdash; the place where it equals zero. You want the one spot where <em>both</em> curves cross. The Jacobian is your compass: at any point it tells you which way and how far to step so that, if the curves were straight lines, you'd land exactly on the intersection. They aren't straight, so you overshoot a little &mdash; then re-read the compass and step again. Each reading gets you closer.
+    </div>
+
+    <h3>The algorithm, step by step</h3>
+    <ol class="steps">
+      <li><b>Guess.</b> Pick a starting point <span class="mono">x&#8304;</span> &mdash; ideally near the solution (for mechanisms, the previous crank angle's answer).</li>
+      <li><b>Evaluate the residual.</b> Compute <span class="mono">F(x&#7524;)</span> &mdash; how far each equation is from zero.</li>
+      <li><b>Build the Jacobian.</b> Compute <span class="mono">J(x&#7524;)</span> at the current point.</li>
+      <li><b>Solve the linear system.</b> Solve <span class="mono">J(x&#7524;)&middot;&Delta;x = &minus;F(x&#7524;)</span> for the correction <span class="mono">&Delta;x</span>. (This is the matrix version of "divide by the slope.")</li>
+      <li><b>Update.</b> <span class="mono">x&#7524;&#8330;&#8321; = x&#7524; + &Delta;x</span>.</li>
+      <li><b>Check.</b> If <span class="mono">&#8214;F(x&#7524;&#8330;&#8321;)&#8214; &lt; tolerance</span>, stop. Otherwise return to step&nbsp;2.</li>
+    </ol>
+
+    <div class="pitfall">
+      <span class="tag">Pitfall &middot; It is a solve, not a division</span>
+      Step&nbsp;4 solves <span class="mono">J&middot;&Delta;x = &minus;F</span>. In MATLAB that is the <em>left</em> division <code class="inline">delta = -J\F</code>; in Python it is <code class="inline">np.linalg.solve(J, -F)</code>. Writing <code class="inline">F/J</code> or any element-wise division silently produces the wrong vector. The unknown is sandwiched as <span class="mono">J&middot;&Delta;x</span>, so it comes out by solving against <span class="mono">J</span> &mdash; never by dividing the other way.
+    </div>
+
+    <h3>Why it is usually fast &mdash; and when it isn't</h3>
+    <p>Near a well-behaved solution, Newton's method roughly <strong>doubles the number of correct digits each step</strong> (quadratic convergence). That is why a four-bar across 360&deg; of crank rotation &mdash; dozens of angles, a few iterations each &mdash; takes milliseconds.</p>
+    <p>That speed depends on the Jacobian being <em>invertible</em> at the solution. When <span class="mono">det(J) &rarr; 0</span>, the matrix can't be solved cleanly, the correction blows up or points nowhere useful, and convergence degrades from quadratic to a slow crawl &mdash; or fails. This isn't a bug in the method; it is the geometry of the problem telling you something.</p>
+
+    <div class="real-world">
+      <span class="tag">Real world &middot; The toggle position of a linkage</span>
+      For a four-bar, the two unknowns are the coupler and rocker angles <span class="mono">&theta;&#8323;, &theta;&#8324;</span>, and the Jacobian determinant works out to a strikingly simple form: <span class="mono">det(J) = r&#8323;&middot;r&#8324;&middot;sin(&theta;&#8323; &minus; &theta;&#8324;)</span>. It hits zero exactly when the coupler and rocker line up (<span class="mono">&theta;&#8323; = &theta;&#8324;</span> or differ by 180&deg;) &mdash; the <strong>toggle</strong> or dead-center positions, where the mechanism momentarily can't decide which way to move. The same singular Jacobian that stalls Newton's method is the physical lock-up you can feel in a folding table leg, a vise-grip clamp, or a knee at full extension. Watch <code class="inline">det(J)</code> in the simulation drop toward zero as you push a four-bar toward toggle.
+    </div>
+
+    <h3>The four-bar position equations</h3>
+    <p>Closing the vector loop gives two scalar residuals (driver angle <span class="mono">&theta;&#8322;</span> known; <span class="mono">&theta;&#8323;, &theta;&#8324;</span> unknown):</p>
+    <div class="mateq">
+      <span class="matrix">
+        <span>f&#8321; = r&#8322;cos&theta;&#8322; + r&#8323;cos&theta;&#8323; &minus; r&#8324;cos&theta;&#8324; &minus; r&#8321;</span>
+        <span>f&#8322; = r&#8322;sin&theta;&#8322; + r&#8323;sin&theta;&#8323; &minus; r&#8324;sin&theta;&#8324;</span>
+      </span>
+    </div>
+    <p>Differentiating with respect to the unknowns <span class="mono">(&theta;&#8323;, &theta;&#8324;)</span>:</p>
+    <div class="mateq">
+      <span class="lbl">J</span><span class="op">=</span>
+      <span class="matrix"><span>&minus;r&#8323;sin&theta;&#8323;</span><span>+r&#8324;sin&theta;&#8324;</span><span>+r&#8323;cos&theta;&#8323;</span><span>&minus;r&#8324;cos&theta;&#8324;</span></span>
+    </div>
+    <p>Take the determinant and a trig identity collapses it: <span class="mono">det(J) = r&#8323;r&#8324;(sin&theta;&#8323;cos&theta;&#8324; &minus; cos&theta;&#8323;sin&theta;&#8324;) = r&#8323;r&#8324;sin(&theta;&#8323; &minus; &theta;&#8324;)</span>. That is the bridge between the linear-algebra condition and the mechanism's geometry.</p>
+
+    <div class="tryit">
+      <span class="tag">Try it &middot; In the simulation below</span>
+      Select <b>Four-bar position</b>, then step it to convergence and note how few iterations it takes. Now compare the <b>Tangential / singular</b> system started near the lock-up root: same method, far more steps, and <code class="inline">det(J)</code> sliding toward zero. Two systems, one lesson about why the Jacobian matters.
+    </div>
+  </section>
+
+  <!-- ===================== SIMULATION ===================== -->
+  <section id="sim">
+    <h2><span class="num">Part 2</span>Step through it yourself</h2>
+    <p class="lead">Pick a system, choose a starting guess, and press <span class="kbd">Step</span> to take one Newton iteration at a time. Watch the residual, the Jacobian, and the convergence path. Everything shown on the plot is also reported in text for screen readers.</p>
+
+    <div class="widget">
+      <div class="widget-head"><span class="wtag">Interactive</span><h4>Newton iterator with live Jacobian &amp; det(J)</h4></div>
+      <div class="widget-body">
+        <div class="sim-grid">
+          <!-- left: plot -->
+          <div>
+            <canvas id="plotCanvas" class="plot-canvas" width="760" height="500"
+              role="img" aria-label="Convergence plot. Choose a system and step to populate it."></canvas>
+            <div class="legend" aria-hidden="true">
+              <span><span class="sw" style="border-top-color:var(--ink)"></span><span id="lgF1">f&#8321; = 0</span></span>
+              <span><span class="sw" style="border-top-color:var(--accent)"></span><span id="lgF2">f&#8322; = 0</span></span>
+              <span><span class="dot" style="background:var(--path)"></span>Newton path</span>
+            </div>
+            <!-- four-bar physical view (shown only for that system) -->
+            <div id="mechWrap" hidden>
+              <svg id="mechSvg" class="mech-svg" viewBox="0 0 760 360" role="img"
+                aria-label="Four-bar linkage drawn at the current iterate. The dashed gap is the loop-closure error.">
+              </svg>
+              <p class="legend" aria-hidden="true"><span>Crank, coupler, rocker drawn at current <span class="mono">&theta;&#8323;, &theta;&#8324;</span>. Dashed red gap = how far the loop fails to close = &#8214;F&#8214;.</span></p>
+            </div>
+          </div>
+
+          <!-- right: controls + readouts -->
+          <div>
+            <fieldset class="sysset">
+              <legend>System of equations</legend>
+              <label class="sysopt"><input type="radio" name="sys" id="sys-circleLine" value="circleLine" checked>
+                <span class="nm">Circle &cap; Line</span><span class="eq">f&#8321;: x&sup2;+y&sup2;&minus;1 &nbsp; f&#8322;: x&minus;y</span></label>
+              <label class="sysopt"><input type="radio" name="sys" id="sys-circleHyperbola" value="circleHyperbola">
+                <span class="nm">Circle &cap; Hyperbola</span><span class="eq">f&#8321;: x&sup2;+y&sup2;&minus;4 &nbsp; f&#8322;: xy&minus;1</span></label>
+              <label class="sysopt"><input type="radio" name="sys" id="sys-tangential" value="tangential">
+                <span class="nm">Tangential / singular</span><span class="eq">f&#8321;: (x&minus;y)&sup2;&minus;1 &nbsp; f&#8322;: e&#737;&minus;y&minus;2</span></label>
+              <label class="sysopt"><input type="radio" name="sys" id="sys-fourbar" value="fourbar">
+                <span class="nm">Four-bar position</span><span class="eq">loop closure &mdash; unknown &theta;&#8323;, &theta;&#8324;</span></label>
+            </fieldset>
+
+            <!-- generic two-unknown starting guess -->
+            <div class="ctrl-row">
+              <div class="ctrl"><label id="lblX" for="inX">Initial x&#8320;</label>
+                <input type="number" id="inX" step="0.1" value="1.5"></div>
+              <div class="ctrl"><label id="lblY" for="inY">Initial y&#8320;</label>
+                <input type="number" id="inY" step="0.1" value="0.5"></div>
+            </div>
+
+            <!-- four-bar driver angle (shown only for four-bar) -->
+            <div class="ctrl" id="fbPanel" hidden>
+              <label for="th2Range">Driver crank &theta;&#8322; = <span class="val" id="th2Val">60&deg;</span></label>
+              <input type="range" id="th2Range" min="0" max="360" step="1" value="60">
+            </div>
+
+            <!-- per-system presets -->
+            <div class="btnrow" id="presetRow">
+              <button type="button" class="btn secondary tiny" id="presetA">Preset A</button>
+              <button type="button" class="btn secondary tiny" id="presetB">Preset B</button>
+            </div>
+
+            <div class="btnrow">
+              <button type="button" class="btn" id="stepBtn">Step</button>
+              <button type="button" class="btn" id="autoBtn" aria-pressed="false">Auto-solve</button>
+              <button type="button" class="btn secondary" id="resetBtn">Reset</button>
+            </div>
+
+            <div class="readout">
+              <h4>Current state</h4>
+              <div class="rgrid">
+                <span class="k">Iteration</span><span class="v" id="rIter">0</span>
+                <span class="k">&#8214;F(x)&#8214;</span><span class="v" id="rNorm">&mdash;</span>
+                <span class="k" id="rXlab">x</span><span class="v" id="rX">&mdash;</span>
+                <span class="k" id="rYlab">y</span><span class="v" id="rY">&mdash;</span>
+                <span class="k">f&#8321;</span><span class="v" id="rF1">&mdash;</span>
+                <span class="k">f&#8322;</span><span class="v" id="rF2">&mdash;</span>
+                <span class="k">det(J)</span><span class="v" id="rDet">&mdash;</span>
+              </div>
+              <div class="jacbox">
+                <h4 style="margin-bottom:4px">Jacobian J(x)</h4>
+                <div class="mateq" style="justify-content:flex-start;margin:4px 0">
+                  <span class="matrix" id="jacM"><span>&mdash;</span><span>&mdash;</span><span>&mdash;</span><span>&mdash;</span></span>
+                </div>
+              </div>
+              <div class="status iter" id="rStatus">Press Step to begin.</div>
+            </div>
+
+            <p id="liveStatus" class="sr-only" aria-live="polite"></p>
+            <div class="outbox" id="logBox" aria-label="Iteration log" role="log"><span class="dim">% iteration log appears here</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pitfall">
+      <span class="tag">Pitfall &middot; A good guess is half the battle</span>
+      Newton's method finds <em>a</em> root near where you start &mdash; not necessarily the one you want. The four-bar has two assembly configurations (open and crossed); the starting guess decides which one you land on. In practice you <strong>warm-start</strong>: solve at one crank angle, then use that answer as the guess for the next angle so you stay on a single branch all the way around. Try the <b>Open guess</b> and <b>Crossed guess</b> presets to see both.
+    </div>
+  </section>
+
+  <!-- ===================== CODE ===================== -->
+  <section id="code">
+    <h2><span class="num">Part 3</span>Implement it: pseudocode, MATLAB, Python</h2>
+    <p class="lead">The same six steps in three forms. Read the pseudocode to understand the logic, then pick the language you actually work in. You hand-code Newton to <em>understand</em> it; you call a built-in solver to <em>use</em> it.</p>
+
+    <div class="langtabs" role="tablist" aria-label="Implementation language">
+      <button role="tab" id="codetab-pseudo" aria-controls="codepanel-pseudo" aria-selected="true">Pseudocode</button>
+      <button role="tab" id="codetab-matlab" aria-controls="codepanel-matlab" aria-selected="false" tabindex="-1">MATLAB</button>
+      <button role="tab" id="codetab-python" aria-controls="codepanel-python" aria-selected="false" tabindex="-1">Python</button>
+    </div>
+
+    <!-- pseudocode panel -->
+    <div class="langpanel" id="codepanel-pseudo" role="tabpanel" aria-labelledby="codetab-pseudo">
+      <p>Language-agnostic. This is the logic every implementation shares.</p>
+      <div class="codewrap">
+        <div class="codebar"><span class="fname">newton_system.pseudo</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="kw">function</span> <span class="fn">NEWTON_SYSTEM</span>(F, J, x0, tol, maxiter):
+    <span class="cm"># F(x) -&gt; residual vector      J(x) -&gt; Jacobian matrix</span>
+    <span class="cm"># x0  -&gt; starting guess         tol  -&gt; convergence tolerance</span>
+    x <span class="op">&larr;</span> x0
+    <span class="kw">for</span> k <span class="op">=</span> 1 <span class="kw">to</span> maxiter:
+        f <span class="op">&larr;</span> F(x)                  <span class="cm"># 1. evaluate residual</span>
+        <span class="kw">if</span> norm(f) &lt; tol:           <span class="cm"># 6. converged?</span>
+            <span class="kw">return</span> x, "converged", k
+        Jk <span class="op">&larr;</span> J(x)                 <span class="cm"># 2. build the Jacobian</span>
+        <span class="kw">if</span> |det(Jk)| &lt; tiny:        <span class="cm">#    near-singular guard</span>
+            <span class="kw">return</span> x, "singular Jacobian", k
+        &Delta;x <span class="op">&larr;</span> SOLVE(Jk &middot; &Delta;x = &minus;f) <span class="cm"># 4. solve linear system (NOT divide)</span>
+        x <span class="op">&larr;</span> x + &Delta;x               <span class="cm"># 5. update</span>
+    <span class="kw">return</span> x, "max iterations reached", maxiter
+</pre>
+      </div>
+      <div class="callout"><span class="tag">Note &middot; The only subtle line</span>
+        <code class="inline">SOLVE(J &middot; &Delta;x = &minus;f)</code> means solve a linear system, not invert and multiply. Forming <span class="mono">J&#8315;&sup1;</span> explicitly is slower and less accurate; every language below uses a dedicated solver instead.</div>
+    </div>
+
+    <!-- matlab panel -->
+    <div class="langpanel" id="codepanel-matlab" role="tabpanel" aria-labelledby="codetab-matlab" hidden>
+      <p>Cleaned from a classroom version: the option-reader is renamed so it no longer shadows MATLAB's built-in <code class="inline">getfield</code>, and the Newton step uses the backslash solve.</p>
+      <div class="codewrap">
+        <div class="codebar"><span class="fname">newton_system.m</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="kw">function</span> [x, hist] = <span class="fn">newton_system</span>(F, J, x0, opt)
+<span class="cm">% NEWTON_SYSTEM  Solve F(x)=0 for a system using Newton's method.</span>
+<span class="cm">%   F  : handle returning the residual column vector  f = F(x)</span>
+<span class="cm">%   J  : handle returning the Jacobian matrix         Jk = J(x)</span>
+<span class="cm">%   x0 : starting guess (column vector)</span>
+<span class="cm">%   opt: struct with optional fields tol, maxiter, verbose</span>
+    <span class="kw">if</span> nargin &lt; 4, opt = struct(); <span class="kw">end</span>
+    tol     = <span class="fn">getOpt</span>(opt, <span class="st">'tol'</span>,     1e-10);
+    maxiter = <span class="fn">getOpt</span>(opt, <span class="st">'maxiter'</span>, 50);
+    verbose = <span class="fn">getOpt</span>(opt, <span class="st">'verbose'</span>, true);
+
+    x = x0(:);                          <span class="cm">% force column</span>
+    hist.x = x;  hist.normF = [];
+
+    <span class="kw">for</span> k = 1:maxiter
+        f  = F(x);                      <span class="cm">% 1. residual</span>
+        nf = norm(f);
+        hist.normF(end+1) = nf;
+        <span class="kw">if</span> verbose
+            fprintf(<span class="st">'iter %2d   ||F|| = %.3e\n'</span>, k-1, nf);
+        <span class="kw">end</span>
+        <span class="kw">if</span> nf &lt; tol, <span class="kw">return</span>; <span class="kw">end</span>     <span class="cm">% 6. converged</span>
+
+        Jk = J(x);                      <span class="cm">% 2. Jacobian</span>
+        <span class="kw">if</span> abs(det(Jk)) &lt; 1e-12        <span class="cm">% near-singular guard</span>
+            warning(<span class="st">'Jacobian ~singular (det=%.2e) -- toggle position?'</span>, det(Jk));
+            <span class="kw">return</span>;
+        <span class="kw">end</span>
+
+        dx = -Jk \ f;                   <span class="cm">% 4. SOLVE J*dx = -f  (left divide)</span>
+        x  = x + dx;                    <span class="cm">% 5. update</span>
+        hist.x(:,end+1) = x;
+    <span class="kw">end</span>
+    warning(<span class="st">'Reached maxiter (%d) without converging.'</span>, maxiter);
+<span class="kw">end</span>
+
+<span class="kw">function</span> v = <span class="fn">getOpt</span>(s, name, default)   <span class="cm">% renamed -- do NOT call this getfield</span>
+    <span class="kw">if</span> isfield(s, name), v = s.(name); <span class="kw">else</span>, v = default; <span class="kw">end</span>
+<span class="kw">end</span>
+</pre>
+      </div>
+      <h4>Four-bar example &amp; the built-in solver</h4>
+      <div class="codewrap">
+        <div class="codebar"><span class="fname">run_fourbar.m</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="cm">% Four-bar: r1=12 (ground), r2=4 (crank), r3=13 (coupler), r4=8 (rocker)</span>
+r1=12; r2=4; r3=13; r4=8; th2 = deg2rad(60);
+
+F = <span class="op">@</span>(t) [ r2*cos(th2) + r3*cos(t(1)) - r4*cos(t(2)) - r1 ;
+          r2*sin(th2) + r3*sin(t(1)) - r4*sin(t(2)) ];
+J = <span class="op">@</span>(t) [ -r3*sin(t(1)),  r4*sin(t(2)) ;
+           r3*cos(t(1)), -r4*cos(t(2)) ];
+
+t0 = deg2rad([10; 70]);                 <span class="cm">% open-config guess</span>
+[t, hist] = <span class="fn">newton_system</span>(F, J, t0);
+fprintf(<span class="st">'theta3 = %.3f deg,  theta4 = %.3f deg\n'</span>, rad2deg(t(1)), rad2deg(t(2)));
+
+<span class="cm">% Same problem with MATLAB's built-in solver (it estimates J for you):</span>
+opts = optimoptions(<span class="st">'fsolve'</span>, <span class="st">'Display'</span>, <span class="st">'none'</span>);
+t_fs = fsolve(F, t0, opts);             <span class="cm">% needs Optimization Toolbox</span>
+</pre>
+      </div>
+      <div class="callout"><span class="tag">Note &middot; If you don't have the Toolbox</span>
+        <code class="inline">fsolve</code> needs the Optimization Toolbox; your hand-coded <code class="inline">newton_system</code> does not. For a single equation, the base-MATLAB <code class="inline">fzero</code> always works.</div>
+    </div>
+
+    <!-- python panel -->
+    <div class="langpanel" id="codepanel-python" role="tabpanel" aria-labelledby="codetab-python" hidden>
+      <p>A direct NumPy translation &mdash; same six steps. <code class="inline">np.linalg.solve(J, -f)</code> is the exact analogue of MATLAB's <code class="inline">-J\f</code>.</p>
+      <div class="codewrap">
+        <div class="codebar"><span class="fname">newton_system.py</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">newton_system</span>(F, J, x0, tol=1e-10, maxiter=50, verbose=True):
+    <span class="st">"""Solve F(x) = 0 for a system using Newton's method.
+
+    F : callable returning the residual vector  f = F(x)
+    J : callable returning the Jacobian matrix  Jk = J(x)
+    x0: starting guess (1-D array)
+    Returns (x, info) where info has 'status', 'iters', 'history'.
+    """</span>
+    x = np.array(x0, dtype=float)
+    history = [x.copy()]
+    <span class="kw">for</span> k <span class="kw">in</span> range(maxiter):
+        f  = np.asarray(F(x), dtype=float)      <span class="cm"># 1. residual</span>
+        nf = np.linalg.norm(f)
+        <span class="kw">if</span> verbose:
+            print(<span class="st">f"iter {k:2d}   ||F|| = {nf:.3e}"</span>)
+        <span class="kw">if</span> nf &lt; tol:                            <span class="cm"># 6. converged</span>
+            <span class="kw">return</span> x, {<span class="st">"status"</span>: <span class="st">"converged"</span>, <span class="st">"iters"</span>: k, <span class="st">"history"</span>: history}
+
+        Jk = np.asarray(J(x), dtype=float)      <span class="cm"># 2. Jacobian</span>
+        <span class="kw">if</span> abs(np.linalg.det(Jk)) &lt; 1e-12:      <span class="cm"># near-singular guard</span>
+            <span class="kw">return</span> x, {<span class="st">"status"</span>: <span class="st">"singular Jacobian (toggle?)"</span>, <span class="st">"iters"</span>: k, <span class="st">"history"</span>: history}
+
+        dx = np.linalg.solve(Jk, -f)            <span class="cm"># 4. SOLVE J dx = -f  (not invert!)</span>
+        x  = x + dx                             <span class="cm"># 5. update</span>
+        history.append(x.copy())
+    <span class="kw">return</span> x, {<span class="st">"status"</span>: <span class="st">"max iterations reached"</span>, <span class="st">"iters"</span>: maxiter, <span class="st">"history"</span>: history}
+</pre>
+      </div>
+      <h4>Four-bar example &amp; SciPy's solver</h4>
+      <div class="codewrap">
+        <div class="codebar"><span class="fname">run_fourbar.py</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> scipy.optimize <span class="kw">import</span> fsolve   <span class="cm"># or: from scipy.optimize import root</span>
+
+r1, r2, r3, r4 = 12.0, 4.0, 13.0, 8.0
+th2 = np.deg2rad(60.0)
+
+<span class="kw">def</span> <span class="fn">F</span>(t):
+    t3, t4 = t
+    <span class="kw">return</span> np.array([
+        r2*np.cos(th2) + r3*np.cos(t3) - r4*np.cos(t4) - r1,
+        r2*np.sin(th2) + r3*np.sin(t3) - r4*np.sin(t4),
+    ])
+
+<span class="kw">def</span> <span class="fn">J</span>(t):
+    t3, t4 = t
+    <span class="kw">return</span> np.array([
+        [-r3*np.sin(t3),  r4*np.sin(t4)],
+        [ r3*np.cos(t3), -r4*np.cos(t4)],
+    ])
+
+t0 = np.deg2rad([10.0, 70.0])               <span class="cm"># open-config guess</span>
+t, info = <span class="fn">newton_system</span>(F, J, t0)
+print(<span class="st">f"theta3 = {np.rad2deg(t[0]):.3f} deg,  theta4 = {np.rad2deg(t[1]):.3f} deg"</span>)
+print(info[<span class="st">"status"</span>], <span class="st">"in"</span>, info[<span class="st">"iters"</span>], <span class="st">"iterations"</span>)
+
+<span class="cm"># Same problem with SciPy (give it the analytic Jacobian for speed/accuracy):</span>
+t_scipy = fsolve(F, t0, fprime=J)
+</pre>
+      </div>
+      <div class="callout"><span class="tag">Note &middot; No analytic Jacobian? Approximate it.</span>
+        If the partial derivatives are painful to derive, replace <code class="inline">J(x)</code> with a finite-difference estimate: perturb each variable by a small <span class="mono">h</span>, recompute <span class="mono">F</span>, and divide. SciPy's <code class="inline">fsolve</code> and <code class="inline">root</code> do this automatically when you omit <code class="inline">fprime</code> &mdash; convenient, but a hand-derived Jacobian is faster and more accurate.</div>
+    </div>
+
+    <hr class="rule">
+    <h3>From these examples to the rest of the course</h3>
+    <p>Once you can form the Jacobian, you've unlocked most of Chapters&nbsp;2 and&nbsp;4. Position analysis (nonlinear) needs Newton, which builds <span class="mono">J</span>. Velocity and acceleration analysis are <em>linear</em> once position is known &mdash; and they reuse that <strong>same Jacobian</strong>, just changing the right-hand side. One matrix, three jobs.</p>
+  </section>
+
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><b>Newton's Method for Nonlinear Systems</b> &mdash; an interactive ENGI 216 tool. The in-browser iterator is a faithful, lightweight teaching implementation; always verify final answers in MATLAB, Octave, or Python for graded work.</p>
+    <p>Built for <span class="program">ENGI 216 &middot; Dynamics &amp; Kinematics of Machines and Mechanisms</span> &middot; Brookdale Community College &middot; 2026. Accessible (WCAG 2.1 AA), keyboard-navigable, works offline.</p>
+    <p class="refs" id="refblock"></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var TOL = 1e-10, SING = 1e-9, MAXIT = 40;
+  var D2R = Math.PI/180, R2D = 180/Math.PI;
+
+  /* ---------- progress dock + scroll-spy ---------- */
+  var pbar = document.getElementById("progressBar");
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+  var secs = tocLinks.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop || document.body.scrollTop;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    if(pbar) pbar.style.width = (100*scrolled/max) + "%";
+    var cur = null, mid = scrolled + window.innerHeight*0.3;
+    for(var i=0;i<secs.length;i++){ if(secs[i].offsetTop <= mid) cur = i; }
+    tocLinks.forEach(function(a,j){ a.classList.toggle("active", j===cur); });
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  window.addEventListener("resize", onScroll);
+  onScroll();
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll(".copybtn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.closest(".codewrap").querySelector("pre");
+      var text = pre ? pre.innerText : "";
+      function done(){ var o = btn.textContent; btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = o; }, 1200); }
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done, done); }
+      else { done(); }
+    });
+  });
+
+  /* ---------- code language tabs (ARIA) ---------- */
+  var ltabs = Array.prototype.slice.call(document.querySelectorAll('.langtabs [role=tab]'));
+  function selectTab(tab){
+    ltabs.forEach(function(t){
+      var on = (t === tab);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      var panel = document.getElementById(t.getAttribute("aria-controls"));
+      if(panel) panel.hidden = !on;
+    });
+  }
+  ltabs.forEach(function(tab, idx){
+    tab.addEventListener("click", function(){ selectTab(tab); });
+    tab.addEventListener("keydown", function(e){
+      var i = null;
+      if(e.key === "ArrowRight" || e.key === "ArrowDown") i = (idx+1)%ltabs.length;
+      else if(e.key === "ArrowLeft" || e.key === "ArrowUp") i = (idx-1+ltabs.length)%ltabs.length;
+      else if(e.key === "Home") i = 0;
+      else if(e.key === "End") i = ltabs.length-1;
+      if(i !== null){ e.preventDefault(); ltabs[i].focus(); selectTab(ltabs[i]); }
+    });
+  });
+
+  /* ---------- references ---------- */
+  var rb = document.getElementById("refblock");
+  if(rb){ rb.innerHTML =
+    "References &amp; further reading: Stani&scaron;i&cacute;, <i>Mechanisms and Machines</i> (Cengage), Ch.&nbsp;2 &mdash; vector-loop position analysis. "+
+    "Newton&ndash;Raphson for systems: any numerical-methods text (e.g. Chapra &amp; Canale, <i>Numerical Methods for Engineers</i>). "+
+    "MATLAB <code>fsolve</code>/<code>fzero</code>: MathWorks documentation. Python <code>scipy.optimize.fsolve</code>/<code>root</code>: SciPy documentation, and <code>numpy.linalg</code> for the linear solve."; }
+
+  /* ====================================================
+     SIMULATION
+     ==================================================== */
+  var canvas = document.getElementById("plotCanvas");
+  var ctx = canvas ? canvas.getContext("2d") : null;
+  var W = canvas ? canvas.width : 760, H = canvas ? canvas.height : 500;
+  var padL = 46, padR = 16, padT = 16, padB = 34;
+  var plotW = W - padL - padR, plotH = H - padT - padB;
+
+  var fbTh2 = 60*D2R; // four-bar driver angle (radians)
+  var R = {r1:12, r2:4, r3:13, r4:8};
+
+  var SYSTEMS = {
+    circleLine: {
+      name:"Circle \u2229 Line", isAngles:false,
+      F:function(x,y){ return [x*x + y*y - 1, x - y]; },
+      J:function(x,y){ return [[2*x, 2*y],[1, -1]]; },
+      view:{xmin:-2, xmax:2, ymin:-2, ymax:2, gx:1, gy:1},
+      def:{x:1.5, y:0.5},
+      presets:[{label:"Guess (1.5, 0.5)", x:1.5, y:0.5},
+               {label:"Guess (\u22121, \u22121)", x:-1, y:-1}]
+    },
+    circleHyperbola: {
+      name:"Circle \u2229 Hyperbola", isAngles:false,
+      F:function(x,y){ return [x*x + y*y - 4, x*y - 1]; },
+      J:function(x,y){ return [[2*x, 2*y],[y, x]]; },
+      view:{xmin:-2.6, xmax:2.6, ymin:-2.6, ymax:2.6, gx:1, gy:1},
+      def:{x:2.0, y:1.0},
+      presets:[{label:"Guess (2, 1)", x:2, y:1},
+               {label:"Guess (1, 2)", x:1, y:2}]
+    },
+    tangential: {
+      name:"Tangential / singular", isAngles:false,
+      F:function(x,y){ return [(x-y)*(x-y) - 1, Math.exp(x) - y - 2]; },
+      J:function(x,y){ return [[2*(x-y), -2*(x-y)],[Math.exp(x), -1]]; },
+      view:{xmin:-2, xmax:3, ymin:-2.5, ymax:3.3, gx:1, gy:1},
+      def:{x:1.5, y:2.5},
+      presets:[{label:"Near transversal root", x:1.5, y:2.5},
+               {label:"Near lock-up (singular)", x:0.4, y:-0.7}]
+    },
+    fourbar: {
+      name:"Four-bar position", isAngles:true,
+      F:function(t3,t4){ return [
+        R.r2*Math.cos(fbTh2) + R.r3*Math.cos(t3) - R.r4*Math.cos(t4) - R.r1,
+        R.r2*Math.sin(fbTh2) + R.r3*Math.sin(t3) - R.r4*Math.sin(t4) ]; },
+      J:function(t3,t4){ return [
+        [-R.r3*Math.sin(t3),  R.r4*Math.sin(t4)],
+        [ R.r3*Math.cos(t3), -R.r4*Math.cos(t4)] ]; },
+      view:{xmin:-100*D2R, xmax:100*D2R, ymin:-150*D2R, ymax:120*D2R, gx:30*D2R, gy:30*D2R},
+      def:{x:10, y:70}, // degrees (converted on reset)
+      presets:[{label:"Open guess", x:10, y:70},
+               {label:"Crossed guess", x:-50, y:-110}]
+    }
+  };
+
+  var sysKey = "circleLine";
+  var cur = [1.5, 0.5];
+  var iter = 0;
+  var path = [[1.5,0.5]];
+  var autoTimer = null;
+
+  function sys(){ return SYSTEMS[sysKey]; }
+  function det2(M){ return M[0][0]*M[1][1] - M[0][1]*M[1][0]; }
+  function norm2(v){ return Math.hypot(v[0], v[1]); }
+  function solve2(M, b){ // solve M x = b
+    var d = det2(M); if(Math.abs(d) < 1e-300) return null;
+    return [(M[1][1]*b[0] - M[0][1]*b[1]) / d, (-M[1][0]*b[0] + M[0][0]*b[1]) / d];
+  }
+  function stateAt(p){
+    var f = sys().F(p[0], p[1]);
+    var J = sys().J(p[0], p[1]);
+    return { f:f, J:J, det:det2(J), nf:norm2(f) };
+  }
+
+  /* ----- DOM refs ----- */
+  var el = {};
+  ["inX","inY","lblX","lblY","fbPanel","th2Range","th2Val","presetRow","presetA","presetB",
+   "stepBtn","autoBtn","resetBtn","rIter","rNorm","rX","rY","rXlab","rYlab","rF1","rF2","rDet",
+   "rStatus","jacM","liveStatus","logBox","mechWrap","mechSvg","lgF1","lgF2"].forEach(function(id){ el[id] = document.getElementById(id); });
+  var jacCells = el.jacM ? el.jacM.querySelectorAll("span") : [];
+
+  /* ----- formatting ----- */
+  function dispVal(v){ return sys().isAngles ? (v*R2D).toFixed(3) + "\u00B0" : v.toFixed(6); }
+  function fmtF(v){ return (Math.abs(v) < 1e-4 && v !== 0) ? v.toExponential(3) : v.toFixed(6); }
+  function fmtNorm(v){ return v.toExponential(3); }
+
+  /* ----- coordinate transforms ----- */
+  function toScreen(mx, my){
+    var v = sys().view;
+    return { x: padL + (mx - v.xmin)/(v.xmax - v.xmin)*plotW,
+             y: (H - padB) - (my - v.ymin)/(v.ymax - v.ymin)*plotH };
+  }
+  function toMath(sx, sy){
+    var v = sys().view;
+    return { x: v.xmin + (sx - padL)/plotW*(v.xmax - v.xmin),
+             y: v.ymin + ((H - padB) - sy)/plotH*(v.ymax - v.ymin) };
+  }
+  function css(name){ return getComputedStyle(document.body).getPropertyValue(name).trim() || "#888"; }
+
+  /* ----- plot ----- */
+  function drawPlot(){
+    if(!ctx) return;
+    var v = sys().view;
+    var C = { panel:css("--panel"), ink:css("--ink"), inkSoft:css("--ink-soft"),
+              accent:css("--accent"), rust:css("--rust"), path:css("--path"),
+              line:css("--panel-line") };
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = C.panel; ctx.fillRect(0,0,W,H);
+
+    // grid + axes + tick labels
+    ctx.lineWidth = 1; ctx.font = "11px " + "monospace"; ctx.textBaseline = "middle";
+    var x, p;
+    var startX = Math.ceil(v.xmin/v.gx)*v.gx;
+    for(x = startX; x <= v.xmax + 1e-9; x += v.gx){
+      p = toScreen(x, 0);
+      ctx.strokeStyle = (Math.abs(x) < 1e-9) ? C.inkSoft : C.line;
+      ctx.beginPath(); ctx.moveTo(p.x, padT); ctx.lineTo(p.x, H - padB); ctx.stroke();
+      ctx.fillStyle = C.inkSoft; ctx.textAlign = "center";
+      ctx.fillText(sys().isAngles ? Math.round(x*R2D)+"\u00B0" : (""+ (+x.toFixed(2))), p.x, H - padB + 12);
+    }
+    var startY = Math.ceil(v.ymin/v.gy)*v.gy;
+    for(x = startY; x <= v.ymax + 1e-9; x += v.gy){
+      p = toScreen(0, x);
+      ctx.strokeStyle = (Math.abs(x) < 1e-9) ? C.inkSoft : C.line;
+      ctx.beginPath(); ctx.moveTo(padL, p.y); ctx.lineTo(W - padR, p.y); ctx.stroke();
+      ctx.fillStyle = C.inkSoft; ctx.textAlign = "right";
+      ctx.fillText(sys().isAngles ? Math.round(x*R2D)+"\u00B0" : (""+ (+x.toFixed(2))), padL - 5, p.y);
+    }
+
+    // implicit zero-curves via gradient-scaled sampling
+    var step = 3;
+    var upp = Math.max((v.xmax - v.xmin)/plotW, (v.ymax - v.ymin)/plotH);
+    var thr = 1.7*upp;
+    for(var sx = padL; sx <= W - padR; sx += step){
+      for(var sy = padT; sy <= H - padB; sy += step){
+        var m = toMath(sx, sy);
+        var f = sys().F(m.x, m.y); var J = sys().J(m.x, m.y);
+        if(!isFinite(f[0]) || !isFinite(f[1])) continue;
+        var g1 = Math.hypot(J[0][0], J[0][1]) || 1e-9;
+        var g2 = Math.hypot(J[1][0], J[1][1]) || 1e-9;
+        if(Math.abs(f[0]) < thr*g1){ ctx.fillStyle = C.ink;    ctx.fillRect(sx-1, sy-1, 3, 3); }
+        if(Math.abs(f[1]) < thr*g2){ ctx.fillStyle = C.accent; ctx.fillRect(sx-1, sy-1, 3, 3); }
+      }
+    }
+
+    // Newton path
+    if(path.length > 1){
+      ctx.strokeStyle = C.path; ctx.lineWidth = 2; ctx.setLineDash([7,4]);
+      ctx.beginPath();
+      for(var i=0;i<path.length;i++){ var s = toScreen(path[i][0], path[i][1]); if(i===0) ctx.moveTo(s.x,s.y); else ctx.lineTo(s.x,s.y); }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    for(var k=0;k<path.length;k++){
+      var s2 = toScreen(path[k][0], path[k][1]);
+      if(s2.x < padL-30 || s2.x > W-padR+30 || s2.y < padT-30 || s2.y > H-padB+30) continue;
+      var isStart = (k===0), isCur = (k===path.length-1);
+      ctx.beginPath();
+      ctx.arc(s2.x, s2.y, isCur?6:(isStart?6:4), 0, 2*Math.PI);
+      if(isStart && !isCur){ ctx.fillStyle = C.panel; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle=C.path; ctx.stroke(); }
+      else { ctx.fillStyle = isCur ? C.rust : C.path; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=C.panel; ctx.stroke(); }
+    }
+    // start / current text labels
+    if(path.length){
+      var s0 = toScreen(path[0][0], path[0][1]);
+      ctx.fillStyle = C.path; ctx.font = "bold 11px monospace"; ctx.textAlign = "left";
+      ctx.fillText("start", s0.x + 9, s0.y - 9);
+      var sc = toScreen(cur[0], cur[1]);
+      ctx.fillStyle = C.rust;
+      ctx.fillText("k=" + iter, sc.x + 9, sc.y - 9);
+    }
+  }
+
+  /* ----- four-bar physical view ----- */
+  function drawMech(){
+    if(!el.mechSvg) return;
+    var t3 = cur[0], t4 = cur[1];
+    var O2 = [0,0], O4 = [R.r1, 0];
+    var A  = [R.r2*Math.cos(fbTh2), R.r2*Math.sin(fbTh2)];
+    var Bc = [A[0] + R.r3*Math.cos(t3), A[1] + R.r3*Math.sin(t3)]; // coupler end
+    var Br = [O4[0] + R.r4*Math.cos(t4), O4[1] + R.r4*Math.sin(t4)]; // rocker end
+    var pts = [O2,O4,A,Bc,Br];
+    var minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+    pts.forEach(function(p){ minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);miny=Math.min(miny,p[1]);maxy=Math.max(maxy,p[1]); });
+    var VW=760, VH=360, pad=40;
+    var sc = Math.min((VW-2*pad)/((maxx-minx)||1), (VH-2*pad)/((maxy-miny)||1));
+    function X(p){ return pad + (p[0]-minx)*sc; }
+    function Y(p){ return VH - (pad + (p[1]-miny)*sc); } // flip y
+    function line(a,b,stroke,w,dash){
+      return '<line x1="'+X(a).toFixed(1)+'" y1="'+Y(a).toFixed(1)+'" x2="'+X(b).toFixed(1)+'" y2="'+Y(b).toFixed(1)+
+             '" style="stroke:'+stroke+';stroke-width:'+w+';stroke-linecap:round'+(dash?(';stroke-dasharray:'+dash):'')+'"/>';
+    }
+    function joint(p,r,fill){ return '<circle cx="'+X(p).toFixed(1)+'" cy="'+Y(p).toFixed(1)+'" r="'+r+'" style="fill:'+fill+';stroke:var(--panel);stroke-width:2"/>'; }
+    function label(p,txt,dx,dy){ return '<text x="'+(X(p)+dx).toFixed(1)+'" y="'+(Y(p)+dy).toFixed(1)+'" style="font-family:var(--mono);font-size:13px;fill:var(--ink-soft)">'+txt+'</text>'; }
+    var gap = Math.hypot(Bc[0]-Br[0], Bc[1]-Br[1]);
+    var svg = "";
+    svg += line(O2,O4,"var(--ink-soft)",2,"6 5"); // ground
+    svg += line(O2,A,"var(--rust)",6);             // crank r2
+    svg += line(A,Bc,"var(--accent)",6);           // coupler r3
+    svg += line(O4,Br,"var(--ink)",6);             // rocker r4
+    if(gap*sc > 1.5){ svg += line(Bc,Br,"var(--bad)",2.5,"4 4"); } // closure gap
+    svg += joint(O2,6,"var(--ink-soft)") + joint(O4,6,"var(--ink-soft)");
+    svg += joint(A,5,"var(--rust)") + joint(Bc,5,"var(--accent)") + joint(Br,5,"var(--ink)");
+    svg += label(O2,"O\u2082",-22,16) + label(O4,"O\u2084",6,16);
+    svg += label(A,"A",-6,-10);
+    svg += label(Bc,"B (coupler)",8,-4) + label(Br,"B (rocker)",8,16);
+    el.mechSvg.innerHTML = svg;
+    el.mechSvg.setAttribute("aria-label",
+      "Four-bar at theta2 " + Math.round(fbTh2*R2D) + " degrees, theta3 " + (t3*R2D).toFixed(1) +
+      ", theta4 " + (t4*R2D).toFixed(1) + " degrees. Loop-closure gap " + gap.toFixed(3) + " length units.");
+  }
+
+  /* ----- log ----- */
+  function logLine(html){
+    if(!el.logBox) return;
+    var d = document.createElement("div"); d.innerHTML = html;
+    el.logBox.appendChild(d); el.logBox.scrollTop = el.logBox.scrollHeight;
+  }
+  function clearLog(){ if(el.logBox) el.logBox.innerHTML = '<span class="dim">% '+sys().name+' \u2014 press Step or Auto-solve</span>'; }
+
+  /* ----- render readouts ----- */
+  function setStatus(cls, text){
+    if(!el.rStatus) return;
+    el.rStatus.className = "status " + cls;
+    el.rStatus.textContent = text;
+    if(el.liveStatus) el.liveStatus.textContent = text;
+  }
+  function render(){
+    var st = stateAt(cur);
+    if(el.rIter) el.rIter.textContent = iter;
+    if(el.rNorm) el.rNorm.textContent = fmtNorm(st.nf);
+    if(el.rX) el.rX.textContent = dispVal(cur[0]);
+    if(el.rY) el.rY.textContent = dispVal(cur[1]);
+    if(el.rF1) el.rF1.textContent = fmtF(st.f[0]);
+    if(el.rF2) el.rF2.textContent = fmtF(st.f[1]);
+    if(el.rDet) el.rDet.textContent = st.det.toFixed(4);
+    if(jacCells.length === 4){
+      jacCells[0].textContent = st.J[0][0].toFixed(3);
+      jacCells[1].textContent = st.J[0][1].toFixed(3);
+      jacCells[2].textContent = st.J[1][0].toFixed(3);
+      jacCells[3].textContent = st.J[1][1].toFixed(3);
+    }
+    drawPlot();
+    if(sysKey === "fourbar") drawMech();
+    if(canvas){
+      canvas.setAttribute("aria-label",
+        sys().name + ". Iteration " + iter + ". " + el.rXlab.textContent + " = " + dispVal(cur[0]) +
+        ", " + el.rYlab.textContent + " = " + dispVal(cur[1]) + ". Residual norm " + fmtNorm(st.nf) +
+        ", determinant of Jacobian " + st.det.toFixed(3) + ".");
+    }
+    return st;
+  }
+
+  /* ----- one Newton step ----- */
+  function step(){
+    var before = stateAt(cur);
+    if(before.nf < TOL){ setStatus("conv", "Converged \u2713  \u2016F\u2016 = " + fmtNorm(before.nf)); return true; }
+    if(Math.abs(before.det) < SING){
+      logLine('<span class="ru">iter '+iter+'  det(J)='+before.det.toExponential(2)+'  \u2192 singular Jacobian, cannot step</span>');
+      setStatus("sing", "Singular Jacobian (det \u2248 0) \u2014 a toggle/lock-up direction. Try another guess.");
+      return true;
+    }
+    var dx = solve2(before.J, [-before.f[0], -before.f[1]]);
+    cur = [cur[0] + dx[0], cur[1] + dx[1]];
+    iter++;
+    path.push(cur.slice());
+    var after = stateAt(cur);
+    logLine('<span class="dim">iter '+String(iter).padStart(2," ")+'</span>  ' +
+            '<span class="hi">\u2016F\u2016=' + after.nf.toExponential(3) + '</span>  ' +
+            '<span class="ru">det(J)=' + after.det.toFixed(3) + '</span>  ' +
+            'step=' + norm2(dx).toExponential(2));
+    render();
+    if(after.nf < TOL){
+      logLine('<span class="ok">\u2713 converged: ' + el.rXlab.textContent + '=' + dispVal(cur[0]) + ', ' + el.rYlab.textContent + '=' + dispVal(cur[1]) + '</span>');
+      setStatus("conv", "Converged \u2713 in " + iter + " iterations.");
+      return true;
+    } else if(after.nf < 1e-3){ setStatus("close", "Closing in\u2026 \u2016F\u2016 = " + fmtNorm(after.nf)); }
+    else { setStatus("iter", "Iterating\u2026 \u2016F\u2016 = " + fmtNorm(after.nf)); }
+    return false;
+  }
+
+  /* ----- auto-solve ----- */
+  function stopAuto(){
+    if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+    if(el.autoBtn){ el.autoBtn.textContent = "Auto-solve"; el.autoBtn.setAttribute("aria-pressed","false"); }
+    if(el.stepBtn) el.stepBtn.disabled = false;
+  }
+  function startAuto(){
+    if(REDUCE){ // no animation: run to completion immediately
+      var done = false, guard = 0;
+      while(!done && guard < MAXIT){ done = step(); guard++; }
+      if(!done) setStatus("iter", "Stopped at max iterations (" + MAXIT + ").");
+      return;
+    }
+    el.autoBtn.textContent = "Stop"; el.autoBtn.setAttribute("aria-pressed","true");
+    if(el.stepBtn) el.stepBtn.disabled = true;
+    autoTimer = setInterval(function(){
+      var done = step();
+      if(done || iter >= MAXIT){
+        if(!done) setStatus("iter", "Stopped at max iterations (" + MAXIT + ").");
+        stopAuto();
+      }
+    }, 850);
+  }
+
+  /* ----- reset / seed ----- */
+  function readGuess(){
+    var x = parseFloat(el.inX.value); var y = parseFloat(el.inY.value);
+    if(!isFinite(x)) x = 0; if(!isFinite(y)) y = 0;
+    if(sys().isAngles) return [x*D2R, y*D2R]; // inputs are degrees
+    return [x, y];
+  }
+  function reset(){
+    stopAuto();
+    cur = readGuess();
+    iter = 0; path = [cur.slice()];
+    clearLog();
+    setStatus("iter", "Ready. Press Step to take one Newton iteration.");
+    render();
+  }
+
+  /* ----- apply a system selection ----- */
+  function applySystem(key){
+    sysKey = key; var s = sys();
+    // labels + inputs
+    if(s.isAngles){
+      el.lblX.innerHTML = "Guess &theta;&#8323;&#8304; (deg)"; el.lblY.innerHTML = "Guess &theta;&#8324;&#8304; (deg)";
+      el.rXlab.innerHTML = "&theta;&#8323;"; el.rYlab.innerHTML = "&theta;&#8324;";
+      el.fbPanel.hidden = false; el.mechWrap.hidden = false;
+      el.inX.step = "1"; el.inY.step = "1";
+    } else {
+      el.lblX.innerHTML = "Initial x&#8320;"; el.lblY.innerHTML = "Initial y&#8320;";
+      el.rXlab.textContent = "x"; el.rYlab.textContent = "y";
+      el.fbPanel.hidden = true; el.mechWrap.hidden = true;
+      el.inX.step = "0.1"; el.inY.step = "0.1";
+    }
+    el.inX.value = s.def.x; el.inY.value = s.def.y;
+    // presets
+    if(s.presets && s.presets.length >= 2){
+      el.presetRow.hidden = false;
+      el.presetA.textContent = s.presets[0].label;
+      el.presetB.textContent = s.presets[1].label;
+    } else { el.presetRow.hidden = true; }
+    reset();
+  }
+
+  /* ----- wire controls ----- */
+  document.querySelectorAll('input[name=sys]').forEach(function(r){
+    r.addEventListener("change", function(){ if(r.checked) applySystem(r.value); });
+  });
+  el.inX.addEventListener("change", reset);
+  el.inY.addEventListener("change", reset);
+  el.th2Range.addEventListener("input", function(){
+    fbTh2 = parseFloat(el.th2Range.value)*D2R;
+    el.th2Val.textContent = el.th2Range.value + "\u00B0";
+    if(sysKey === "fourbar") reset();
+  });
+  el.presetA.addEventListener("click", function(){ var p = sys().presets[0]; el.inX.value = p.x; el.inY.value = p.y; reset(); });
+  el.presetB.addEventListener("click", function(){ var p = sys().presets[1]; el.inX.value = p.x; el.inY.value = p.y; reset(); });
+  el.stepBtn.addEventListener("click", function(){ step(); });
+  el.resetBtn.addEventListener("click", reset);
+  el.autoBtn.addEventListener("click", function(){ if(autoTimer) stopAuto(); else startAuto(); });
+
+  // theme change -> redraw canvas with new colors
+  if(window.matchMedia){
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    var onTheme = function(){ render(); };
+    if(mq.addEventListener) mq.addEventListener("change", onTheme); else if(mq.addListener) mq.addListener(onTheme);
+  }
+
+  // initial
+  applySystem("circleLine");
+})();
+</script>
+</body>
+</html>
