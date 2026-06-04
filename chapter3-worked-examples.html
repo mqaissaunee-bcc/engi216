@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENGI 216 · Chapter 3 Worked Examples — Rolling Contacts &amp; Geartrains</title>
+<meta name="description" content="Interactive worked-example companion for ENGI 216 Chapter 3: rolling contacts and geartrains. All eleven Stanišić examples (3.1–3.11) worked step by step and grouped by type, with animated mechanisms, a rolling-contact (no-slip) visualizer, a simple/compound gear-train ratio and speed–torque calculator, and a planetary (epicyclic) ratio solver.">
+<style>
+  :root{
+    --ink:        #10243a;
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+    --gear-fill: rgba(10,126,164,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+      --gear-fill: rgba(59,182,216,.16);
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+  }
+  header.site::after{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px; pointer-events:none;
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:1; }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.14em;
+    text-transform:uppercase; background:rgba(243,241,231,.14); color:#f3f1e7;
+    padding:5px 12px; border-radius:20px; border:1px solid rgba(243,241,231,.25);
+  }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; font-size:clamp(1.7rem,4.4vw,2.6rem);
+    margin:.4em 0 .2em; line-height:1.12;
+  }
+  header.site .sub{ font-size:1.04rem; max-width:62ch; color:#e6e2d4; margin:.2em 0 1em; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:8px 22px; font-family:var(--mono); font-size:.8rem; color:#cfe0ec; }
+  .meta-row span{ white-space:nowrap; }
+
+  nav.toc{
+    position:sticky; top:0; z-index:50; background:var(--panel);
+    border-bottom:1px solid var(--panel-line); box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  nav.toc .wrap{
+    max-width:var(--maxw); margin:0 auto; padding:0 8px;
+    display:flex; gap:2px; overflow-x:auto; scrollbar-width:thin;
+  }
+  nav.toc a{
+    flex:0 0 auto; font-family:var(--mono); font-size:.78rem; letter-spacing:.02em;
+    color:var(--ink-soft); text-decoration:none; padding:11px 12px; border-bottom:3px solid transparent;
+    white-space:nowrap; min-height:44px; display:flex; align-items:center;
+  }
+  nav.toc a:hover{ color:var(--accent-dk); }
+  nav.toc a.active{ color:var(--accent-dk); border-bottom-color:var(--accent); font-weight:700; }
+  nav.toc a:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; border-radius:4px; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:8px 18px 60px; }
+  section{ padding:30px 0 8px; border-bottom:1px solid var(--panel-line); }
+  section:last-of-type{ border-bottom:none; }
+  .sec-tag{
+    display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:2px;
+  }
+  h2{ font-family:var(--serif); font-weight:700; font-size:clamp(1.4rem,3vw,2rem); line-height:1.18; margin:.1em 0 .5em; }
+  h3{ font-family:var(--serif); font-weight:700; font-size:1.22rem; margin:1.1em 0 .35em; }
+  h4{ font-family:var(--mono); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-dk); margin:1.1em 0 .3em; }
+  p{ margin:.55em 0; }
+  .lead{ font-size:1.08rem; color:var(--ink); }
+  a{ color:var(--accent-dk); }
+  strong{ color:var(--ink); }
+  em{ color:var(--ink); }
+
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:1.5em; margin:.4em 0; }
+  ul.clean li::before{ content:"\25B8"; position:absolute; left:0; color:var(--accent); font-weight:700; }
+
+  .card{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:18px 20px; margin:16px 0; box-shadow:var(--shadow); }
+  .grid3{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:14px 0; }
+  .defn{ background:var(--paper-2); border:1px solid var(--panel-line); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:11px 14px; font-size:.95rem; }
+  .defn strong{ color:var(--accent-dk); }
+
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; display:block; margin-bottom:3px; }
+  .analogy{ border-left:4px solid var(--accent); background:linear-gradient(180deg, var(--paper-2), var(--panel)); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; }
+  .analogy::before{ content:"\1F4A1"; position:absolute; left:14px; top:13px; font-size:1.2rem; line-height:1; }
+  .analogy .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; margin-bottom:3px; }
+  .analogy p:last-child{ margin-bottom:0; }
+  .realworld{ border:1px solid var(--panel-line); border-left:4px solid var(--accent-2); background:var(--panel); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; box-shadow:var(--shadow); }
+  .realworld::before{ content:"\1F527"; position:absolute; left:14px; top:13px; font-size:1.15rem; line-height:1; }
+  .realworld .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:3px; }
+  .realworld p:last-child{ margin-bottom:0; }
+  .realworld ul{ margin:.4em 0 0; padding-left:1.1em; }
+  .realworld li{ margin:.3em 0; }
+
+  .eq{ font-family:var(--serif); font-size:1.18rem; text-align:center; margin:14px 0; padding:12px; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; overflow-x:auto; }
+  .eq .term{ color:var(--accent-dk); font-style:italic; }
+  .eq .op{ color:var(--accent-2); }
+  var{ font-family:var(--serif); font-style:italic; color:var(--accent-dk); }
+  sub{ font-size:.7em; }
+
+  .tbl-wrap{ overflow-x:auto; margin:14px 0; }
+  table{ border-collapse:collapse; width:100%; font-size:.93rem; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; overflow:hidden; }
+  caption{ caption-side:top; text-align:left; font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding:0 0 6px; }
+  th, td{ text-align:left; padding:9px 12px; border-bottom:1px solid var(--panel-line); vertical-align:top; }
+  thead th{ background:var(--ink); color:#f3f1e7; font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; font-weight:700; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:nth-child(even){ background:var(--paper-2); }
+  td.num, th.num{ text-align:center; font-family:var(--mono); }
+
+  .stage{ width:100%; height:auto; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; display:block; }
+  .stage-wrap{ margin:0; }
+  .stage-cap{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin:6px 2px 0; }
+  text.lk{ font-family:var(--mono); font-size:13px; font-weight:700; }
+
+  .btn{
+    font-family:var(--mono); font-size:.82rem; font-weight:700; letter-spacing:.03em;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:0 16px; min-height:44px; min-width:44px; cursor:pointer; display:inline-flex;
+    align-items:center; justify-content:center; gap:7px; transition:background .15s ease, transform .05s ease;
+  }
+  .btn:hover{ background:var(--accent-dk); }
+  .btn:active{ transform:translateY(1px); }
+  .btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .btn[disabled]{ background:var(--panel-line); color:var(--ink-soft); cursor:not-allowed; }
+  .btn.ghost{ background:transparent; color:var(--accent-dk); border:1.5px solid var(--accent); }
+  .btn.ghost:hover{ background:var(--paper-2); }
+  .btn.rust{ background:var(--accent-2); }
+  .btn.rust:hover{ background:#9c4316; }
+  .btn.sm{ min-height:34px; font-size:.74rem; padding:0 11px; }
+
+  .tool{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent); border-radius:var(--radius); padding:18px 20px; margin:16px 0; box-shadow:var(--shadow); }
+  .tool .tool-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; }
+  .field-row{ display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin:12px 0; }
+  .field{ display:flex; flex-direction:column; gap:4px; }
+  .field label{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); font-weight:700; }
+  .field input[type=number]{
+    width:90px; font-family:var(--mono); font-size:1rem; padding:8px 10px; min-height:44px;
+    border:1.5px solid var(--panel-line); border-radius:8px; background:var(--paper); color:var(--ink);
+  }
+  .field input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .readout{ font-family:var(--serif); font-size:1.5rem; }
+  .readout .big{ font-size:2.2rem; font-weight:700; color:var(--accent-dk); }
+
+  .verdict{ font-family:var(--mono); font-size:.86rem; font-weight:700; padding:8px 12px; border-radius:8px; margin-top:8px; display:inline-block; }
+  .verdict.mech{ background:var(--good-bg); color:var(--good); }
+  .verdict.struct{ background:var(--warn-bg); color:var(--warn); }
+  .verdict.indet{ background:var(--bad-bg); color:var(--bad); }
+
+  .example{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:0; margin:22px 0; box-shadow:var(--shadow); overflow:hidden; }
+  .example > .ex-head{ background:linear-gradient(135deg, var(--ink), var(--ink-soft)); color:#f3f1e7; padding:14px 20px; }
+  .ex-badge{ display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; background:var(--accent-2); color:#fff; padding:3px 10px; border-radius:5px; }
+  .ex-head h3{ font-family:var(--serif); color:#fff; margin:.35em 0 0; font-size:1.25rem; }
+  .ex-body{ padding:18px 20px; }
+  .ex-prompt{ font-size:1rem; }
+  .ex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; margin-top:8px; }
+  @media (max-width:760px){ .ex-grid{ grid-template-columns:1fr; } }
+
+  .play-row{ display:flex; gap:8px; align-items:center; margin:8px 0 0; flex-wrap:wrap; }
+  .play-row .drv{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+
+  .stepper{ border:1px solid var(--panel-line); border-radius:10px; background:var(--paper); }
+  .stepper .progress-pips{ display:flex; gap:5px; padding:12px 14px 0; flex-wrap:wrap; }
+  .pip{ width:24px; height:6px; border-radius:3px; background:var(--panel-line); }
+  .pip.done{ background:var(--accent); }
+  .pip.cur{ background:var(--accent-2); }
+  .step-track{ padding:8px 16px 4px; min-height:120px; }
+  .step{ animation:fade .25s ease; }
+  @keyframes fade{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .step{ animation:none; } }
+  .step h5{ font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-dk); margin:.2em 0 .3em; }
+  .step p{ margin:.35em 0; font-size:.96rem; }
+  .step .mini-eq{ font-family:var(--serif); font-size:1.05rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:6px; padding:7px 10px; margin:8px 0; text-align:center; overflow-x:auto; }
+  .tally{ font-family:var(--mono); font-size:.85rem; }
+  .tally b{ color:var(--accent-dk); }
+  .answer{ margin:6px 16px 14px; padding:14px 16px; border:2px solid var(--good); border-radius:10px; background:var(--good-bg); }
+  .answer.struct{ border-color:var(--warn); background:var(--warn-bg); }
+  .answer.indet{ border-color:var(--bad); background:var(--bad-bg); }
+  .answer .ans-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--good); }
+  .answer.struct .ans-h{ color:var(--warn); }
+  .answer.indet .ans-h{ color:var(--bad); }
+  .answer .big-eq{ font-family:var(--serif); font-size:1.15rem; text-align:center; margin:8px 0; overflow-x:auto; }
+  .step-controls{ display:flex; align-items:center; gap:8px; padding:8px 14px 14px; flex-wrap:wrap; border-top:1px solid var(--panel-line); }
+  .step-count{ font-family:var(--mono); font-size:.78rem; color:var(--ink-soft); margin-left:auto; }
+
+  .q{ background:var(--panel); border:1px solid var(--panel-line); border-radius:10px; padding:16px 18px; margin:14px 0; box-shadow:var(--shadow); }
+  .q .qnum{ font-family:var(--mono); font-size:.72rem; color:var(--accent-2); font-weight:700; letter-spacing:.08em; }
+  .q .qtext{ font-weight:600; margin:.2em 0 .6em; }
+  .opt{ display:block; width:100%; text-align:left; font-family:var(--sans); font-size:.95rem; background:var(--paper); border:1.5px solid var(--panel-line); border-radius:8px; padding:10px 14px; margin:6px 0; min-height:44px; cursor:pointer; color:var(--ink); }
+  .opt:hover{ border-color:var(--accent); }
+  .opt:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .opt.correct{ background:var(--good-bg); border-color:var(--good); color:var(--good); font-weight:700; }
+  .opt.wrong{ background:var(--bad-bg); border-color:var(--bad); color:var(--bad); }
+  .opt .mk{ font-weight:700; margin-right:6px; }
+  .feedback{ font-size:.9rem; margin-top:8px; padding:10px 12px; border-radius:8px; background:var(--paper-2); border-left:3px solid var(--accent); display:none; }
+  .feedback.show{ display:block; }
+
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:12px; padding:0; margin:16px 0; overflow:hidden; }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--serif); font-size:1.15rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:16px 18px; }
+  .rc-eq{ font-family:var(--serif); font-size:1.22rem; text-align:center; padding:10px; background:var(--paper-2); border-radius:8px; margin:0 0 12px; overflow-x:auto; }
+
+  .gloss-search{ width:100%; max-width:420px; font-family:var(--sans); font-size:1rem; padding:10px 14px; min-height:44px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--paper); color:var(--ink); margin:6px 0 12px; }
+  .gloss-search:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  dl.gloss{ margin:0; }
+  dl.gloss > div{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:8px 0; background:var(--panel); }
+  dl.gloss dt{ font-family:var(--serif); font-weight:700; font-size:1.04rem; color:var(--accent-dk); }
+  dl.gloss dd{ margin:.25em 0 0; font-size:.95rem; }
+  .gloss-none{ color:var(--ink-soft); font-style:italic; }
+
+  .res-cat{ font-family:var(--mono); font-size:.76rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin:14px 0 4px; }
+  .res-list{ list-style:none; padding:0; margin:0; }
+  .res-list li{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:7px 0; background:var(--panel); }
+  .res-list a{ font-weight:700; }
+  .ext::after{ content:" \2197"; font-size:.85em; color:var(--accent-2); }
+  .res-list .desc{ display:block; font-size:.88rem; color:var(--ink-soft); margin-top:2px; }
+
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  footer{ background:var(--ink); color:#cfe0ec; padding:22px 18px; text-align:center; font-size:.86rem; }
+  footer .program{ color:#f3f1e7; font-weight:700; }
+  footer a{ color:#9fd8ee; }
+
+  .note{ font-size:.86rem; color:var(--ink-soft); }
+  hr.soft{ border:none; border-top:1px dashed var(--panel-line); margin:18px 0; }
+
+  @media print{
+    nav.toc, .progress-dock, .play-row, .step-controls, button, .gloss-search{ display:none !important; }
+    body{ background:#fff; font-size:12px; }
+    .step[hidden]{ display:block !important; }
+    .answer[hidden]{ display:block !important; }
+    .example, .card, .tool, .refcard{ box-shadow:none; break-inside:avoid; }
+  }
+
+  /* ---------- Ch3 additions: rolling contacts, gears, knowns ---------- */
+  .vle{ font-family:var(--serif); font-size:1.12rem; text-align:center; margin:12px 0; padding:11px; background:var(--paper-2); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; overflow-x:auto; }
+  .vle .vec{ font-weight:700; }
+  .knowns-row{ display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+  .kchip{ font-family:var(--mono); font-size:.74rem; padding:4px 9px; border-radius:6px; border:1px solid var(--panel-line); background:var(--paper-2); }
+  .kchip.known{ border-left:3px solid var(--good); }
+  .kchip.unknown{ border-left:3px solid var(--accent-2); }
+  .dof-pill{ display:inline-block; font-family:var(--mono); font-weight:700; font-size:.9rem; padding:6px 13px; border-radius:20px; background:var(--good-bg); color:var(--good); border:1px solid var(--good); }
+  .ratio-pill{ display:inline-block; font-family:var(--mono); font-weight:700; font-size:.9rem; padding:6px 13px; border-radius:20px; background:var(--paper-2); color:var(--accent-dk); border:1px solid var(--accent); }
+  .solver-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }
+  @media (max-width:760px){ .solver-grid{ grid-template-columns:1fr; } }
+  .statgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin:10px 0; }
+  .stat{ background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; padding:8px 10px; }
+  .stat .lab{ font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); display:block; }
+  .stat .val{ font-family:var(--mono); font-size:1.12rem; font-weight:700; color:var(--accent-dk); }
+  .work{ font-family:var(--mono); font-size:.82rem; line-height:1.5; white-space:pre-wrap; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; padding:10px 12px; }
+  .seg{ display:inline-flex; border:1.5px solid var(--accent); border-radius:8px; overflow:hidden; flex-wrap:wrap; }
+  .seg button{ font-family:var(--mono); font-size:.74rem; font-weight:700; padding:7px 12px; min-height:40px; border:none; background:var(--paper); color:var(--accent-dk); cursor:pointer; }
+  .seg button[aria-pressed="true"]{ background:var(--accent); color:#fff; }
+  .seg button:focus-visible{ outline:2px solid var(--accent-2); outline-offset:-2px; }
+  .mesh-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:8px 0; border-bottom:1px dashed var(--panel-line); }
+  .mesh-row:last-child{ border-bottom:none; }
+  .mesh-row .mlab{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); min-width:62px; }
+  .selrow{ display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
+  .selrow label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); font-weight:700; display:flex; flex-direction:column; gap:3px; }
+  .selrow select{ font-family:var(--mono); font-size:.9rem; padding:7px 9px; min-height:40px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--paper); color:var(--ink); }
+  .chkline{ display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:.78rem; }
+  .chkline input{ width:18px; height:18px; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 &middot; Chapter 3 &middot; Worked Examples</span>
+    <h1>Rolling Contacts &amp; Geartrains</h1>
+    <p class="sub">All eleven of Stani&scaron;i&cacute;&rsquo;s Chapter 3 examples worked step by step and grouped by type &mdash; from a single rolling joint to simple, compound, planetary, automatic, and hybrid geartrains. Three live tools run the no-slip equation, the gear-ratio product, and the planetary speed balance in front of the class.</p>
+    <div class="meta-row">
+      <span>&#9719; ~3 hour problem session</span>
+      <span>&#9670; 11 animated examples</span>
+      <span>&#9881; Rolling-contact &middot; gear-ratio &middot; planetary solvers</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Worked-example sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#method">The Rolling-Contact Rule</a>
+    <a href="#rc-tool">Rolling Visualizer</a>
+    <a href="#grp-1">3.1&ndash;3.2 &middot; Rolling mechanisms</a>
+    <a href="#grp-2">3.3&ndash;3.5 &middot; Simple geartrains</a>
+    <a href="#gt-tool">Gear-Ratio Calc</a>
+    <a href="#grp-3">3.6 &middot; Power &amp; torque</a>
+    <a href="#grp-4">3.7&ndash;3.8 &middot; Planetary</a>
+    <a href="#pl-tool">Planetary Solver</a>
+    <a href="#grp-5">3.9&ndash;3.11 &middot; Automatic &amp; hybrid</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Orientation</span>
+  <h2 id="start-h">How to use this problem session</h2>
+  <p class="lead">Chapter 2 wrote a vector loop and counted degrees of freedom for linkages made of pins and sliders. Chapter 3 adds one more joint &mdash; the <strong>rolling contact</strong> &mdash; and then builds an entire family of machines out of it: <strong>geartrains</strong>. Today we work all eleven textbook examples, watch each mechanism move, and run three live tools that do the arithmetic in front of the class.</p>
+
+  <div class="card">
+    <h3 style="margin-top:.2em">Each example works the same way</h3>
+    <ul class="clean">
+      <li><strong>Watch first.</strong> Press <em>Play</em> on the animated skeleton to see the motion &mdash; which body rolls, which way it turns, what stays fixed &mdash; before any algebra.</li>
+      <li><strong>Step through the derivation.</strong> Use <em>Next</em> to advance one logical step at a time: write the loop (if any), write the rolling-contact equation, incorporate the assembly configuration, count knowns and unknowns. Ideal for working it on the board together.</li>
+      <li><strong>Reveal the result.</strong> On the last step the boxed position equations, the degree-of-freedom count, and the gear ratio appear. Predict each before you reveal.</li>
+      <li><strong>Then compute it.</strong> Three live tools &mdash; a rolling-contact visualizer, a gear-ratio &amp; speed&ndash;torque calculator, and a planetary ratio solver &mdash; take the equations the rest of the way to numbers.</li>
+    </ul>
+    <p class="note">Everything runs offline in a single file &mdash; safe to embed in Canvas, project from a laptop with no Wi-Fi, or hand to students to replay.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; two people pushing a revolving door</span>
+    <p>A rolling contact is a promise: the two surfaces touching never slip, so the <em>arc length</em> that rolls past the contact point is the same measured on either body. Picture two people walking a revolving door from opposite sides &mdash; each must take exactly the same length of step along the glass, or someone gets a shoulder in the ribs. &ldquo;No slip&rdquo; is just &ldquo;same arc length on both sides,&rdquo; and that single fact generates every gear-ratio equation in this chapter.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Why this chapter runs the world</span>
+    <p>Every car transmission, e-bike mid-drive, wind-turbine gearbox, cordless-drill planetary head, clock, and watch is a geartrain built from rolling contacts. Solve the position and ratio problem here and you can predict output speed, output torque, and direction for any of them &mdash; and read why a planetary set the size of a coffee mug can do what a foot-wide spur train does.</p>
+  </div>
+</section>
+
+<!-- ============ METHOD / FOUNDATIONS ============ -->
+<section id="method" aria-labelledby="method-h">
+  <span class="sec-tag">The recipe</span>
+  <h2 id="method-h">The rolling-contact rule &mdash; one equation does it all</h2>
+  <p class="lead">A rolling contact is a higher pair: two curved bodies touch and roll without slipping. The no-slip condition says the arc length that passes the contact point is identical on both bodies. Written for the <em>changes</em> in orientation, that becomes the single equation this whole chapter is built on.</p>
+
+  <div class="card">
+    <h4 style="margin-top:.2em">The no-slip (arc-length) condition</h4>
+    <p>If body <var>A</var> of radius &rho;<sub>A</sub> rolls on body <var>B</var> of radius &rho;<sub>B</sub>, the arc rolled on <var>A</var> equals the arc rolled on <var>B</var>: &rho;<sub>A</sub>&middot;(arc angle on A) = &rho;<sub>B</sub>&middot;(arc angle on B). The angles must be measured <strong>relative to the link that carries the contact</strong> &mdash; the <em>arm</em>. Calling that arm body <var>m</var>, Stani&scaron;i&cacute; writes the rolling-contact equation as</p>
+    <div class="eq"><span class="term">&rho;<sub>A</sub> &Delta;&theta;<sub>A/m</sub></span> <span class="op">=</span> <span class="term">&plusmn; &rho;<sub>B</sub> &Delta;&theta;<sub>B/m</sub></span></div>
+    <p>where &Delta;&theta;<sub>A/m</sub> = &Delta;&theta;<sub>A</sub> &minus; &Delta;&theta;<sub>m</sub> is the rotation of <var>A</var> <em>relative to the arm</em>. The sign is the only thing that changes between the two kinds of contact:</p>
+    <div class="grid3">
+      <div class="defn"><strong>External contact &mdash; minus sign.</strong> The two bodies sit outside each other and spin in <em>opposite</em> directions at the contact point: &rho;<sub>A</sub>&Delta;&theta;<sub>A/m</sub> = &minus;&rho;<sub>B</sub>&Delta;&theta;<sub>B/m</sub>. This is Stani&scaron;i&cacute;&rsquo;s Equation (3.1).</div>
+      <div class="defn"><strong>Internal contact &mdash; plus sign.</strong> One body rolls inside the other; they spin the <em>same</em> way at the contact: &rho;<sub>A</sub>&Delta;&theta;<sub>A/m</sub> = +&rho;<sub>B</sub>&Delta;&theta;<sub>B/m</sub>. This is Equation (3.5).</div>
+      <div class="defn"><strong>Assembly configuration.</strong> Replace each &Delta;&theta; with (&theta; &minus; &theta;<sub>i</sub>), the change from the assembled starting angle &theta;<sub>i</sub>. That turns the rate relation into a <em>position</em> equation you can solve.</div>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; outside lane vs. inside lane</span>
+    <p>External rolling is two runners passing shoulder-to-shoulder in opposite directions on a track &mdash; same speed past each other, opposite headings. Internal rolling is a runner on the <em>inside</em> of a circular wall: both the runner and a mark on the wall sweep the same way. Same arc length either way; the geometry just flips who&rsquo;s facing where. That flip is the &plusmn; sign, and it is exactly what makes a single pair of external gears reverse rotation while an internal (ring) gear does not.</p>
+  </div>
+
+  <h3>From rolling contact to gear ratio</h3>
+  <p>For a geartrain the bodies are gears and the writing of a vector loop becomes pointless &mdash; the loop is just &ldquo;the fixed center is where it is&rdquo; (r&#772;<sub>1</sub> &minus; r&#772;<sub>1</sub> = 0&#772;), which says nothing. <strong>The only meaningful equations in a geartrain are the rolling-contact equations.</strong> Two facts turn them into ratios:</p>
+  <ul class="clean">
+    <li><strong>Pitch radius is proportional to tooth number.</strong> Gears that mesh share a module, so &rho; &prop; <var>N</var>. Every radius ratio &rho;<sub>a</sub>/&rho;<sub>b</sub> may be replaced by the tooth ratio <var>N</var><sub>a</sub>/<var>N</var><sub>b</sub> &mdash; the quantity you can actually count.</li>
+    <li><strong>The gear ratio is input over output.</strong> <var>R</var> = &Delta;&theta;<sub>in</sub>/&Delta;&theta;<sub>out</sub> = &omega;<sub>in</sub>/&omega;<sub>out</sub>. A negative <var>R</var> means input and output turn in opposite directions; a positive <var>R</var> means the same direction.</li>
+  </ul>
+  <div class="eq"><span class="term">&rho; &prop; N</span> &nbsp;&nbsp;&rarr;&nbsp;&nbsp; <span class="term">R = &Delta;&theta;<sub>in</sub> / &Delta;&theta;<sub>out</sub> = &omega;<sub>in</sub> / &omega;<sub>out</sub></span></div>
+
+  <h3>Power, torque, and the two reference frames</h3>
+  <p>Power passes through a geartrain (minus friction) unchanged, so torque scales <em>up</em> exactly as speed scales <em>down</em>: <var>T</var><sub>out</sub> = &minus;<var>R</var>&middot;<var>T</var><sub>in</sub>. The minus sign keeps the bookkeeping honest about direction. And one idea separates the easy trains from the clever ones &mdash; the <strong>arm</strong>:</p>
+  <div class="grid3">
+    <div class="defn"><strong>Fixed-axis (simple/compound) trains.</strong> Every gear spins on a stationary shaft, so the arm is ground and &Delta;&theta;<sub>m</sub> = 0. The rolling-contact equation drops to &rho;<sub>A</sub>&Delta;&theta;<sub>A</sub> = &plusmn;&rho;<sub>B</sub>&Delta;&theta;<sub>B</sub>.</div>
+    <div class="defn"><strong>Planetary (epicyclic) trains.</strong> A planet gear&rsquo;s shaft rides on a moving carrier, so the arm <em>turns</em>. You must keep the relative terms &Delta;&theta;<sub>A/m</sub>. That single complication is what lets a tiny planetary set produce a huge ratio.</div>
+    <div class="defn"><strong>Brakes select gears.</strong> Ground one element of a multi-element epicyclic with a band brake and a different equation goes to zero &mdash; giving a different ratio. Stack a few brakes and you have an automatic transmission.</div>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Why engineers still write rolling-contact equations by hand</span>
+    <p>A gearbox catalog gives you a ratio, but the catalog can&rsquo;t tell you which way the output turns, why adding an idler changed the sign, or how a clutch pack picks third gear. Those answers come straight from the &plusmn; sign and the arm term you learn today. The CAD model does the arithmetic; the engineer owns the contact equation.</p>
+  </div>
+</section>
+
+<!-- ============ TOOL 1: ROLLING-CONTACT VISUALIZER ============ -->
+<section id="rc-tool" aria-labelledby="rc-h">
+  <span class="sec-tag">Live tool 1 of 3</span>
+  <h2 id="rc-h">Rolling-contact (no-slip) visualizer</h2>
+  <p>The engine of Examples 3.1&ndash;3.5. Choose external or internal contact, set the two radii, then sweep the driver. Watch equal arc lengths roll past the contact point and read the rolling-contact equation update live. Here the arm is the fixed ground, so &Delta;&theta;<sub>m</sub> = 0 and the equation reduces to &rho;<sub>A</sub>&Delta;&theta;<sub>A</sub> = &plusmn;&rho;<sub>B</sub>&Delta;&theta;<sub>B</sub>.</p>
+
+  <div class="tool">
+    <span class="tool-h">Rolling-contact visualizer</span>
+    <div class="solver-grid" style="margin-top:10px">
+      <div>
+        <svg id="rc_svg" class="stage" viewBox="0 0 360 300" role="img" aria-label="Two bodies in rolling contact. Body A on the left and body B on the right touch at a single point; markers on each body show that equal arc lengths roll past the contact point as the driver turns."></svg>
+        <div class="play-row">
+          <button type="button" class="btn ghost sm" data-play="rc_svg">&#9654; Play</button>
+          <span class="drv" id="rc_drv">driver A turns; B rolls without slipping</span>
+        </div>
+      </div>
+      <div>
+        <div class="field-row" role="group" aria-label="Contact type">
+          <div class="field">
+            <label id="rc_typelab">Contact type</label>
+            <div class="seg" role="group" aria-labelledby="rc_typelab">
+              <button type="button" id="rc_ext" aria-pressed="true">External (&minus;)</button>
+              <button type="button" id="rc_int" aria-pressed="false">Internal (+)</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="rc_ra">&rho;<sub>A</sub> driver</label><input type="number" id="rc_ra" value="2.0" min="0.4" max="6" step="0.1"></div>
+          <div class="field"><label for="rc_rb">&rho;<sub>B</sub> follower</label><input type="number" id="rc_rb" value="3.0" min="0.4" max="6" step="0.1"></div>
+          <div class="field"><label for="rc_da">&Delta;&theta;<sub>A</sub> (deg)</label><input type="number" id="rc_da" value="60" min="-360" max="360" step="5"></div>
+        </div>
+        <div class="statgrid">
+          <div class="stat"><span class="lab">arc length s</span><span class="val" id="rc_arc">&mdash;</span></div>
+          <div class="stat"><span class="lab">&Delta;&theta;<sub>B</sub> follower</span><span class="val" id="rc_db">&mdash;</span></div>
+          <div class="stat"><span class="lab">direction</span><span class="val" id="rc_dir">&mdash;</span></div>
+        </div>
+        <div class="work" id="rc_work" aria-live="polite">&mdash;</div>
+        <p class="note" id="rc_note" style="margin-bottom:0">External gears reverse direction; internal (ring) contact keeps it.</p>
+      </div>
+    </div>
+  </div>
+  <div class="analogy"><span class="h">Analogy &mdash; tape measures meeting</span><p>Imagine a tape measure glued to the rim of each body, unrolling from the contact point. No slip means the two tapes always read the same length, <var>s</var> = &rho;<sub>A</sub>|&Delta;&theta;<sub>A</sub>| = &rho;<sub>B</sub>|&Delta;&theta;<sub>B</sub>|. The bigger wheel needs fewer degrees to lay down the same tape &mdash; that is the gear ratio, right there in front of you.</p></div>
+</section>
+
+<!-- ============ GROUP 1 : rolling-contact mechanisms ============ -->
+<section id="grp-1" aria-labelledby="g1-h">
+  <span class="sec-tag">Type 1 &mdash; rolling contact inside a linkage</span>
+  <h2 id="g1-h">Group 1 &mdash; mechanisms with a rolling contact</h2>
+  <p>Start where Chapter 2 left off: a real linkage with pins and a slider, but now one joint is a rolling contact. You still write a vector loop &mdash; you just add <strong>one rolling-contact equation</strong> (and sometimes a geometric constraint) before counting. Watch the &plusmn; sign decide everything.</p>
+
+  <!-- 3.1 five-bar external rolling -->
+  <article class="example" id="ex-3-1">
+    <div class="ex-head"><span class="ex-badge">Example 3.1</span><h3>A five-bar mechanism with external rolling contact</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Figure 3.9 shows a five-bar mechanism in which coupler body 4 has a rolling contact with the ground. Link 5, the &ldquo;arm,&rdquo; is needed in practice to keep 4 touching 1. Derive the position equations and deduce the degrees of freedom.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_1" class="stage" viewBox="0 0 360 300" role="img" aria-label="A five-bar mechanism: crank 2 and coupler 3 reach from a right ground pin to body 4, a disk that rolls along the outside of a fixed ground arc. Arm 5 runs from the ground arc center to the disk center."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_1">&#9654; Play</button><span class="drv" id="drv_st_3_1">arm 5 sweeps; disk 4 rolls on ground</span></div>
+          <p class="stage-cap">Body 4 (disk &rho;<sub>4</sub>) rolls externally on the ground arc &rho;<sub>1</sub>; arm 5 carries the contact.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Vector loop</h5><p>Five bodies, one loop. Assign one vector per link and close the loop crank&rarr;coupler&rarr;disk&rarr;arm&rarr;ground:</p><div class="mini-eq">r&#772;<sub>2</sub> + r&#772;<sub>3</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>5</sub> + r&#772;<sub>1</sub> = 0&#772;</div></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Scalar components (&theta;<sub>1</sub>=0)</h5><div class="mini-eq">r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>5</sub>cos&theta;<sub>5</sub> + r<sub>1</sub> = 0</div><div class="mini-eq">r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>3</sub>sin&theta;<sub>3</sub> &minus; r<sub>4</sub>sin&theta;<sub>4</sub> &minus; r<sub>5</sub>sin&theta;<sub>5</sub> = 0</div><p>Equations (3.11) and (3.12) &mdash; two position equations, but more unknowns than equations. The rolling contact supplies the missing one.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Rolling-contact equation</h5><p>Body 4 rolls <strong>externally</strong> on body 1; the arm is body 5. External rolling is Eq. (3.1) &mdash; the minus sign:</p><div class="mini-eq">&rho;<sub>4</sub> &Delta;&theta;<sub>4/5</sub> = &minus;&rho;<sub>1</sub> &Delta;&theta;<sub>1/5</sub></div><p>i.e. &rho;<sub>4</sub>(&Delta;&theta;<sub>4</sub> &minus; &Delta;&theta;<sub>5</sub>) = &minus;&rho;<sub>1</sub>(&Delta;&theta;<sub>1</sub> &minus; &Delta;&theta;<sub>5</sub>).</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Ground fixed, add assembly config</h5><p>Body 1 is fixed, so &Delta;&theta;<sub>1</sub> = 0 and the contact equation simplifies to &rho;<sub>4</sub>(&Delta;&theta;<sub>4</sub> &minus; &Delta;&theta;<sub>5</sub>) = &rho;<sub>1</sub>&Delta;&theta;<sub>5</sub>. Replacing each &Delta;&theta; by (&theta; &minus; &theta;<sub>i</sub>) gives the third position equation:</p><div class="mini-eq">&rho;<sub>4</sub>(&theta;<sub>4</sub> &minus; &theta;<sub>4i</sub>) &minus; (&rho;<sub>1</sub>+&rho;<sub>4</sub>)(&theta;<sub>5</sub> &minus; &theta;<sub>5i</sub>) = 0</div><p>Equation (3.13).</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Count</h5><div class="knowns-row"><span class="kchip known">known r<sub>1</sub>, &theta;<sub>1</sub>=0, r<sub>2</sub>, r<sub>3</sub>, r<sub>4</sub>, r<sub>5</sub>, &rho;<sub>1</sub>, &rho;<sub>4</sub>, &theta;<sub>4i</sub>, &theta;<sub>5i</sub></span><span class="kchip unknown">unknown &theta;<sub>2</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub>, &theta;<sub>5</sub></span></div><p>Three position equations &mdash; (3.11), (3.12), (3.13) &mdash; in four unknowns. Predict the DOF before revealing.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">4 unknowns &minus; 3 equations = <strong>1 DOF</strong></div>
+              <p>One input runs the whole device. Notice the rolling radii &rho;<sub>1</sub>, &rho;<sub>4</sub> and the assembly angles &theta;<sub>4i</sub>, &theta;<sub>5i</sub> are <em>knowns</em> &mdash; they enter the equations alongside the link lengths. Gruebler agrees only once link 5 and the rolling contact are accounted for. <span class="dof-pill">F = 1 &middot; one input</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a pizza cutter on the counter</span><p>Roll a pizza cutter along the edge of the counter. Your hand is the arm; the wheel is body 4; the counter edge is the ground. The wheel&rsquo;s spin is locked to how far your hand travels &mdash; you cannot turn the wheel independently. That lock is the rolling-contact equation, and it is why the device has just one degree of freedom even though it looks like it has more parts than a four-bar.</p></div>
+      <div class="realworld"><span class="h">Where you see rolling contacts in a linkage</span><p>Cam-and-roller followers, friction-drive turntables, rolling-cam clamps, and traction-drive CVTs all bury a rolling contact inside a linkage. The arm-plus-rolling-disk pattern here is the same one used in planetary gearsets &mdash; a planet on a carrier rolling on a sun &mdash; which is exactly where this chapter is heading.</p></div>
+    </div>
+  </article>
+
+  <!-- 3.2 internal rolling + slide -->
+  <article class="example" id="ex-3-2">
+    <div class="ex-head"><span class="ex-badge">Example 3.2</span><h3>A four-link mechanism: a slide plus an internal rolling contact</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Figure 3.11 shows a &ldquo;somewhat strange&rdquo; four-link mechanism. Body 3 slides in and out of body 4, and body 4 rolls on body 1 &mdash; this time on the <em>inside</em>. Derive the position equations and deduce the degrees of freedom.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_2" class="stage" viewBox="0 0 360 300" role="img" aria-label="A four-link mechanism: crank 2 drives link 3, which slides inside body 4. Body 4 is a disk that rolls along the inside of a fixed ground ring. Arm 5 runs from the ring center to the disk center."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_2">&#9654; Play</button><span class="drv" id="drv_st_3_2">disk 4 rolls inside ring 1; link 3 slides</span></div>
+          <p class="stage-cap">Body 4 rolls <em>internally</em> inside the ground ring &rho;<sub>1</sub>; body 3 slides within body 4 (r&#772;<sub>3</sub> &perp; r&#772;<sub>4</sub>).</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Vector loop</h5><div class="mini-eq">r&#772;<sub>2</sub> + r&#772;<sub>3</sub> + r&#772;<sub>4</sub> &minus; r&#772;<sub>5</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</div><p>r&#772;<sub>5</sub> is the arm from the ring center to the disk center; r&#772;<sub>3</sub> is the variable-length slide inside body 4.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Scalar components (&theta;<sub>1</sub>=0)</h5><div class="mini-eq">r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> + r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>5</sub>cos&theta;<sub>5</sub> &minus; r<sub>1</sub> = 0</div><div class="mini-eq">r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>3</sub>sin&theta;<sub>3</sub> + r<sub>4</sub>sin&theta;<sub>4</sub> &minus; r<sub>5</sub>sin&theta;<sub>5</sub> = 0</div><p>Equations (3.14) and (3.15).</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Geometric constraint</h5><p>Because body 3 slides <em>inside</em> body 4, the slide direction r&#772;<sub>3</sub> is perpendicular to r&#772;<sub>4</sub> &mdash; a rigid-body angle lock:</p><div class="mini-eq">&theta;<sub>4</sub> &minus; &theta;<sub>3</sub> + &pi;/2 = 0</div><p>Equation (3.16) &mdash; one extra equation that costs no new unknown.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Internal rolling contact</h5><p>Body 4 rolls <strong>internally</strong> on body 1; arm is body 5. Internal rolling is Eq. (3.5) &mdash; the <em>plus</em> sign:</p><div class="mini-eq">&rho;<sub>4</sub> &Delta;&theta;<sub>4/5</sub> = +&rho;<sub>1</sub> &Delta;&theta;<sub>1/5</sub></div><p>With &Delta;&theta;<sub>1</sub> = 0 and the assembly configuration, the homogeneous form is</p><div class="mini-eq">&rho;<sub>4</sub>(&theta;<sub>4</sub> &minus; &theta;<sub>4i</sub>) + (&rho;<sub>1</sub> &minus; &rho;<sub>4</sub>)(&theta;<sub>5</sub> &minus; &theta;<sub>5i</sub>) = 0</div><p>Equation (3.17). Compare the sign with (3.13): internal contact flips it.</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Count</h5><div class="knowns-row"><span class="kchip known">known r<sub>1</sub>, &theta;<sub>1</sub>=0, r<sub>2</sub>, r<sub>4</sub>, r<sub>5</sub>, &rho;<sub>1</sub>, &rho;<sub>4</sub>, &theta;<sub>4i</sub>, &theta;<sub>5i</sub></span><span class="kchip unknown">unknown &theta;<sub>2</sub>, r<sub>3</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub>, &theta;<sub>5</sub></span></div><p>Four equations &mdash; (3.14)&ndash;(3.17) &mdash; in five unknowns (note r<sub>3</sub>, a <em>length</em>, is unknown). Predict the DOF.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">5 unknowns &minus; 4 equations = <strong>1 DOF</strong></div>
+              <p>The slide adds an unknown <em>length</em> r<sub>3</sub> but the perpendicularity constraint (3.16) adds an equation to match it, and the internal rolling contact (3.17) closes the count. One input still runs the device. The only difference from 3.1 is the sign on the rolling term &mdash; internal vs. external. <span class="dof-pill">F = 1 &middot; one input</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a coin rolling inside a ring</span><p>Spin a coin so it rolls around the inside of a jar lid. The coin and the lid turn the <em>same</em> way at the point they touch &mdash; that is internal rolling, the plus sign. Roll the same coin around the <em>outside</em> of a second coin and they turn opposite ways. Same arc length, opposite sign: that one switch is the whole difference between Examples 3.1 and 3.2.</p></div>
+      <div class="realworld"><span class="h">Where internal rolling shows up</span><p>Internal (ring) contact is the heart of ring gears in planetary transmissions, cycloidal speed reducers used in robot joints, and Wankel rotary engines, where a triangular rotor rolls inside a housing. Internal meshes are prized because they share load over more teeth and don&rsquo;t reverse direction.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ GROUP 2 : simple geartrains ============ -->
+<section id="grp-2" aria-labelledby="g2-h">
+  <span class="sec-tag">Type 2 &mdash; fixed-axis geartrains</span>
+  <h2 id="g2-h">Group 2 &mdash; simple, idler, and compound geartrains</h2>
+  <p>Now every gear spins on a stationary shaft, so the arm is ground and the vector loop says nothing. <strong>Only the rolling-contact equations carry information.</strong> Three examples build the whole fixed-axis story: a single pair, the effect of an idler, and how a compound gear multiplies ratios.</p>
+
+  <!-- 3.3 simple pair -->
+  <article class="example" id="ex-3-3">
+    <div class="ex-head"><span class="ex-badge">Example 3.3</span><h3>A single-stage simple geartrain</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">In the single-stage simple geartrain of Figure 3.13, gear 2 is the input and gear 3 is the output. Derive the position equations, deduce the degrees of freedom, and compute the gear ratio.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_3" class="stage" viewBox="0 0 360 300" role="img" aria-label="Two external spur gears in mesh: input gear 2 on the right turns one way, output gear 3 on the left turns the opposite way."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_3">&#9654; Play</button><span class="drv" id="drv_st_3_3">gear 2 drives gear 3 the opposite way</span></div>
+          <p class="stage-cap">External mesh: input and output rotate in <em>opposite</em> directions &mdash; a negative ratio.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; The loop is meaningless</h5><p>A geartrain&rsquo;s only vector runs between the two fixed centers, so the loop equation reduces to r&#772;<sub>1</sub> &minus; r&#772;<sub>1</sub> = 0&#772; &mdash; no information. From here on, geartrains are analyzed entirely with <strong>rolling-contact equations</strong>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Rolling-contact equation</h5><p>The contact is external, so Equation (3.1) with the arm being the fixed ground 1:</p><div class="mini-eq">&rho;<sub>3</sub> &Delta;&theta;<sub>3/1</sub> = &minus;&rho;<sub>2</sub> &Delta;&theta;<sub>2/1</sub></div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Ground fixed + assembly</h5><p>Body 1 fixed &rArr; &Delta;&theta;<sub>1</sub> = 0, giving &rho;<sub>3</sub>&Delta;&theta;<sub>3</sub> + &rho;<sub>2</sub>&Delta;&theta;<sub>2</sub> = 0 (Eq. 3.25). With the assembly configuration:</p><div class="mini-eq">&rho;<sub>3</sub>(&theta;<sub>3</sub> &minus; &theta;<sub>3i</sub>) + &rho;<sub>2</sub>(&theta;<sub>2</sub> &minus; &theta;<sub>2i</sub>) = 0</div></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Count</h5><div class="knowns-row"><span class="kchip known">known &rho;<sub>2</sub>, &rho;<sub>3</sub>, &theta;<sub>2i</sub>, &theta;<sub>3i</sub></span><span class="kchip unknown">unknown &theta;<sub>2</sub>, &theta;<sub>3</sub></span></div><p>One position equation, two unknowns. Predict the DOF and the ratio&rsquo;s sign.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1, R = &minus;&rho;<sub>3</sub>/&rho;<sub>2</sub></span>
+              <div class="big-eq">R = &Delta;&theta;<sub>2</sub>/&Delta;&theta;<sub>3</sub> = &minus;&rho;<sub>3</sub>/&rho;<sub>2</sub> = &minus;N<sub>3</sub>/N<sub>2</sub></div>
+              <p>2 unknowns &minus; 1 equation = <strong>1 DOF</strong> (Eq. 3.26). The ratio is <em>negative</em>: an external pair reverses direction, so &Delta;&theta;<sub>2</sub> and &Delta;&theta;<sub>3</sub> oppose. Because power is conserved, the driving and load torques then point the <em>same</em> way. <span class="ratio-pill">R = &minus;N<sub>3</sub>/N<sub>2</sub></span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; two interlocked bicycle wheels</span><p>Press two bike wheels together rim-to-rim and spin one. The other spins backwards, and a smaller wheel whips around faster than a big one. Speed ratio is just size ratio &mdash; and because the rims must travel together, the small one always loses the &ldquo;turns&rdquo; race in exact proportion to its radius.</p></div>
+      <div class="realworld"><span class="h">Where you see a single pair</span><p>A hand-crank pencil sharpener, a manual egg-beater, and the pinion-and-ring-gear final drive of a rear-wheel-drive car are single external pairs. The direction reversal matters: it&rsquo;s why a car&rsquo;s ring gear and pinion are arranged to send the driveshaft&rsquo;s spin the correct way to the wheels.</p></div>
+    </div>
+  </article>
+
+  <!-- 3.4 idler -->
+  <article class="example" id="ex-3-4">
+    <div class="ex-head"><span class="ex-badge">Example 3.4</span><h3>A geartrain with an idler gear</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">A two-stage simple geartrain is shown in Figure 3.15. The input is gear 2 and the output is gear 3, with gear 4 between them. Determine the position equations, the degrees of freedom, and the gear ratio.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_4" class="stage" viewBox="0 0 360 300" role="img" aria-label="Three spur gears in a row: input gear 2 on the right, idler gear 4 in the middle, output gear 3 on the left. The idler makes input and output turn the same direction."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_4">&#9654; Play</button><span class="drv" id="drv_st_3_4">idler 4 makes 2 and 3 turn the same way</span></div>
+          <p class="stage-cap">Two external meshes in series &mdash; the idler flips direction twice, so input and output agree.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Two rolling contacts</h5><p>Both meshes are external, both on fixed shafts (Eq. 3.1, arm fixed):</p><div class="mini-eq">&rho;<sub>3</sub>&Delta;&theta;<sub>3</sub> = &minus;&rho;<sub>4</sub>&Delta;&theta;<sub>4</sub> &nbsp;&nbsp; and &nbsp;&nbsp; &rho;<sub>4</sub>&Delta;&theta;<sub>4</sub> = &minus;&rho;<sub>2</sub>&Delta;&theta;<sub>2</sub></div><p>Equation (3.27).</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Position equations</h5><div class="mini-eq">&rho;<sub>3</sub>(&theta;<sub>3</sub>&minus;&theta;<sub>3i</sub>) + &rho;<sub>4</sub>(&theta;<sub>4</sub>&minus;&theta;<sub>4i</sub>) = 0</div><div class="mini-eq">&rho;<sub>4</sub>(&theta;<sub>4</sub>&minus;&theta;<sub>4i</sub>) + &rho;<sub>2</sub>(&theta;<sub>2</sub>&minus;&theta;<sub>2i</sub>) = 0</div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Count</h5><div class="knowns-row"><span class="kchip known">known &rho;<sub>2</sub>, &rho;<sub>3</sub>, &rho;<sub>4</sub>, &theta;<sub>2i</sub>, &theta;<sub>3i</sub>, &theta;<sub>4i</sub></span><span class="kchip unknown">unknown &theta;<sub>2</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub></span></div><p>Two equations, three unknowns &rarr; one degree of freedom.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Eliminate the idler</h5><p>Eliminate &Delta;&theta;<sub>4</sub> between the two equations of (3.27):</p><div class="mini-eq">&rho;<sub>3</sub>&Delta;&theta;<sub>3</sub> = &rho;<sub>2</sub>&Delta;&theta;<sub>2</sub></div><p>Equation (3.28). The idler radius &rho;<sub>4</sub> has cancelled completely.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1, R = +&rho;<sub>3</sub>/&rho;<sub>2</sub></span>
+              <div class="big-eq">R = &Delta;&theta;<sub>2</sub>/&Delta;&theta;<sub>3</sub> = &rho;<sub>3</sub>/&rho;<sub>2</sub> = N<sub>3</sub>/N<sub>2</sub></div>
+              <p>Comparing with Example 3.3, the idler gear 4 changes only the <em>sign</em> of the ratio &mdash; it makes input and output turn the <em>same</em> way (Eq. 3.29). Its radius and tooth count have <strong>no effect on the magnitude</strong>. That is the entire job of an idler. <span class="ratio-pill">R = +N<sub>3</sub>/N<sub>2</sub></span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; passing a bucket down a line</span><p>An idler is the person in the middle of a bucket brigade. They don&rsquo;t change how much water arrives &mdash; only which hand it comes from. Add one middle person and the bucket arrives on the other side facing the same way; the line&rsquo;s &ldquo;throughput&rdquo; (the ratio) is untouched.</p></div>
+      <div class="realworld"><span class="h">Where idlers earn their keep</span><p>Timing-gear trains in engines use idlers to bridge a long center distance and to set rotation sense without changing speed. A reverse-gear idler in a manual transmission is the classic case: slide an extra gear into the train and the output spins backward &mdash; same magnitude, flipped sign &mdash; and the car backs up.</p></div>
+    </div>
+  </article>
+
+  <!-- 3.5 compound -->
+  <article class="example" id="ex-3-5">
+    <div class="ex-head"><span class="ex-badge">Example 3.5</span><h3>A compound geartrain with two stages of reduction</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Derive the position equations and the degrees of freedom for the simple geartrain with two stages of reduction in Figure 3.17. Determine the gear ratio if gear 2 is the input and gear 3 is the output.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_5" class="stage" viewBox="0 0 360 300" role="img" aria-label="A compound geartrain: input gear 2 meshes the large gear 4 of a compound gear, whose small gear 5 on the same shaft meshes output gear 3, producing two stages of reduction."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_5">&#9654; Play</button><span class="drv" id="drv_st_3_5">gears 4 and 5 share a shaft (compound)</span></div>
+          <p class="stage-cap">Gears 4 &amp; 5 are rigid on one shaft (compound 45). Each stage reduces &mdash; the ratios multiply.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; The compound gear</h5><p>Gears 4 and 5 are bolted to the same intermediate shaft, so they share one angle &mdash; call the pair body 45. Two external meshes feed it (Eq. 3.1, arm fixed): 2 drives 4, and 5 drives 3.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Two rolling contacts</h5><div class="mini-eq">&rho;<sub>2</sub>&Delta;&theta;<sub>2</sub> = &minus;&rho;<sub>4</sub>&Delta;&theta;<sub>45</sub></div><div class="mini-eq">&rho;<sub>3</sub>&Delta;&theta;<sub>3</sub> = &minus;&rho;<sub>5</sub>&Delta;&theta;<sub>45</sub></div><p>Equation (3.30).</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Position equations + count</h5><div class="mini-eq">&rho;<sub>2</sub>(&theta;<sub>2</sub>&minus;&theta;<sub>2i</sub>) + &rho;<sub>4</sub>(&theta;<sub>45</sub>&minus;&theta;<sub>45i</sub>) = 0 &nbsp;(3.31)</div><div class="mini-eq">&rho;<sub>3</sub>(&theta;<sub>3</sub>&minus;&theta;<sub>3i</sub>) + &rho;<sub>5</sub>(&theta;<sub>45</sub>&minus;&theta;<sub>45i</sub>) = 0 &nbsp;(3.32)</div><div class="knowns-row"><span class="kchip known">known &rho;<sub>2</sub>, &rho;<sub>3</sub>, &rho;<sub>4</sub>, &rho;<sub>5</sub>, &theta;<sub>2i</sub>, &theta;<sub>3i</sub>, &theta;<sub>45i</sub></span><span class="kchip unknown">unknown &theta;<sub>2</sub>, &theta;<sub>3</sub>, &theta;<sub>45</sub></span></div><p>Two equations, three unknowns &rarr; F = 1.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Eliminate the compound shaft</h5><p>Eliminate &Delta;&theta;<sub>45</sub> between (3.30). Unlike the idler, &rho;<sub>4</sub> and &rho;<sub>5</sub> are <em>different</em>, so they do <strong>not</strong> cancel &mdash; they multiply into the ratio:</p><div class="mini-eq">R = &Delta;&theta;<sub>2</sub>/&Delta;&theta;<sub>3</sub> = (&rho;<sub>3</sub>&rho;<sub>4</sub>)/(&rho;<sub>2</sub>&rho;<sub>5</sub>)</div></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1, R = (N<sub>3</sub>N<sub>4</sub>)/(N<sub>2</sub>N<sub>5</sub>)</span>
+              <div class="big-eq">R = (&rho;<sub>3</sub>&rho;<sub>4</sub>)/(&rho;<sub>2</sub>&rho;<sub>5</sub>) = (N<sub>3</sub>N<sub>4</sub>)/(N<sub>2</sub>N<sub>5</sub>)</div>
+              <p>Equation (3.33). Two external meshes flip the sign twice, so R &gt; 0 &mdash; input and output agree. The product form is the payoff of a compound gear: stacking stages <em>multiplies</em> reductions, so large ratios fit in a small box. <span class="ratio-pill">R = N<sub>3</sub>N<sub>4</sub> / N<sub>2</sub>N<sub>5</sub></span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; gearing down a bicycle twice</span><p>One chainring-to-cog step gives you some reduction. Now imagine the rear cog were rigidly tied to a second, smaller chainring that drives a third gear &mdash; you&rsquo;d multiply the two reductions. That&rsquo;s a compound gear: the shared shaft passes the first stage&rsquo;s output straight into the second stage&rsquo;s input, and the ratios stack.</p></div>
+      <div class="realworld"><span class="h">Where compound trains live</span><p>Clocks (seconds&rarr;minutes&rarr;hours), the speed-reduction head of a cordless drill, kitchen-mixer drives, and the high-reduction gearboxes on conveyor motors are all compound trains. When a single pair would need an impractically huge gear, engineers split the reduction across compound stages.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ TOOL 3: GEAR-RATIO + SPEED/TORQUE CALC ============ -->
+<section id="gt-tool" aria-labelledby="gt-h">
+  <span class="sec-tag">Live tool 2 of 3</span>
+  <h2 id="gt-h">Gear-train ratio &amp; speed&ndash;torque calculator</h2>
+  <p>The companion to Examples 3.3&ndash;3.6. Enter each mesh as a driver/driven tooth pair, mark it external or internal, and the tool builds the signed train ratio R = &Delta;&theta;<sub>in</sub>/&Delta;&theta;<sub>out</sub>. Feed in a speed and a power (or torque) and it returns output speed, output torque, and direction &mdash; using the same power&ndash;torque conversion as Example 3.6.</p>
+
+  <div class="tool">
+    <span class="tool-h">Gear-train calculator</span>
+    <div class="solver-grid" style="margin-top:10px">
+      <div>
+        <h4 style="margin-top:0">Meshes (driver &rarr; driven)</h4>
+        <div id="gt_meshes">
+          <div class="mesh-row" data-mesh="1">
+            <span class="mlab">Mesh 1</span>
+            <label class="chkline"><input type="checkbox" id="gt_a1" checked> on</label>
+            <div class="field"><label for="gt_d1">driver N</label><input type="number" id="gt_d1" value="18" min="6" max="200" step="1"></div>
+            <div class="field"><label for="gt_n1">driven N</label><input type="number" id="gt_n1" value="54" min="6" max="200" step="1"></div>
+            <div class="seg" role="group" aria-label="Mesh 1 type"><button type="button" id="gt_e1" aria-pressed="true">ext &minus;</button><button type="button" id="gt_i1" aria-pressed="false">int +</button></div>
+          </div>
+          <div class="mesh-row" data-mesh="2">
+            <span class="mlab">Mesh 2</span>
+            <label class="chkline"><input type="checkbox" id="gt_a2"> on</label>
+            <div class="field"><label for="gt_d2">driver N</label><input type="number" id="gt_d2" value="20" min="6" max="200" step="1"></div>
+            <div class="field"><label for="gt_n2">driven N</label><input type="number" id="gt_n2" value="40" min="6" max="200" step="1"></div>
+            <div class="seg" role="group" aria-label="Mesh 2 type"><button type="button" id="gt_e2" aria-pressed="true">ext &minus;</button><button type="button" id="gt_i2" aria-pressed="false">int +</button></div>
+          </div>
+          <div class="mesh-row" data-mesh="3">
+            <span class="mlab">Mesh 3</span>
+            <label class="chkline"><input type="checkbox" id="gt_a3"> on</label>
+            <div class="field"><label for="gt_d3">driver N</label><input type="number" id="gt_d3" value="16" min="6" max="200" step="1"></div>
+            <div class="field"><label for="gt_n3">driven N</label><input type="number" id="gt_n3" value="48" min="6" max="200" step="1"></div>
+            <div class="seg" role="group" aria-label="Mesh 3 type"><button type="button" id="gt_e3" aria-pressed="true">ext &minus;</button><button type="button" id="gt_i3" aria-pressed="false">int +</button></div>
+          </div>
+          <div class="mesh-row" data-mesh="4">
+            <span class="mlab">Mesh 4</span>
+            <label class="chkline"><input type="checkbox" id="gt_a4"> on</label>
+            <div class="field"><label for="gt_d4">driver N</label><input type="number" id="gt_d4" value="16" min="6" max="200" step="1"></div>
+            <div class="field"><label for="gt_n4">driven N</label><input type="number" id="gt_n4" value="32" min="6" max="200" step="1"></div>
+            <div class="seg" role="group" aria-label="Mesh 4 type"><button type="button" id="gt_e4" aria-pressed="true">ext &minus;</button><button type="button" id="gt_i4" aria-pressed="false">int +</button></div>
+          </div>
+        </div>
+        <div class="field-row" style="margin-top:12px">
+          <div class="field"><label for="gt_nin">input speed (rpm)</label><input type="number" id="gt_nin" value="2000" min="0" step="50"></div>
+          <div class="field"><label for="gt_pow">input power (hp)</label><input type="number" id="gt_pow" value="40" min="0" step="1"></div>
+        </div>
+        <div class="play-row" style="margin-top:4px">
+          <button type="button" class="btn ghost sm" data-gtpreset="ext:18,54">Ex 3.3 simple pair</button>
+          <button type="button" class="btn ghost sm" data-gtpreset="ext:18,30;ext:30,54">Ex 3.4 with idler</button>
+          <button type="button" class="btn ghost sm" data-gtpreset="ext:18,54;ext:16,48">Ex 3.5 compound</button>
+        </div>
+      </div>
+      <div>
+        <div class="statgrid">
+          <div class="stat"><span class="lab">signed ratio R</span><span class="val" id="gt_R">&mdash;</span></div>
+          <div class="stat"><span class="lab">direction</span><span class="val" id="gt_dir">&mdash;</span></div>
+          <div class="stat"><span class="lab">output speed</span><span class="val" id="gt_nout">&mdash;</span></div>
+          <div class="stat"><span class="lab">input torque</span><span class="val" id="gt_Tin">&mdash;</span></div>
+          <div class="stat"><span class="lab">output torque</span><span class="val" id="gt_Tout">&mdash;</span></div>
+        </div>
+        <div class="work" id="gt_work" aria-live="polite">&mdash;</div>
+        <p class="note" style="margin-bottom:0">R = &prod;(N<sub>driven</sub>/N<sub>driver</sub>), one sign flip per external mesh. Speed: n<sub>out</sub> = n<sub>in</sub>/|R|. Torque (ideal, lossless): T = 5252&middot;hp/rpm, T<sub>out</sub> = &minus;R&middot;T<sub>in</sub>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="realworld"><span class="h">Reading a real gearbox spec</span><p>Catalog ratios like &ldquo;3.08:1&rdquo; are the magnitude |R| &mdash; this tool also tells you the missing two facts the catalog hides: which way the output turns and how much torque you actually gained. Try the Ex 3.6 numbers (next section) to recover the 1st-gear ratio and output torque of a manual transmission.</p></div>
+</section>
+
+<!-- ============ GROUP 3 : power & torque, a real transmission ============ -->
+<section id="grp-3" aria-labelledby="g3-h">
+  <span class="sec-tag">Type 3 &mdash; from ratio to torque</span>
+  <h2 id="g3-h">Group 3 &mdash; power, torque, and a real transmission</h2>
+  <p>A gear ratio is only half a design. The other half is what it does to torque. Example 3.6 takes a real manual-transmission gear set, finds its ratio from tooth counts, then converts horsepower and rpm into an output torque &mdash; units and all.</p>
+
+  <!-- 3.6 manual transmission 1st gear -->
+  <article class="example" id="ex-3-6">
+    <div class="ex-head"><span class="ex-badge">Example 3.6</span><h3>First gear of a manual transmission</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Calculate the gear ratio for 1st gear in the manual transmission of Figure 3.19. If the input is 230 hp at 2000 rpm, calculate the transmission&rsquo;s output torque.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_6" class="stage" viewBox="0 0 360 300" role="img" aria-label="Schematic of a manual transmission in first gear: input gear 4 drives the large gear of a compound countershaft cluster, whose small gear drives output gear 1 selected by the shift collar; a two-stage reduction."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_6">&#9654; Play</button><span class="drv" id="drv_st_3_6">input 4 &rarr; countershaft 56789 &rarr; output 1</span></div>
+          <p class="stage-cap">1st gear: input gear 4 and output gear 1 both route through the compound countershaft cluster 56789.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; What 1st gear engages</h5><p>The shift selector 11 engages gear 1, so the output shaft turns with gear 1 (&Delta;&theta;<sub>out</sub> = &Delta;&theta;<sub>1</sub>) and the input shaft drives gear 4 (&Delta;&theta;<sub>in</sub> = &Delta;&theta;<sub>4</sub>). Power flows through the compound countershaft 56789 in two stages.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Stage 1 &mdash; gear 4 on gear 5</h5><p>Gear 4 rolls externally on gear 5 of the countershaft; arm is the fixed case 13 (Eq. 3.1):</p><div class="mini-eq">&rho;<sub>4</sub>&Delta;&theta;<sub>4</sub> = &minus;&rho;<sub>5</sub>&Delta;&theta;<sub>56789</sub></div><p>Equation (3.34).</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Stage 2 &mdash; gear 9 on gear 1</h5><p>Gear 1 rolls externally on gear 9 of the same countershaft; arm is the fixed case (Eq. 3.1):</p><div class="mini-eq">&rho;<sub>1</sub>&Delta;&theta;<sub>1</sub> = &minus;&rho;<sub>9</sub>&Delta;&theta;<sub>56789</sub></div><p>Equation (3.35).</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Eliminate the countershaft &rarr; ratio</h5><p>Eliminate &Delta;&theta;<sub>56789</sub> between (3.34) and (3.35) and swap radii for teeth:</p><div class="mini-eq">R = &Delta;&theta;<sub>4</sub>/&Delta;&theta;<sub>1</sub> = (&rho;<sub>5</sub>&rho;<sub>1</sub>)/(&rho;<sub>4</sub>&rho;<sub>9</sub>) = (N<sub>5</sub>N<sub>1</sub>)/(N<sub>4</sub>N<sub>9</sub>)</div><div class="mini-eq">= (36&middot;35)/(24&middot;17) = 3.088</div><p>Equation (3.36).</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Power &rarr; torque</h5><p>Power is torque times speed, so T<sub>in</sub> = P/&omega; = 230 hp / (2000 rev/min) = 0.115 hp&middot;min/rev &mdash; not yet a torque unit. Convert with 1 hp = 550 ft&middot;lbf/s:</p><div class="mini-eq">T<sub>in</sub> = 0.115 &middot; 550 &middot; 60 / (2&pi;) &asymp; 604 ft&middot;lbf</div><p>Then T<sub>out</sub> = &minus;R&middot;T<sub>in</sub> (Eq. 3.37).</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; R = 3.088, T<sub>out</sub> &asymp; &minus;1865 ft&middot;lbf</span>
+              <div class="big-eq">T<sub>out</sub> = &minus;3.088 &times; 604 ft&middot;lbf &asymp; &minus;1865 ft&middot;lbf</div>
+              <p>First gear multiplies torque about threefold &mdash; exactly why you start moving in 1st. The negative sign says the output torque points opposite the input torque (an even number of reversals would flip it back). Speed drops by the same factor: 2000 rpm &rarr; about 648 rpm at the output. <span class="ratio-pill">R = 3.088 &middot; torque &times;3.09</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a long wrench on a stubborn bolt</span><p>Gearing down is just choosing a longer wrench. You turn the handle many times (high input speed) to move the bolt a little (low output speed), but the bolt feels enormous torque. The 3.088 ratio is the wrench length; horsepower is how fast you can keep swinging.</p></div>
+      <div class="realworld"><span class="h">Why first gear exists</span><p>An engine makes useful power only in a narrow rpm band, but a car needs huge torque to launch from rest and high speed on the highway. The gearbox trades one for the other: 1st gear&rsquo;s big ratio gives tire-shredding torque to get moving; top gear&rsquo;s near-1:1 ratio gives speed. Plug 230&nbsp;hp, 2000&nbsp;rpm, and the four tooth counts into the calculator above to reproduce this exact result.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ GROUP 4 : planetary geartrains ============ -->
+<section id="grp-4" aria-labelledby="g4-h">
+  <span class="sec-tag">Type 4 &mdash; the arm moves</span>
+  <h2 id="g4-h">Group 4 &mdash; planetary (epicyclic) geartrains</h2>
+  <p>Mount a gear&rsquo;s shaft on a rotating <strong>carrier</strong> and the arm is no longer ground &mdash; you must keep the relative term &Delta;&theta;<sub>A/m</sub>. That single change unlocks the planetary set: huge ratios in a tiny, coaxial package. The trick to every planetary problem is to write the rolling contacts <em>relative to the arm</em>.</p>
+
+  <!-- 3.7 basic planetary -->
+  <article class="example" id="ex-3-7">
+    <div class="ex-head"><span class="ex-badge">Example 3.7</span><h3>A planetary geartrain with the ring fixed</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Calculate the gear ratio for the planetary geartrain of Figure 3.22 if the ring gear 4 is fixed, the arm 5 is the output, and the sun gear 2 is the input.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_7" class="stage" viewBox="0 0 360 300" role="img" aria-label="A planetary gearset: a central sun gear 2, three planet gears 3 on a rotating carrier (arm 5), all inside a fixed internal ring gear 4. The sun drives, the ring is held, the carrier turns slowly as output."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_7">&#9654; Play</button><span class="drv" id="drv_st_3_7">sun spins fast; carrier turns slow; ring fixed</span></div>
+          <p class="stage-cap">Sun 2 (input), planets 3 on carrier/arm 5 (output), ring 4 fixed. The carrier turns the same way as the sun.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Write contacts relative to the arm</h5><p>The planet 3 rides on the arm 5, so its rotation is measured relative to the arm. Sun&ndash;planet is external; planet&ndash;ring is internal. The two rolling-contact equations (3.38)&ndash;(3.39) use the relative angles &Delta;&theta;<sub>2/5</sub>, &Delta;&theta;<sub>3/5</sub>, &Delta;&theta;<sub>4/5</sub>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Eliminate the planet</h5><p>The planet 3 is just a coupler &mdash; eliminate &Delta;&theta;<sub>3/5</sub> between the two contact equations:</p><div class="mini-eq">&minus;&rho;<sub>2</sub>&Delta;&theta;<sub>2/5</sub> = &rho;<sub>4</sub>&Delta;&theta;<sub>4/5</sub></div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Hold the ring</h5><p>The ring is fixed, &Delta;&theta;<sub>4</sub> = 0, so &Delta;&theta;<sub>4/5</sub> = &minus;&Delta;&theta;<sub>5</sub>. Expanding &Delta;&theta;<sub>2/5</sub> = &Delta;&theta;<sub>2</sub> &minus; &Delta;&theta;<sub>5</sub>:</p><div class="mini-eq">&rho;<sub>2</sub>&Delta;&theta;<sub>2</sub> = (&rho;<sub>2</sub> + &rho;<sub>4</sub>)&Delta;&theta;<sub>5</sub></div></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Solve for the ratio</h5><div class="mini-eq">R = &Delta;&theta;<sub>2</sub>/&Delta;&theta;<sub>5</sub> = 1 + &rho;<sub>4</sub>/&rho;<sub>2</sub> = 1 + N<sub>4</sub>/N<sub>2</sub></div><p>The &ldquo;1 +&rdquo; is the signature of a planetary with the ring fixed &mdash; it comes from the arm carrying the planet around.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; R = 1 + N<sub>4</sub>/N<sub>2</sub> &asymp; 3.5</span>
+              <div class="big-eq">R = 1 + N<sub>4</sub>/N<sub>2</sub></div>
+              <p>Always <em>positive</em>: sun and carrier turn the same way, so the output torque opposes the input torque. With &rho;<sub>4</sub> &asymp; 2.5&rho;<sub>2</sub> from the figure, R &asymp; 3.5. A simple train giving the same ratio would be roughly three times larger &mdash; <strong>compactness is the whole reason planetaries exist</strong>. <span class="ratio-pill">R = 1 + N<sub>4</sub>/N<sub>2</sub></span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; walking on a moving walkway</span><p>The planet&rsquo;s true motion is its spin <em>plus</em> the ride it gets from the carrier &mdash; exactly like your speed over the ground is your walking speed plus the airport walkway carrying you. The &ldquo;relative to the arm&rdquo; trick just means: first measure how fast you&rsquo;re walking <em>on</em> the walkway, then add the walkway. Forget to add the walkway and every planetary calculation comes out wrong.</p></div>
+      <div class="realworld"><span class="h">Planetaries you touch every day</span><p>Cordless-drill gearheads, the hub gears in a 3-speed bicycle, automatic-transmission gearsets, wind-turbine and helicopter main gearboxes, and the reduction stage in most electric-vehicle drive units are planetary. Coaxial input and output plus load shared over several planets make them compact, balanced, and strong.</p></div>
+    </div>
+  </article>
+
+  <!-- 3.8 compound planet, Model T motivation -->
+  <article class="example" id="ex-3-8">
+    <div class="ex-head"><span class="ex-badge">Example 3.8</span><h3>A planetary with a compound planet &mdash; positive or negative ratio</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">The geartrain of Figure 3.23 has gears 2, the compound planet gear 34, and gear 5, plus arm 6. Element 5 is fixed; the input is the arm 6 (&Delta;&theta;<sub>in</sub> = &Delta;&theta;<sub>6</sub>) and the output is gear 2 (&Delta;&theta;<sub>out</sub> = &Delta;&theta;<sub>2</sub>). Determine the gear ratio.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_8" class="stage" viewBox="0 0 360 300" role="img" aria-label="A planetary gearset with a compound planet: gears 2 and 5 mesh with the two different gears 3 and 4 of a single compound planet carried on arm 6, with gear 5 held fixed."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_8">&#9654; Play</button><span class="drv" id="drv_st_3_8">arm 6 drives; compound planet 34; gear 5 fixed</span></div>
+          <p class="stage-cap">Compound planet 34 meshes both gear 2 and the fixed gear 5; the arm 6 carries it around.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Two contacts, arm is 6</h5><p>Gear 2 rolls externally with gear 3 (of compound 34); gear 5 rolls externally with gear 4 (of compound 34). Both relative to the moving arm 6 (Eq. 3.1):</p><div class="mini-eq">&rho;<sub>2</sub>&Delta;&theta;<sub>2/6</sub> = &minus;&rho;<sub>3</sub>&Delta;&theta;<sub>34/6</sub> &nbsp;(3.43)</div><div class="mini-eq">&rho;<sub>5</sub>&Delta;&theta;<sub>5/6</sub> = &minus;&rho;<sub>4</sub>&Delta;&theta;<sub>34/6</sub> &nbsp;(3.44)</div></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Eliminate the compound planet</h5><p>Divide to remove &Delta;&theta;<sub>34/6</sub>:</p><div class="mini-eq">(&rho;<sub>2</sub>/&rho;<sub>3</sub>)&Delta;&theta;<sub>2/6</sub> = (&rho;<sub>5</sub>/&rho;<sub>4</sub>)&Delta;&theta;<sub>5/6</sub></div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Hold gear 5, expand the arm terms</h5><p>Set &Delta;&theta;<sub>5</sub> = 0 and expand &Delta;&theta;<sub>2/6</sub> = &Delta;&theta;<sub>2</sub> &minus; &Delta;&theta;<sub>6</sub>:</p><div class="mini-eq">(&rho;<sub>2</sub>/&rho;<sub>3</sub>)(&Delta;&theta;<sub>2</sub> &minus; &Delta;&theta;<sub>6</sub>) = &minus;(&rho;<sub>5</sub>/&rho;<sub>4</sub>)&Delta;&theta;<sub>6</sub></div></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Solve for R</h5><div class="mini-eq">R = &Delta;&theta;<sub>6</sub>/&Delta;&theta;<sub>2</sub> = 1 / (1 &minus; (&rho;<sub>3</sub>&rho;<sub>5</sub>)/(&rho;<sub>2</sub>&rho;<sub>4</sub>)) = 1 / (1 &minus; N<sub>3</sub>N<sub>5</sub>/(N<sub>2</sub>N<sub>4</sub>))</div><p>Equation (3.45). Now look at what the tooth-number product does to the sign.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; R = 1/(1 &minus; N<sub>3</sub>N<sub>5</sub>/N<sub>2</sub>N<sub>4</sub>)</span>
+              <div class="big-eq">R = 1 / (1 &minus; N<sub>3</sub>N<sub>5</sub>/N<sub>2</sub>N<sub>4</sub>)</div>
+              <p>This one architecture can give a <strong>positive or negative</strong> ratio just by choosing tooth counts: if N<sub>3</sub>N<sub>5</sub>/N<sub>2</sub>N<sub>4</sub> &gt; 1 the ratio is negative (output reverses); if &lt; 1 it is positive and greater than one. For the Model T values this product exceeds 1, so R &lt; 0. That switchability may have motivated the first semiautomatic transmission, the Ford Model T. <span class="ratio-pill">sign set by N<sub>3</sub>N<sub>5</sub> vs N<sub>2</sub>N<sub>4</sub></span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; gearing that can change its mind</span><p>Most gear sets commit to a direction. A compound-planet set is like a seesaw balanced near its tipping point: nudge the tooth counts one way and the output spins forward; nudge them the other way and it spins backward. The denominator 1 &minus; (tooth product) is the seesaw &mdash; when it crosses zero, the sign flips and the ratio briefly becomes enormous.</p></div>
+      <div class="realworld"><span class="h">The Ford Model T planetary transmission</span><p>The Model T (1908&ndash;1927) used pedal-operated band brakes on a planetary gearset instead of a sliding-gear manual box &mdash; press a pedal, ground an element, get a gear. It was easy to drive precisely because compound-planet sets like this one let one gear cluster deliver low, reverse, and direct drive. Examples 3.9 and 3.10 work the brake-selected ratios directly.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ TOOL 2: PLANETARY RATIO SOLVER ============ -->
+<section id="pl-tool" aria-labelledby="pl-h">
+  <span class="sec-tag">Live tool 3 of 3</span>
+  <h2 id="pl-h">Planetary (epicyclic) ratio solver</h2>
+  <p>The companion to Examples 3.7&ndash;3.10. Set the sun and ring tooth counts (the planet count follows), choose which member is <em>fixed</em>, which is <em>input</em>, and which is <em>output</em>, and the tool solves the epicyclic speed balance &mdash; the Willis equation &mdash; for the ratio and direction, then animates it.</p>
+
+  <div class="tool">
+    <span class="tool-h">Planetary ratio solver &middot; Willis equation (&omega;<sub>s</sub>&minus;&omega;<sub>c</sub>) = &minus;(N<sub>r</sub>/N<sub>s</sub>)(&omega;<sub>r</sub>&minus;&omega;<sub>c</sub>)</span>
+    <div class="solver-grid" style="margin-top:10px">
+      <div>
+        <svg id="pl_svg" class="stage" viewBox="0 0 360 300" role="img" aria-label="An animated planetary gearset showing the sun gear, three planet gears on a carrier, and an outer ring gear, turning at the speeds the solver computes."></svg>
+        <div class="play-row"><button type="button" class="btn ghost sm" data-play="pl_svg">&#9654; Play</button><span class="drv" id="pl_drv">turning at the computed speeds</span></div>
+      </div>
+      <div>
+        <div class="field-row">
+          <div class="field"><label for="pl_ns">sun teeth N<sub>s</sub></label><input type="number" id="pl_ns" value="24" min="8" max="120" step="1"></div>
+          <div class="field"><label for="pl_nr">ring teeth N<sub>r</sub></label><input type="number" id="pl_nr" value="72" min="20" max="240" step="1"></div>
+          <div class="field"><label>planet teeth N<sub>p</sub></label><div class="readout" style="font-size:1.1rem"><span class="val" id="pl_np" style="font-family:var(--mono);font-weight:700;color:var(--accent-dk)">&mdash;</span></div></div>
+        </div>
+        <div class="selrow">
+          <label>fixed member<select id="pl_fixed"><option value="ring" selected>ring</option><option value="sun">sun</option><option value="carrier">carrier</option></select></label>
+          <label>input member<select id="pl_in"><option value="sun" selected>sun</option><option value="ring">ring</option><option value="carrier">carrier</option></select></label>
+          <label>output member<select id="pl_out"><option value="carrier" selected>carrier</option><option value="sun">sun</option><option value="ring">ring</option></select></label>
+        </div>
+        <div class="statgrid">
+          <div class="stat"><span class="lab">ratio R = in/out</span><span class="val" id="pl_R">&mdash;</span></div>
+          <div class="stat"><span class="lab">direction</span><span class="val" id="pl_dir">&mdash;</span></div>
+        </div>
+        <div class="work" id="pl_work" aria-live="polite">&mdash;</div>
+        <div class="play-row" style="margin-top:6px">
+          <button type="button" class="btn ghost sm" data-plpreset="ring,sun,carrier">Ex 3.7: ring fixed</button>
+          <button type="button" class="btn ghost sm" data-plpreset="carrier,sun,ring">carrier fixed (reverse)</button>
+          <button type="button" class="btn ghost sm" data-plpreset="sun,carrier,ring">sun fixed</button>
+        </div>
+        <p class="note" id="pl_note" style="margin-bottom:0">N<sub>p</sub> = (N<sub>r</sub> &minus; N<sub>s</sub>)/2 must be a whole number for the planets to fit. Ring fixed + sun in + carrier out reproduces R = 1 + N<sub>r</sub>/N<sub>s</sub> from Example 3.7.</p>
+      </div>
+    </div>
+  </div>
+  <div class="analogy"><span class="h">Analogy &mdash; the solar-system metaphor that names it</span><p>Sun at the center, planets orbiting on a carrier, an outer ring like the sky. Hold any one still and drive another, and the third responds &mdash; just as fixing the sky, spinning the sun, and watching the planets&rsquo; carrier drift is a different machine than fixing the carrier and spinning the sky. The Willis equation is the one rule that governs all three choices at once.</p></div>
+</section>
+
+<!-- ============ GROUP 5 : automatic & hybrid trains ============ -->
+<section id="grp-5" aria-labelledby="g5-h">
+  <span class="sec-tag">Type 5 &mdash; capstone</span>
+  <h2 id="g5-h">Group 5 &mdash; automatic transmissions and a hybrid train</h2>
+  <p>Everything comes together. Ground one element of a multi-element epicyclic with a <strong>band brake</strong> and you select a gear &mdash; the basis of an automatic transmission (3.9, 3.10). Then combine a fixed-axis stage and a planetary stage into one <strong>hybrid</strong> train and chase the ratio all the way to tooth numbers (3.11).</p>
+
+  <div class="callout"><span class="h">A note on these three</span><p>Examples 3.9 and 3.10 are real multi-element transmissions; the textbook&rsquo;s figures carry the full set of rolling-contact equations (3.46)&ndash;(3.48) and (3.51)&ndash;(3.54). We mirror the <em>solution structure</em> and the gear-selection idea, then state the final ratios the book derives. Example 3.11 is worked in full from its four contact equations. The schematics here are representative teaching diagrams.</p></div>
+
+  <!-- 3.9 Model T low gear -->
+  <article class="example" id="ex-3-9">
+    <div class="ex-head"><span class="ex-badge">Example 3.9</span><h3>Ford Model T &mdash; low-gear ratio by band brake</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Calculate the gear ratio for the low-gear operating mode of the Ford Model T semiautomatic transmission (Figure 3.24).</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_9" class="stage" viewBox="0 0 360 300" role="img" aria-label="A planetary transmission with a band brake wrapped around a drum. In low gear the band brake B-two clamps the drum that turns with element 7, holding it still so the rest of the train delivers a reduction."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_9">&#9654; Play</button><span class="drv" id="drv_st_3_9">band brake B&#8322; grounds element 7</span></div>
+          <p class="stage-cap">Low gear: clamping the band brake B<sub>2</sub> stops the drum on element 7 &mdash; that choice sets the ratio.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; The brake makes the choice</h5><p>A band brake is the gear selector. In low gear, brake B<sub>2</sub> is engaged, clamping the drum that rotates with element 7 so it cannot move:</p><div class="mini-eq">&Delta;&theta;<sub>7</sub> = 0</div><p>Equation (3.49). Grounding a different element would select a different gear &mdash; this is the heart of an automatic transmission.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Apply it to the train equations</h5><p>With the three rolling-contact equations (3.46)&ndash;(3.48) of this epicyclic, substitute &Delta;&theta;<sub>7</sub> = 0 into (3.47):</p><div class="mini-eq">&rho;<sub>4</sub>(&Delta;&theta;<sub>345</sub> &minus; &Delta;&theta;<sub>9</sub>) = &rho;<sub>7</sub>&Delta;&theta;<sub>9</sub></div><p>Equation (3.50).</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Eliminate and solve</h5><p>Eliminate the relative term between (3.46) and (3.50) to get R = &Delta;&theta;<sub>9</sub>/&Delta;&theta;<sub>6</sub>:</p><div class="mini-eq">R = 1 / (1 &minus; (&rho;<sub>3</sub>&rho;<sub>7</sub>)/(&rho;<sub>6</sub>&rho;<sub>4</sub>)) = 1 / (1 &minus; N<sub>3</sub>N<sub>7</sub>/(N<sub>6</sub>N<sub>4</sub>))</div></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Plug in the teeth</h5><p>Using the tooth numbers from Figure 3.24:</p><div class="mini-eq">R = 1 / (1 &minus; (27&middot;21)/(27&middot;33)) = 2.75</div></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; R = 2.75 in low gear</span>
+              <div class="big-eq">R = 1 / (1 &minus; N<sub>3</sub>N<sub>7</sub>/N<sub>6</sub>N<sub>4</sub>) = 2.75</div>
+              <p>In low gear the output torque is 2.75&times; the input torque and points the opposite way. Release B<sub>2</sub> and clamp a different brake and the active equation changes, giving high gear or reverse (Problem 3.21 asks for those; reverse comes out negative). <strong>Gear selection = which element you ground.</strong> <span class="ratio-pill">low gear R = 2.75</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; pinning one gear to change them all</span><p>Think of a lazy-Susan with three stacked trays. Pin any one tray to the table and spinning a second tray drives the third at a fixed ratio. Pin a <em>different</em> tray and the same hardware gives a new ratio. The band brake is the pin; the driver never has to slide gears in and out.</p></div>
+      <div class="realworld"><span class="h">From Model T pedals to modern automatics</span><p>The Model T driver pressed a pedal to clamp a band and get low gear &mdash; no clutch-and-stick choreography. Modern automatics do the same thing with hydraulically applied clutches and bands controlled by a computer, but the principle is unchanged: hold one element of an epicyclic and you have selected a gear.</p></div>
+    </div>
+  </article>
+
+  <!-- 3.10 automatic transmission low speed -->
+  <article class="example" id="ex-3-10">
+    <div class="ex-head"><span class="ex-badge">Example 3.10</span><h3>An automatic transmission &mdash; low-speed ratio</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Calculate the gear ratio for the low-speed condition of the automatic transmission in Figure 3.25.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_10" class="stage" viewBox="0 0 360 300" role="img" aria-label="A multi-element automatic-transmission gearset on coaxial shafts with two band brakes. In the low-speed condition band brake B-one grounds element 3 while the remaining elements deliver the reduction."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_10">&#9654; Play</button><span class="drv" id="drv_st_3_10">band brake B&#8321; grounds element 3</span></div>
+          <p class="stage-cap">Low speed: band brake B<sub>1</sub> grounds element 3; input is 6, output is the compound 58.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Select low speed</h5><p>From the transmission&rsquo;s control table, band brake B<sub>1</sub> is engaged in low gear, grounding element 3:</p><div class="mini-eq">&Delta;&theta;<sub>3</sub> = 0</div><p>Equation (3.55).</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; A 1-DOF system</h5><p>Equation (3.55) together with the four rolling-contact equations (3.51)&ndash;(3.54) is a system of <strong>five position equations in six unknowns</strong> &mdash; one degree of freedom, as a transmission must be.</p><div class="knowns-row"><span class="kchip known">known all &rho; (or N), assembly angles, &Delta;&theta;<sub>3</sub>=0</span><span class="kchip unknown">unknown &theta;<sub>4</sub>, &theta;<sub>58</sub>, &theta;<sub>6</sub>, &theta;<sub>7</sub>, &theta;<sub>9</sub>, &hellip;</span></div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Eliminate in two stages</h5><p>Eliminate the first planet&rsquo;s relative term from (3.51)&ndash;(3.52), enforce (3.55), and you reach &Delta;&theta;<sub>58</sub> = (1 + &rho;<sub>3</sub>/&rho;<sub>5</sub>)&Delta;&theta;<sub>9</sub> (Eqs. 3.56&ndash;3.57, 3.60). Repeat for the second planet (3.53)&ndash;(3.54) to get &Delta;&theta;<sub>6</sub> = (1 &minus; &rho;<sub>8</sub>&rho;<sub>3</sub>/&rho;<sub>6</sub>&rho;<sub>5</sub>)&Delta;&theta;<sub>9</sub> (Eqs. 3.58&ndash;3.59, 3.61).</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Form R = &Delta;&theta;<sub>58</sub>/&Delta;&theta;<sub>6</sub></h5><div class="mini-eq">R = (1 + &rho;<sub>3</sub>/&rho;<sub>5</sub>) / (1 &minus; &rho;<sub>8</sub>&rho;<sub>3</sub>/(&rho;<sub>6</sub>&rho;<sub>5</sub>)) = (1 + N<sub>3</sub>/N<sub>5</sub>) / (1 &minus; N<sub>8</sub>N<sub>3</sub>/(N<sub>6</sub>N<sub>5</sub>))</div></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; R = 1.72 in low speed</span>
+              <div class="big-eq">R = (1 + N<sub>3</sub>/N<sub>5</sub>) / (1 &minus; N<sub>8</sub>N<sub>3</sub>/N<sub>6</sub>N<sub>5</sub>) = 1.72</div>
+              <p>The shared &ldquo;1 &plusmn;&rdquo; structure of two planetary stages produces a moderate 1.72:1 reduction. Engage a different brake and a different element grounds, giving a higher or direct ratio from the same hardware. This is exactly how a multi-speed automatic realizes several ratios with no sliding gears. <span class="ratio-pill">low speed R = 1.72</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a control panel of brakes</span><p>Picture a mixing board where each slider grounds one gear element. Push slider B<sub>1</sub> and the machine sings &ldquo;low gear&rdquo;; push a different slider and it sings &ldquo;direct.&rdquo; The gears never move &mdash; only which one is held fast changes &mdash; and that is why an automatic can shift smoothly under power.</p></div>
+      <div class="realworld"><span class="h">Inside every torque-converter automatic</span><p>Classic automatics (the GM Hydra-Matic lineage and countless others) stack two or three planetary sets and apply clutches and bands in patterns to get 3, 4, 6, even 10 speeds. The control logic is a table of which elements to ground; the kinematics of each row is exactly the calculation you just did.</p></div>
+    </div>
+  </article>
+
+  <!-- 3.11 hybrid geartrain -->
+  <article class="example" id="ex-3-11">
+    <div class="ex-head"><span class="ex-badge">Example 3.11</span><h3>A hybrid geartrain &mdash; simple stage coupled to a planetary stage</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">In the geartrain of Figure 3.28 the input is the shaft on the left and the output is the shaft on the right. Assuming the tooth count on each gear is known, derive an expression for the gear ratio in terms of tooth numbers.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_3_11" class="stage" viewBox="0 0 360 300" role="img" aria-label="A hybrid geartrain: on the left a fixed-axis simple stage from input 27 through compound 34 to element 56, and on the right a planetary stage in which 56 acts as the rotating arm carrying gears that drive output 10. Element 56 couples the two stages."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_3_11">&#9654; Play</button><span class="drv" id="drv_st_3_11">simple stage (left) + planetary stage (right), coupled by 56</span></div>
+          <p class="stage-cap">Left: simple stage 27&rarr;34&rarr;56 (arm = fixed ground 1). Right: planetary stage with arm 56. Element 56 is shared.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Split the train in two</h5><p>Six elements: 1, 27, 34, 56, 89, 10. Input &Delta;&theta;<sub>27</sub>, output &Delta;&theta;<sub>10</sub>. Four external rolling contacts. The first two belong to a <strong>simple</strong> train (arm = fixed ground 1); the last two belong to a <strong>planetary</strong> train (arm = 56, which rotates). Element 56 is in both.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Simple stage (arm fixed)</h5><p>34 rolls externally with 27, and with 56, both about the fixed ground (Eq. 3.1, &Delta;&theta;<sub>1</sub>=0):</p><div class="mini-eq">&rho;<sub>4</sub>&Delta;&theta;<sub>34</sub> = &minus;&rho;<sub>2</sub>&Delta;&theta;<sub>27</sub> &nbsp;(3.68)</div><div class="mini-eq">&rho;<sub>3</sub>&Delta;&theta;<sub>34</sub> = &minus;&rho;<sub>5</sub>&Delta;&theta;<sub>56</sub> &nbsp;(3.69)</div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Planetary stage (arm = 56)</h5><p>27 rolls externally with 89, and 89 with 10, both relative to the rotating arm 56:</p><div class="mini-eq">&rho;<sub>7</sub>&Delta;&theta;<sub>27/56</sub> = &minus;&rho;<sub>8</sub>&Delta;&theta;<sub>89/56</sub> &nbsp;(3.70)</div><div class="mini-eq">&rho;<sub>9</sub>&Delta;&theta;<sub>89/56</sub> = &minus;&rho;<sub>10</sub>&Delta;&theta;<sub>10/56</sub> &nbsp;(3.71)</div></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Couple through 56, count</h5><p>Eliminate &Delta;&theta;<sub>34</sub> from (3.68)&ndash;(3.69) to relate the stages:</p><div class="mini-eq">&Delta;&theta;<sub>56</sub> = (&rho;<sub>4</sub>&rho;<sub>2</sub>)/(&rho;<sub>5</sub>&rho;<sub>3</sub>) &Delta;&theta;<sub>27</sub> &nbsp;(3.72)</div><div class="knowns-row"><span class="kchip known">known all &rho; (or N), assembly angles</span><span class="kchip unknown">unknown &theta;<sub>27</sub>, &theta;<sub>34</sub>, &theta;<sub>56</sub>, &theta;<sub>89</sub>, &theta;<sub>10</sub></span></div><p>Four equations, five unknowns &rarr; F = 1.</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Eliminate and solve for R</h5><p>Eliminate &Delta;&theta;<sub>89/56</sub> from (3.70)&ndash;(3.71), expand the relative rotations, and substitute (3.72). Everything collapses to a ratio in tooth numbers.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1, R in tooth numbers</span>
+              <div class="big-eq">R = &Delta;&theta;<sub>27</sub>/&Delta;&theta;<sub>10</sub> = N<sub>10</sub>N<sub>5</sub>N<sub>3</sub>N<sub>8</sub> / (N<sub>7</sub>N<sub>9</sub>N<sub>5</sub>N<sub>3</sub> + N<sub>10</sub>N<sub>4</sub>N<sub>2</sub>N<sub>8</sub> &minus; N<sub>7</sub>N<sub>4</sub>N<sub>2</sub>N<sub>9</sub>)</div>
+              <p>The simple stage feeds the planetary arm through the shared element 56, so the final ratio mixes both stages&rsquo; tooth products &mdash; the hallmark of a hybrid train. Every term here is a tooth count you can read off the gears. Master this and no geartrain in the chapter is out of reach. <span class="ratio-pill">F = 1 &middot; hybrid ratio</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a relay race with a moving baton handoff</span><p>The simple stage runs its leg on solid ground and hands the baton to element 56. But 56 is itself running &mdash; it is the moving arm of the planetary leg. So the second runner&rsquo;s speed is measured <em>relative to a teammate already in motion</em>. Add the two motions correctly (the arm term) and the whole relay&rsquo;s time &mdash; the overall ratio &mdash; falls out.</p></div>
+      <div class="realworld"><span class="h">Why hybrids of stages exist</span><p>Coupling a fixed-axis stage to a planetary stage lets designers hit oddball ratios and packaging constraints a single architecture can&rsquo;t. Power-split hybrid-vehicle transmissions, some e-bike mid-drives, and aerospace accessory gearboxes blend stage types exactly like this to balance ratio, size, and where the shafts have to come out.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ SELF-CHECK QUIZ ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Check yourself</span>
+  <h2 id="quiz-h">Self-check</h2>
+  <p>Six quick questions on the ideas behind all eleven examples. Pick an answer to see the explanation.</p>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 1</div>
+    <p class="qtext">A gear rolls on the <em>inside</em> of a ring gear. The rolling-contact equation &rho;<sub>A</sub>&Delta;&theta;<sub>A/m</sub> = &plusmn;&rho;<sub>B</sub>&Delta;&theta;<sub>B/m</sub> takes which sign?</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> Minus &mdash; internal contacts always reverse direction</button>
+    <button class="opt" data-correct="1"><span class="mk">B.</span> Plus &mdash; an internal contact is Equation (3.5)</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> Either; the sign depends on the radii</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> Neither; internal contacts have no rolling equation</button>
+    <div class="feedback">Internal rolling (one body inside the other) takes the <strong>plus</strong> sign &mdash; the two surfaces move the same way at the contact (Eq. 3.5). External contacts take the minus sign (Eq. 3.1) and reverse direction.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 2</div>
+    <p class="qtext">Why don&rsquo;t we write a vector loop equation for a geartrain?</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> Gears have no length, so vectors can&rsquo;t be assigned</button>
+    <button class="opt" data-correct="1"><span class="mk">B.</span> The only vector runs between fixed centers, so the loop reduces to r&#772;<sub>1</sub>&minus;r&#772;<sub>1</sub>=0&#772; and says nothing</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> Vector loops only work for mechanisms with sliders</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> Because gear ratios are always given, never derived</button>
+    <div class="feedback">For a fixed-axis geartrain the centers don&rsquo;t move, so the loop equation is trivially zero. All the information lives in the <strong>rolling-contact equations</strong> &mdash; that&rsquo;s the key shift in Chapter 3.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 3</div>
+    <p class="qtext">You insert an idler gear between the input and output of a simple pair. What changes?</p>
+    <button class="opt" data-correct="1"><span class="mk">A.</span> Only the <em>sign</em> of the ratio &mdash; the magnitude is unchanged</button>
+    <button class="opt" data-correct="0"><span class="mk">B.</span> The ratio magnitude increases by N<sub>idler</sub></button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> The mechanism gains a degree of freedom</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> Nothing changes at all</button>
+    <div class="feedback">Comparing Examples 3.3 and 3.4: the idler&rsquo;s radius cancels (Eq. 3.28), so |R| is untouched. Its only job is to flip the direction &mdash; one extra external mesh, one extra sign change.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 4</div>
+    <p class="qtext">In a <em>compound</em> geartrain, why do the intermediate gears&rsquo; tooth counts <strong>not</strong> cancel the way an idler&rsquo;s does?</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> They do cancel; compound and idler trains are identical</button>
+    <button class="opt" data-correct="1"><span class="mk">B.</span> The two gears on the shared shaft are <em>different</em> sizes, so &rho;<sub>4</sub> and &rho;<sub>5</sub> don&rsquo;t divide out &mdash; they multiply into R</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> Because the shaft is fixed to ground</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> Because compound trains have two degrees of freedom</button>
+    <div class="feedback">An idler is one gear meshing on both sides, so its radius appears top and bottom and cancels. A compound gear is <em>two different</em> gears rigidly joined; the input-side and output-side radii differ, so R = (N<sub>3</sub>N<sub>4</sub>)/(N<sub>2</sub>N<sub>5</sub>) &mdash; the ratios multiply (Eq. 3.33).</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 5</div>
+    <p class="qtext">A planetary set has the ring fixed, sun as input, carrier as output. The ratio is R = 1 + N<sub>ring</sub>/N<sub>sun</sub>. Where does the &ldquo;1 +&rdquo; come from?</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> A rounding convention in the textbook</button>
+    <button class="opt" data-correct="0"><span class="mk">B.</span> The extra tooth always added to avoid interference</button>
+    <button class="opt" data-correct="1"><span class="mk">C.</span> The moving arm: the planet&rsquo;s motion is its spin <em>plus</em> the carrier ride, so the arm term adds 1</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> The internal ring contact, which adds a unit</button>
+    <div class="feedback">Because the carrier turns, you keep the relative term &Delta;&theta;<sub>A/m</sub> = &Delta;&theta;<sub>A</sub> &minus; &Delta;&theta;<sub>m</sub>. Carrying the planet around contributes the extra &ldquo;1,&rdquo; which is precisely why a small planetary gives a big ratio.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 6</div>
+    <p class="qtext">In the Model T and the automatic transmission (Examples 3.9&ndash;3.10), how is a particular gear ratio &ldquo;selected&rdquo;?</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> By sliding gears into and out of mesh</button>
+    <button class="opt" data-correct="1"><span class="mk">B.</span> By using a band brake to ground one element (e.g. &Delta;&theta;=0), which changes the active equation</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> By changing the tooth counts on the fly</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> By reversing the input shaft</button>
+    <div class="feedback">Clamping a band brake forces one element&rsquo;s &Delta;&theta; to zero (Eqs. 3.49, 3.55). That single condition picks which solution the 1-DOF epicyclic settles into &mdash; ground a different element, get a different ratio. That is the whole idea of an automatic transmission.</div>
+  </div>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rc2-h">
+  <span class="sec-tag">Quick reference</span>
+  <h2 id="rc2-h">Rolling-contact &amp; geartrain formula card</h2>
+  <p class="note">Printable. Use your browser&rsquo;s Print command for a clean one-page reference (navigation, controls, and animations are hidden in print).</p>
+
+  <div class="refcard">
+    <div class="rc-head"><span>Rolling contacts &amp; geartrains</span><span style="font-family:var(--mono);font-size:.8rem">ENGI 216 &middot; Ch 3</span></div>
+    <div class="rc-body">
+      <h4>The rolling-contact equation (arm = body m)</h4>
+      <div class="rc-eq">&rho;<sub>A</sub> &Delta;&theta;<sub>A/m</sub> = &plusmn; &rho;<sub>B</sub> &Delta;&theta;<sub>B/m</sub>, &nbsp; &Delta;&theta;<sub>A/m</sub> = &Delta;&theta;<sub>A</sub> &minus; &Delta;&theta;<sub>m</sub></div>
+      <ul class="clean">
+        <li><strong>External contact</strong> &rarr; minus sign (Eq. 3.1); surfaces oppose, direction reverses.</li>
+        <li><strong>Internal contact</strong> &rarr; plus sign (Eq. 3.5); surfaces agree, direction kept.</li>
+        <li><strong>Assembly configuration:</strong> replace each &Delta;&theta; with (&theta; &minus; &theta;<sub>i</sub>) to get a position equation.</li>
+        <li><strong>Pitch radius &prop; tooth count:</strong> &rho; &prop; N, so &rho;<sub>a</sub>/&rho;<sub>b</sub> = N<sub>a</sub>/N<sub>b</sub>.</li>
+      </ul>
+      <h4>Gear ratio, speed, torque</h4>
+      <div class="rc-eq">R = &Delta;&theta;<sub>in</sub>/&Delta;&theta;<sub>out</sub> = &omega;<sub>in</sub>/&omega;<sub>out</sub>; &nbsp; T<sub>out</sub> = &minus;R&middot;T<sub>in</sub>; &nbsp; T(ft&middot;lbf) = 5252&middot;P(hp)/n(rpm)</div>
+      <h4>Fixed-axis trains</h4>
+      <ul class="clean">
+        <li><strong>Simple pair (external):</strong> R = &minus;N<sub>out</sub>/N<sub>in</sub> &mdash; negative (Ex 3.3).</li>
+        <li><strong>Idler:</strong> R = +N<sub>out</sub>/N<sub>in</sub> &mdash; idler flips sign only; its teeth cancel (Ex 3.4).</li>
+        <li><strong>Compound:</strong> R = &prod;(N<sub>driven</sub>/N<sub>driver</sub>) &mdash; stage ratios multiply (Ex 3.5, 3.6).</li>
+        <li><strong>Sign rule:</strong> one factor of (&minus;1) per external mesh; internal meshes keep sign.</li>
+      </ul>
+      <h4>Planetary (epicyclic) &mdash; Willis equation</h4>
+      <div class="rc-eq">(&omega;<sub>sun</sub> &minus; &omega;<sub>carrier</sub>) = &minus;(N<sub>ring</sub>/N<sub>sun</sub>)(&omega;<sub>ring</sub> &minus; &omega;<sub>carrier</sub>)</div>
+      <ul class="clean">
+        <li>Ring fixed, sun in, carrier out: R = 1 + N<sub>ring</sub>/N<sub>sun</sub> (Ex 3.7) &mdash; always positive, compact.</li>
+        <li>Compound planet: R = 1/(1 &minus; N<sub>3</sub>N<sub>5</sub>/N<sub>2</sub>N<sub>4</sub>) &mdash; sign set by the tooth product (Ex 3.8).</li>
+        <li>Planet count to fit: N<sub>planet</sub> = (N<sub>ring</sub> &minus; N<sub>sun</sub>)/2 (must be a whole number).</li>
+      </ul>
+      <h4>Automatic / hybrid</h4>
+      <ul class="clean">
+        <li><strong>Band brake selects a gear:</strong> ground one element (&Delta;&theta;=0); a different element &rarr; a different ratio (Ex 3.9, 3.10).</li>
+        <li><strong>Hybrid train:</strong> a fixed-axis stage feeds a planetary stage through a shared element; ratios of both stages combine (Ex 3.11).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Reference</span>
+  <h2 id="gl-h">Glossary</h2>
+  <label for="glossSearch" class="note">Filter terms:</label><br>
+  <input type="search" id="glossSearch" class="gloss-search" placeholder="Type to filter (e.g. &ldquo;planetary&rdquo;)&hellip;" aria-label="Filter glossary terms">
+  <dl class="gloss" id="glossList">
+    <div><dt>Rolling contact</dt><dd>A higher pair in which two curved bodies touch and roll without slipping, so the arc length passing the contact point is equal on both bodies. The chapter&rsquo;s fundamental joint.</dd></div>
+    <div><dt>No-slip (arc-length) condition</dt><dd>The statement that &rho;<sub>A</sub>|&Delta;&theta;<sub>A</sub>| = &rho;<sub>B</sub>|&Delta;&theta;<sub>B</sub>| &mdash; equal arc rolled on each body. Differentiated, it gives the velocity relation &rho;<sub>A</sub>&omega;<sub>A</sub> = &rho;<sub>B</sub>&omega;<sub>B</sub>.</dd></div>
+    <div><dt>External contact</dt><dd>Two bodies touching on the outside of each other; they rotate in opposite senses at the contact. Rolling-contact equation takes the minus sign (Eq. 3.1).</dd></div>
+    <div><dt>Internal contact</dt><dd>One body rolling inside another (e.g. a planet inside a ring gear); they rotate the same sense at the contact. Rolling-contact equation takes the plus sign (Eq. 3.5).</dd></div>
+    <div><dt>Arm (carrier)</dt><dd>The body that carries a rolling contact &mdash; the reference link for the relative angles &Delta;&theta;<sub>A/m</sub>. For fixed-axis gears the arm is ground; for a planetary set the arm (carrier) rotates.</dd></div>
+    <div><dt>Assembly configuration</dt><dd>The set of starting angles &theta;<sub>i</sub> at which a mechanism is put together. Substituting &Delta;&theta; = &theta; &minus; &theta;<sub>i</sub> converts a rate relation into a position equation.</dd></div>
+    <div><dt>Pitch radius (&rho;)</dt><dd>The radius of the imaginary pitch circle on which two gears effectively roll. Meshing gears share a module, so pitch radius is proportional to tooth number, &rho; &prop; N.</dd></div>
+    <div><dt>Tooth number (N)</dt><dd>The count of teeth on a gear. Because &rho; &prop; N, every radius ratio in a geartrain can be replaced by a ratio of (countable) tooth numbers.</dd></div>
+    <div><dt>Module</dt><dd>The ratio of pitch diameter to tooth number (mm/tooth). Gears must share a module to mesh, which is why pitch radius tracks tooth count.</dd></div>
+    <div><dt>Gear ratio (R)</dt><dd>R = &Delta;&theta;<sub>in</sub>/&Delta;&theta;<sub>out</sub> = &omega;<sub>in</sub>/&omega;<sub>out</sub>. A negative R means input and output turn in opposite directions; |R| &gt; 1 is a speed reduction (and torque increase).</dd></div>
+    <div><dt>Train value</dt><dd>The product of driven-over-driver tooth ratios for a geartrain, signed by the number of external meshes. Equivalent to R for fixed-axis trains.</dd></div>
+    <div><dt>Simple geartrain</dt><dd>Gears on fixed parallel shafts, each shaft carrying one gear, meshing in series. Analyzed purely with rolling-contact equations.</dd></div>
+    <div><dt>Idler gear</dt><dd>A gear meshing on both sides between input and output. It changes only the sign (direction) of the ratio; its tooth count cancels and does not affect the magnitude.</dd></div>
+    <div><dt>Compound gear</dt><dd>Two (different) gears rigidly fixed to the same intermediate shaft, sharing one angle. Compound trains multiply stage ratios, giving large reductions compactly.</dd></div>
+    <div><dt>Planetary (epicyclic) geartrain</dt><dd>A geartrain with one or more planet gears whose shafts ride on a rotating carrier (arm), typically around a central sun gear and inside a ring gear. Compact, coaxial, load-sharing.</dd></div>
+    <div><dt>Sun gear</dt><dd>The central gear of a planetary set, on the main axis; meshes externally with the planets.</dd></div>
+    <div><dt>Planet gear</dt><dd>A gear that meshes the sun and (often) the ring while its center orbits on the carrier. It behaves as the coupler of the planetary set and is usually eliminated in the algebra.</dd></div>
+    <div><dt>Ring (annulus) gear</dt><dd>The outer gear of a planetary set with inward-facing teeth; meshes internally with the planets (plus sign).</dd></div>
+    <div><dt>Carrier</dt><dd>The arm that holds the planet shafts and orbits them about the sun. Its rotation is the &ldquo;arm term&rdquo; that gives planetary trains their characteristic 1 &plusmn; structure.</dd></div>
+    <div><dt>Willis equation</dt><dd>The epicyclic speed balance (&omega;<sub>sun</sub> &minus; &omega;<sub>carrier</sub>) = &minus;(N<sub>ring</sub>/N<sub>sun</sub>)(&omega;<sub>ring</sub> &minus; &omega;<sub>carrier</sub>). One equation governs all choices of fixed/input/output member.</dd></div>
+    <div><dt>Band brake</dt><dd>A friction band that clamps a drum to ground one element of an epicyclic train (forcing &Delta;&theta; = 0). Engaging different brakes selects different gear ratios &mdash; the basis of an automatic transmission.</dd></div>
+    <div><dt>Hybrid geartrain</dt><dd>A train combining a fixed-axis stage and a planetary stage, coupled through a shared element. Its overall ratio blends the tooth products of both stages (Ex 3.11).</dd></div>
+    <div><dt>Degrees of freedom (from the equations)</dt><dd>Scalar unknowns minus scalar (position + rolling-contact) equations. It is the number of inputs needed, and must equal Gruebler&rsquo;s F.</dd></div>
+  </dl>
+  <p class="gloss-none" id="glossNone" hidden>No terms match that filter.</p>
+</section>
+
+<!-- ============ RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">Go deeper</span>
+  <h2 id="res-h">External resources</h2>
+  <p>Open, reputable references covering rolling contacts and geartrains from complementary angles. All open in a new tab.</p>
+
+  <p class="res-cat">Rolling without slipping (the foundation)</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://rotorlab.tamu.edu/Dynamics_and_Vibrations/Lectures%20(pdf)%20and%20homework/Planar%20Kinematics/L19.pdf" target="_blank" rel="noopener">Texas A&amp;M (Rotordynamics Lab) &mdash; Lecture 19: Rolling Without Slipping (PDF)</a><span class="desc">A mechanisms-focused lecture on the rolling-without-slipping constraint, including a gear rolling in a ring &mdash; the exact geometry of Examples 3.1&ndash;3.2.</span></li>
+    <li><a class="ext" href="https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-10-rotational-motion/31-6-non-slip-condition/" target="_blank" rel="noopener">MIT OpenCourseWare 8.01 &mdash; The Non-Slip Condition</a><span class="desc">Derives v = R&omega; from equal arc lengths at the contact &mdash; the velocity version of the rolling-contact equation.</span></li>
+    <li><a class="ext" href="https://phys.libretexts.org/Bookshelves/University_Physics/University_Physics_I_-_Classical_Mechanics_(Gea-Banacloche)/09:_Rotational_Dynamics/9.06:_Rolling_Motion" target="_blank" rel="noopener">LibreTexts (University Physics I) &mdash; 9.6 Rolling Motion</a><span class="desc">Shows s = R|&Delta;&theta;| with a clear arc-length figure &mdash; why &ldquo;no slip&rdquo; means &ldquo;equal arc on both bodies.&rdquo;</span></li>
+  </ul>
+
+  <p class="res-cat">Geartrains &amp; planetary (epicyclic) gears</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://egyankosh.ac.in/bitstream/123456789/31873/1/Unit-10.pdf" target="_blank" rel="noopener">IGNOU eGyanKosh &mdash; Unit 10: Gear Trains (PDF)</a><span class="desc">Open courseware on simple, compound, and epicyclic trains, including the tabular and relative-velocity methods and the train-value concept.</span></li>
+    <li><a class="ext" href="https://www.sciencedirect.com/topics/engineering/epicyclic-gears" target="_blank" rel="noopener">ScienceDirect Topics &mdash; Epicyclic Gears (overview)</a><span class="desc">Concise reference on epicyclic kinematics, the train value, and the ring-fixed reduction ratio &mdash; the textbook&rsquo;s result for Example 3.7.</span></li>
+    <li><a class="ext" href="https://en.wikipedia.org/wiki/Epicyclic_gearing" target="_blank" rel="noopener">Wikipedia &mdash; Epicyclic gearing</a><span class="desc">Accessible overview of sun/planet/ring/carrier, the fundamental speed relation, and where planetary sets are used.</span></li>
+  </ul>
+
+  <p class="res-cat">Kinematics fundamentals</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://sites.tntech.edu/scanfield/wp-content/uploads/sites/59/2017/01/ME3610_Part-II-Kinematics-fundamental-concepts.pdf" target="_blank" rel="noopener">Tennessee Tech ME 3610 &mdash; Kinematics Fundamental Concepts (PDF)</a><span class="desc">Course notes connecting joint types, rolling joints, and Gruebler&rsquo;s criterion &mdash; useful for confirming the DOF counts in Examples 3.1&ndash;3.2.</span></li>
+  </ul>
+
+  <div class="callout"><span class="h">A note on these links</span><p>They reinforce the same ideas in other instructors&rsquo; notation &mdash; helpful when a second explanation makes a concept click. The authoritative source for ENGI 216 remains Stani&scaron;i&cacute;&rsquo;s textbook and the worked examples above. For full position, velocity, and force analysis, the course&rsquo;s Mechanism Workbench is the companion tool.</p></div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section id="refs" aria-labelledby="refs-h">
+  <span class="sec-tag">Attribution</span>
+  <h2 id="refs-h">References &amp; notes</h2>
+  <ul class="clean">
+    <li>All eleven examples are drawn from <strong>Stani&scaron;i&cacute;, M. M., <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em></strong> (Cengage Learning, 2015), Chapter 3. Problem statements here are paraphrased; example and equation numbers (3.1&ndash;3.11, Eqs 3.1&ndash;3.72) follow the textbook.</li>
+    <li>The mechanism and gear diagrams in this module are <strong>original schematic redrawings</strong> created for teaching. The simple-pair, idler, compound, and planetary stages (3.3&ndash;3.5, 3.7) animate with the correct rotation senses and ratios. The rolling-mechanism and transmission stages (3.1&ndash;3.2, 3.6, 3.8&ndash;3.11) are <strong>representative teaching schematics</strong> that show topology and motion sense rather than exact kinematic solutions, particularly for the multi-element transmissions whose full equation sets (Eqs 3.46&ndash;3.48, 3.51&ndash;3.54) appear in the textbook figures.</li>
+    <li>The three live tools &mdash; the rolling-contact visualizer, the gear-ratio &amp; speed&ndash;torque calculator, and the planetary ratio solver &mdash; compute their results from the rolling-contact equation, the train-value product, and the Willis equation respectively. The planetary solver was checked to reproduce R = 1 + N<sub>ring</sub>/N<sub>sun</sub> for the ring-fixed case of Example 3.7. For full numerical position, velocity, and force analysis, use the separate Mechanism Workbench tool.</li>
+  </ul>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Session progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+  </div>
+</div>
+
+<footer>
+  <p>Built for <span class="program">ENGI 216 &mdash; Dynamics &amp; Kinematics of Machines and Mechanisms</span> &middot; Brookdale Community College &middot; <span class="year">2026</span></p>
+  <p class="note" style="color:#9fb6c8">Chapter 3 worked-examples companion &middot; rolling contacts &amp; geartrains &middot; runs entirely offline.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var DEG = Math.PI/180;
+  function el(tag, attrs){ var n=document.createElementNS(SVGNS, tag); if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); } return n; }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  /* ---------- SVG drawing helpers ---------- */
+  function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+  function bar(svg,x1,y1,x2,y2,opts){ opts=opts||{}; svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:opts.color||cssVar('--link-fill'),'stroke-width':opts.w||6,'stroke-linecap':'round',opacity:(opts.op==null?1:opts.op)})); }
+  function tri(svg,pts,opts){ opts=opts||{}; var s=''; for(var i=0;i<pts.length;i++){ s+=pts[i][0]+','+pts[i][1]+' '; } svg.appendChild(el('polygon',{points:s,fill:opts.fill||'rgba(10,126,164,.18)',stroke:opts.color||cssVar('--link-fill'),'stroke-width':opts.w||4,'stroke-linejoin':'round'})); }
+  function label(svg,x,y,t,color){ var tx=el('text',{x:x,y:y,'text-anchor':'middle','dominant-baseline':'middle','class':'lk',fill:color||cssVar('--ink')}); tx.textContent=t; svg.appendChild(tx); }
+  function caption(svg,x,y,t,color){ var tx=el('text',{x:x,y:y,'text-anchor':'middle',fill:color||cssVar('--ink-soft'),'font-family':cssVar('--mono'),'font-size':'11px'}); tx.textContent=t; svg.appendChild(tx); }
+  function rail(svg,x1,y1,x2,y2){ svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:cssVar('--ink-soft'),'stroke-width':1.5,'stroke-dasharray':'4 4',opacity:.7})); }
+  function groundPin(svg,x,y){
+    svg.appendChild(el('circle',{cx:x,cy:y,r:7,fill:'none',stroke:cssVar('--ground-fill'),'stroke-width':2.5}));
+    svg.appendChild(el('circle',{cx:x,cy:y,r:2.5,fill:cssVar('--ground-fill')}));
+    svg.appendChild(el('line',{x1:x-16,y1:y+8,x2:x+16,y2:y+8,stroke:cssVar('--ground-fill'),'stroke-width':2}));
+    for(var i=-14;i<=14;i+=7){ svg.appendChild(el('line',{x1:x+i,y1:y+8,x2:x+i-6,y2:y+16,stroke:cssVar('--ground-fill'),'stroke-width':1.4})); }
+  }
+  function freePin(svg,x,y,r){ r=r||5.5; svg.appendChild(el('circle',{cx:x,cy:y,r:r,fill:cssVar('--panel'),stroke:cssVar('--ink'),'stroke-width':2.2})); svg.appendChild(el('circle',{cx:x,cy:y,r:1.8,fill:cssVar('--ink')})); }
+  function block(svg,cx,cy,ang,w,h,opts){ opts=opts||{}; var g=el('g',{transform:'translate('+cx+','+cy+') rotate('+(ang*180/Math.PI)+')'}); g.appendChild(el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:2,fill:opts.fill||cssVar('--panel'),stroke:opts.color||cssVar('--ink'),'stroke-width':2})); svg.appendChild(g); }
+  function arrow(svg,x1,y1,x2,y2,opts){ opts=opts||{}; var c=opts.color||cssVar('--accent-2'); var w=opts.w||2; svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:c,'stroke-width':w,'stroke-linecap':'round',opacity:(opts.op==null?1:opts.op)})); var a=Math.atan2(y2-y1,x2-x1),hl=opts.head||7; svg.appendChild(el('line',{x1:x2,y1:y2,x2:x2-hl*Math.cos(a-0.4),y2:y2-hl*Math.sin(a-0.4),stroke:c,'stroke-width':w,'stroke-linecap':'round'})); svg.appendChild(el('line',{x1:x2,y1:y2,x2:x2-hl*Math.cos(a+0.4),y2:y2-hl*Math.sin(a+0.4),stroke:c,'stroke-width':w,'stroke-linecap':'round'})); }
+  function dot(svg,x,y,r,c){ svg.appendChild(el('circle',{cx:x,cy:y,r:r||4,fill:c||cssVar('--accent-2')})); }
+  function polyline(svg,pts,opts){ opts=opts||{}; var s=''; for(var i=0;i<pts.length;i++){ s+=pts[i][0]+','+pts[i][1]+' '; } svg.appendChild(el('polyline',{points:s,fill:'none',stroke:opts.color||cssVar('--accent-2'),'stroke-width':opts.w||2,opacity:(opts.op==null?1:opts.op),'stroke-dasharray':opts.dash||'none'})); }
+  function circInt(p0,r0,p1,r1,sign){ var dx=p1.x-p0.x,dy=p1.y-p0.y,d=Math.hypot(dx,dy); if(d>r0+r1||d<Math.abs(r0-r1)||d===0) return null; var a=(r0*r0-r1*r1+d*d)/(2*d); var h2=r0*r0-a*a; if(h2<0)h2=0; var h=Math.sqrt(h2); var xm=p0.x+a*dx/d, ym=p0.y+a*dy/d; return {x:xm+sign*h*(-dy)/d, y:ym+sign*h*dx/d}; }
+
+  /* gear with optional spoke (to show rotation), plus optional hub pin */
+  function gear(svg,cx,cy,r,teeth,phase,fill){
+    svg.appendChild(el('circle',{cx:cx,cy:cy,r:r,fill:fill||cssVar('--gear-fill'),stroke:cssVar('--link-fill'),'stroke-width':3}));
+    for(var i=0;i<teeth;i++){ var a=phase+i*2*Math.PI/teeth; svg.appendChild(el('line',{x1:cx+Math.cos(a)*r,y1:cy+Math.sin(a)*r,x2:cx+Math.cos(a)*(r+5),y2:cy+Math.sin(a)*(r+5),stroke:cssVar('--link-fill'),'stroke-width':2.5,'stroke-linecap':'round'})); }
+  }
+  function spoke(svg,cx,cy,r,phase,color){ svg.appendChild(el('line',{x1:cx,y1:cy,x2:cx+Math.cos(phase)*r*0.82,y2:cy+Math.sin(phase)*r*0.82,stroke:color||cssVar('--accent-2'),'stroke-width':2.4,'stroke-linecap':'round'})); }
+  /* internal ring gear: outline + inward teeth */
+  function ring(svg,cx,cy,r,teeth,phase){
+    svg.appendChild(el('circle',{cx:cx,cy:cy,r:r,fill:'none',stroke:cssVar('--ink-soft'),'stroke-width':3}));
+    svg.appendChild(el('circle',{cx:cx,cy:cy,r:r+9,fill:'none',stroke:cssVar('--ink-soft'),'stroke-width':2,opacity:.5}));
+    for(var i=0;i<teeth;i++){ var a=phase+i*2*Math.PI/teeth; svg.appendChild(el('line',{x1:cx+Math.cos(a)*r,y1:cy+Math.sin(a)*r,x2:cx+Math.cos(a)*(r-5),y2:cy+Math.sin(a)*(r-5),stroke:cssVar('--ink-soft'),'stroke-width':2})); }
+  }
+  function arcPath(svg,cx,cy,r,a0,a1,opts){ opts=opts||{};
+    var x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    var large=(Math.abs(a1-a0)>Math.PI)?1:0, sweep=(a1>a0)?1:0;
+    svg.appendChild(el('path',{d:'M'+x0+' '+y0+' A'+r+' '+r+' 0 '+large+' '+sweep+' '+x1+' '+y1, fill:'none', stroke:opts.color||cssVar('--accent-2'),'stroke-width':opts.w||5,'stroke-linecap':'round',opacity:(opts.op==null?1:opts.op)}));
+  }
+  function hatchBox(svg,x,y,w,h){ svg.appendChild(el('rect',{x:x,y:y,width:w,height:h,fill:'none',stroke:cssVar('--ground-fill'),'stroke-width':1.6})); for(var i=0;i<w;i+=7){ svg.appendChild(el('line',{x1:x+i,y1:y+h,x2:x+i-6,y2:y+h+7,stroke:cssVar('--ground-fill'),'stroke-width':1.2})); } }
+
+  /* ===================== STAGE RENDERERS ===================== */
+  var STAGES={};
+
+  // 3.1 five-bar, disk 4 rolls externally on ground arc; arm 5
+  STAGES.st_3_1=function(svg,t){ clear(svg);
+    var O1={x:120,y:185}, RG=64, r4=27;
+    var a5=-0.95+0.55*Math.sin(t*2*Math.PI);
+    var C4={x:O1.x+(RG+r4)*Math.cos(a5), y:O1.y+(RG+r4)*Math.sin(a5)};
+    // ground arc (body 1)
+    svg.appendChild(el('circle',{cx:O1.x,cy:O1.y,r:RG,fill:'none',stroke:cssVar('--ink-soft'),'stroke-width':3,'stroke-dasharray':'2 5',opacity:.8}));
+    caption(svg,O1.x,O1.y+RG-14,'\u03c1\u2081',cssVar('--ink-soft'));
+    // arm 5
+    bar(svg,O1.x,O1.y,C4.x,C4.y,{color:cssVar('--ink-soft'),w:4});
+    label(svg,(O1.x+C4.x)/2-8,(O1.y+C4.y)/2-8,'5');
+    // disk 4 (rolls externally -> spin opposite to arm travel, magnified)
+    var ph4=-(1+RG/r4)*(a5+0.95);
+    gear(svg,C4.x,C4.y,r4,12,ph4,cssVar('--gear-fill')); spoke(svg,C4.x,C4.y,r4,ph4);
+    label(svg,C4.x,C4.y,'4',cssVar('--accent-dk'));
+    caption(svg,C4.x,C4.y-r4-7,'\u03c1\u2084',cssVar('--ink-soft'));
+    // crank 2 + coupler 3 from right ground pin O2 to C4 (representative)
+    var O2={x:312,y:120}; var ux=C4.x-O2.x, uy=C4.y-O2.y, dd=Math.hypot(ux,uy); ux/=dd; uy/=dd;
+    var A={x:O2.x+42*ux+22*(-uy), y:O2.y+42*uy+22*ux};
+    bar(svg,O2.x,O2.y,A.x,A.y,{color:cssVar('--accent'),w:7});
+    bar(svg,A.x,A.y,C4.x,C4.y,{color:cssVar('--accent-2'),w:5});
+    groundPin(svg,O1.x,O1.y); groundPin(svg,O2.x,O2.y); freePin(svg,A.x,A.y); freePin(svg,C4.x,C4.y,4);
+    label(svg,(O2.x+A.x)/2+8,(O2.y+A.y)/2-6,'2',cssVar('--accent-dk'));
+    label(svg,(A.x+C4.x)/2,(A.y+C4.y)/2-9,'3',cssVar('--accent-2'));
+    label(svg,O1.x,O1.y+8,'1');
+    // contact dot
+    var cp={x:O1.x+RG*Math.cos(a5), y:O1.y+RG*Math.sin(a5)}; dot(svg,cp.x,cp.y,3.5,cssVar('--accent-2'));
+    caption(svg,180,292,'disk 4 rolls externally on ground \u2014 arm 5 carries it'); };
+
+  // 3.2 disk 4 rolls internally inside ring 1; link 3 slides in 4; arm 5
+  STAGES.st_3_2=function(svg,t){ clear(svg);
+    var O1={x:185,y:160}, RR=98, r4=36;
+    var a5=-0.5+0.7*Math.sin(t*2*Math.PI);
+    var C4={x:O1.x+(RR-r4)*Math.cos(a5), y:O1.y+(RR-r4)*Math.sin(a5)};
+    ring(svg,O1.x,O1.y,RR,40,0);
+    caption(svg,O1.x,O1.y-RR+16,'\u03c1\u2081 (ring 1)',cssVar('--ink-soft'));
+    bar(svg,O1.x,O1.y,C4.x,C4.y,{color:cssVar('--ink-soft'),w:4}); label(svg,(O1.x+C4.x)/2+8,(O1.y+C4.y)/2,'5');
+    var ph4=(RR/r4 - 1)*(a5+0.5); // internal rolling -> same sense
+    gear(svg,C4.x,C4.y,r4,12,ph4,cssVar('--gear-fill')); spoke(svg,C4.x,C4.y,r4,ph4); label(svg,C4.x,C4.y,'4',cssVar('--accent-dk'));
+    // crank 2 from bottom-left ground O2 + link 3 sliding in body 4 (toward C4)
+    var O2={x:64,y:248}; var th2=0.5+0.5*Math.sin(t*2*Math.PI+1);
+    var A={x:O2.x+46*Math.cos(-th2), y:O2.y+46*Math.sin(-th2)};
+    bar(svg,O2.x,O2.y,A.x,A.y,{color:cssVar('--accent'),w:7});
+    bar(svg,A.x,A.y,C4.x,C4.y,{color:cssVar('--accent-2'),w:4});
+    block(svg,(A.x+C4.x)/2,(A.y+C4.y)/2,Math.atan2(C4.y-A.y,C4.x-A.x),18,11,{fill:cssVar('--paper-2')});
+    groundPin(svg,O1.x,O1.y); groundPin(svg,O2.x,O2.y); freePin(svg,A.x,A.y); freePin(svg,C4.x,C4.y,4);
+    label(svg,(O2.x+A.x)/2-8,(O2.y+A.y)/2,'2',cssVar('--accent-dk'));
+    label(svg,(A.x+C4.x)/2+4,(A.y+C4.y)/2+12,'3',cssVar('--accent-2'));
+    var cp={x:O1.x+RR*Math.cos(a5), y:O1.y+RR*Math.sin(a5)}; dot(svg,cp.x,cp.y,3.5,cssVar('--accent-2'));
+    caption(svg,185,292,'disk 4 rolls internally; link 3 slides inside it'); };
+
+  // 3.3 two external gears
+  STAGES.st_3_3=function(svg,t){ clear(svg);
+    var r3=64,r2=44, y=152; var c3={x:122,y:y}, c2={x:122+(r3+r2),y:y};
+    var ph2=t*2*Math.PI, ph3=-(r2/r3)*ph2;
+    gear(svg,c3.x,c3.y,r3,20,ph3); spoke(svg,c3.x,c3.y,r3,ph3,cssVar('--accent'));
+    gear(svg,c2.x,c2.y,r2,14,ph2); spoke(svg,c2.x,c2.y,r2,ph2,cssVar('--accent-2'));
+    groundPin(svg,c3.x,c3.y); groundPin(svg,c2.x,c2.y);
+    label(svg,c3.x,c3.y,'3',cssVar('--accent-dk')); label(svg,c2.x,c2.y,'2',cssVar('--accent-2'));
+    arrow(svg,c2.x+r2+14,y-26,c2.x+r2+14,y+26,{color:cssVar('--accent-2')}); caption(svg,c2.x+r2+30,y,'in',cssVar('--accent-2'));
+    arrow(svg,c3.x-r3-14,y+26,c3.x-r3-14,y-26,{color:cssVar('--accent')}); caption(svg,c3.x-r3-30,y,'out',cssVar('--accent'));
+    caption(svg,180,292,'external pair \u2014 opposite directions, R = \u2212N\u2083/N\u2082'); };
+
+  // 3.4 idler
+  STAGES.st_3_4=function(svg,t){ clear(svg);
+    var r3=50,r4=38,r2=50, y=152; var c3={x:84,y:y}; var c4={x:c3.x+(r3+r4),y:y}; var c2={x:c4.x+(r4+r2),y:y};
+    var ph2=t*2*Math.PI, ph4=-(r2/r4)*ph2, ph3=-(r4/r3)*ph4;
+    gear(svg,c3.x,c3.y,r3,20,ph3); spoke(svg,c3.x,c3.y,r3,ph3,cssVar('--accent'));
+    gear(svg,c4.x,c4.y,r4,15,ph4,cssVar('--paper-2')); spoke(svg,c4.x,c4.y,r4,ph4,cssVar('--ink-soft'));
+    gear(svg,c2.x,c2.y,r2,20,ph2); spoke(svg,c2.x,c2.y,r2,ph2,cssVar('--accent-2'));
+    groundPin(svg,c3.x,c3.y); groundPin(svg,c4.x,c4.y); groundPin(svg,c2.x,c2.y);
+    label(svg,c3.x,c3.y,'3',cssVar('--accent-dk')); label(svg,c4.x,c4.y,'4'); label(svg,c2.x,c2.y,'2',cssVar('--accent-2'));
+    caption(svg,180,292,'idler 4 \u2014 same direction, |R| unchanged'); };
+
+  // 3.5 compound
+  STAGES.st_3_5=function(svg,t){ clear(svg);
+    var r2=40,r4=56,r5=28,r3=52, y=150; var c2={x:78,y:y}; var cc={x:c2.x+(r2+r4),y:y}; var c3={x:cc.x+(r5+r3),y:y+4};
+    var ph2=t*2*Math.PI, ph45=-(r2/r4)*ph2, ph3=-(r5/r3)*ph45;
+    gear(svg,c2.x,c2.y,r2,14,ph2); spoke(svg,c2.x,c2.y,r2,ph2,cssVar('--accent'));
+    gear(svg,cc.x,cc.y,r4,18,ph45); gear(svg,cc.x,cc.y,r5,10,ph45,cssVar('--paper-2')); spoke(svg,cc.x,cc.y,r4,ph45,cssVar('--ink-soft'));
+    gear(svg,c3.x,c3.y,r3,18,ph3); spoke(svg,c3.x,c3.y,r3,ph3,cssVar('--accent-2'));
+    groundPin(svg,c2.x,c2.y); groundPin(svg,cc.x,cc.y); groundPin(svg,c3.x,c3.y);
+    label(svg,c2.x,c2.y,'2',cssVar('--accent-dk')); label(svg,cc.x-12,cc.y,'4'); label(svg,cc.x+10,cc.y,'5'); label(svg,c3.x,c3.y,'3',cssVar('--accent-2'));
+    caption(svg,180,292,'compound 4\u20135 share a shaft \u2014 ratios multiply'); };
+
+  // 3.6 manual transmission 1st gear (representative two-stage compound)
+  STAGES.st_3_6=function(svg,t){ clear(svg);
+    var r4=34,r5=54,r9=24,r1=46, y=140; var c4={x:80,y:y}; var cc={x:c4.x+(r4+r5),y:y}; var c1={x:cc.x+(r9+r1),y:y+10};
+    var ph4=t*2*Math.PI, ph56789=-(r4/r5)*ph4, ph1=-(r9/r1)*ph56789;
+    rail(svg,40,y,c4.x,y); rail(svg,c1.x,y+10,330,y+10);
+    gear(svg,c4.x,c4.y,r4,12,ph4); spoke(svg,c4.x,c4.y,r4,ph4,cssVar('--accent'));
+    gear(svg,cc.x,cc.y,r5,18,ph56789); gear(svg,cc.x,cc.y,r9,10,ph56789,cssVar('--paper-2')); spoke(svg,cc.x,cc.y,r5,ph56789,cssVar('--ink-soft'));
+    gear(svg,c1.x,c1.y,r1,16,ph1); spoke(svg,c1.x,c1.y,r1,ph1,cssVar('--accent-2'));
+    groundPin(svg,c4.x,c4.y); groundPin(svg,cc.x,cc.y); groundPin(svg,c1.x,c1.y);
+    label(svg,c4.x,c4.y,'4',cssVar('--accent-dk')); label(svg,cc.x-13,cc.y,'5'); label(svg,cc.x+12,cc.y,'9'); label(svg,c1.x,c1.y,'1',cssVar('--accent-2'));
+    caption(svg,60,y-44,'Input',cssVar('--accent-dk')); caption(svg,300,y+44,'Output',cssVar('--accent-2'));
+    caption(svg,180,292,'1st gear: 4 \u2192 countershaft 56789 \u2192 1 (R = 3.088)'); };
+
+  // 3.7 planetary, ring fixed
+  STAGES.st_3_7=function(svg,t){ clear(svg);
+    var O={x:180,y:150}; var Ns=24,Nr=72,Np=(Nr-Ns)/2; var k=104/Nr;
+    var Rs=Ns*k, Rr=Nr*k, Rp=Np*k, orbit=Rs+Rp;
+    var wc=0.5, ws=(1+Nr/Ns)*wc; var cAng=t*2*Math.PI*0.18*1; var carrier=cAng*wc, sun=cAng*ws;
+    ring(svg,O.x,O.y,Rr,Nr>40?40:Nr,0); label(svg,O.x,O.y-Rr+14,'4');
+    // carrier arms + planets
+    for(var j=0;j<3;j++){ var pa=carrier + j*2*Math.PI/3; var pc={x:O.x+orbit*Math.cos(pa), y:O.y+orbit*Math.sin(pa)};
+      bar(svg,O.x,O.y,pc.x,pc.y,{color:cssVar('--ink-soft'),w:4,op:.85});
+      var pspin=carrier - (Ns/Np)*(sun-carrier);
+      gear(svg,pc.x,pc.y,Rp,12,pspin,cssVar('--gear-fill')); spoke(svg,pc.x,pc.y,Rp,pspin,cssVar('--accent-2'));
+      if(j===0){ label(svg,pc.x,pc.y,'3',cssVar('--accent-dk')); }
+    }
+    gear(svg,O.x,O.y,Rs,14,sun,cssVar('--gear-fill')); spoke(svg,O.x,O.y,Rs,sun,cssVar('--accent')); label(svg,O.x,O.y,'2',cssVar('--accent'));
+    freePin(svg,O.x,O.y,3);
+    caption(svg,180,292,'ring 4 fixed \u00b7 sun 2 in \u00b7 arm 5 out \u2014 R = 1 + N\u2084/N\u2082'); };
+
+  // 3.8 compound planet (representative)
+  STAGES.st_3_8=function(svg,t){ clear(svg);
+    var O={x:180,y:150}; var R5=92, Rs=40, Rp1=30, Rp2=20, orbit=Rs+Rp1;
+    var arm=t*2*Math.PI*0.16;
+    svg.appendChild(el('circle',{cx:O.x,cy:O.y,r:R5,fill:'none',stroke:cssVar('--ink-soft'),'stroke-width':3,'stroke-dasharray':'2 5',opacity:.6})); label(svg,O.x,O.y-R5+14,'5 (fixed)');
+    for(var j=0;j<3;j++){ var pa=arm+j*2*Math.PI/3; var pc={x:O.x+orbit*Math.cos(pa),y:O.y+orbit*Math.sin(pa)};
+      bar(svg,O.x,O.y,pc.x,pc.y,{color:cssVar('--ink-soft'),w:4,op:.85});
+      var ps=-(Rs/Rp1)*(arm); gear(svg,pc.x,pc.y,Rp1,12,ps,cssVar('--gear-fill')); gear(svg,pc.x,pc.y,Rp2,9,ps,cssVar('--paper-2')); spoke(svg,pc.x,pc.y,Rp1,ps,cssVar('--accent-2'));
+      if(j===0) label(svg,pc.x,pc.y,'34',cssVar('--accent-dk'));
+    }
+    var sun=(1+R5/Rs)*arm; gear(svg,O.x,O.y,Rs,14,sun,cssVar('--gear-fill')); spoke(svg,O.x,O.y,Rs,sun,cssVar('--accent')); label(svg,O.x,O.y,'2',cssVar('--accent'));
+    caption(svg,180,292,'compound planet 34 \u00b7 arm 6 in \u00b7 gear 5 held \u00b7 out 2'); };
+
+  // 3.9 Model T low gear: planetary + band brake on element 7
+  STAGES.st_3_9=function(svg,t){ clear(svg);
+    var O={x:165,y:150}; var Rs=34,Rp=28,orbit=Rs+Rp; var arm=t*2*Math.PI*0.14;
+    // drum (element 7) held by band brake B2 -> static, hatched ring
+    svg.appendChild(el('circle',{cx:O.x,cy:O.y,r:96,fill:'none',stroke:cssVar('--ground-fill'),'stroke-width':4}));
+    arcPath(svg,O.x,O.y,108,-2.3,0.9,{color:cssVar('--accent-2'),w:7}); // band
+    caption(svg,O.x+118,O.y-44,'B\u2082',cssVar('--accent-2'));
+    label(svg,O.x,O.y-96+14,'7 (held)');
+    for(var j=0;j<3;j++){ var pa=arm+j*2*Math.PI/3; var pc={x:O.x+orbit*Math.cos(pa),y:O.y+orbit*Math.sin(pa)};
+      bar(svg,O.x,O.y,pc.x,pc.y,{color:cssVar('--ink-soft'),w:4,op:.8});
+      gear(svg,pc.x,pc.y,Rp,11,-(Rs/Rp)*arm,cssVar('--gear-fill')); }
+    var sun=(2.0)*arm; gear(svg,O.x,O.y,Rs,14,sun,cssVar('--gear-fill')); spoke(svg,O.x,O.y,Rs,sun,cssVar('--accent')); label(svg,O.x,O.y,'6',cssVar('--accent'));
+    arrow(svg,300,90,300,150,{color:cssVar('--accent')}); caption(svg,300,80,'in 6',cssVar('--accent'));
+    arrow(svg,300,210,300,150,{color:cssVar('--accent-2')}); caption(svg,300,222,'out 9',cssVar('--accent-2'));
+    caption(svg,180,292,'low gear: band brake B\u2082 grounds 7 \u2014 R = 2.75'); };
+
+  // 3.10 automatic transmission (representative coaxial schematic, B1 grounds 3)
+  STAGES.st_3_10=function(svg,t){ clear(svg);
+    var y=150; rail(svg,30,y,330,y);
+    var spin=t*2*Math.PI*0.4;
+    // input 6 (left), planetary blocks, output 58 (right)
+    gear(svg,70,y,30,12,spin,cssVar('--gear-fill')); spoke(svg,70,y,30,spin,cssVar('--accent')); label(svg,70,y,'6',cssVar('--accent'));
+    // element 3 grounded by B1 (hatched, static)
+    svg.appendChild(el('circle',{cx:150,cy:y,r:34,fill:'none',stroke:cssVar('--ground-fill'),'stroke-width':4}));
+    arcPath(svg,150,y,46,-2.4,0.6,{color:cssVar('--accent-2'),w:6}); caption(svg,150,y-52,'B\u2081',cssVar('--accent-2')); label(svg,150,y,'3');
+    gear(svg,230,y,30,12,-spin,cssVar('--gear-fill')); spoke(svg,230,y,30,-spin,cssVar('--ink-soft')); label(svg,230,y,'5/8');
+    gear(svg,300,y,26,10,spin*0.6,cssVar('--gear-fill')); spoke(svg,300,y,26,spin*0.6,cssVar('--accent-2')); label(svg,300,y,'58',cssVar('--accent-2'));
+    caption(svg,70,y-46,'in',cssVar('--accent')); caption(svg,300,y+46,'out',cssVar('--accent-2'));
+    caption(svg,180,292,'low speed: B\u2081 grounds 3 \u2014 5 eqs, 6 unknowns, R = 1.72'); };
+
+  // 3.11 hybrid: simple stage (left) + planetary stage (right), shared 56
+  STAGES.st_3_11=function(svg,t){ clear(svg);
+    var spin=t*2*Math.PI*0.4;
+    // left simple stage: input 27 -> 34 -> 56
+    var y=130; var c27={x:60,y:y}, c34={x:128,y:y}, c56={x:196,y:y};
+    rail(svg,28,y,60,y);
+    gear(svg,c27.x,c27.y,28,12,spin,cssVar('--gear-fill')); spoke(svg,c27.x,c27.y,28,spin,cssVar('--accent')); label(svg,c27.x,c27.y,'27',cssVar('--accent'));
+    gear(svg,c34.x,c34.y,38,15,-(28/38)*spin,cssVar('--paper-2')); spoke(svg,c34.x,c34.y,38,-(28/38)*spin,cssVar('--ink-soft')); label(svg,c34.x,c34.y,'34');
+    var s56=(38/30)*( (28/38)*spin ); gear(svg,c56.x,c56.y,30,12,s56,cssVar('--gear-fill')); spoke(svg,c56.x,c56.y,30,s56,cssVar('--accent-dk')); label(svg,c56.x,c56.y,'56',cssVar('--accent-dk'));
+    groundPin(svg,c27.x,c27.y); groundPin(svg,c34.x,c34.y);
+    caption(svg,128,y-52,'simple stage (arm = ground)',cssVar('--ink-soft'));
+    // right planetary stage: arm = 56, drives output 10
+    var O={x:262,y:206}; var Rs=24,Rp=20,orbit=Rs+Rp; var arm=s56;
+    for(var j=0;j<3;j++){ var pa=arm+j*2*Math.PI/3; var pc={x:O.x+orbit*Math.cos(pa),y:O.y+orbit*Math.sin(pa)};
+      bar(svg,O.x,O.y,pc.x,pc.y,{color:cssVar('--ink-soft'),w:3,op:.8});
+      gear(svg,pc.x,pc.y,Rp,10,-(Rs/Rp)*arm,cssVar('--gear-fill')); if(j===0) label(svg,pc.x,pc.y,'89',cssVar('--accent-dk')); }
+    gear(svg,O.x,O.y,Rs,12,-1.6*arm,cssVar('--gear-fill')); spoke(svg,O.x,O.y,Rs,-1.6*arm,cssVar('--accent-2')); label(svg,O.x,O.y,'10',cssVar('--accent-2'));
+    bar(svg,c56.x,c56.y,O.x,O.y,{color:cssVar('--accent-dk'),w:3,op:.7});
+    arrow(svg,O.x+54,O.y,O.x+18,O.y,{color:cssVar('--accent-2')}); caption(svg,O.x+66,O.y,'out 10',cssVar('--accent-2'));
+    caption(svg,262,y+8,'planetary stage (arm = 56)',cssVar('--ink-soft'));
+    caption(svg,180,292,'simple stage feeds planetary arm 56 \u2014 hybrid ratio'); };
+
+  /* ===================== STAGE CONTROLLER ===================== */
+  function makeStage(id,draw,opts){ var svg=$(id); if(!svg) return; opts=opts||{}; var t=opts.t0||0; var speed=opts.speed||0.006; var raf=null,playing=false;
+    var btn=document.querySelector('[data-play="'+id+'"]'); var origLabel=btn?btn.innerHTML:'';
+    function render(){ draw(svg,t); }
+    function frame(){ t+=speed; if(t>=1) t-=1; draw(svg,t); if(playing) raf=requestAnimationFrame(frame); }
+    function play(){ if(reduceMotion){ t=(t+(opts.step||0.12))%1; render(); return; } playing=true; if(btn) btn.innerHTML='\u258D\u258D Pause'; if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(frame); }
+    function pause(){ playing=false; if(raf) cancelAnimationFrame(raf); if(btn) btn.innerHTML=origLabel; }
+    render();
+    if(btn) btn.addEventListener('click',function(){ if(reduceMotion){ play(); return; } if(playing) pause(); else play(); });
+    if('IntersectionObserver' in window){ var io=new IntersectionObserver(function(en){ en.forEach(function(e){ if(!e.isIntersecting && playing) pause(); }); }); io.observe(svg); }
+  }
+
+  /* ===================== STEPPER ENGINE ===================== */
+  function initSteppers(){
+    var steppers=document.querySelectorAll('[data-stepper]');
+    Array.prototype.forEach.call(steppers,function(st){
+      var steps=Array.prototype.slice.call(st.querySelectorAll('.step'));
+      var answer=st.querySelector('[data-answer]');
+      var prev=st.querySelector('[data-prev]'), next=st.querySelector('[data-next]'), reveal=st.querySelector('[data-reveal]');
+      var curEl=st.querySelector('[data-cur]'), totEl=st.querySelector('[data-total]'), pips=st.querySelector('.progress-pips');
+      var idx=0, revealed=false, total=steps.length;
+      if(totEl) totEl.textContent=total;
+      var pipEls=[]; if(pips){ for(var i=0;i<total;i++){ var p=document.createElement('span'); p.className='pip'; pips.appendChild(p); pipEls.push(p);} }
+      function update(){
+        for(var i=0;i<steps.length;i++){ steps[i].hidden=(i!==idx)||revealed; }
+        if(answer) answer.hidden=!revealed;
+        if(curEl) curEl.textContent=revealed?total:(idx+1);
+        for(var j=0;j<pipEls.length;j++){ pipEls[j].className='pip'+((revealed||j<idx)?' done':'')+((j===idx&&!revealed)?' cur':''); }
+        var onLast=(idx===total-1);
+        if(prev) prev.disabled=(idx===0&&!revealed);
+        if(next) next.hidden=onLast||revealed;
+        if(reveal) reveal.hidden=(!onLast)||revealed;
+      }
+      if(next) next.addEventListener('click',function(){ if(idx<total-1){ idx++; update(); } });
+      if(prev) prev.addEventListener('click',function(){ if(revealed){ revealed=false; update(); return;} if(idx>0){ idx--; update(); } });
+      if(reveal) reveal.addEventListener('click',function(){ revealed=true; update(); });
+      update();
+    });
+  }
+
+  /* ===================== QUIZ ===================== */
+  function initQuiz(){ Array.prototype.forEach.call(document.querySelectorAll('[data-q]'),function(q){ var opts=Array.prototype.slice.call(q.querySelectorAll('.opt')); var fb=q.querySelector('.feedback'); var done=false;
+    opts.forEach(function(o){ o.addEventListener('click',function(){ if(done) return; done=true; var correct=o.getAttribute('data-correct')==='1';
+      if(correct){ o.classList.add('correct'); } else { o.classList.add('wrong'); opts.forEach(function(x){ if(x.getAttribute('data-correct')==='1') x.classList.add('correct'); }); }
+      if(fb) fb.classList.add('show'); }); });
+  }); }
+
+  /* ===================== GLOSSARY FILTER ===================== */
+  function initGloss(){ var inp=$('glossSearch'),list=$('glossList'),none=$('glossNone'); if(!inp||!list) return; var items=Array.prototype.slice.call(list.querySelectorAll('div'));
+    inp.addEventListener('input',function(){ var qv=inp.value.trim().toLowerCase(),any=false; items.forEach(function(it){ var m=it.textContent.toLowerCase().indexOf(qv)!==-1; it.hidden=!m; if(m)any=true; }); if(none) none.hidden=any; });
+  }
+
+  /* ===================== NAV ACTIVE + PROGRESS ===================== */
+  function initNavProgress(){ var prog=$('readprog'); var sections=Array.prototype.slice.call(document.querySelectorAll('main section[id]')); var links=Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    function onScroll(){ var h=document.documentElement; var scrolled=h.scrollTop||document.body.scrollTop||window.pageYOffset||0; var max=(h.scrollHeight-h.clientHeight)||1; if(prog) prog.value=Math.min(100,Math.max(0,scrolled/max*100));
+      var cur=sections.length?sections[0].id:null, mid=scrolled+h.clientHeight*0.3;
+      sections.forEach(function(sec){ if(sec.offsetTop<=mid) cur=sec.id; });
+      links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href')==='#'+cur); });
+    }
+    window.addEventListener('scroll',onScroll,{passive:true}); window.addEventListener('resize',onScroll); onScroll();
+  }
+
+  /* ===================== TOOL A: ROLLING-CONTACT VISUALIZER ===================== */
+  function initRollingTool(){
+    var svg=$('rc_svg'); if(!svg) return;
+    var extBtn=$('rc_ext'), intBtn=$('rc_int');
+    var raI=$('rc_ra'), rbI=$('rc_rb'), daI=$('rc_da');
+    var arcO=$('rc_arc'), dbO=$('rc_db'), dirO=$('rc_dir'), workO=$('rc_work'), noteO=$('rc_note');
+    var mode='ext';
+    var playBtn=document.querySelector('[data-play="rc_svg"]');
+    var anim=null, playing=false;
+
+    function num(inp,d){ var v=parseFloat(inp.value); return isFinite(v)?v:d; }
+
+    function compute(){
+      var ra=num(raI,2), rb=num(rbI,3), daDeg=num(daI,60);
+      var da=daDeg*DEG;
+      var ratio=ra/rb;
+      var dbRad = (mode==='ext'? -1:1)*ratio*da;
+      var dbDeg = dbRad/DEG;
+      var arc = ra*Math.abs(da); // arc length in radius-units (rolled by both)
+      return {ra:ra,rb:rb,daDeg:daDeg,da:da,dbRad:dbRad,dbDeg:dbDeg,arc:arc,ratio:ratio};
+    }
+
+    function draw(da){
+      clear(svg);
+      var ra=num(raI,2), rb=num(rbI,3);
+      var maxr=Math.max(ra,rb); var scale=Math.min(30, 118/maxr); if(!isFinite(scale)||scale<=0) scale=20;
+      var Ra=ra*scale, Rb=rb*scale, cy=150;
+      var c=compute(); var db=(mode==='ext'?-1:1)*c.ratio*da;
+      var pa, pb, contact;
+      if(mode==='ext'){
+        var cxa=180-Ra, cxb=180+Rb; contact={x:180,y:cy};
+        gear(svg,cxa,cy,Ra,Math.max(8,Math.round(ra*7)),da,cssVar('--gear-fill')); spoke(svg,cxa,cy,Ra,da,cssVar('--accent'));
+        gear(svg,cxb,cy,Rb,Math.max(8,Math.round(rb*7)),db,cssVar('--gear-fill')); spoke(svg,cxb,cy,Rb,db,cssVar('--accent-2'));
+        groundPin(svg,cxa,cy); groundPin(svg,cxb,cy);
+        label(svg,cxa,cy,'A',cssVar('--accent-dk')); label(svg,cxb,cy,'B',cssVar('--accent-dk'));
+        // arc swept highlights
+        arcPath(svg,cxa,cy,Ra+3, -Math.PI/2, -Math.PI/2+da, {color:cssVar('--accent'),w:4});
+        arcPath(svg,cxb,cy,Rb+3, -Math.PI/2, -Math.PI/2+db, {color:cssVar('--accent-2'),w:4});
+        dot(svg,contact.x,contact.y,4,cssVar('--rust'));
+      } else {
+        // internal: B is the ring (use larger as ring); draw ring centered, A inside
+        var Rring=Math.max(Ra,Rb), Rin=Math.min(Ra,Rb);
+        // ensure B is ring per labels (B big). If rb<ra, still treat geometry by sizes.
+        var cxa=180+(Rring-Rin), contact2={x:180+Rring,y:cy};
+        ring(svg,180,cy,Rring,Math.max(10,Math.round((Rring/scale)*7)),0);
+        label(svg,180,cy-Rring+14,'B (ring)',cssVar('--ink-soft'));
+        gear(svg,cxa,cy,Rin,Math.max(8,Math.round((Rin/scale)*7)),da,cssVar('--gear-fill')); spoke(svg,cxa,cy,Rin,da,cssVar('--accent'));
+        groundPin(svg,180,cy); freePin(svg,cxa,cy,4); label(svg,cxa,cy,'A',cssVar('--accent-dk'));
+        arcPath(svg,cxa,cy,Rin+3, 0, db, {color:cssVar('--accent'),w:4});
+        dot(svg,contact2.x,contact2.y,4,cssVar('--rust'));
+      }
+      caption(svg,180,290, mode==='ext'?'external \u2014 surfaces move opposite at contact':'internal \u2014 surfaces move together at contact');
+    }
+
+    function refresh(){
+      var c=compute();
+      if(arcO) arcO.textContent=c.arc.toFixed(2)+' units';
+      if(dbO) dbO.textContent=c.dbDeg.toFixed(1)+'\u00b0';
+      if(dirO) dirO.textContent=(mode==='ext'?'opposite':'same');
+      var sign=(mode==='ext'?'\u2212':'+');
+      if(workO){ workO.textContent=
+        '\u03c1_A \u0394\u03b8_A = '+sign+' \u03c1_B \u0394\u03b8_B   ('+(mode==='ext'?'external, Eq 3.1':'internal, Eq 3.5')+')\n'+
+        'arc s = \u03c1_A|\u0394\u03b8_A| = '+c.ra.toFixed(2)+' \u00d7 '+(Math.abs(c.daDeg)).toFixed(0)+'\u00b0(='+(Math.abs(c.da)).toFixed(3)+' rad) = '+c.arc.toFixed(2)+' units\n'+
+        '\u0394\u03b8_B = '+sign+'(\u03c1_A/\u03c1_B)\u0394\u03b8_A = '+sign+'('+c.ra.toFixed(2)+'/'+c.rb.toFixed(2)+')\u00d7'+c.daDeg.toFixed(0)+'\u00b0 = '+c.dbDeg.toFixed(1)+'\u00b0';
+      }
+      if(noteO) noteO.textContent = (mode==='ext'
+        ? 'External contact: B turns the opposite way, and faster when it is smaller (\u03c1_A>\u03c1_B).'
+        : 'Internal contact: B (the ring) turns the same way as A; equal arc lengths still rule.');
+      if(!playing) draw(c.da);
+    }
+
+    var animPhase=0;
+    function frame(){ animPhase+=0.03; if(animPhase>compute().da) animPhase=0; draw(animPhase); if(playing) anim=requestAnimationFrame(frame); }
+    function setMode(m){ mode=m; extBtn.setAttribute('aria-pressed', m==='ext'?'true':'false'); intBtn.setAttribute('aria-pressed', m==='int'?'true':'false'); refresh(); }
+
+    extBtn.addEventListener('click',function(){ setMode('ext'); });
+    intBtn.addEventListener('click',function(){ setMode('int'); });
+    [raI,rbI,daI].forEach(function(inp){ inp.addEventListener('input',function(){ if(playing){ playing=false; if(anim) cancelAnimationFrame(anim); if(playBtn) playBtn.innerHTML='\u25B6 Play'; } refresh(); }); });
+    if(playBtn) playBtn.addEventListener('click',function(){
+      if(reduceMotion){ animPhase=(animPhase+0.2)%(compute().da||1); draw(animPhase); return; }
+      if(playing){ playing=false; if(anim) cancelAnimationFrame(anim); playBtn.innerHTML='\u25B6 Play'; }
+      else { playing=true; playBtn.innerHTML='\u258D\u258D Pause'; animPhase=0; anim=requestAnimationFrame(frame); }
+    });
+    setMode('ext');
+  }
+
+  /* ===================== TOOL C: GEAR-TRAIN RATIO + SPEED/TORQUE ===================== */
+  function initGearTrainTool(){
+    var ninI=$('gt_nin'), powI=$('gt_pow');
+    var RO=$('gt_R'), dirO=$('gt_dir'), noutO=$('gt_nout'), tinO=$('gt_Tin'), toutO=$('gt_Tout'), workO=$('gt_work');
+    if(!RO) return;
+    var rows=[1,2,3,4].map(function(i){ return {
+      a:$('gt_a'+i), d:$('gt_d'+i), n:$('gt_n'+i), ext:$('gt_e'+i), int:$('gt_i'+i), i:i,
+      type:'ext'
+    }; });
+
+    function num(inp,d){ var v=parseFloat(inp.value); return isFinite(v)?v:d; }
+
+    function compute(){
+      var mag=1, sign=1, parts=[], nExt=0, active=0;
+      rows.forEach(function(r){ if(r.a.checked){ active++; var dN=num(r.d,1), nN=num(r.n,1); if(dN<=0)dN=1; mag*=nN/dN; if(r.type==='ext'){ sign*=-1; nExt++; } parts.push((r.type==='ext'?'\u2212':'+')+'('+nN+'/'+dN+')'); } });
+      var signedR=sign*mag;
+      var nin=num(ninI,0), pow=num(powI,0);
+      var nout=(mag!==0&&nin>0)? nin/mag : 0;
+      var Tin=(nin>0)? 5252*pow/nin : 0;
+      var Tout=-signedR*Tin;
+      return {mag:mag,sign:sign,signedR:signedR,parts:parts,nExt:nExt,active:active,nin:nin,pow:pow,nout:nout,Tin:Tin,Tout:Tout};
+    }
+
+    function refresh(){
+      var c=compute();
+      if(c.active===0){ RO.textContent='\u2014'; dirO.textContent='\u2014'; noutO.textContent='\u2014'; tinO.textContent='\u2014'; toutO.textContent='\u2014'; if(workO) workO.textContent='Turn on at least one mesh.'; return; }
+      RO.textContent=(c.signedR>=0?'+':'')+c.signedR.toFixed(3);
+      dirO.textContent=(c.signedR>=0?'same as input':'reversed');
+      noutO.textContent=(c.nin>0)? c.nout.toFixed(1)+' rpm' : '\u2014';
+      tinO.textContent=(c.nin>0)? c.Tin.toFixed(1)+' ft\u00b7lbf' : '\u2014';
+      toutO.textContent=(c.nin>0)? c.Tout.toFixed(1)+' ft\u00b7lbf' : '\u2014';
+      if(workO){ workO.textContent=
+        'R = \u220f(N_driven/N_driver) with one sign flip per external mesh\n'+
+        'R = '+c.parts.join(' \u00d7 ').replace(/\+\(/g,'(').replace(/\u2212\(/g,'\u2212(')+' = '+(c.signedR>=0?'+':'')+c.signedR.toFixed(3)+'\n'+
+        '|R| = '+c.mag.toFixed(3)+' \u00b7 '+c.nExt+' external mesh(es) \u2192 sign '+(c.sign>0?'+':'\u2212')+'\n'+
+        (c.nin>0? ('n_out = n_in/|R| = '+c.nin+'/'+c.mag.toFixed(3)+' = '+c.nout.toFixed(1)+' rpm\nT_in = 5252\u00b7'+c.pow+'/'+c.nin+' = '+c.Tin.toFixed(1)+' ft\u00b7lbf\nT_out = \u2212R\u00b7T_in = '+c.Tout.toFixed(1)+' ft\u00b7lbf') : 'Enter input speed for n_out and torque.');
+      }
+    }
+
+    rows.forEach(function(r){
+      r.a.addEventListener('change',refresh);
+      r.d.addEventListener('input',refresh); r.n.addEventListener('input',refresh);
+      r.ext.addEventListener('click',function(){ r.type='ext'; r.ext.setAttribute('aria-pressed','true'); r.int.setAttribute('aria-pressed','false'); refresh(); });
+      r.int.addEventListener('click',function(){ r.type='int'; r.int.setAttribute('aria-pressed','true'); r.ext.setAttribute('aria-pressed','false'); refresh(); });
+    });
+    ninI.addEventListener('input',refresh); powI.addEventListener('input',refresh);
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-gtpreset]'),function(btn){ btn.addEventListener('click',function(){
+      var spec=btn.getAttribute('data-gtpreset').split(';');
+      rows.forEach(function(r){ r.a.checked=false; });
+      spec.forEach(function(seg,idx){ if(idx>3) return; var r=rows[idx]; var pp=seg.split(':'); var type=pp[0]; var teeth=pp[1].split(','); r.a.checked=true; r.type=type; r.ext.setAttribute('aria-pressed',type==='ext'?'true':'false'); r.int.setAttribute('aria-pressed',type==='int'?'true':'false'); r.d.value=teeth[0]; r.n.value=teeth[1]; });
+      refresh();
+    }); });
+    refresh();
+  }
+
+  /* ===================== TOOL B: PLANETARY RATIO SOLVER ===================== */
+  function initPlanetaryTool(){
+    var svg=$('pl_svg'); if(!svg) return;
+    var nsI=$('pl_ns'), nrI=$('pl_nr'), npO=$('pl_np');
+    var fixedS=$('pl_fixed'), inS=$('pl_in'), outS=$('pl_out');
+    var RO=$('pl_R'), dirO=$('pl_dir'), workO=$('pl_work'), noteO=$('pl_note'), drv=$('pl_drv');
+    var playBtn=document.querySelector('[data-play="pl_svg"]');
+    var raf=null, playing=false, tt=0;
+
+    function num(inp,d){ var v=parseFloat(inp.value); return isFinite(v)?v:d; }
+
+    // Solve Willis: ws + k*wr - (1+k)*wc = 0, k = Nr/Ns. fixed=0, input=1, solve third.
+    function solve(){
+      var Ns=num(nsI,24), Nr=num(nrI,72), k=Nr/Ns;
+      var fx=fixedS.value, ip=inS.value, op=outS.value;
+      var valid=(fx!==ip)&&(fx!==op)&&(ip!==op);
+      var w={sun:null,ring:null,carrier:null};
+      w[fx]=0; w[ip]=1;
+      // unknown is the remaining member
+      var members=['sun','ring','carrier'];
+      var unknown=null; members.forEach(function(m){ if(w[m]===null) unknown=m; });
+      // equation coefficients: sun:1, ring:k, carrier:-(1+k)
+      var coef={sun:1, ring:k, carrier:-(1+k)};
+      if(unknown){
+        var rhs=0; members.forEach(function(m){ if(m!==unknown) rhs+=coef[m]*w[m]; });
+        w[unknown]=-rhs/coef[unknown];
+      }
+      var win=w[ip], wout=w[op];
+      var R=(wout!==0)? win/wout : Infinity;
+      return {Ns:Ns,Nr:Nr,k:k,valid:valid,w:w,win:win,wout:wout,R:R,fx:fx,ip:ip,op:op,unknown:unknown};
+    }
+
+    function drawPlan(){
+      clear(svg);
+      var s=solve();
+      var Ns=s.Ns, Nr=s.Nr, Np=(Nr-Ns)/2;
+      var O={x:180,y:150}; var kk=104/Nr; var Rs=Ns*kk, Rr=Nr*kk, Rp=Np*kk, orbit=Rs+Rp;
+      var spd=0.5;
+      var ang= tt*2*Math.PI;
+      var carrier=(s.valid? s.w.carrier:0)*ang*spd;
+      var sun=(s.valid? s.w.sun:1)*ang*spd;
+      var ringRot=(s.valid? s.w.ring:0)*ang*spd;
+      ring(svg,O.x,O.y,Rr,Nr>44?44:Math.round(Nr),ringRot); label(svg,O.x,O.y-Rr+14,'ring');
+      for(var j=0;j<3;j++){ var pa=carrier+j*2*Math.PI/3; var pc={x:O.x+orbit*Math.cos(pa),y:O.y+orbit*Math.sin(pa)};
+        bar(svg,O.x,O.y,pc.x,pc.y,{color:cssVar('--ink-soft'),w:4,op:.8});
+        var pspin=(Np!==0)? (carrier - (Ns/Np)*(sun-carrier)) : carrier;
+        gear(svg,pc.x,pc.y,Rp,Math.max(8,Math.round(Np>0?Np/2:6)),pspin,cssVar('--gear-fill')); spoke(svg,pc.x,pc.y,Rp,pspin,cssVar('--accent-2'));
+        if(j===0) label(svg,pc.x,pc.y,'planet',cssVar('--ink-soft'));
+      }
+      gear(svg,O.x,O.y,Rs,Math.max(8,Math.round(Ns/2)),sun,cssVar('--gear-fill')); spoke(svg,O.x,O.y,Rs,sun,cssVar('--accent')); label(svg,O.x,O.y,'sun',cssVar('--accent'));
+      freePin(svg,O.x,O.y,3);
+    }
+
+    function refresh(){
+      var s=solve();
+      var Np=(s.Nr-s.Ns)/2;
+      if(npO) npO.textContent=Np.toFixed( (Np%1===0)?0:2 );
+      if(!s.valid){ RO.textContent='\u2014'; dirO.textContent='choose 3 different members'; if(workO) workO.textContent='Fixed, input, and output must be three different members.'; drawPlan(); return; }
+      if(!isFinite(s.R)){ RO.textContent='\u221e (locked)'; dirO.textContent='output stationary'; }
+      else { RO.textContent=(s.R>=0?'+':'')+s.R.toFixed(3); dirO.textContent=(s.R>=0?'same direction':'reversed'); }
+      if(workO){ workO.textContent=
+        'Willis: (\u03c9_sun \u2212 \u03c9_carrier) = \u2212(N_r/N_s)(\u03c9_ring \u2212 \u03c9_carrier),  k = N_r/N_s = '+s.k.toFixed(3)+'\n'+
+        'set \u03c9_'+s.fx+' = 0 (fixed), \u03c9_'+s.ip+' = 1 (input)\n'+
+        '\u2192 \u03c9_sun = '+s.w.sun.toFixed(3)+',  \u03c9_ring = '+s.w.ring.toFixed(3)+',  \u03c9_carrier = '+s.w.carrier.toFixed(3)+'\n'+
+        'R = \u03c9_'+s.ip+'/\u03c9_'+s.op+' = '+(isFinite(s.R)? ((s.R>=0?'+':'')+s.R.toFixed(3)) : '\u221e');
+      }
+      if(noteO){ var msg='N_p = (N_r \u2212 N_s)/2 = '+Np.toFixed((Np%1===0)?0:2)+(Np%1===0?'':'  \u2014 not a whole number, planets would not fit evenly')+'. Ring fixed + sun in + carrier out gives R = 1 + N_r/N_s.';
+        noteO.textContent=msg; }
+      if(drv) drv.textContent=s.fx+' fixed \u00b7 '+s.ip+' in \u00b7 '+s.op+' out';
+      drawPlan();
+    }
+
+    function frame(){ tt+=0.004; if(tt>=1) tt-=1; drawPlan(); if(playing) raf=requestAnimationFrame(frame); }
+
+    [nsI,nrI].forEach(function(inp){ inp.addEventListener('input',refresh); });
+    [fixedS,inS,outS].forEach(function(sel){ sel.addEventListener('change',refresh); });
+    if(playBtn) playBtn.addEventListener('click',function(){
+      if(reduceMotion){ tt=(tt+0.12)%1; drawPlan(); return; }
+      if(playing){ playing=false; if(raf) cancelAnimationFrame(raf); playBtn.innerHTML='\u25B6 Play'; }
+      else { playing=true; playBtn.innerHTML='\u258D\u258D Pause'; raf=requestAnimationFrame(frame); }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-plpreset]'),function(btn){ btn.addEventListener('click',function(){
+      var p=btn.getAttribute('data-plpreset').split(','); fixedS.value=p[0]; inS.value=p[1]; outS.value=p[2]; refresh();
+    }); });
+    refresh();
+  }
+
+  /* ===================== BOOT ===================== */
+  function boot(){
+    initSteppers(); initQuiz(); initGloss(); initNavProgress();
+    var speeds={st_3_1:0.0045, st_3_2:0.0045, st_3_3:0.006, st_3_4:0.006, st_3_5:0.0055, st_3_6:0.005, st_3_7:0.006, st_3_8:0.006, st_3_9:0.006, st_3_10:0.006, st_3_11:0.006};
+    Object.keys(STAGES).forEach(function(id){ if($(id)) makeStage(id, STAGES[id], {speed:speeds[id]||0.006, step:0.12}); });
+    initRollingTool(); initGearTrainTool(); initPlanetaryTool();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+</body>
+</html>
