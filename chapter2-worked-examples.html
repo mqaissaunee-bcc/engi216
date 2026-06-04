@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENGI 216 · Chapter 2 Worked Examples — The Vector Loop Method</title>
+<meta name="description" content="Interactive worked-example companion for ENGI 216 Chapter 2: the vector loop method for position analysis. All eleven Stanišić examples (2.1–2.11) worked step by step, grouped by method, with animated mechanisms, a live four-bar closed-form position solver, and a Newton–Raphson iteration lab.">
+<style>
+  :root{
+    --ink:        #10243a;
+    --ink-soft:   #2b4a66;
+    --paper:      #f3f1e7;
+    --paper-2:    #e9e6d6;
+    --panel:      #ffffff;
+    --panel-line: #c9c4b0;
+    --accent:     #0a7ea4;
+    --accent-dk:  #075a76;
+    --accent-2:   #c2541d;
+    --good:       #1f7a4d;
+    --good-bg:    #e3f3e9;
+    --bad:        #a4231f;
+    --bad-bg:     #f7e3e2;
+    --warn:       #8a6d1a;
+    --warn-bg:    #f7f0d8;
+    --grid-line:  rgba(10,126,164,.10);
+    --shadow:     0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:     10px;
+    --maxw:       1080px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", serif;
+    --sans: "Optima", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --link-fill: #0a7ea4;
+    --ground-fill:#10243a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:        #e8edf2;
+      --ink-soft:   #aebfcf;
+      --paper:      #0e1820;
+      --paper-2:    #132330;
+      --panel:      #16242f;
+      --panel-line: #2c4150;
+      --accent:     #3bb6d8;
+      --accent-dk:  #7fd6ee;
+      --accent-2:   #e8853f;
+      --good:       #5fc78e;
+      --good-bg:    #16352a;
+      --bad:        #f08a86;
+      --bad-bg:     #3a1e1d;
+      --warn:       #e6c869;
+      --warn-bg:    #352d12;
+      --grid-line:  rgba(59,182,216,.12);
+      --shadow:     0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+      --link-fill:  #3bb6d8;
+      --ground-fill:#cfe0ec;
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    line-height:1.62;
+    font-size:17px;
+  }
+
+  /* ---------- skip link ---------- */
+  .skip-link{
+    position:absolute; left:8px; top:-44px;
+    background:var(--accent); color:#fff; padding:10px 16px;
+    border-radius:8px; z-index:1000; text-decoration:none; font-weight:700;
+    transition:top .15s ease;
+  }
+  .skip-link:focus{ top:8px; }
+
+  /* ---------- header ---------- */
+  header.site{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden;
+  }
+  header.site::after{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px; pointer-events:none;
+  }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:1; }
+  .chip{
+    display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.14em;
+    text-transform:uppercase; background:rgba(243,241,231,.14); color:#f3f1e7;
+    padding:5px 12px; border-radius:20px; border:1px solid rgba(243,241,231,.25);
+  }
+  header.site h1{
+    font-family:var(--serif); font-weight:700; font-size:clamp(1.7rem,4.4vw,2.6rem);
+    margin:.4em 0 .2em; line-height:1.12;
+  }
+  header.site .sub{ font-size:1.04rem; max-width:60ch; color:#e6e2d4; margin:.2em 0 1em; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:8px 22px; font-family:var(--mono); font-size:.8rem; color:#cfe0ec; }
+  .meta-row span{ white-space:nowrap; }
+
+  /* ---------- toc nav ---------- */
+  nav.toc{
+    position:sticky; top:0; z-index:50; background:var(--panel);
+    border-bottom:1px solid var(--panel-line); box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  nav.toc .wrap{
+    max-width:var(--maxw); margin:0 auto; padding:0 8px;
+    display:flex; gap:2px; overflow-x:auto; scrollbar-width:thin;
+  }
+  nav.toc a{
+    flex:0 0 auto; font-family:var(--mono); font-size:.78rem; letter-spacing:.02em;
+    color:var(--ink-soft); text-decoration:none; padding:11px 12px; border-bottom:3px solid transparent;
+    white-space:nowrap; min-height:44px; display:flex; align-items:center;
+  }
+  nav.toc a:hover{ color:var(--accent-dk); }
+  nav.toc a.active{ color:var(--accent-dk); border-bottom-color:var(--accent); font-weight:700; }
+  nav.toc a:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; border-radius:4px; }
+
+  /* ---------- layout ---------- */
+  main{ max-width:var(--maxw); margin:0 auto; padding:8px 18px 60px; }
+  section{ padding:30px 0 8px; border-bottom:1px solid var(--panel-line); }
+  section:last-of-type{ border-bottom:none; }
+  .sec-tag{
+    display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:2px;
+  }
+  h2{ font-family:var(--serif); font-weight:700; font-size:clamp(1.4rem,3vw,2rem); line-height:1.18; margin:.1em 0 .5em; }
+  h3{ font-family:var(--serif); font-weight:700; font-size:1.22rem; margin:1.1em 0 .35em; }
+  h4{ font-family:var(--mono); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-dk); margin:1.1em 0 .3em; }
+  p{ margin:.55em 0; }
+  .lead{ font-size:1.08rem; color:var(--ink); }
+  a{ color:var(--accent-dk); }
+  strong{ color:var(--ink); }
+  em{ color:var(--ink); }
+
+  ul.clean{ list-style:none; padding-left:0; }
+  ul.clean li{ position:relative; padding-left:1.5em; margin:.4em 0; }
+  ul.clean li::before{ content:"▸"; position:absolute; left:0; color:var(--accent); font-weight:700; }
+
+  /* ---------- cards & boxes ---------- */
+  .card{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:18px 20px; margin:16px 0; box-shadow:var(--shadow); }
+  .grid3{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:14px 0; }
+  .defn{ background:var(--paper-2); border:1px solid var(--panel-line); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:11px 14px; font-size:.95rem; }
+  .defn strong{ color:var(--accent-dk); }
+
+  /* ---------- callouts ---------- */
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; display:block; margin-bottom:3px; }
+  .analogy{ border-left:4px solid var(--accent); background:linear-gradient(180deg, var(--paper-2), var(--panel)); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; }
+  .analogy::before{ content:"\1F4A1"; position:absolute; left:14px; top:13px; font-size:1.2rem; line-height:1; }
+  .analogy .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; margin-bottom:3px; }
+  .analogy p:last-child{ margin-bottom:0; }
+  .realworld{ border:1px solid var(--panel-line); border-left:4px solid var(--accent-2); background:var(--panel); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; box-shadow:var(--shadow); }
+  .realworld::before{ content:"\1F527"; position:absolute; left:14px; top:13px; font-size:1.15rem; line-height:1; }
+  .realworld .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:3px; }
+  .realworld p:last-child{ margin-bottom:0; }
+  .realworld ul{ margin:.4em 0 0; padding-left:1.1em; }
+  .realworld li{ margin:.3em 0; }
+
+  /* ---------- equation ---------- */
+  .eq{ font-family:var(--serif); font-size:1.18rem; text-align:center; margin:14px 0; padding:12px; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; overflow-x:auto; }
+  .eq .term{ color:var(--accent-dk); font-style:italic; }
+  .eq .op{ color:var(--accent-2); }
+  var{ font-family:var(--serif); font-style:italic; color:var(--accent-dk); }
+  sub{ font-size:.7em; }
+
+  /* ---------- tables ---------- */
+  .tbl-wrap{ overflow-x:auto; margin:14px 0; }
+  table{ border-collapse:collapse; width:100%; font-size:.93rem; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; overflow:hidden; }
+  caption{ caption-side:top; text-align:left; font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding:0 0 6px; }
+  th, td{ text-align:left; padding:9px 12px; border-bottom:1px solid var(--panel-line); vertical-align:top; }
+  thead th{ background:var(--ink); color:#f3f1e7; font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; font-weight:700; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:nth-child(even){ background:var(--paper-2); }
+  td.num, th.num{ text-align:center; font-family:var(--mono); }
+
+  /* ---------- SVG stage ---------- */
+  .stage{ width:100%; height:auto; background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; display:block; }
+  .stage-wrap{ margin:0; }
+  .stage-cap{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); margin:6px 2px 0; }
+  text.lk{ font-family:var(--mono); font-size:13px; font-weight:700; }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:var(--mono); font-size:.82rem; font-weight:700; letter-spacing:.03em;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:0 16px; min-height:44px; min-width:44px; cursor:pointer; display:inline-flex;
+    align-items:center; justify-content:center; gap:7px; transition:background .15s ease, transform .05s ease;
+  }
+  .btn:hover{ background:var(--accent-dk); }
+  .btn:active{ transform:translateY(1px); }
+  .btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .btn[disabled]{ background:var(--panel-line); color:var(--ink-soft); cursor:not-allowed; }
+  .btn.ghost{ background:transparent; color:var(--accent-dk); border:1.5px solid var(--accent); }
+  .btn.ghost:hover{ background:var(--paper-2); }
+  .btn.rust{ background:var(--accent-2); }
+  .btn.rust:hover{ background:#9c4316; }
+  .btn.sm{ min-height:34px; font-size:.74rem; padding:0 11px; }
+
+  /* ---------- tool panel ---------- */
+  .tool{ background:var(--panel); border:1px solid var(--panel-line); border-top:3px solid var(--accent); border-radius:var(--radius); padding:18px 20px; margin:16px 0; box-shadow:var(--shadow); }
+  .tool .tool-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; }
+  .field-row{ display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin:12px 0; }
+  .field{ display:flex; flex-direction:column; gap:4px; }
+  .field label{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); font-weight:700; }
+  .field input[type=number]{
+    width:84px; font-family:var(--mono); font-size:1rem; padding:8px 10px; min-height:44px;
+    border:1.5px solid var(--panel-line); border-radius:8px; background:var(--paper); color:var(--ink);
+  }
+  .field input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .stepper-input{ display:flex; align-items:center; gap:6px; }
+  .stepper-input button{ font-family:var(--mono); font-size:1.1rem; min-width:38px; min-height:44px; border:1.5px solid var(--panel-line); background:var(--paper-2); color:var(--ink); border-radius:8px; cursor:pointer; }
+  .stepper-input button:hover{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .readout{ font-family:var(--serif); font-size:1.5rem; }
+  .readout .big{ font-size:2.2rem; font-weight:700; color:var(--accent-dk); }
+  .verdict{ font-family:var(--mono); font-size:.86rem; font-weight:700; padding:8px 12px; border-radius:8px; margin-top:8px; display:inline-block; }
+  .verdict.mech{ background:var(--good-bg); color:var(--good); }
+  .verdict.struct{ background:var(--warn-bg); color:var(--warn); }
+  .verdict.indet{ background:var(--bad-bg); color:var(--bad); }
+
+  /* ---------- example article ---------- */
+  .example{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:0; margin:22px 0; box-shadow:var(--shadow); overflow:hidden; }
+  .example > .ex-head{ background:linear-gradient(135deg, var(--ink), var(--ink-soft)); color:#f3f1e7; padding:14px 20px; }
+  .ex-badge{ display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; background:var(--accent-2); color:#fff; padding:3px 10px; border-radius:5px; }
+  .ex-head h3{ font-family:var(--serif); color:#fff; margin:.35em 0 0; font-size:1.25rem; }
+  .ex-body{ padding:18px 20px; }
+  .ex-prompt{ font-size:1rem; }
+  .ex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; margin-top:8px; }
+  @media (max-width:760px){ .ex-grid{ grid-template-columns:1fr; } }
+
+  .play-row{ display:flex; gap:8px; align-items:center; margin:8px 0 0; flex-wrap:wrap; }
+  .play-row .drv{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); }
+
+  /* ---------- stepper ---------- */
+  .stepper{ border:1px solid var(--panel-line); border-radius:10px; background:var(--paper); }
+  .stepper .progress-pips{ display:flex; gap:5px; padding:12px 14px 0; flex-wrap:wrap; }
+  .pip{ width:24px; height:6px; border-radius:3px; background:var(--panel-line); }
+  .pip.done{ background:var(--accent); }
+  .pip.cur{ background:var(--accent-2); }
+  .step-track{ padding:8px 16px 4px; min-height:120px; }
+  .step{ animation:fade .25s ease; }
+  @keyframes fade{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .step{ animation:none; } }
+  .step h5{ font-family:var(--mono); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-dk); margin:.2em 0 .3em; }
+  .step p{ margin:.35em 0; font-size:.96rem; }
+  .step .mini-eq{ font-family:var(--serif); font-size:1.05rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:6px; padding:7px 10px; margin:8px 0; text-align:center; overflow-x:auto; }
+  .tally{ font-family:var(--mono); font-size:.85rem; }
+  .tally b{ color:var(--accent-dk); }
+  .answer{ margin:6px 16px 14px; padding:14px 16px; border:2px solid var(--good); border-radius:10px; background:var(--good-bg); }
+  .answer.struct{ border-color:var(--warn); background:var(--warn-bg); }
+  .answer.indet{ border-color:var(--bad); background:var(--bad-bg); }
+  .answer .ans-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--good); }
+  .answer.struct .ans-h{ color:var(--warn); }
+  .answer.indet .ans-h{ color:var(--bad); }
+  .answer .big-eq{ font-family:var(--serif); font-size:1.15rem; text-align:center; margin:8px 0; overflow-x:auto; }
+  .step-controls{ display:flex; align-items:center; gap:8px; padding:8px 14px 14px; flex-wrap:wrap; border-top:1px solid var(--panel-line); }
+  .step-count{ font-family:var(--mono); font-size:.78rem; color:var(--ink-soft); margin-left:auto; }
+
+  /* ---------- self-check quiz ---------- */
+  .q{ background:var(--panel); border:1px solid var(--panel-line); border-radius:10px; padding:16px 18px; margin:14px 0; box-shadow:var(--shadow); }
+  .q .qnum{ font-family:var(--mono); font-size:.72rem; color:var(--accent-2); font-weight:700; letter-spacing:.08em; }
+  .q .qtext{ font-weight:600; margin:.2em 0 .6em; }
+  .opt{ display:block; width:100%; text-align:left; font-family:var(--sans); font-size:.95rem; background:var(--paper); border:1.5px solid var(--panel-line); border-radius:8px; padding:10px 14px; margin:6px 0; min-height:44px; cursor:pointer; color:var(--ink); }
+  .opt:hover{ border-color:var(--accent); }
+  .opt:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .opt.correct{ background:var(--good-bg); border-color:var(--good); color:var(--good); font-weight:700; }
+  .opt.wrong{ background:var(--bad-bg); border-color:var(--bad); color:var(--bad); }
+  .opt .mk{ font-weight:700; margin-right:6px; }
+  .feedback{ font-size:.9rem; margin-top:8px; padding:10px 12px; border-radius:8px; background:var(--paper-2); border-left:3px solid var(--accent); display:none; }
+  .feedback.show{ display:block; }
+
+  /* ---------- formula card ---------- */
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:12px; padding:0; margin:16px 0; overflow:hidden; }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--serif); font-size:1.15rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:16px 18px; }
+  .rc-eq{ font-family:var(--serif); font-size:1.3rem; text-align:center; padding:10px; background:var(--paper-2); border-radius:8px; margin:0 0 12px; }
+
+  /* ---------- glossary ---------- */
+  .gloss-search{ width:100%; max-width:420px; font-family:var(--sans); font-size:1rem; padding:10px 14px; min-height:44px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--paper); color:var(--ink); margin:6px 0 12px; }
+  .gloss-search:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  dl.gloss{ margin:0; }
+  dl.gloss > div{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:8px 0; background:var(--panel); }
+  dl.gloss dt{ font-family:var(--serif); font-weight:700; font-size:1.04rem; color:var(--accent-dk); }
+  dl.gloss dd{ margin:.25em 0 0; font-size:.95rem; }
+  .gloss-none{ color:var(--ink-soft); font-style:italic; }
+
+  /* ---------- resources ---------- */
+  .res-cat{ font-family:var(--mono); font-size:.76rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin:14px 0 4px; }
+  .res-list{ list-style:none; padding:0; margin:0; }
+  .res-list li{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:7px 0; background:var(--panel); }
+  .res-list a{ font-weight:700; }
+  .ext::after{ content:" \2197"; font-size:.85em; color:var(--accent-2); }
+  .res-list .desc{ display:block; font-size:.88rem; color:var(--ink-soft); margin-top:2px; }
+
+  /* ---------- progress dock ---------- */
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  /* ---------- footer ---------- */
+  footer{ background:var(--ink); color:#cfe0ec; padding:22px 18px; text-align:center; font-size:.86rem; }
+  footer .program{ color:#f3f1e7; font-weight:700; }
+  footer a{ color:#9fd8ee; }
+
+  .note{ font-size:.86rem; color:var(--ink-soft); }
+  hr.soft{ border:none; border-top:1px dashed var(--panel-line); margin:18px 0; }
+
+  /* ---------- print ---------- */
+  @media print{
+    nav.toc, .progress-dock, .play-row, .step-controls, button, .gloss-search{ display:none !important; }
+    body{ background:#fff; font-size:12px; }
+    .step[hidden]{ display:block !important; }
+    .answer[hidden]{ display:block !important; }
+    .example, .card, .tool, .refcard{ box-shadow:none; break-inside:avoid; }
+  }
+
+  /* ---------- Ch2 additions: solvers, vectors, iteration log ---------- */
+  .vle{ font-family:var(--serif); font-size:1.12rem; text-align:center; margin:12px 0; padding:11px; background:var(--paper-2); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; overflow-x:auto; }
+  .vle .vec{ font-weight:700; }
+  .scalar{ font-family:var(--serif); font-size:1.02rem; }
+  .knowns-row{ display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+  .kchip{ font-family:var(--mono); font-size:.74rem; padding:4px 9px; border-radius:6px; border:1px solid var(--panel-line); background:var(--paper-2); }
+  .kchip.known{ border-left:3px solid var(--good); }
+  .kchip.unknown{ border-left:3px solid var(--accent-2); }
+  .dof-pill{ display:inline-block; font-family:var(--mono); font-weight:700; font-size:.9rem; padding:6px 13px; border-radius:20px; background:var(--good-bg); color:var(--good); border:1px solid var(--good); }
+  .solver-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }
+  @media (max-width:760px){ .solver-grid{ grid-template-columns:1fr; } }
+  .statgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin:10px 0; }
+  .stat{ background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; padding:8px 10px; }
+  .stat .lab{ font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); display:block; }
+  .stat .val{ font-family:var(--mono); font-size:1.12rem; font-weight:700; color:var(--accent-dk); }
+  .matrix{ font-family:var(--mono); font-size:.82rem; line-height:1.5; white-space:pre; overflow-x:auto; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; padding:10px 12px; }
+  .itlog{ font-size:.82rem; }
+  .itlog td, .itlog th{ font-family:var(--mono); text-align:center; padding:6px 8px; white-space:nowrap; }
+  .itlog tbody tr.latest td{ background:var(--good-bg); font-weight:700; }
+  .mode-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .mode-tabs .mt{ font-family:var(--mono); font-size:.76rem; font-weight:700; padding:8px 14px; min-height:40px; border-radius:8px; border:1.5px solid var(--panel-line); background:var(--paper); color:var(--ink-soft); cursor:pointer; }
+  .mode-tabs .mt[aria-selected="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .mode-tabs .mt:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .seg{ display:inline-flex; border:1.5px solid var(--accent); border-radius:8px; overflow:hidden; }
+  .seg button{ font-family:var(--mono); font-size:.74rem; font-weight:700; padding:7px 12px; min-height:40px; border:none; background:var(--paper); color:var(--accent-dk); cursor:pointer; }
+  .seg button[aria-pressed="true"]{ background:var(--accent); color:#fff; }
+  .seg button:focus-visible{ outline:2px solid var(--accent-2); outline-offset:-2px; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Chapter 2 · Worked Examples</span>
+    <h1>The Vector Loop Method</h1>
+    <p class="sub">All eleven of Stanišić&rsquo;s Chapter 2 examples worked step by step &mdash; writing position equations from vector loops, counting degrees of freedom, and solving them in closed form and with Newton&rsquo;s method. Two live solvers run the arithmetic in front of the class.</p>
+    <div class="meta-row">
+      <span>&#9719; ~3 hour problem session</span>
+      <span>&#9670; 11 animated examples</span>
+      <span>&#9881; Four-bar solver &middot; Newton&ndash;Raphson lab</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Worked-example sections">
+  <div class="wrap" id="tocWrap">
+    <a href="#start" class="active">Start</a>
+    <a href="#method">The 5 Steps</a>
+    <a href="#grp-1">2.1&ndash;2.2 &middot; Single loop</a>
+    <a href="#grp-2">2.3&ndash;2.7 &middot; Multiloop</a>
+    <a href="#solver-fb">Four-bar Solver</a>
+    <a href="#grp-3">2.8 &middot; Closed form</a>
+    <a href="#newton-lab">Newton Lab</a>
+    <a href="#grp-4">2.9&ndash;2.10 &middot; Newton</a>
+    <a href="#grp-5">2.11 &middot; Points</a>
+    <a href="#quiz">Self-Check</a>
+    <a href="#refcard">Formula Card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ START ============ -->
+<section id="start" aria-labelledby="start-h">
+  <span class="sec-tag">Orientation</span>
+  <h2 id="start-h">How to use this problem session</h2>
+  <p class="lead">Chapter 1 asked <em>how many</em> inputs a mechanism needs. Chapter 2 asks the harder question: <em>given those inputs, exactly where does every link go?</em> The answer is the <strong>position problem</strong>, and one disciplined recipe &mdash; the vector loop method &mdash; sets it up for any planar mechanism, from a four-bar to a front-end loader. Today we run that recipe through all eleven textbook examples, watch each mechanism move, and then actually <em>solve</em> the equations two ways.</p>
+
+  <div class="card">
+    <h3 style="margin-top:.2em">Each example works the same way</h3>
+    <ul class="clean">
+      <li><strong>Watch first.</strong> Press <em>Play</em> on the animated skeleton to see the motion and the vectors before any algebra.</li>
+      <li><strong>Step through the derivation.</strong> Use <em>Next</em> to advance one logical step at a time: assign vectors, write the loop equation, fix a frame, split into scalar components, count unknowns. Ideal for working it on the board together.</li>
+      <li><strong>Reveal the result.</strong> On the last step the boxed position equations and the degree-of-freedom count appear. Predict the DOF before you reveal &mdash; then check it against Gruebler.</li>
+      <li><strong>Then solve it.</strong> Two live tools &mdash; a four-bar closed-form solver and a Newton&ndash;Raphson lab &mdash; take the equations the rest of the way to numbers.</li>
+    </ul>
+    <p class="note">Everything runs offline in a single file &mdash; safe to embed in Canvas, project from a laptop with no Wi-Fi, or hand to students to replay.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; a treasure-map walk</span>
+    <p>A vector loop is a set of walking directions that must return you to your starting X. &ldquo;20 paces along link 2, then 36 along link 3, then back along link 4 and the ground.&rdquo; If you end up anywhere but where you started, the directions are wrong. Closing the loop &mdash; ending exactly at the start &mdash; is the single geometric fact that ties all the link angles together. Every position equation in this chapter is just that walk, written in <em>x</em> and <em>y</em>.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Where this goes next</span>
+    <p>Solve the position problem once and you can place a robot&rsquo;s gripper, predict where an engine piston sits at a given crank angle, or check that a bucket linkage won&rsquo;t collide with the cab. Differentiate the very same loop equations and you get velocities and accelerations &mdash; the entire rest of the course is built on the loop you learn to write today.</p>
+  </div>
+</section>
+
+<!-- ============ METHOD ============ -->
+<section id="method" aria-labelledby="method-h">
+  <span class="sec-tag">The recipe</span>
+  <h2 id="method-h">The five-step vector loop procedure</h2>
+  <p class="lead">Stanišić&rsquo;s Section 2.1 lays out five steps that every example below follows without exception. Learn the five steps once and the only thing that changes from a four-bar to a front loader is bookkeeping.</p>
+
+  <div class="card">
+    <ol style="padding-left:1.2em">
+      <li style="margin:.5em 0"><strong>Assign a vector to each link</strong>, running from one pin joint to the next. Name each vector after its link where you can. The vector&rsquo;s <em>length</em> is a known dimension; its <em>direction</em> &theta; is either known or an unknown joint variable. A good assignment is one where every vector represents a real dimension or a joint variable.</li>
+      <li style="margin:.5em 0"><strong>Write the vector loop equation (VLE).</strong> Walk the vectors head-to-tail around a closed loop and set the sum to zero: the walk must return to its start. One independent VLE per independent loop.</li>
+      <li style="margin:.5em 0"><strong>Fix a coordinate frame.</strong> Put the origin at a stationary pin and align the <var>X</var> axis with the ground vector <span class="vec">r&#772;<sub>1</sub></span> so that &theta;<sub>1</sub> = 0 and the equations simplify.</li>
+      <li style="margin:.5em 0"><strong>Take scalar components.</strong> Project the VLE onto <var>X</var> and <var>Y</var>. Each vector <var>r&#8341;</var>&ang;&theta;&#8341; contributes <var>r&#8341;</var>cos&theta;&#8341; to the <var>X</var> equation and <var>r&#8341;</var>sin&theta;&#8341; to the <var>Y</var> equation. Two scalar equations per VLE.</li>
+      <li style="margin:.5em 0"><strong>Count knowns and unknowns.</strong> Scalar unknowns minus scalar equations equals the number of inputs you must supply &mdash; the degrees of freedom. It must agree with Gruebler.</li>
+    </ol>
+  </div>
+
+  <h3>The one rule that generates every scalar equation</h3>
+  <p>A planar vector of length <var>r</var> at angle &theta; (measured counter-clockwise from the <var>+X</var> axis) has components (<var>r</var>cos&theta;, <var>r</var>sin&theta;). So the moment you have a loop equation, the two scalar position equations write themselves:</p>
+  <div class="eq"><span class="term">&sum; r<sub>i</sub> cos&theta;<sub>i</sub></span> <span class="op">= 0</span> &nbsp;&nbsp;and&nbsp;&nbsp; <span class="term">&sum; r<sub>i</sub> sin&theta;<sub>i</sub></span> <span class="op">= 0</span></div>
+  <p>with a plus sign for a vector taken in its assigned direction and a minus sign for one taken against it. That is the entire mechanical content of steps 2&ndash;4.</p>
+
+  <div class="analogy">
+    <span class="h">Analogy &mdash; shadows on two walls</span>
+    <p>cos&theta; and sin&theta; are just the shadow a link casts on the floor (<var>X</var>) and on the wall (<var>Y</var>) when lit from the side and from above. &ldquo;The loop closes&rdquo; means the floor-shadows of all the links cancel <em>and</em> the wall-shadows cancel, independently. Two shadows, two scalar equations.</p>
+  </div>
+
+  <h3>Multiloop mechanisms: independent loops and geometric constraints</h3>
+  <p>A mechanism with more than one loop needs <strong>one VLE per <em>independent</em> loop</strong>. A loop you can build by adding or subtracting loops you already have is <em>not</em> independent &mdash; writing it adds no new information. But multiloop mechanisms hide a second subtlety: several vectors may be glued to the <em>same</em> rigid body, so their directions are locked together by a fixed angle. Those relationships &mdash; like &theta;<sub>3</sub> + &gamma; = &theta;<sub>7</sub> &mdash; are <strong>geometric constraints</strong>, and they are extra equations you must add before the unknown count is right.</p>
+
+  <div class="callout">
+    <span class="h">Two ways to finish the job</span>
+    <p>Setting up the equations is only half the chapter. <strong>Closed-form:</strong> for the four-bar (and a few others) you can eliminate one unknown and solve a quadratic exactly &mdash; that is Example 2.8 and the live solver below. <strong>Numerical:</strong> for everything messier, Newton&rsquo;s method drives the residuals to zero by repeated linear corrections &mdash; Examples 2.9&ndash;2.10 and the Newton lab. You will use both before the day is out.</p>
+  </div>
+
+  <div class="realworld">
+    <span class="h">Why engineers still write the loop by hand</span>
+    <p>CAD and multibody software solve these loops automatically &mdash; but the solver needs <em>you</em> to know how many inputs the device has, which assembly mode it sits in, and why it sometimes refuses to assemble. Every one of those judgments comes straight out of the five steps. The software does the arithmetic; the engineer owns the loop.</p>
+  </div>
+</section>
+
+<!-- ============ GROUP 1 : single loop ============ -->
+<section id="grp-1" aria-labelledby="g1-h">
+  <span class="sec-tag">Method &mdash; setting up a single loop</span>
+  <h2 id="g1-h">Group 1 &mdash; one loop, written from scratch</h2>
+  <p>The two mechanisms every engineer meets first. Here the whole point is the <em>setup</em>: assign vectors, close the loop, drop to scalar components, and read the DOF straight off the unknown count.</p>
+
+  <!-- 2.1 four-bar -->
+  <article class="example" id="ex-2-1">
+    <div class="ex-head"><span class="ex-badge">Example 2.1</span><h3>The four-bar mechanism</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">A four-bar mechanism (Figure 2.2): four links in a closed loop, joined by four pins, one link grounded. Follow the five steps to derive the position equations and deduce the degrees of freedom.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_1" class="stage" viewBox="0 0 360 280" role="img" aria-label="A four-bar linkage: crank link 2 on the left ground pin drives coupler link 3, which drives output link 4 on the right ground pin, all closing through ground link 1."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_1">&#9654; Play</button><span class="drv" id="drv_st_2_1">crank 2 rotates; the loop stays closed</span></div>
+          <p class="stage-cap">Vectors r&#772;<sub>2</sub>+r&#772;<sub>3</sub> reach the same point as r&#772;<sub>1</sub>+r&#772;<sub>4</sub> &mdash; the loop closes.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Assign vectors</h5><p>One vector per link, pin to pin: <span class="vec">r&#772;<sub>2</sub></span> along the crank, <span class="vec">r&#772;<sub>3</sub></span> along the coupler, <span class="vec">r&#772;<sub>4</sub></span> along the output link, and <span class="vec">r&#772;<sub>1</sub></span> along the ground. The angles &theta;<sub>2</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub> are the joint variables; the lengths are fixed.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Vector loop equation</h5><div class="mini-eq">r&#772;<sub>2</sub> + r&#772;<sub>3</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</div><p>Walk crank&rarr;coupler, then back along output&rarr;ground, and you return to the start. (Eq. 2.3)</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Fix the frame</h5><p>Origin at the pin between links 1 and 2; align <var>X</var> with <span class="vec">r&#772;<sub>1</sub></span>, so <strong>&theta;<sub>1</sub> = 0</strong> and r&#772;<sub>1</sub> has only an <var>X</var> component.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Scalar components</h5><div class="mini-eq">r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>1</sub> = 0</div><div class="mini-eq">r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>3</sub>sin&theta;<sub>3</sub> &minus; r<sub>4</sub>sin&theta;<sub>4</sub> = 0</div><p>Equations (2.4) and (2.5) &mdash; the position equations.</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Count</h5><p><span class="kchip known">known r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, r<sub>4</sub>, &theta;<sub>1</sub>=0</span> <span class="kchip unknown">unknown &theta;<sub>2</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub></span></p><p>Three unknowns, two equations &rarr; one must be given. Predict the DOF, then reveal.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">3 unknowns &minus; 2 equations = <strong>1 DOF</strong></div>
+              <p>Specify the crank angle &theta;<sub>2</sub> and the coupler and output angles are determined &mdash; one driver runs the whole linkage, agreeing with Gruebler. Note the two scalar equations have <em>two</em> solutions for a given &theta;<sub>2</sub>: the <strong>open</strong> and <strong>crossed</strong> assembly modes. <span class="dof-pill">F = 1 &middot; one input</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a four-person hand-hold</span><p>Four people hold hands in a ring. Move one person&rsquo;s arm (the crank) and everyone else shifts to keep the ring closed &mdash; nobody lets go. You only get to command <em>one</em> arm; the rest follow. That is exactly one degree of freedom.</p></div>
+      <div class="realworld"><span class="h">Where you see the four-bar</span><p>Windshield-wiper drives, bicycle-brake calipers, locking pliers, the suspension of many cars, and the classic oil-field pumpjack are all four-bars. It is the most-used mechanism in engineering precisely because one motor produces a useful, repeatable path.</p></div>
+    </div>
+  </article>
+
+  <!-- 2.2 offset crank-slider -->
+  <article class="example" id="ex-2-2">
+    <div class="ex-head"><span class="ex-badge">Example 2.2</span><h3>The offset crank-slider</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">An <em>offset</em> crank-slider (Figure 2.4): the line of action of the wrist pin does not pass through the crank&rsquo;s ground pin. Derive the position equations and find the DOF.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_2" class="stage" viewBox="0 0 360 280" role="img" aria-label="An offset crank-slider: crank link 2 rotates about a ground pin, connecting rod link 3 drives a slider block link 4 along a horizontal line offset below the crank pivot."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_2">&#9654; Play</button><span class="drv" id="drv_st_2_2">crank turns; slider 4 reciprocates</span></div>
+          <p class="stage-cap">r&#772;<sub>1</sub> is the perpendicular <em>offset</em>; r&#772;<sub>4</sub> is the slider position along its rail.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Assign vectors</h5><p><span class="vec">r&#772;<sub>2</sub></span> crank, <span class="vec">r&#772;<sub>3</sub></span> connecting rod, then close with two <em>perpendicular</em> vectors: <span class="vec">r&#772;<sub>4</sub></span> horizontal (slider travel) and <span class="vec">r&#772;<sub>1</sub></span> vertical (the constant offset). Using the shortest distance from a point to a line keeps both meaningful.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Vector loop equation</h5><div class="mini-eq">r&#772;<sub>2</sub> + r&#772;<sub>3</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Fix the frame</h5><p>Origin at the crank ground pin; align axes with r&#772;<sub>4</sub> and r&#772;<sub>1</sub>, giving <strong>&theta;<sub>4</sub> = 0</strong> and <strong>&theta;<sub>1</sub> = &minus;&pi;/2</strong>.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Scalar components</h5><div class="mini-eq">r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub> = 0</div><div class="mini-eq">r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>3</sub>sin&theta;<sub>3</sub> + r<sub>1</sub> = 0</div><p>Equations (2.7) and (2.8). The slider distance r<sub>4</sub> is itself one of the unknowns.</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Count</h5><p><span class="kchip known">known r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, &theta;<sub>1</sub>=&minus;&pi;/2, &theta;<sub>4</sub>=0</span> <span class="kchip unknown">unknown &theta;<sub>2</sub>, &theta;<sub>3</sub>, r<sub>4</sub></span></p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">3 unknowns &minus; 2 equations = <strong>1 DOF</strong></div>
+              <p>One input &mdash; the crank angle &theta;<sub>2</sub> &mdash; fixes both the rod angle and the slider position. Notice an unknown can be a <em>length</em> (r<sub>4</sub>) just as easily as an angle. <span class="dof-pill">F = 1 &middot; one input</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a bike pump</span><p>Your hand circles the crank; the piston slides straight in the cylinder. The connecting rod converts the &ldquo;going around&rdquo; into &ldquo;going in and out.&rdquo; The <em>offset</em> is just mounting the cylinder slightly off the crank&rsquo;s center line &mdash; common in real engines to tune the side-thrust on the piston.</p></div>
+      <div class="realworld"><span class="h">Where you see the crank-slider</span><p>Every piston engine and compressor, scotch-yoke pumps, sewing-machine needles, and stamping presses. When the offset is zero it becomes the in-line slider-crank of a car engine; the offset version shows up where packaging or wear considerations nudge the cylinder aside.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ GROUP 2 : multiloop ============ -->
+<section id="grp-2" aria-labelledby="g2-h">
+  <span class="sec-tag">Method &mdash; multiple loops &amp; constraints</span>
+  <h2 id="g2-h">Group 2 &mdash; multiloop mechanisms and geometric constraints</h2>
+  <p>More loops, more bookkeeping. Two new ideas carry the whole group: write <strong>one VLE per independent loop</strong>, and add a <strong>geometric constraint</strong> for every pair of vectors locked to the same rigid body. Get those right and the DOF count always matches Gruebler.</p>
+
+  <!-- 2.3 -->
+  <article class="example" id="ex-2-3">
+    <div class="ex-head"><span class="ex-badge">Example 2.3</span><h3>A two-DOF three-link mechanism</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Figure 2.14 shows a four-link mechanism that Gruebler&rsquo;s criterion says has two degrees of freedom. Derive the position equations and confirm the DOF from them.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_3" class="stage" viewBox="0 0 360 280" role="img" aria-label="A two-degree-of-freedom mechanism: link 2 from the left ground carries a circular body whose center connects through vector r5 to a second circular body on link 3, which links to the right ground through link 4."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_3">&#9654; Play</button><span class="drv" id="drv_st_2_3">two inputs move independently</span></div>
+          <p class="stage-cap">r&#772;<sub>5</sub> spans the two body centers &mdash; an extra vector, an extra unknown angle.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Assign vectors</h5><p>Vectors on links 2 and 3 are pin-to-pin as usual. The circular bodies on 2 and 3 give clear center points, so insert <span class="vec">r&#772;<sub>5</sub></span> between those centers. With <span class="vec">r&#772;<sub>4</sub></span> and ground <span class="vec">r&#772;<sub>1</sub></span> the loop closes.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Vector loop equation</h5><div class="mini-eq">r&#772;<sub>2</sub> + r&#772;<sub>5</sub> + r&#772;<sub>3</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3&ndash;4 &middot; Frame &amp; scalars</h5><p>Origin at the pin between 1 and 2, <var>X</var> along r&#772;<sub>1</sub> (&theta;<sub>1</sub>=0):</p><div class="mini-eq">r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>5</sub>cos&theta;<sub>5</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>1</sub> = 0</div><div class="mini-eq">r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>5</sub>sin&theta;<sub>5</sub> + r<sub>3</sub>sin&theta;<sub>3</sub> &minus; r<sub>4</sub>sin&theta;<sub>4</sub> = 0</div><p>Equations (2.9) and (2.10).</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 5 &middot; Count</h5><p><span class="kchip known">known r<sub>2</sub>, r<sub>5</sub>, r<sub>3</sub>, r<sub>4</sub>, r<sub>1</sub>, &theta;<sub>1</sub>=0</span> <span class="kchip unknown">unknown &theta;<sub>2</sub>, &theta;<sub>5</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub></span></p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 2</span>
+              <div class="big-eq">4 unknowns &minus; 2 equations = <strong>2 DOF</strong></div>
+              <p>Two of the four angles must be supplied &mdash; a two-input mechanism, matching Gruebler. The extra vector r&#772;<sub>5</sub> introduced the extra unknown angle that bumps the count from one to two. <span class="dof-pill">F = 2 &middot; two inputs</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; an Etch A Sketch</span><p>Two knobs, two independent motions: one draws horizontally, one vertically, and together they reach any point. A two-DOF mechanism is the same &mdash; you need two commands to pin down where everything sits, and neither knob alone is enough.</p></div>
+      <div class="realworld"><span class="h">Where two DOF earns its keep</span><p>Pan-tilt camera mounts, two-joint SCARA placement, and excavator boom-plus-stick motions are all two-DOF: two actuators reach a workspace of points rather than a single fixed path. The cost of that freedom is a second motor and a second command.</p></div>
+    </div>
+  </article>
+
+  <!-- 2.4 -->
+  <article class="example" id="ex-2-4">
+    <div class="ex-head"><span class="ex-badge">Example 2.4</span><h3>A two-loop mechanism (with geometric constraints)</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">The two-loop mechanism of Figure 2.16, built from loops 1-2-3-4 and 1-4-3-5-6. Derive the position equations and deduce the DOF. This is the mechanism the Newton lab below actually solves.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_4" class="stage" viewBox="0 0 360 280" role="img" aria-label="A two-loop mechanism with three ground pins, a coupler body carrying a slider, driven through link 2."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_4">&#9654; Play</button><span class="drv" id="drv_st_2_4">one input drives both loops</span></div>
+          <p class="stage-cap">Two loops share link 3 and 4; r&#772;<sub>3</sub>, r&#772;<sub>5</sub>, r&#772;<sub>7</sub> ride the same body.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1&ndash;2 &middot; Two independent loops</h5><p>Two loops need two VLEs. A third loop (1-2-3-5-6) exists but is just their difference &mdash; not independent.</p><div class="mini-eq">r&#772;<sub>2</sub> + r&#772;<sub>3</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</div><div class="mini-eq">r&#772;<sub>8</sub> + r&#772;<sub>6</sub> &minus; r&#772;<sub>5</sub> &minus; r&#772;<sub>7</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</div></div>
+            <div class="step" data-step="2" hidden><h5>Step 3&ndash;4 &middot; Four scalar equations</h5><p>From the first loop, Eqs (2.13)&ndash;(2.14); from the second, Eqs (2.15)&ndash;(2.16) &mdash; four equations in all.</p><div class="mini-eq">r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>1</sub> = 0</div><div class="mini-eq">r<sub>8</sub>cos&theta;<sub>8</sub> + r<sub>6</sub>cos&theta;<sub>6</sub> &minus; r<sub>5</sub>cos&theta;<sub>5</sub> &minus; r<sub>7</sub>cos&theta;<sub>7</sub> &minus; r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>1</sub> = 0</div><p>(plus the two matching sine equations).</p></div>
+            <div class="step" data-step="3" hidden><h5>The trap &middot; too many unknowns</h5><p>Seven unknowns (&theta;<sub>2</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub>, &theta;<sub>6</sub>, r<sub>5</sub>, &theta;<sub>5</sub>, &theta;<sub>7</sub>) against four equations would say 3 DOF &mdash; but Gruebler says <strong>1</strong>. What did the equations miss?</p></div>
+            <div class="step" data-step="4" hidden><h5>Step &middot; Geometric constraints</h5><p>Vectors r&#772;<sub>3</sub>, r&#772;<sub>7</sub>, r&#772;<sub>5</sub> are glued to body 3, so their directions are locked together:</p><div class="mini-eq">&theta;<sub>3</sub> + &gamma; &minus; &theta;<sub>7</sub> = 0</div><div class="mini-eq">&theta;<sub>5</sub> + &pi;/2 &minus; &theta;<sub>7</sub> = 0</div><p>Two more equations &rarr; six total. Add &gamma; to the knowns.</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Count again</h5><p><span class="kchip known">known r<sub>1</sub>,r<sub>2</sub>,r<sub>3</sub>,r<sub>4</sub>,r<sub>6</sub>,r<sub>7</sub>,r<sub>8</sub>,&theta;<sub>1</sub>=0,&theta;<sub>8</sub>,&gamma;</span> <span class="kchip unknown">unknown &theta;<sub>2..7</sub>, r<sub>5</sub> (7)</span></p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 1</span>
+              <div class="big-eq">7 unknowns &minus; 6 equations = <strong>1 DOF</strong></div>
+              <p>The two geometric constraints were the missing equations. With them the count drops from a wrong 3 to the correct 1 &mdash; the lesson of multiloop analysis. <span class="dof-pill">F = 1 &middot; one input</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>6</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; folding-ruler segments</span><p>On a carpenter&rsquo;s folding ruler, three little marks printed on one segment always keep their angles to each other &mdash; they ride the same stick. Pretending each mark could point anywhere would over-count the ruler&rsquo;s freedom. Geometric constraints are how we tell the equations that those directions move together.</p></div>
+      <div class="realworld"><span class="h">Why multiloop matters</span><p>Backhoes, automotive valve trains, and printing-press feeds are multiloop. Counting their freedom correctly is the difference between sizing one actuator or three &mdash; and an over-counted model will never assemble in software.</p></div>
+    </div>
+  </article>
+
+  <!-- 2.5 -->
+  <article class="example" id="ex-2-5">
+    <div class="ex-head"><span class="ex-badge">Example 2.5</span><h3>A two-loop mechanism with a length constraint</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">The mechanism of Figure 2.19 &mdash; loops 1-2-3-4 and 1-4-5 &mdash; including the rarer case where two vector <em>lengths</em> are tied together. Derive the position equations and the DOF.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_5" class="stage" viewBox="0 0 360 280" role="img" aria-label="A two-loop mechanism with a rack on the left, two small bodies, an oval coupler body, and a grounded slider, illustrating a vector-length geometric constraint."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_5">&#9654; Play</button><span class="drv" id="drv_st_2_5">coupled two-DOF motion</span></div>
+          <p class="stage-cap">A sliding pair makes r&#772;<sub>7</sub>, r&#772;<sub>8</sub> share a fixed total length: r<sub>8</sub> + r<sub>7</sub> = L.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1&ndash;2 &middot; Two loops</h5><p>Two independent VLEs (a third loop is dependent):</p><div class="mini-eq">r&#772;<sub>5</sub> + r&#772;<sub>6</sub> + r&#772;<sub>7</sub> &minus; r&#772;<sub>9</sub> = 0&#772;</div><div class="mini-eq">r&#772;<sub>9</sub> &minus; r&#772;<sub>8</sub> &minus; r&#772;<sub>4</sub> &minus; r&#772;<sub>3</sub> &minus; r&#772;<sub>10</sub> &minus; r&#772;<sub>2</sub> &minus; r&#772;<sub>1</sub> = 0&#772;</div></div>
+            <div class="step" data-step="2" hidden><h5>Step 3&ndash;4 &middot; Four scalar equations</h5><p>Components give Eqs (2.20)&ndash;(2.23). Watch the signs: with &theta;<sub>2</sub> = &minus;&pi;/2, the term &minus;r<sub>2</sub>sin&theta;<sub>2</sub> becomes <em>+r<sub>2</sub></em>.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step &middot; Four geometric constraints</h5><p>Three angle constraints from vectors sharing bodies, plus one <strong>length</strong> constraint from the sliding pair:</p><div class="mini-eq">&theta;<sub>8</sub>&minus;&theta;<sub>7</sub>+&pi;=0 &nbsp; &theta;<sub>4</sub>&minus;&theta;<sub>8</sub>+&pi;/2=0 &nbsp; &theta;<sub>7</sub>&minus;&theta;<sub>6</sub>+&pi;/2=0</div><div class="mini-eq">r<sub>8</sub> + r<sub>7</sub> = L</div><p>Eqs (2.24)&ndash;(2.27): eight equations in all.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 5 &middot; Count</h5><p>Ten scalar unknowns (r<sub>2</sub>, &theta;<sub>10</sub>, &theta;<sub>3</sub>, &theta;<sub>4</sub>, &theta;<sub>8</sub>, &theta;<sub>7</sub>, r<sub>8</sub>, r<sub>7</sub>, &theta;<sub>6</sub>, &theta;<sub>5</sub>) against eight equations.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 2</span>
+              <div class="big-eq">10 unknowns &minus; 8 equations = <strong>2 DOF</strong></div>
+              <p>A two-input mechanism. The unusual feature here is the <em>length</em> constraint r<sub>8</sub>+r<sub>7</sub>=L &mdash; geometric constraints aren&rsquo;t always about angles. Choosing better loops (Fig 2.21) gets the same DOF with fewer equations. <span class="dof-pill">F = 2 &middot; two inputs</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a trombone slide</span><p>Two tube lengths share one fixed total: push the slide out and the inner length shrinks by exactly the amount the outer grows. r<sub>8</sub> + r<sub>7</sub> = L is that same &ldquo;what one gains the other loses&rdquo; bookkeeping, written as an equation.</p></div>
+      <div class="realworld"><span class="h">Length constraints in the wild</span><p>Telescoping booms, hydraulic-cylinder strokes, and trombone slides all impose a fixed combined length on two segments. Recognizing them as constraints &mdash; not free variables &mdash; keeps the DOF count honest.</p></div>
+    </div>
+  </article>
+
+
+  <!-- 2.6 exercise machine -->
+  <article class="example" id="ex-2-6">
+    <div class="ex-head"><span class="ex-badge">Example 2.6</span><h3>The exercise machine</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Figure 2.22 is the skeleton of the elliptical exercise machine first met in Chapter 1. Derive its position equations and deduce the DOF.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_6" class="stage" viewBox="0 0 360 280" role="img" aria-label="An elliptical exercise machine skeleton: two pin-jointed loops sharing link 4, producing the foot-pedal path."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_6">&#9654; Play</button><span class="drv" id="drv_st_2_6">pedal path traced by two loops</span></div>
+          <p class="stage-cap">Loops 1-2-3-4 and 4-5-6-7, all pin joints; r&#772;<sub>4</sub> and r&#772;<sub>8</sub> ride link 4.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1&ndash;2 &middot; Two loops, pins only</h5><div class="mini-eq">r&#772;<sub>1</sub> + r&#772;<sub>2</sub> + r&#772;<sub>3</sub> + r&#772;<sub>8</sub> = 0&#772;</div><div class="mini-eq">r&#772;<sub>4</sub> + r&#772;<sub>5</sub> &minus; r&#772;<sub>6</sub> &minus; r&#772;<sub>7</sub> = 0&#772;</div></div>
+            <div class="step" data-step="2" hidden><h5>Step 3&ndash;4 &middot; Four scalar equations</h5><p>Origin at the pin between 1 and 5, <var>X</var> along r&#772;<sub>1</sub>:</p><div class="mini-eq">r<sub>1</sub> + r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>3</sub>cos&theta;<sub>3</sub> + r<sub>8</sub>cos&theta;<sub>8</sub> = 0</div><div class="mini-eq">r<sub>4</sub>cos&theta;<sub>4</sub> + r<sub>5</sub>cos&theta;<sub>5</sub> &minus; r<sub>6</sub>cos&theta;<sub>6</sub> &minus; r<sub>7</sub>cos&theta;<sub>7</sub> = 0</div><p>Eqs (2.28)&ndash;(2.31) with the matching sine equations.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step &middot; One geometric constraint</h5><p>r&#772;<sub>4</sub> and r&#772;<sub>8</sub> are both fixed to link 4, so they rotate together:</p><div class="mini-eq">&theta;<sub>8</sub> &minus; &theta;<sub>4</sub> = 0</div><p>Eq (2.32) &mdash; five equations total.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 5 &middot; Count</h5><p><span class="kchip known">known &theta;<sub>1</sub>=0, r<sub>1..8</sub></span> <span class="kchip unknown">unknown &theta;<sub>2</sub>,&theta;<sub>3</sub>,&theta;<sub>4</sub>,&theta;<sub>5</sub>,&theta;<sub>6</sub>,&theta;<sub>7</sub>,&theta;<sub>8</sub> (7)</span></p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 2</span>
+              <div class="big-eq">7 unknowns &minus; 5 equations = <strong>2 DOF</strong></div>
+              <p>Two inputs &mdash; which is exactly why an elliptical trainer lets the user drive both stride length and incline. Once solved, you can draw the whole machine at any instant. <span class="dof-pill">F = 2 &middot; two inputs</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; pedaling and steering at once</span><p>On an elliptical you supply two things: how hard you stride and how the ramp is set. Each is an independent command, and the pedal&rsquo;s elliptical path is the mechanism&rsquo;s response to both &mdash; two degrees of freedom you feel in your legs.</p></div>
+      <div class="realworld"><span class="h">Designing the feel of a machine</span><p>Gym-equipment engineers tune these link lengths to shape the pedal path &mdash; flatter for a walking feel, taller for a climbing feel. The position equations are what let them predict that path before any steel is cut.</p></div>
+    </div>
+  </article>
+
+  <!-- 2.7 front loader -->
+  <article class="example" id="ex-2-7">
+    <div class="ex-head"><span class="ex-badge">Example 2.7</span><h3>The front-end loader</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Figure 2.23 is the skeleton of the front loader from Chapter 1 &mdash; a three-loop mechanism driven by two hydraulic cylinders. Derive the position equations and deduce the DOF.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_7" class="stage" viewBox="0 0 360 280" role="img" aria-label="A front-end loader skeleton: a boom raised by one hydraulic cylinder and a bucket tilted by a second, forming three vector loops."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_7">&#9654; Play</button><span class="drv" id="drv_st_2_7">boom lifts, bucket tilts</span></div>
+          <p class="stage-cap">Three loops; the two hydraulic cylinders (2-3 and 5-6) are the two inputs.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1&ndash;2 &middot; Three independent loops</h5><div class="mini-eq">r&#772;<sub>1</sub> + r&#772;<sub>4</sub> &minus; r&#772;<sub>2</sub> = 0&#772;</div><div class="mini-eq">r&#772;<sub>5</sub> &minus; r&#772;<sub>8</sub> &minus; r&#772;<sub>3</sub> = 0&#772;</div><div class="mini-eq">r&#772;<sub>8</sub> &minus; r&#772;<sub>7</sub> &minus; r&#772;<sub>9</sub> &minus; r&#772;<sub>10</sub> = 0&#772;</div></div>
+            <div class="step" data-step="2" hidden><h5>Step 3&ndash;4 &middot; Six scalar equations</h5><p>Origin at the pin between 1 and 5, <var>X</var> along r&#772;<sub>1</sub>. Because &theta;<sub>1</sub> = &pi;, the ground term is negative: r<sub>1</sub>cos&theta;<sub>1</sub> = &minus;r<sub>1</sub>.</p><div class="mini-eq">&minus;r<sub>1</sub> + r<sub>4</sub>cos&theta;<sub>4</sub> &minus; r<sub>2</sub>cos&theta;<sub>2</sub> = 0</div><p>Eqs (2.34)&ndash;(2.39) &mdash; six in all.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step &middot; Two geometric constraints</h5><p>Vectors r&#772;<sub>4</sub>, r&#772;<sub>3</sub>, r&#772;<sub>10</sub> all ride link 4, fixing two angle relations:</p><div class="mini-eq">&theta;<sub>4</sub> &minus; &gamma; &minus; &theta;<sub>3</sub> = 0</div><div class="mini-eq">&theta;<sub>3</sub> + &phi; &minus; &theta;<sub>10</sub> = 0</div><p>Eqs (2.40)&ndash;(2.41) &mdash; eight equations total.</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 5 &middot; Count</h5><p><span class="kchip known">known &theta;<sub>1</sub>=&pi;, r<sub>1</sub>,r<sub>3</sub>,r<sub>4</sub>,r<sub>7</sub>,r<sub>8</sub>,r<sub>9</sub>,r<sub>10</sub>,&gamma;,&phi;</span> <span class="kchip unknown">unknown r<sub>2</sub>,&theta;<sub>2</sub>,&theta;<sub>3</sub>,&theta;<sub>4</sub>,r<sub>5</sub>,&theta;<sub>5</sub>,&theta;<sub>7</sub>,&theta;<sub>8</sub>,&theta;<sub>9</sub>,&theta;<sub>10</sub> (10)</span></p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Answer &mdash; F = 2</span>
+              <div class="big-eq">10 unknowns &minus; 8 equations = <strong>2 DOF</strong></div>
+              <p>Two inputs &mdash; one cylinder lifts the boom, the other tilts the bucket &mdash; matching Gruebler from Example 1.6. The two cylinder lengths r<sub>2</sub> and r<sub>5</sub> are unknowns, just as the slider distance was in the crank-slider. <span class="dof-pill">F = 2 &middot; two cylinders</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; two joysticks on the loader</span><p>The operator has two levers: one raises the arms, one curls the bucket. Two commands, two degrees of freedom. The linkage&rsquo;s job is to turn those two simple pushes into a scooping motion that keeps the load level.</p></div>
+      <div class="realworld"><span class="h">Keeping the bucket level</span><p>Loader linkages are designed so that raising the boom keeps the bucket roughly level automatically (&ldquo;self-leveling&rdquo;). That behavior falls straight out of these loop equations &mdash; engineers solve them across the full lift range to verify the load won&rsquo;t spill.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ FOUR-BAR SOLVER TOOL ============ -->
+<section id="solver-fb" aria-labelledby="sfb-h">
+  <span class="sec-tag">Live tool</span>
+  <h2 id="sfb-h">Four-bar position solver</h2>
+  <p class="lead">This is Example 2.8 made live. Type in the four link lengths and a crank angle &theta;<sub>2</sub>; the solver runs the closed-form solution &mdash; input&ndash;output equation, tangent-half-angle quadratic, then back-substitution &mdash; and draws the assembled linkage. Switch assembly modes to see the two geometric inversions. Press <em>Sweep</em> to drive the crank.</p>
+
+  <div class="tool">
+    <span class="tool-h">Closed-form four-bar &mdash; Eqs (2.45)&ndash;(2.53)</span>
+    <div class="solver-grid">
+      <div>
+        <svg id="fb_solver" class="stage" viewBox="0 0 360 280" role="img" aria-label="Four-bar linkage drawn at the solved configuration for the entered link lengths and crank angle."></svg>
+        <div class="play-row">
+          <button type="button" class="btn ghost sm" data-play="fb_solver">&#9654; Sweep &theta;<sub>2</sub></button>
+          <span class="drv">drives the crank through a full turn</span>
+        </div>
+        <p class="stage-cap" id="fb_status">Enter values to solve.</p>
+      </div>
+      <div>
+        <div class="field-row">
+          <div class="field"><label for="fbR1">ground r&#8321;</label><input type="number" id="fbR1" value="6" min="0.1" step="0.1"></div>
+          <div class="field"><label for="fbR2">crank r&#8322;</label><input type="number" id="fbR2" value="2" min="0.1" step="0.1"></div>
+          <div class="field"><label for="fbR3">coupler r&#8323;</label><input type="number" id="fbR3" value="5" min="0.1" step="0.1"></div>
+          <div class="field"><label for="fbR4">output r&#8324;</label><input type="number" id="fbR4" value="5" min="0.1" step="0.1"></div>
+          <div class="field"><label for="fbTh2">&theta;&#8322; (deg)</label><input type="number" id="fbTh2" value="60" step="1"></div>
+        </div>
+        <div class="field" style="margin:4px 0 10px">
+          <label>assembly mode</label>
+          <div class="seg" role="group" aria-label="Assembly mode">
+            <button type="button" id="fbModeOpen" data-fbmode="1" aria-pressed="true">open</button>
+            <button type="button" id="fbModeCross" data-fbmode="-1" aria-pressed="false">crossed</button>
+          </div>
+        </div>
+        <div class="statgrid">
+          <div class="stat"><span class="lab">&theta;&#8323; coupler</span><span class="val" id="fbTh3">&mdash;</span></div>
+          <div class="stat"><span class="lab">&theta;&#8324; output</span><span class="val" id="fbTh4">&mdash;</span></div>
+        </div>
+        <h4 style="margin:.8em 0 .2em">Inside the solution</h4>
+        <div class="matrix" id="fbWork">A = &mdash;
+B = &mdash;
+C = &mdash;
+A&sup2;+B&sup2;&minus;C&sup2; = &mdash;
+u&#8324; = &mdash;</div>
+        <p class="note" style="margin-top:8px">A = 2r&#8324;(r&#8321; &minus; r&#8322;cos&theta;&#8322;), B = &minus;2r&#8322;r&#8324;sin&theta;&#8322;, C = r&#8323;&sup2; &minus; r&#8322;&sup2; &minus; r&#8324;&sup2; &minus; r&#8321;&sup2; + 2r&#8322;r&#8321;cos&theta;&#8322;. If A&sup2;+B&sup2;&minus;C&sup2; &lt; 0 the links cannot reach &mdash; no assembly exists at that angle.</p>
+        <div class="field-row" style="margin-top:6px">
+          <button type="button" class="btn sm" data-fbpreset="6,2,5,5,60">crank-rocker</button>
+          <button type="button" class="btn sm ghost" data-fbpreset="4,2,4,2,60">parallelogram</button>
+          <button type="button" class="btn sm ghost" data-fbpreset="8,3,3,3,90">non-Grashof</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="realworld"><span class="h">Try this in class</span><p>Set the crank-rocker preset and sweep &mdash; watch &theta;<sub>4</sub> rock back and forth without completing a turn. Then load <em>non-Grashof</em> and sweep: the status line reports angles where <strong>no assembly exists</strong>, the algebraic signature of a linkage that physically jams. The discriminant going negative <em>is</em> the lockup.</p></div>
+</section>
+
+<!-- ============ GROUP 3 : closed form ============ -->
+<section id="grp-3" aria-labelledby="g3-h">
+  <span class="sec-tag">Method &mdash; solving in closed form</span>
+  <h2 id="g3-h">Group 3 &mdash; the four-bar, solved exactly</h2>
+  <p>Setting up the equations is half the job; now we solve them. For the four-bar the two scalar equations can be collapsed to a single equation in one unknown and cracked with a quadratic &mdash; an exact, instant answer with no iteration.</p>
+
+  <article class="example" id="ex-2-8">
+    <div class="ex-head"><span class="ex-badge">Example 2.8</span><h3>Closed-form solution of the four-bar</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Given the four link lengths and the crank angle &theta;<sub>2</sub>, solve Equations (2.4)&ndash;(2.5) in closed form for &theta;<sub>3</sub> and &theta;<sub>4</sub>. The solver above runs exactly these steps.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_8" class="stage" viewBox="0 0 360 280" role="img" aria-label="A four-bar shown in both its open and crossed assembly configurations for one crank angle."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_8">&#9654; Play</button><span class="drv">both assembly modes for one &theta;<sub>2</sub></span></div>
+          <p class="stage-cap">The &plusmn; in the quadratic is the open vs. crossed configuration.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Isolate &theta;<sub>3</sub></h5><p>Move the &theta;<sub>3</sub> terms to one side of (2.4)&ndash;(2.5):</p><div class="mini-eq">r<sub>3</sub>cos&theta;<sub>3</sub> = &minus;r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>4</sub>cos&theta;<sub>4</sub> + r<sub>1</sub></div><div class="mini-eq">r<sub>3</sub>sin&theta;<sub>3</sub> = &minus;r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>4</sub>sin&theta;<sub>4</sub></div></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Square and add</h5><p>Squaring both and adding kills &theta;<sub>3</sub> (since sin&sup2;+cos&sup2;=1), leaving the <strong>input&ndash;output equation</strong> in &theta;<sub>4</sub> alone (Eq 2.44).</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Standard form</h5><div class="mini-eq">A cos&theta;<sub>4</sub> + B sin&theta;<sub>4</sub> = C</div><p>A = 2r<sub>4</sub>(r<sub>1</sub>&minus;r<sub>2</sub>cos&theta;<sub>2</sub>), &nbsp; B = &minus;2r<sub>2</sub>r<sub>4</sub>sin&theta;<sub>2</sub>, &nbsp; C = r<sub>3</sub>&sup2;&minus;r<sub>2</sub>&sup2;&minus;r<sub>4</sub>&sup2;&minus;r<sub>1</sub>&sup2;+2r<sub>2</sub>r<sub>1</sub>cos&theta;<sub>2</sub>. (Eqs 2.46&ndash;2.48)</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Tangent half-angle</h5><p>Let u<sub>4</sub> = tan(&theta;<sub>4</sub>/2). Substituting cos&theta;<sub>4</sub>=(1&minus;u&sup2;)/(1+u&sup2;), sin&theta;<sub>4</sub>=2u/(1+u&sup2;) turns it into a quadratic:</p><div class="mini-eq">(C+A)u<sub>4</sub>&sup2; &minus; 2B u<sub>4</sub> + (C&minus;A) = 0</div></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Solve &amp; back-substitute</h5><div class="mini-eq">u<sub>4</sub> = [ B &plusmn; &radic;(A&sup2;+B&sup2;&minus;C&sup2;) ] / (C+A)</div><p>&theta;<sub>4</sub> = 2 tan&#8315;&sup1; u<sub>4</sub> (Eq 2.52). Then recover &theta;<sub>3</sub> from Step 1 with atan2. The &plusmn; gives the two assembly modes.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Result &mdash; an exact formula</span>
+              <div class="big-eq">&theta;<sub>4</sub> = 2 tan&#8315;&sup1;( [B &plusmn; &radic;(A&sup2;+B&sup2;&minus;C&sup2;)] / (C+A) )</div>
+              <p>Two roots &rarr; two configurations (open / crossed). A negative discriminant means the links can&rsquo;t close at that &theta;<sub>2</sub> &mdash; the linkage jams. Use the solver above to evaluate this for any inputs instantly.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; two circles crossing</span><p>Fix the crank; the coupler&rsquo;s far end must lie on a circle of radius r<sub>3</sub> about the crank tip <em>and</em> a circle of radius r<sub>4</sub> about the output pivot. Two circles meet in (at most) two points &mdash; the open and crossed assemblies. The &plusmn; in the formula is just &ldquo;which intersection.&rdquo; No intersection means no assembly.</p></div>
+      <div class="realworld"><span class="h">Why closed form is prized</span><p>A closed-form solution evaluates in microseconds with no convergence worries &mdash; ideal for real-time control of a fast four-bar or for sweeping thousands of design candidates. When a mechanism admits one, you take it; when it doesn&rsquo;t, you reach for Newton&rsquo;s method.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ NEWTON-RAPHSON LAB ============ -->
+<section id="newton-lab" aria-labelledby="nl-h">
+  <span class="sec-tag">Live tool</span>
+  <h2 id="nl-h">Newton&ndash;Raphson iteration lab</h2>
+  <p class="lead">When no closed form exists, Newton&rsquo;s method drives the residual vector f&#772;(x&#772;) to zero by repeated linear corrections: x&#772; &larr; x&#772; &minus; J&#8315;&sup1;f&#772;. Step it one iteration at a time and watch the residual collapse. Mode 1 is the algebraic primer of Example 2.9; Mode 2 solves the actual two-loop mechanism of Examples 2.4 / 2.10.</p>
+
+  <div class="tool">
+    <span class="tool-h">Newton&rsquo;s method for systems &mdash; Eq (2.61): x&#772;&#8345;&#8330;&#8321; = x&#772;&#8345; &minus; J&#8315;&sup1; f&#772;</span>
+    <div class="mode-tabs" role="tablist" aria-label="Newton lab mode">
+      <button type="button" class="mt" id="nlTab3" role="tab" aria-selected="true" data-nlmode="alg">Algebraic 3&times;3 (Ex 2.9)</button>
+      <button type="button" class="mt" id="nlTab10" role="tab" aria-selected="false" data-nlmode="mech">Two-loop mechanism (Ex 2.10)</button>
+    </div>
+    <p class="note" id="nlDesc"></p>
+
+    <div class="solver-grid">
+      <div>
+        <div class="statgrid">
+          <div class="stat"><span class="lab">iteration</span><span class="val" id="nlIter">0</span></div>
+          <div class="stat"><span class="lab">residual norm |f&#772;|</span><span class="val" id="nlNorm">&mdash;</span></div>
+        </div>
+        <h4 style="margin:.7em 0 .2em">Current estimate x&#772;</h4>
+        <div class="matrix" id="nlX">&mdash;</div>
+        <h4 style="margin:.7em 0 .2em">Residual f&#772;(x&#772;)</h4>
+        <div class="matrix" id="nlF">&mdash;</div>
+        <h4 style="margin:.7em 0 .2em">Jacobian J</h4>
+        <div class="matrix" id="nlJac">&mdash;</div>
+        <svg id="nl_pose" class="stage" viewBox="0 0 360 280" role="img" aria-label="The two-loop mechanism drawn at the current Newton estimate." hidden style="margin-top:12px"></svg>
+        <div class="field-row" style="margin-top:12px">
+          <button type="button" class="btn" id="nlStep">Step once &rsaquo;</button>
+          <button type="button" class="btn rust" id="nlRun">Run to convergence</button>
+          <button type="button" class="btn ghost" id="nlReset">Reset</button>
+        </div>
+      </div>
+      <div>
+        <h4 style="margin:.2em 0 .2em">Iteration log</h4>
+        <div class="tbl-wrap">
+          <table class="itlog">
+            <thead id="nlHead"></thead>
+            <tbody id="nlLog"></tbody>
+          </table>
+        </div>
+        <p class="note" id="nlConv"></p>
+      </div>
+    </div>
+  </div>
+  <div class="realworld"><span class="h">The lesson Newton teaches</span><p>From a deliberately rough first guess, the residual norm drops by orders of magnitude each step &mdash; quadratic convergence. The mechanism mode starts the crank at a guessed pose and converges to the assembled configuration in four iterations, exactly as Stanišić&rsquo;s MATLAB code does. Same loop equations as Example 2.4; this time we solve them.</p></div>
+</section>
+
+<!-- ============ GROUP 4 : Newton ============ -->
+<section id="grp-4" aria-labelledby="g4-h">
+  <span class="sec-tag">Method &mdash; solving numerically</span>
+  <h2 id="g4-h">Group 4 &mdash; Newton&rsquo;s method for nonlinear systems</h2>
+  <p>Most position problems have no tidy closed form. Newton&rsquo;s method handles them all the same way: linearize, correct, repeat. Example 2.9 builds the machinery on a clean algebraic system; Example 2.10 turns it loose on the two-loop mechanism. Run both in the lab above.</p>
+
+  <article class="example" id="ex-2-9">
+    <div class="ex-head"><span class="ex-badge">Example 2.9</span><h3>Newton&rsquo;s method on a 3&times;3 system</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Find the roots of three coupled nonlinear equations using Newton&rsquo;s method, starting from the deliberately poor guess x&#772;&#8304; = [0, 0, 0]. This is the primer for the mechanism solve that follows.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_9" class="stage" viewBox="0 0 360 280" role="img" aria-label="A convergence plot: each Newton iterate marked as a point approaching the true root, with the residual bar shrinking each step."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_9">&#9654; Play</button><span class="drv">iterates march toward the root</span></div>
+          <p class="stage-cap">Residual norm (rust bar) collapses as the estimate nears [1, 2, 3].</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; The system</h5><div class="mini-eq">x&#8321;&sup2;+x&#8322;+x&#8323;&minus;6 = 0</div><div class="mini-eq">x&#8321;+x&#8322;&sup2;+x&#8323;&minus;8 = 0</div><div class="mini-eq">x&#8321;+x&#8322;+x&#8323;&sup2;&minus;12 = 0</div><p>Three equations, three unknowns (Eq 2.63). The true root is [1, 2, 3].</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; The Jacobian</h5><p>Each entry is &part;f<sub>i</sub>/&part;x<sub>j</sub> (Eq 2.64):</p><div class="mini-eq">J = [ [2x&#8321;, 1, 1], [1, 2x&#8322;, 1], [1, 1, 2x&#8323;] ]</div></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; The update</h5><div class="mini-eq">x&#772; &larr; x&#772; &minus; J&#8315;&sup1; f&#772;(x&#772;)</div><p>Evaluate f&#772; and J at the current guess, solve J&middot;&Delta;x = &minus;f&#772; for the correction, and add it. Start at x&#772;&#8304; = [0, 0, 0].</p></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; First iteration</h5><p>At [0,0,0]: f&#772; = [&minus;6, &minus;8, &minus;12]. Solving gives the first estimate</p><div class="mini-eq">x&#772;&sup1; = [7, 5, 1]</div><p>&mdash; nowhere near the root yet, but moving.</p></div>
+            <div class="step" data-step="5" hidden><h5>Step 5 &middot; Iterate</h5><p>Repeating drives the estimate in: [3.50, 2.61, 3.45] &rarr; [1.92, 1.91, 2.91] &rarr; [1.24, 1.95, 2.97] &rarr; [1.03, 1.99, 3.00]&hellip;</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Converged &mdash; 5 iterations</span>
+              <div class="big-eq">x&#772; &rarr; [1, 2, 3]</div>
+              <p>From a hopeless first guess, five iterations land on the root to four figures. The number of iterations depends only on the convergence tolerance. Run it yourself in <a href="#newton-lab">the Newton lab</a>, Mode 1.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>5</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; rolling downhill in fog</span><p>You can&rsquo;t see the valley floor, but you can feel the slope under your feet (the Jacobian). Take the step that slope predicts will reach the bottom, then re-check the slope and step again. Each step gets you dramatically closer &mdash; that&rsquo;s the quadratic convergence of Newton&rsquo;s method.</p></div>
+      <div class="realworld"><span class="h">The workhorse of engineering software</span><p>Newton&rsquo;s method is what powers the &ldquo;solve&rdquo; button in kinematics packages, circuit simulators, and finite-element codes. Understanding its one update line demystifies a tool you&rsquo;ll lean on for the rest of your career.</p></div>
+    </div>
+  </article>
+
+  <article class="example" id="ex-2-10">
+    <div class="ex-head"><span class="ex-badge">Example 2.10</span><h3>Newton&rsquo;s method on the two-loop mechanism</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">Solve the position problem of the Example 2.4 mechanism numerically: the six equations (2.13)&ndash;(2.18) for the six unknowns, given the crank angle &theta;<sub>2</sub>. The lab above runs this live.</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_10" class="stage" viewBox="0 0 360 280" role="img" aria-label="The two-loop mechanism converging from a rough initial pose to its assembled configuration over Newton iterations."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_10">&#9654; Play</button><span class="drv">rough guess snaps into the real pose</span></div>
+          <p class="stage-cap">Iteration 0 is a guessed pose; by iteration 4 the loops close.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; Stack the equations</h5><p>The six scalar equations from Example 2.4 &mdash; four loop components plus two geometric constraints &mdash; become the residual vector f&#772; (Eq 2.65). The unknowns are</p><div class="mini-eq">x&#772; = [&theta;<sub>3</sub>, &theta;<sub>4</sub>, r<sub>5</sub>, &theta;<sub>5</sub>, &theta;<sub>6</sub>, &theta;<sub>7</sub>]</div><p>with the crank angle &theta;<sub>2</sub> given.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; The 6&times;6 Jacobian</h5><p>Differentiate each residual with respect to each unknown (Eq 2.66). The loop rows hold terms like &minus;r<sub>3</sub>sin&theta;<sub>3</sub> and r<sub>4</sub>sin&theta;<sub>4</sub>; the constraint rows are constant &plusmn;1 entries.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Rough first guess</h5><p>To show the method&rsquo;s robustness, start far from the answer:</p><div class="mini-eq">x&#772;&#8304; = [0&deg;, 90&deg;, 1.5 in, 0&deg;, 0&deg;, 90&deg;]</div></div>
+            <div class="step" data-step="4" hidden><h5>Step 4 &middot; Iterate</h5><p>Each step solves J&middot;&Delta;x = &minus;f&#772; and updates x&#772;. The residual norm falls from order 1 to about 10&#8315;&#8313; in four steps.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Converged &mdash; 4 iterations</span>
+              <div class="big-eq">x&#772; &rarr; [0.346, 1.84, 0.785, 0.695, &minus;0.508, 2.27]</div>
+              <p>(radians and inches). The rough guess assembles into the true pose &mdash; the same answer the closed-form four-bar can&rsquo;t give for a mechanism this tangled. Drive it in <a href="#newton-lab">the Newton lab</a>, Mode 2.</p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>4</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; snapping a model kit together</span><p>You hold the parts roughly in place (the guess), then press &mdash; and they click into the one configuration where every pin lines up. Newton&rsquo;s correction is that press: each iteration nudges all six unknowns at once until every loop closes simultaneously.</p></div>
+      <div class="realworld"><span class="h">One solver, any mechanism</span><p>The same six-line routine handles a four-bar, a front loader, or a 30-bar machine &mdash; only the residual function and Jacobian change. That generality is why numerical position analysis underlies essentially every commercial multibody-dynamics package.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ GROUP 5 : points of interest ============ -->
+<section id="grp-5" aria-labelledby="g5-h">
+  <span class="sec-tag">Method &mdash; finding a point</span>
+  <h2 id="g5-h">Group 5 &mdash; locating a point of interest</h2>
+  <p>Solving the loop gives every link&rsquo;s angle &mdash; but often what you really want is the path of one special point: a tool tip, a weld nozzle, a coupler point. Once the position problem is solved, that point is one short vector sum away.</p>
+
+  <article class="example" id="ex-2-11">
+    <div class="ex-head"><span class="ex-badge">Example 2.11</span><h3>A point of interest on the coupler</h3></div>
+    <div class="ex-body">
+      <p class="ex-prompt">For the offset crank-slider, find the coordinates of a point Q fixed to the coupler (link 3), located off the coupler line by a known length r<sub>5</sub> and angle &phi; (Figure 2.25).</p>
+      <div class="ex-grid">
+        <div class="stage-wrap">
+          <svg id="st_2_11" class="stage" viewBox="0 0 360 280" role="img" aria-label="An offset crank-slider whose coupler carries a point Q; as the crank turns, Q traces a closed coupler curve."></svg>
+          <div class="play-row"><button type="button" class="btn ghost sm" data-play="st_2_11">&#9654; Play</button><span class="drv">Q traces its coupler curve</span></div>
+          <p class="stage-cap">Q rides the coupler; its locus is the rust-colored coupler curve.</p>
+        </div>
+        <div class="stepper" data-stepper>
+          <div class="progress-pips" aria-hidden="true"></div>
+          <div class="step-track" aria-live="polite">
+            <div class="step" data-step="1"><h5>Step 1 &middot; A vector loop to Q</h5><p>Q is reached from the origin by going out the crank, then out to Q along the coupler:</p><div class="mini-eq">r&#772;<sub>q</sub> = r&#772;<sub>2</sub> + r&#772;<sub>5</sub></div><p>where r&#772;<sub>5</sub> locates Q on the coupler, at angle &phi; from r&#772;<sub>3</sub>.</p></div>
+            <div class="step" data-step="2" hidden><h5>Step 2 &middot; Components</h5><div class="mini-eq">r<sub>qx</sub> = r<sub>2</sub>cos&theta;<sub>2</sub> + r<sub>5</sub>cos(&theta;<sub>3</sub>+&phi;)</div><div class="mini-eq">r<sub>qy</sub> = r<sub>2</sub>sin&theta;<sub>2</sub> + r<sub>5</sub>sin(&theta;<sub>3</sub>+&phi;)</div><p>Equations (2.67) and (2.68). Note Q&rsquo;s direction is &theta;<sub>3</sub>+&phi; &mdash; it turns <em>with</em> the coupler.</p></div>
+            <div class="step" data-step="3" hidden><h5>Step 3 &middot; Solve, then evaluate</h5><p>First solve the crank-slider position problem for &theta;<sub>3</sub> (and r<sub>4</sub>) at the given &theta;<sub>2</sub>. With &theta;<sub>2</sub> and &theta;<sub>3</sub> now known, plug into (2.67)&ndash;(2.68) to get Q&rsquo;s coordinates.</p></div>
+            <div class="answer mech" data-answer hidden>
+              <span class="ans-h">Result &mdash; Q&rsquo;s path</span>
+              <div class="big-eq">( r<sub>qx</sub>, r<sub>qy</sub> ) as &theta;<sub>2</sub> sweeps &rarr; the coupler curve</div>
+              <p>Sweeping the crank traces Q&rsquo;s locus &mdash; a coupler curve. The position problem is solved <em>once</em>; locating any point on any link afterward is a single vector sum. <span class="dof-pill">solve once &middot; locate anything</span></p>
+            </div>
+          </div>
+          <div class="step-controls">
+            <button type="button" class="btn ghost sm" data-prev disabled>&lsaquo; Back</button>
+            <button type="button" class="btn sm" data-next>Next &rsaquo;</button>
+            <button type="button" class="btn rust sm" data-reveal hidden>Reveal answer</button>
+            <span class="step-count"><span data-cur>1</span> / <span data-total>3</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="analogy"><span class="h">Analogy &mdash; a pen taped to a linkage</span><p>Tape a pen anywhere on a moving coupler and let the mechanism run: it draws a curve on the paper. Change where you tape it (r<sub>5</sub> and &phi;) and you get a different curve. Coupler curves are how a single rotating input produces remarkably complex, useful paths.</p></div>
+      <div class="realworld"><span class="h">Coupler curves at work</span><p>The straight-line portion of a film-advance mechanism, the dwell of a packaging arm, and classic walking-machine legs are all coupler curves &mdash; chosen by an engineer who solved exactly these two equations across the crank&rsquo;s rotation.</p></div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" aria-labelledby="quiz-h">
+  <span class="sec-tag">Check yourself</span>
+  <h2 id="quiz-h">Self-check</h2>
+  <p>Six quick questions on the vector loop method. Pick an answer to see whether it&rsquo;s right and why.</p>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 1</div>
+    <p class="qtext">A single vector loop equation produces how many scalar position equations?</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> One</button>
+    <button class="opt" data-correct="1"><span class="mk">B.</span> Two &mdash; one X-component, one Y-component</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> Three &mdash; X, Y, and rotation</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> It depends on the number of links</button>
+    <div class="feedback">Each planar vector equation resolves into exactly two scalar equations: the sum of all r<sub>i</sub>cos&theta;<sub>i</sub> = 0 and the sum of all r<sub>i</sub>sin&theta;<sub>i</sub> = 0.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 2</div>
+    <p class="qtext">In a multiloop mechanism, a <em>geometric constraint</em> such as &theta;<sub>3</sub> + &gamma; = &theta;<sub>7</sub> is needed because&hellip;</p>
+    <button class="opt" data-correct="1"><span class="mk">A.</span> Several vectors are fixed to one rigid body, so their directions are locked together</button>
+    <button class="opt" data-correct="0"><span class="mk">B.</span> The ground link must be horizontal</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> Newton&rsquo;s method requires it to converge</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> It replaces one of the vector loop equations</button>
+    <div class="feedback">When vectors r&#772;<sub>3</sub>, r&#772;<sub>5</sub>, r&#772;<sub>7</sub> ride the same body, their angles differ by fixed amounts. Without those extra equations the unknown count is too high and the DOF won&rsquo;t match Gruebler.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 3</div>
+    <p class="qtext">In the closed-form four-bar solution, the &plusmn; in u<sub>4</sub> = [B &plusmn; &radic;(A&sup2;+B&sup2;&minus;C&sup2;)]/(C+A) corresponds to&hellip;</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> Clockwise vs. counter-clockwise crank rotation</button>
+    <button class="opt" data-correct="1"><span class="mk">B.</span> The two assembly modes &mdash; open and crossed</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> Two different crank angles</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> Rounding error in the square root</button>
+    <div class="feedback">The two roots are the two ways the links can assemble for one crank angle &mdash; the open and crossed configurations (geometric inversions). The designer picks the one the real machine uses.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 4</div>
+    <p class="qtext">If the discriminant A&sup2;+B&sup2;&minus;C&sup2; comes out <em>negative</em> at some crank angle, it means&hellip;</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> The crank is spinning too fast</button>
+    <button class="opt" data-correct="0"><span class="mk">B.</span> You must switch to Newton&rsquo;s method</button>
+    <button class="opt" data-correct="1"><span class="mk">C.</span> The links cannot close at that angle &mdash; no assembly exists there</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> The mechanism has two degrees of freedom</button>
+    <div class="feedback">A real square root needs a non-negative argument. When it goes negative the two circles never intersect &mdash; the coupler can&rsquo;t reach, so the linkage physically jams at that crank angle.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 5</div>
+    <p class="qtext">Newton&rsquo;s update x&#772; &larr; x&#772; &minus; J&#8315;&sup1;f&#772; requires, at each step, the&hellip;</p>
+    <button class="opt" data-correct="0"><span class="mk">A.</span> Exact solution, known in advance</button>
+    <button class="opt" data-correct="1"><span class="mk">B.</span> Jacobian &mdash; the matrix of partial derivatives of the residuals</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> Determinant of the link-length matrix</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> Eigenvalues of the mechanism</button>
+    <div class="feedback">The Jacobian J holds &part;f<sub>i</sub>/&part;x<sub>j</sub>. It is the local linear model of how the residuals change, and solving J&middot;&Delta;x = &minus;f&#772; gives the correction step.</div>
+  </div>
+
+  <div class="q" data-q>
+    <div class="qnum">Question 6</div>
+    <p class="qtext">In the offset crank-slider, one of the scalar unknowns is r<sub>4</sub>, the slider distance. This shows that&hellip;</p>
+    <button class="opt" data-correct="1"><span class="mk">A.</span> An unknown in a loop equation can be a length, not just an angle</button>
+    <button class="opt" data-correct="0"><span class="mk">B.</span> The slider has no degrees of freedom</button>
+    <button class="opt" data-correct="0"><span class="mk">C.</span> The mechanism is over-constrained</button>
+    <button class="opt" data-correct="0"><span class="mk">D.</span> r<sub>4</sub> must always be given as a known</button>
+    <div class="feedback">For a sliding pair the vector&rsquo;s <em>direction</em> is fixed but its <em>length</em> varies, so the magnitude r<sub>4</sub> is the joint variable &mdash; an unknown length. Hydraulic-cylinder lengths (r<sub>2</sub>, r<sub>5</sub> in the loader) work the same way.</div>
+  </div>
+</section>
+
+<!-- ============ FORMULA CARD ============ -->
+<section id="refcard" aria-labelledby="rc-h">
+  <span class="sec-tag">Quick reference</span>
+  <h2 id="rc-h">Vector loop formula card</h2>
+  <p class="note">Printable. Use your browser&rsquo;s Print command for a clean one-page reference (navigation, controls, and animations are hidden in print).</p>
+
+  <div class="refcard">
+    <div class="rc-head"><span>The vector loop method &mdash; position analysis</span><span style="font-family:var(--mono);font-size:.8rem">ENGI 216 &middot; Ch 2</span></div>
+    <div class="rc-body">
+      <h4>The five steps</h4>
+      <ul class="clean">
+        <li><strong>1. Assign vectors</strong> pin-to-pin; lengths known, angles are joint variables.</li>
+        <li><strong>2. Write the VLE</strong> &mdash; one per independent loop; vectors sum to zero around the loop.</li>
+        <li><strong>3. Fix the frame</strong> &mdash; origin at a stationary pin, <var>X</var> along r&#772;<sub>1</sub> so &theta;<sub>1</sub>=0.</li>
+        <li><strong>4. Scalar components</strong> &mdash; project onto X and Y.</li>
+        <li><strong>5. Count</strong> unknowns &minus; equations = DOF (check against Gruebler).</li>
+      </ul>
+      <div class="rc-eq">&sum; r<sub>i</sub>cos&theta;<sub>i</sub> = 0 &nbsp;&nbsp; &sum; r<sub>i</sub>sin&theta;<sub>i</sub> = 0</div>
+      <h4>Multiloop rules</h4>
+      <ul class="clean">
+        <li><strong>Independent loops only</strong> &mdash; a loop that is the sum/difference of others adds nothing.</li>
+        <li><strong>Geometric constraints</strong> &mdash; vectors on the same rigid body satisfy &theta;<sub>a</sub> + (fixed) = &theta;<sub>b</sub>; add one equation each. Lengths can be constrained too (r<sub>a</sub>+r<sub>b</sub>=L).</li>
+      </ul>
+      <h4>Four-bar closed form (Eqs 2.45&ndash;2.53)</h4>
+      <div class="rc-eq">A cos&theta;<sub>4</sub> + B sin&theta;<sub>4</sub> = C &nbsp;&rarr;&nbsp; u<sub>4</sub> = (B &plusmn; &radic;(A&sup2;+B&sup2;&minus;C&sup2;)) / (C+A)</div>
+      <ul class="clean">
+        <li>A = 2r<sub>4</sub>(r<sub>1</sub>&minus;r<sub>2</sub>cos&theta;<sub>2</sub>) &nbsp; B = &minus;2r<sub>2</sub>r<sub>4</sub>sin&theta;<sub>2</sub> &nbsp; C = r<sub>3</sub>&sup2;&minus;r<sub>2</sub>&sup2;&minus;r<sub>4</sub>&sup2;&minus;r<sub>1</sub>&sup2;+2r<sub>2</sub>r<sub>1</sub>cos&theta;<sub>2</sub></li>
+        <li>&theta;<sub>4</sub> = 2 tan&#8315;&sup1; u<sub>4</sub>; then &theta;<sub>3</sub> = atan2(&minus;r<sub>2</sub>sin&theta;<sub>2</sub>+r<sub>4</sub>sin&theta;<sub>4</sub>, &minus;r<sub>2</sub>cos&theta;<sub>2</sub>+r<sub>4</sub>cos&theta;<sub>4</sub>+r<sub>1</sub>)/r<sub>3</sub>.</li>
+        <li><strong>&plusmn;</strong> = open/crossed mode; <strong>discriminant &lt; 0</strong> = no assembly.</li>
+      </ul>
+      <h4>Newton&rsquo;s method (Eq 2.61)</h4>
+      <div class="rc-eq">x&#772;<sub>k+1</sub> = x&#772;<sub>k</sub> &minus; J&#8315;&sup1; f&#772;(x&#772;<sub>k</sub>) , &nbsp; J<sub>ij</sub> = &part;f<sub>i</sub>/&part;x<sub>j</sub></div>
+      <p style="margin:.2em 0">Use when no closed form exists. Solve J&middot;&Delta;x = &minus;f&#772; each step; iterate until |f&#772;| is below tolerance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <span class="sec-tag">Reference</span>
+  <h2 id="gl-h">Glossary</h2>
+  <label for="glossSearch" class="note">Filter terms:</label><br>
+  <input type="search" id="glossSearch" class="gloss-search" placeholder="Type to filter (e.g. &ldquo;Jacobian&rdquo;)&hellip;" aria-label="Filter glossary terms">
+  <dl class="gloss" id="glossList">
+    <div><dt>Vector loop</dt><dd>A chain of vectors, one per link, drawn head-to-tail around a closed path in a mechanism so that the chain returns to its starting point.</dd></div>
+    <div><dt>Vector loop equation (VLE)</dt><dd>The statement that the vectors around a closed loop sum to zero: &sum; r&#772;<sub>i</sub> = 0&#772;. One independent VLE is written for each independent loop.</dd></div>
+    <div><dt>Position equations</dt><dd>The two scalar equations (X- and Y-components) obtained from each VLE: &sum; r<sub>i</sub>cos&theta;<sub>i</sub> = 0 and &sum; r<sub>i</sub>sin&theta;<sub>i</sub> = 0.</dd></div>
+    <div><dt>Joint variable</dt><dd>A quantity that changes as the mechanism moves &mdash; usually a vector&rsquo;s direction &theta; (a pin angle), or its length r (a slider distance).</dd></div>
+    <div><dt>Independent loop</dt><dd>A loop that cannot be formed by adding or subtracting other loops already chosen. A mechanism needs one VLE per independent loop; dependent loops add no new information.</dd></div>
+    <div><dt>Geometric constraint</dt><dd>An extra equation relating quantities locked together by rigidity &mdash; e.g. two vectors fixed to the same body keep a constant angle (&theta;<sub>a</sub> + &gamma; = &theta;<sub>b</sub>), or two lengths share a fixed sum (r<sub>a</sub> + r<sub>b</sub> = L).</dd></div>
+    <div><dt>Degrees of freedom (from the equations)</dt><dd>Scalar unknowns minus scalar equations. It is the number of inputs that must be supplied to solve the position problem, and it must equal Gruebler&rsquo;s F.</dd></div>
+    <div><dt>Four-bar mechanism</dt><dd>Four links closed by four pins, F = 1. Its position problem has a clean closed-form solution (Example 2.8).</dd></div>
+    <div><dt>Offset crank-slider</dt><dd>A crank, connecting rod, and slider whose travel line is offset from the crank pivot. Closed with two perpendicular vectors: the offset r&#772;<sub>1</sub> and the slider position r&#772;<sub>4</sub>.</dd></div>
+    <div><dt>Assembly mode (circuit / inversion)</dt><dd>One of the distinct configurations a mechanism can occupy for the same input. The four-bar has two &mdash; open and crossed &mdash; the &plusmn; roots of its closed-form quadratic.</dd></div>
+    <div><dt>Closed-form solution</dt><dd>An explicit algebraic formula for the unknowns, evaluated directly with no iteration. Available for the four-bar and crank-slider.</dd></div>
+    <div><dt>Input&ndash;output displacement equation</dt><dd>The single equation A cos&theta;<sub>4</sub> + B sin&theta;<sub>4</sub> = C relating the four-bar&rsquo;s output angle to its input, obtained by eliminating the coupler angle.</dd></div>
+    <div><dt>Tangent half-angle substitution</dt><dd>The trick u = tan(&theta;/2), giving cos&theta; = (1&minus;u&sup2;)/(1+u&sup2;) and sin&theta; = 2u/(1+u&sup2;), which turns A cos&theta;+B sin&theta;=C into a quadratic in u.</dd></div>
+    <div><dt>Newton&ndash;Raphson method</dt><dd>An iterative solver for nonlinear systems: x&#772; &larr; x&#772; &minus; J&#8315;&sup1;f&#772;, repeated until the residual is small. Used when no closed form exists.</dd></div>
+    <div><dt>Jacobian (J)</dt><dd>The matrix of partial derivatives J<sub>ij</sub> = &part;f<sub>i</sub>/&part;x<sub>j</sub>. It is the local linear model of the residuals and drives each Newton correction.</dd></div>
+    <div><dt>Residual</dt><dd>The vector f&#772;(x&#772;) of left-hand sides of the position equations evaluated at the current estimate. It is zero exactly at a solution; its norm |f&#772;| measures how far off the estimate is.</dd></div>
+    <div><dt>Convergence tolerance</dt><dd>The threshold on |f&#772;| (or on the step size) below which Newton&rsquo;s iteration is declared finished. It, not the mechanism, sets the iteration count.</dd></div>
+    <div><dt>Point of interest</dt><dd>Any point whose location you want &mdash; a tool tip or coupler point. Once the loop is solved, it is found by one extra vector sum (Eqs 2.67&ndash;2.68).</dd></div>
+    <div><dt>Coupler curve</dt><dd>The path traced by a point fixed to a floating (coupler) link as the input sweeps. Designers exploit coupler curves to get complex paths from a single rotating input.</dd></div>
+    <div><dt>Grashof / non-Grashof</dt><dd>A four-bar is Grashof if the shortest plus longest link &le; the other two summed, allowing a link to fully rotate; non-Grashof linkages only rock, and jam at angles where the closed-form discriminant goes negative.</dd></div>
+  </dl>
+  <p class="gloss-none" id="glossNone" hidden>No terms match that filter.</p>
+</section>
+
+<!-- ============ RESOURCES ============ -->
+<section id="resources" aria-labelledby="res-h">
+  <span class="sec-tag">Go deeper</span>
+  <h2 id="res-h">External resources</h2>
+  <p>Open, reputable references that cover the vector loop method and position analysis from complementary angles. All open in a new tab.</p>
+
+  <p class="res-cat">Open course notes &amp; courseware</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://ocw.metu.edu.tr/pluginfile.php/3961/mod_resource/content/12/ch3/3-4.htm" target="_blank" rel="noopener">METU OpenCourseWare &mdash; Position Analysis of Mechanisms</a><span class="desc">Treats the links of a constrained mechanism as closed polygons (loops) and builds the loop-closure equations step by step.</span></li>
+    <li><a class="ext" href="https://people.ohio.edu/williams/html/PDF/Supplement3011.pdf" target="_blank" rel="noopener">Ohio University &mdash; Williams, Mechanisms NotesBook Supplement (PDF)</a><span class="desc">A clean five-step recipe for vector-loop-closure equations, with the right-hand-sense angle convention and worked four-bar and six-bar branches.</span></li>
+    <li><a class="ext" href="https://ingmec.ual.es/tmm/L02_02_position_analysis.html" target="_blank" rel="noopener">University of Almería &mdash; Theory of Machines &amp; Mechanisms: Position Analysis</a><span class="desc">Derives the four-bar loop equation and explains the open vs. crossed circuits as the two circle intersections &mdash; the same &plusmn; as the closed-form solver here.</span></li>
+  </ul>
+
+  <p class="res-cat">Focused tutorial</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://alistairstutorials.co.uk/tutorial30.html" target="_blank" rel="noopener">Alistair&rsquo;s Engineering Tutorials &mdash; Four-bar mechanisms</a><span class="desc">Walks the isolate-square-add elimination of the coupler angle to reach the closed-form output angle &mdash; mirrors Example 2.8 closely.</span></li>
+  </ul>
+
+  <div class="callout"><span class="h">A note on these links</span><p>They reinforce the same method in other instructors&rsquo; notation &mdash; useful when a second explanation makes an idea click. The authoritative source for ENGI 216 remains Stanišić&rsquo;s textbook and the worked examples above. For precise numerical solving, the course&rsquo;s Mechanism Workbench tool is the companion to these examples.</p></div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section id="refs" aria-labelledby="refs-h">
+  <span class="sec-tag">Attribution</span>
+  <h2 id="refs-h">References &amp; notes</h2>
+  <ul class="clean">
+    <li>All eleven examples are drawn from <strong>Stanišić, M. M., <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em></strong> (Cengage Learning, 2015), Chapter 2. Problem statements here are paraphrased; example and equation numbers (2.1&ndash;2.11, Eqs 2.2&ndash;2.68) follow the textbook.</li>
+    <li>The mechanism diagrams in this module are <strong>original schematic redrawings</strong> created for teaching. They illustrate vector-loop topology and motion; they are not the textbook&rsquo;s figures, and the multiloop animations show representative coordinated motion rather than exact kinematic solutions. The four-bar and crank-slider stages, the four-bar solver, and the Newton lab compute their configurations exactly.</li>
+    <li>The four-bar closed-form solver and the Newton&ndash;Raphson lab were verified against the textbook&rsquo;s published iteration sequences (Examples 2.8&ndash;2.10) before release. For full position, velocity, and force analysis, use the separate Mechanism Workbench tool.</li>
+  </ul>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readprog">Session progress</label>
+    <progress id="readprog" value="0" max="100"></progress>
+  </div>
+</div>
+
+<footer>
+  <p>Built for <span class="program">ENGI 216 &mdash; Dynamics &amp; Kinematics of Machines and Mechanisms</span> · Brookdale Community College · <span class="year">2026</span></p>
+  <p class="note" style="color:#9fb6c8">Chapter 2 worked-examples companion · the vector loop method · runs entirely offline.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var DEG = Math.PI/180;
+  function el(tag, attrs){ var n=document.createElementNS(SVGNS, tag); if(attrs) for(var k in attrs){ n.setAttribute(k, attrs[k]); } return n; }
+  function $(id){ return document.getElementById(id); }
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  /* ---------- SVG drawing helpers ---------- */
+  function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+  function bar(svg,x1,y1,x2,y2,opts){ opts=opts||{}; svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:opts.color||cssVar('--link-fill'),'stroke-width':opts.w||6,'stroke-linecap':'round',opacity:(opts.op==null?1:opts.op)})); }
+  function tri(svg,pts,opts){ opts=opts||{}; var s=''; for(var i=0;i<pts.length;i++){ s+=pts[i][0]+','+pts[i][1]+' '; } svg.appendChild(el('polygon',{points:s,fill:opts.fill||'rgba(10,126,164,.18)',stroke:opts.color||cssVar('--link-fill'),'stroke-width':opts.w||4,'stroke-linejoin':'round'})); }
+  function label(svg,x,y,t,color){ var tx=el('text',{x:x,y:y,'text-anchor':'middle','dominant-baseline':'middle','class':'lk',fill:color||cssVar('--ink')}); tx.textContent=t; svg.appendChild(tx); }
+  function caption(svg,x,y,t,color){ var tx=el('text',{x:x,y:y,'text-anchor':'middle',fill:color||cssVar('--ink-soft'),'font-family':cssVar('--mono'),'font-size':'11px'}); tx.textContent=t; svg.appendChild(tx); }
+  function rail(svg,x1,y1,x2,y2){ svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:cssVar('--ink-soft'),'stroke-width':1.5,'stroke-dasharray':'4 4',opacity:.7})); }
+  function groundPin(svg,x,y){
+    svg.appendChild(el('circle',{cx:x,cy:y,r:7,fill:'none',stroke:cssVar('--ground-fill'),'stroke-width':2.5}));
+    svg.appendChild(el('circle',{cx:x,cy:y,r:2.5,fill:cssVar('--ground-fill')}));
+    svg.appendChild(el('line',{x1:x-16,y1:y+8,x2:x+16,y2:y+8,stroke:cssVar('--ground-fill'),'stroke-width':2}));
+    for(var i=-14;i<=14;i+=7){ svg.appendChild(el('line',{x1:x+i,y1:y+8,x2:x+i-6,y2:y+16,stroke:cssVar('--ground-fill'),'stroke-width':1.4})); }
+  }
+  function freePin(svg,x,y,r){ r=r||5.5; svg.appendChild(el('circle',{cx:x,cy:y,r:r,fill:cssVar('--panel'),stroke:cssVar('--ink'),'stroke-width':2.2})); svg.appendChild(el('circle',{cx:x,cy:y,r:1.8,fill:cssVar('--ink')})); }
+  function block(svg,cx,cy,ang,w,h,opts){ opts=opts||{}; var g=el('g',{transform:'translate('+cx+','+cy+') rotate('+(ang*180/Math.PI)+')'}); g.appendChild(el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:2,fill:opts.fill||cssVar('--panel'),stroke:opts.color||cssVar('--ink'),'stroke-width':2})); svg.appendChild(g); }
+  function cylinder(svg,a,b){ var ang=Math.atan2(b.y-a.y,b.x-a.x); var L=Math.hypot(b.x-a.x,b.y-a.y); svg.appendChild(el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:cssVar('--ink-soft'),'stroke-width':4})); block(svg,a.x+Math.cos(ang)*L*0.3,a.y+Math.sin(ang)*L*0.3,ang,Math.max(20,L*0.5),12,{fill:cssVar('--paper-2')}); freePin(svg,b.x,b.y,4); }
+  function gear(svg,cx,cy,r,teeth,phase,fill){ svg.appendChild(el('circle',{cx:cx,cy:cy,r:r,fill:fill||'rgba(10,126,164,.12)',stroke:cssVar('--link-fill'),'stroke-width':3})); for(var i=0;i<teeth;i++){ var a=phase+i*2*Math.PI/teeth; svg.appendChild(el('line',{x1:cx+Math.cos(a)*r,y1:cy+Math.sin(a)*r,x2:cx+Math.cos(a)*(r+5),y2:cy+Math.sin(a)*(r+5),stroke:cssVar('--link-fill'),'stroke-width':2.5,'stroke-linecap':'round'})); } }
+  function arrow(svg,x1,y1,x2,y2,opts){ opts=opts||{}; var c=opts.color||cssVar('--accent-2'); var w=opts.w||2; svg.appendChild(el('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:c,'stroke-width':w,'stroke-linecap':'round',opacity:(opts.op==null?1:opts.op)})); var a=Math.atan2(y2-y1,x2-x1),hl=opts.head||7; svg.appendChild(el('line',{x1:x2,y1:y2,x2:x2-hl*Math.cos(a-0.4),y2:y2-hl*Math.sin(a-0.4),stroke:c,'stroke-width':w,'stroke-linecap':'round'})); svg.appendChild(el('line',{x1:x2,y1:y2,x2:x2-hl*Math.cos(a+0.4),y2:y2-hl*Math.sin(a+0.4),stroke:c,'stroke-width':w,'stroke-linecap':'round'})); }
+  function dot(svg,x,y,r,c){ svg.appendChild(el('circle',{cx:x,cy:y,r:r||4,fill:c||cssVar('--accent-2')})); }
+  function polyline(svg,pts,opts){ opts=opts||{}; var s=''; for(var i=0;i<pts.length;i++){ s+=pts[i][0]+','+pts[i][1]+' '; } svg.appendChild(el('polyline',{points:s,fill:'none',stroke:opts.color||cssVar('--accent-2'),'stroke-width':opts.w||2,opacity:(opts.op==null?1:opts.op),'stroke-dasharray':opts.dash||'none'})); }
+  function teeth(svg,x,y1,y2,n,dir){ var dy=(y2-y1)/n; for(var i=0;i<n;i++){ var yy=y1+i*dy; svg.appendChild(el('line',{x1:x,y1:yy,x2:x+dir*9,y2:yy+dy*0.5,stroke:cssVar('--ground-fill'),'stroke-width':2})); svg.appendChild(el('line',{x1:x+dir*9,y1:yy+dy*0.5,x2:x,y2:yy+dy,stroke:cssVar('--ground-fill'),'stroke-width':2})); } }
+
+  function circInt(p0,r0,p1,r1,sign){ var dx=p1.x-p0.x,dy=p1.y-p0.y,d=Math.hypot(dx,dy); if(d>r0+r1||d<Math.abs(r0-r1)||d===0) return null; var a=(r0*r0-r1*r1+d*d)/(2*d); var h2=r0*r0-a*a; if(h2<0)h2=0; var h=Math.sqrt(h2); var xm=p0.x+a*dx/d, ym=p0.y+a*dy/d; return {x:xm+sign*h*(-dy)/d, y:ym+sign*h*dx/d}; }
+  function fourbarScreen(O2,O4,r2,r3,r4,th2,sign){ var A={x:O2.x+r2*Math.cos(th2),y:O2.y+r2*Math.sin(th2)}; return {A:A, C:circInt(A,r3,O4,r4,sign||1)}; }
+
+  /* ---------- linear algebra: solve J d = -f (Gauss, partial pivot) ---------- */
+  function newtonStep(J,f){ var n=f.length, i,j,k; var A=[]; for(i=0;i<n;i++){ A[i]=J[i].slice(); A[i].push(-f[i]); }
+    for(i=0;i<n;i++){ var p=i; for(k=i+1;k<n;k++){ if(Math.abs(A[k][i])>Math.abs(A[p][i])) p=k; } var tmp=A[i];A[i]=A[p];A[p]=tmp; var piv=A[i][i]||1e-12; for(j=i;j<=n;j++) A[i][j]/=piv; for(k=0;k<n;k++){ if(k!==i){ var fac=A[k][i]; for(j=i;j<=n;j++) A[k][j]-=fac*A[i][j]; } } }
+    var d=[]; for(i=0;i<n;i++) d[i]=A[i][n]; return d; }
+
+  /* ---------- four-bar closed form (Eqs 2.45-2.53) ---------- */
+  function fourbarClosed(r1,r2,r3,r4,th2,mode){
+    var A=2*r4*(r1-r2*Math.cos(th2));
+    var B=-2*r2*r4*Math.sin(th2);
+    var C=r3*r3-r2*r2-r4*r4-r1*r1+2*r2*r1*Math.cos(th2);
+    var disc=A*A+B*B-C*C;
+    if(disc<0) return {A:A,B:B,C:C,disc:disc,ok:false};
+    var u=(B+mode*Math.sqrt(disc))/(C+A);
+    var th4=2*Math.atan(u);
+    var ct3=(-r2*Math.cos(th2)+r4*Math.cos(th4)+r1)/r3;
+    var st3=(-r2*Math.sin(th2)+r4*Math.sin(th4))/r3;
+    var th3=Math.atan2(st3,ct3);
+    return {A:A,B:B,C:C,disc:disc,u:u,th3:th3,th4:th4,ok:true};
+  }
+  // map a set of model points (y up) into the viewBox (y down) with padding
+  function fitPoints(pts,W,H,pad){ pad=pad||34; var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
+    var minx=Math.min.apply(null,xs),maxx=Math.max.apply(null,xs),miny=Math.min.apply(null,ys),maxy=Math.max.apply(null,ys);
+    var sx=(W-2*pad)/Math.max(1e-6,(maxx-minx)), sy=(H-2*pad)/Math.max(1e-6,(maxy-miny)); var s=Math.min(sx,sy);
+    var cx=(minx+maxx)/2, cy=(miny+maxy)/2;
+    return function(p){ return {x:W/2+(p.x-cx)*s, y:H/2-(p.y-cy)*s}; };
+  }
+  // draw a four-bar from closed-form solution; returns solution object
+  function drawFourbar(svg,r1,r2,r3,r4,th2deg,mode,opts){ opts=opts||{}; var th2=th2deg*DEG; var sol=fourbarClosed(r1,r2,r3,r4,th2,mode);
+    clear(svg);
+    var O2={x:0,y:0}, O4={x:r1,y:0}, A={x:r2*Math.cos(th2),y:r2*Math.sin(th2)};
+    var pts=[O2,O4,A]; var C=null;
+    if(sol.ok){ C={x:O4.x+r4*Math.cos(sol.th4),y:O4.y+r4*Math.sin(sol.th4)}; pts.push(C); }
+    else { pts.push({x:A.x,y:A.y+r3}); pts.push({x:O4.x,y:O4.y+r4}); }
+    var m=fitPoints(pts,360,280,40);
+    var sO2=m(O2),sO4=m(O4),sA=m(A);
+    bar(svg,sO2.x,sO2.y,sO4.x,sO4.y,{color:cssVar('--ink-soft'),w:5});
+    if(sol.ok){ var sC=m(C);
+      bar(svg,sO2.x,sO2.y,sA.x,sA.y,{color:cssVar('--accent'),w:7});
+      bar(svg,sA.x,sA.y,sC.x,sC.y);
+      bar(svg,sO4.x,sO4.y,sC.x,sC.y,{color:cssVar('--accent-2'),w:6});
+      groundPin(svg,sO2.x,sO2.y); groundPin(svg,sO4.x,sO4.y); freePin(svg,sA.x,sA.y); freePin(svg,sC.x,sC.y);
+      label(svg,(sO2.x+sO4.x)/2,sO2.y+18,'1'); label(svg,(sO2.x+sA.x)/2-10,(sO2.y+sA.y)/2,'2',cssVar('--accent-dk'));
+      label(svg,(sA.x+sC.x)/2,(sA.y+sC.y)/2-11,'3'); label(svg,(sO4.x+sC.x)/2+11,(sO4.y+sC.y)/2,'4',cssVar('--accent-2'));
+    } else {
+      groundPin(svg,sO2.x,sO2.y); groundPin(svg,sO4.x,sO4.y); bar(svg,sO2.x,sO2.y,sA.x,sA.y,{color:cssVar('--accent'),w:7}); freePin(svg,sA.x,sA.y);
+      caption(svg,180,150,'no assembly at this angle',cssVar('--bad'));
+    }
+    if(opts.caption) caption(svg,180,266,opts.caption);
+    return sol;
+  }
+
+  /* ---------- two-loop mechanism (Ex 2.4/2.10) exact solver + geometry ---------- */
+  var TL={ g:110*DEG, th2:58*DEG, th8:80*DEG, r1:6.0,r2:3.0,r3:3.6,r4:3.9,r6:3.9,r7:1.4,r8:7.35 };
+  function tlF(x,th2){ var t3=x[0],t4=x[1],r5=x[2],t5=x[3],t6=x[4],t7=x[5]; return [
+    TL.r2*Math.cos(th2)+TL.r3*Math.cos(t3)-TL.r4*Math.cos(t4)-TL.r1,
+    TL.r2*Math.sin(th2)+TL.r3*Math.sin(t3)-TL.r4*Math.sin(t4),
+    TL.r8*Math.cos(TL.th8)+TL.r6*Math.cos(t6)-r5*Math.cos(t5)-TL.r7*Math.cos(t7)-TL.r4*Math.cos(t4)-TL.r1,
+    TL.r8*Math.sin(TL.th8)+TL.r6*Math.sin(t6)-r5*Math.sin(t5)-TL.r7*Math.sin(t7)-TL.r4*Math.sin(t4),
+    t3-t7+TL.g, t5-t7+Math.PI/2 ]; }
+  function tlJ(x){ var t3=x[0],t4=x[1],r5=x[2],t5=x[3],t6=x[4],t7=x[5]; return [
+    [-TL.r3*Math.sin(t3), TL.r4*Math.sin(t4), 0, 0, 0, 0],
+    [ TL.r3*Math.cos(t3),-TL.r4*Math.cos(t4), 0, 0, 0, 0],
+    [0, TL.r4*Math.sin(t4), -Math.cos(t5),  r5*Math.sin(t5), -TL.r6*Math.sin(t6),  TL.r7*Math.sin(t7)],
+    [0,-TL.r4*Math.cos(t4), -Math.sin(t5), -r5*Math.cos(t5),  TL.r6*Math.cos(t6), -TL.r7*Math.cos(t7)],
+    [1,0,0,0,0,-1],[0,0,0,1,0,-1] ]; }
+  function tlNorm(f){ var s=0; for(var i=0;i<f.length;i++) s+=f[i]*f[i]; return Math.sqrt(s); }
+  function tlSolve(th2,x0,iters){ var x=x0.slice(); for(var k=0;k<(iters||30);k++){ var f=tlF(x,th2); if(tlNorm(f)<1e-10) break; var d=newtonStep(tlJ(x),f); for(var i=0;i<6;i++) x[i]+=d[i]; } return x; }
+  // model points (y up) from state x at crank angle th2
+  function tlPoints(x,th2){ var t3=x[0],t4=x[1],r5=x[2],t5=x[3],t6=x[4],t7=x[5];
+    var O={x:0,y:0}, O4={x:TL.r1,y:0};
+    var A={x:TL.r2*Math.cos(th2),y:TL.r2*Math.sin(th2)};
+    var B={x:O4.x+TL.r4*Math.cos(t4),y:O4.y+TL.r4*Math.sin(t4)};
+    var C7={x:B.x+TL.r7*Math.cos(t7),y:B.y+TL.r7*Math.sin(t7)};
+    var C5a={x:C7.x+r5*Math.cos(t5),y:C7.y+r5*Math.sin(t5)};
+    var D8={x:TL.r8*Math.cos(TL.th8),y:TL.r8*Math.sin(TL.th8)};
+    var C5b={x:D8.x+TL.r6*Math.cos(t6),y:D8.y+TL.r6*Math.sin(t6)};
+    return {O:O,O4:O4,A:A,B:B,C7:C7,C5a:C5a,C5b:C5b,D8:D8};
+  }
+  function drawTwoLoop(svg,x,th2,showGap){ clear(svg); var P=tlPoints(x,th2);
+    var all=[P.O,P.O4,P.A,P.B,P.C7,P.C5a,P.C5b,P.D8]; var m=fitPoints(all,360,280,40);
+    var O=m(P.O),O4=m(P.O4),A=m(P.A),B=m(P.B),C7=m(P.C7),C5a=m(P.C5a),C5b=m(P.C5b),D8=m(P.D8);
+    // ground member r8 and r1
+    bar(svg,O.x,O.y,O4.x,O4.y,{color:cssVar('--ink-soft'),w:4});
+    bar(svg,O.x,O.y,D8.x,D8.y,{color:cssVar('--ink-soft'),w:4,op:.7});
+    // link 2 (crank)
+    bar(svg,O.x,O.y,A.x,A.y,{color:cssVar('--accent'),w:7});
+    // body 3 coupler triangle A-B-C7
+    tri(svg,[[A.x,A.y],[B.x,B.y],[C7.x,C7.y]],{});
+    // link 4 output
+    bar(svg,O4.x,O4.y,B.x,B.y,{color:cssVar('--accent-2'),w:6});
+    // slider 5 along C7->C5a
+    bar(svg,C7.x,C7.y,C5a.x,C5a.y,{color:cssVar('--ink-soft'),w:3});
+    block(svg,(C7.x+C5a.x)/2,(C7.y+C5a.y)/2,Math.atan2(C5a.y-C7.y,C5a.x-C7.x),18,11,{fill:cssVar('--paper-2')});
+    // link 6
+    bar(svg,D8.x,D8.y,C5b.x,C5b.y);
+    if(showGap){ var gap=Math.hypot(C5a.x-C5b.x,C5a.y-C5b.y); if(gap>2){ polyline(svg,[[C5a.x,C5a.y],[C5b.x,C5b.y]],{color:cssVar('--bad'),w:2,dash:'4 3'}); } }
+    groundPin(svg,O.x,O.y); groundPin(svg,O4.x,O4.y); groundPin(svg,D8.x,D8.y);
+    freePin(svg,A.x,A.y); freePin(svg,B.x,B.y); freePin(svg,C7.x,C7.y); freePin(svg,C5b.x,C5b.y);
+    label(svg,(O.x+A.x)/2-9,(O.y+A.y)/2,'2',cssVar('--accent-dk'));
+    label(svg,A.x+10,A.y-2,'3'); label(svg,(O4.x+B.x)/2+10,(O4.y+B.y)/2,'4',cssVar('--accent-2'));
+    label(svg,(D8.x+C5b.x)/2-8,(D8.y+C5b.y)/2,'6'); label(svg,O.x-12,O.y+4,'1');
+  }
+
+  /* ---------- crank-slider screen solver (Ex 2.2 / 2.11) ---------- */
+  function crankSlider(O2,r2,r3,slideY,th2,side){ var A={x:O2.x+r2*Math.cos(th2),y:O2.y+r2*Math.sin(th2)}; var h=slideY-A.y; if(Math.abs(h)>r3) return null; var bx=A.x+ (side||1)*Math.sqrt(r3*r3-h*h); var B={x:bx,y:slideY}; return {A:A,B:B,th3:Math.atan2(B.y-A.y,B.x-A.x)}; }
+
+  /* ---------- stage renderers ---------- */
+  var STAGES={};
+
+  STAGES.st_2_1=function(svg,t){ drawFourbar(svg,6,2,5,5,t*360,1,{caption:'Grashof crank-rocker \u2014 the loop stays closed'}); };
+
+  STAGES.st_2_8=function(svg,t){ var th2=40+50*Math.sin(t*2*Math.PI); // both modes overlaid
+    var r1=6,r2=2,r3=5,r4=5; var th=th2*DEG;
+    var o=fourbarClosed(r1,r2,r3,r4,th,1), c=fourbarClosed(r1,r2,r3,r4,th,-1);
+    clear(svg); var O2={x:0,y:0},O4={x:r1,y:0},A={x:r2*Math.cos(th),y:r2*Math.sin(th)};
+    var pts=[O2,O4,A]; if(o.ok)pts.push({x:O4.x+r4*Math.cos(o.th4),y:O4.y+r4*Math.sin(o.th4)}); if(c.ok)pts.push({x:O4.x+r4*Math.cos(c.th4),y:O4.y+r4*Math.sin(c.th4)});
+    var m=fitPoints(pts,360,280,42); var sO2=m(O2),sO4=m(O4),sA=m(A);
+    bar(svg,sO2.x,sO2.y,sO4.x,sO4.y,{color:cssVar('--ink-soft'),w:5}); bar(svg,sO2.x,sO2.y,sA.x,sA.y,{color:cssVar('--accent'),w:7});
+    if(o.ok){ var Co=m({x:O4.x+r4*Math.cos(o.th4),y:O4.y+r4*Math.sin(o.th4)}); bar(svg,sA.x,sA.y,Co.x,Co.y); bar(svg,sO4.x,sO4.y,Co.x,Co.y,{color:cssVar('--accent')}); freePin(svg,Co.x,Co.y); label(svg,Co.x+12,Co.y,'open',cssVar('--accent-dk')); }
+    if(c.ok){ var Cc=m({x:O4.x+r4*Math.cos(c.th4),y:O4.y+r4*Math.sin(c.th4)}); bar(svg,sA.x,sA.y,Cc.x,Cc.y,{color:cssVar('--accent-2'),op:.85,w:4}); bar(svg,sO4.x,sO4.y,Cc.x,Cc.y,{color:cssVar('--accent-2'),op:.85,w:4}); freePin(svg,Cc.x,Cc.y); label(svg,Cc.x+14,Cc.y,'crossed',cssVar('--accent-2')); }
+    groundPin(svg,sO2.x,sO2.y); groundPin(svg,sO4.x,sO4.y); freePin(svg,sA.x,sA.y);
+    caption(svg,180,266,'one crank angle \u2014 two assembly modes'); };
+
+  STAGES.st_2_2=function(svg,t){ clear(svg); var O2={x:120,y:108},r2=40,r3=150,slideY=168; var th2=t*2*Math.PI;
+    var s=crankSlider(O2,r2,r3,slideY,th2,1); if(!s) return;
+    rail(svg,40,slideY,340,slideY);
+    rail(svg,O2.x,O2.y,O2.x,slideY); // offset indicator
+    bar(svg,O2.x,O2.y,s.A.x,s.A.y,{color:cssVar('--accent'),w:7}); bar(svg,s.A.x,s.A.y,s.B.x,s.B.y);
+    block(svg,s.B.x,s.B.y,0,30,18,{fill:cssVar('--paper-2')});
+    groundPin(svg,O2.x,O2.y); freePin(svg,s.A.x,s.A.y); freePin(svg,s.B.x,s.B.y,4);
+    label(svg,O2.x-14,O2.y,'1'); label(svg,(O2.x+s.A.x)/2-8,(O2.y+s.A.y)/2-6,'2',cssVar('--accent-dk'));
+    label(svg,(s.A.x+s.B.x)/2,(s.A.y+s.B.y)/2-9,'3'); label(svg,s.B.x+2,s.B.y+2,'4');
+    caption(svg,O2.x-30,(O2.y+slideY)/2,'offset r\u2081',cssVar('--ink-soft'));
+    caption(svg,190,266,'crank \u2192 slider reciprocation'); };
+
+  STAGES.st_2_11=function(svg,t){ clear(svg); var O2={x:120,y:120},r2=42,r3=150,slideY=178,r5=78,phi=-0.62; var th2=t*2*Math.PI;
+    // trace Q over full revolution
+    var path=[]; for(var k=0;k<=60;k++){ var th=k/60*2*Math.PI; var ss=crankSlider(O2,r2,r3,slideY,th,1); if(ss){ var ang=ss.th3+phi; path.push([ss.A.x+r5*Math.cos(ang), ss.A.y+r5*Math.sin(ang)]); } }
+    polyline(svg,path,{color:cssVar('--accent-2'),w:2,op:.55});
+    var s=crankSlider(O2,r2,r3,slideY,th2,1); if(!s) return;
+    rail(svg,40,slideY,340,slideY);
+    bar(svg,O2.x,O2.y,s.A.x,s.A.y,{color:cssVar('--accent'),w:7}); bar(svg,s.A.x,s.A.y,s.B.x,s.B.y);
+    var ang=s.th3+phi, Q={x:s.A.x+r5*Math.cos(ang),y:s.A.y+r5*Math.sin(ang)};
+    tri(svg,[[s.A.x,s.A.y],[s.B.x,s.B.y],[Q.x,Q.y]],{fill:'rgba(194,84,29,.13)',color:cssVar('--accent-2'),w:2});
+    block(svg,s.B.x,s.B.y,0,30,18,{fill:cssVar('--paper-2')});
+    groundPin(svg,O2.x,O2.y); freePin(svg,s.A.x,s.A.y); freePin(svg,s.B.x,s.B.y,4);
+    dot(svg,Q.x,Q.y,5,cssVar('--accent-2')); label(svg,Q.x+12,Q.y-4,'Q',cssVar('--accent-2'));
+    caption(svg,190,266,'Q traces a coupler curve'); };
+
+  // ---- illustrative coordinated schematics (multiloop) ----
+  STAGES.st_2_3=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var O1={x:70,y:215},O4={x:300,y:215};
+    var a2=-1.15+0.30*Math.sin(TT), a5=-0.15+0.45*Math.sin(TT*1.4+1);
+    var L2=90,rho2=20,L5=60,rho3=26,L4=92;
+    var c2={x:O1.x+L2*Math.cos(a2),y:O1.y+L2*Math.sin(a2)};
+    var c3={x:c2.x+L5*Math.cos(a5),y:c2.y+L5*Math.sin(a5)};
+    bar(svg,O1.x,O1.y,c2.x,c2.y); bar(svg,O4.x,O4.y,c3.x,c3.y,{color:cssVar('--accent-2')});
+    bar(svg,c2.x,c2.y,c3.x,c3.y,{color:cssVar('--accent'),w:4});
+    svg.appendChild(el('circle',{cx:c2.x,cy:c2.y,r:rho2,fill:'rgba(10,126,164,.12)',stroke:cssVar('--link-fill'),'stroke-width':2.5}));
+    svg.appendChild(el('circle',{cx:c3.x,cy:c3.y,r:rho3,fill:'rgba(10,126,164,.12)',stroke:cssVar('--link-fill'),'stroke-width':2.5}));
+    groundPin(svg,O1.x,O1.y); groundPin(svg,O4.x,O4.y); freePin(svg,c2.x,c2.y,3); freePin(svg,c3.x,c3.y,3);
+    label(svg,(O1.x+c2.x)/2-8,(O1.y+c2.y)/2,'2'); label(svg,(c2.x+c3.x)/2,(c2.y+c3.y)/2-9,'5',cssVar('--accent-dk'));
+    label(svg,(O4.x+c3.x)/2+9,(O4.y+c3.y)/2,'4',cssVar('--accent-2')); label(svg,185,232,'1');
+    caption(svg,185,262,'two independent inputs \u2014 F = 2'); };
+
+  STAGES.st_2_4=function(svg,t){ var th2=TL.th2 + (35*DEG)*Math.sin(t*2*Math.PI); // sweep crank, solve exactly
+    if(!STAGES._tlSeed) STAGES._tlSeed=[0,Math.PI/2,1.5,0,0,Math.PI/2];
+    var x=tlSolve(th2,STAGES._tlSeed,40); STAGES._tlSeed=x; drawTwoLoop(svg,x,th2,false);
+    caption(svg,180,268,'one input drives both loops \u2014 F = 1'); };
+
+  STAGES.st_2_5=function(svg,t){ clear(svg); var TT=t*2*Math.PI;
+    teeth(svg,70,90,210,9,-1); // rack on left
+    var a=-0.5+0.25*Math.sin(TT); var c2={x:150,y:120},rA=16; var c3={x:c2.x+44*Math.cos(a),y:c2.y+44*Math.sin(a)},rB=14;
+    var body={x:250,y:150}; var slY=175;
+    var slx=150+30*Math.sin(TT*1.3);
+    svg.appendChild(el('ellipse',{cx:body.x,cy:body.y,rx:62,ry:40,fill:'rgba(10,126,164,.10)',stroke:cssVar('--link-fill'),'stroke-width':2.5}));
+    svg.appendChild(el('circle',{cx:c2.x,cy:c2.y,r:rA,fill:'rgba(10,126,164,.12)',stroke:cssVar('--link-fill'),'stroke-width':2.5}));
+    svg.appendChild(el('circle',{cx:c3.x,cy:c3.y,r:rB,fill:'rgba(10,126,164,.12)',stroke:cssVar('--link-fill'),'stroke-width':2.5}));
+    rail(svg,110,slY,250,slY); block(svg,slx,slY,0,26,14,{fill:cssVar('--paper-2')});
+    bar(svg,c3.x,c3.y,body.x-20,body.y-10,{color:cssVar('--accent')}); bar(svg,slx,slY,body.x,body.y+30,{color:cssVar('--accent-2')});
+    bar(svg,80,150,c2.x,c2.y); groundPin(svg,205,235); bar(svg,205,235,body.x,body.y+30,{color:cssVar('--ink-soft'),w:4});
+    freePin(svg,c2.x,c2.y,3); freePin(svg,c3.x,c3.y,3);
+    label(svg,70,80,'1'); label(svg,c2.x-6,c2.y-rA-8,'2'); label(svg,c3.x+rB+6,c3.y,'3'); label(svg,body.x+40,body.y-30,'4',cssVar('--accent-dk')); label(svg,body.x-30,body.y+34,'5',cssVar('--accent-2'));
+    caption(svg,180,266,'length constraint r\u2088+r\u2087=L \u2014 F = 2'); };
+
+  STAGES.st_2_6=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var O2={x:95,y:120},O7={x:95,y:215},O5={x:250,y:215};
+    var a2=TT; var r2=34, A={x:O2.x+r2*Math.cos(a2),y:O2.y+r2*Math.sin(a2)};
+    var foot={x:200+60*Math.cos(a2),y:200+26*Math.sin(a2)};
+    bar(svg,O2.x,O2.y,A.x,A.y,{color:cssVar('--accent'),w:6});
+    bar(svg,A.x,A.y,foot.x,foot.y); bar(svg,O5.x,O5.y,foot.x,foot.y,{color:cssVar('--accent-2')});
+    bar(svg,O7.x,O7.y,A.x,A.y,{color:cssVar('--ink-soft'),w:4});
+    var path=[]; for(var k=0;k<=48;k++){ var aa=k/48*2*Math.PI; path.push([200+60*Math.cos(aa),200+26*Math.sin(aa)]); }
+    polyline(svg,path,{color:cssVar('--accent-2'),w:1.5,op:.45,dash:'3 3'});
+    groundPin(svg,O2.x,O2.y); groundPin(svg,O7.x,O7.y); groundPin(svg,O5.x,O5.y); freePin(svg,A.x,A.y); dot(svg,foot.x,foot.y,5,cssVar('--accent-2'));
+    label(svg,O2.x-13,O2.y,'1'); label(svg,(O2.x+A.x)/2-8,(O2.y+A.y)/2,'2',cssVar('--accent-dk')); label(svg,foot.x+8,foot.y+12,'pedal',cssVar('--accent-2'));
+    caption(svg,180,262,'two loops \u2014 pedal path \u2014 F = 2'); };
+
+  STAGES.st_2_7=function(svg,t){ clear(svg); var TT=t*2*Math.PI; var base={x:80,y:215};
+    var boomAng=-0.55+0.30*Math.sin(TT), boomLen=150;
+    var elbow={x:base.x+boomLen*Math.cos(boomAng),y:base.y+boomLen*Math.sin(boomAng)};
+    var tilt=-0.2+0.6*Math.sin(TT*1.3+1), sl=34;
+    var s2={x:elbow.x+sl*Math.cos(tilt),y:elbow.y+sl*Math.sin(tilt)};
+    var s3={x:elbow.x+sl*Math.cos(tilt+1.5),y:elbow.y+sl*Math.sin(tilt+1.5)};
+    var g1={x:60,y:150}, midb={x:base.x+boomLen*0.45*Math.cos(boomAng),y:base.y+boomLen*0.45*Math.sin(boomAng)};
+    var g2={x:elbow.x-46,y:elbow.y-34};
+    svg.appendChild(el('line',{x1:52,y1:120,x2:52,y2:235,stroke:cssVar('--ground-fill'),'stroke-width':3}));
+    bar(svg,base.x,base.y,elbow.x,elbow.y,{w:8}); cylinder(svg,g1,midb);
+    tri(svg,[[elbow.x,elbow.y],[s2.x,s2.y],[s3.x,s3.y]],{}); cylinder(svg,g2,s3);
+    groundPin(svg,base.x,base.y); groundPin(svg,g1.x,g1.y); freePin(svg,elbow.x,elbow.y);
+    label(svg,base.x-12,base.y,'1'); label(svg,elbow.x+9,elbow.y+5,'4',cssVar('--accent-dk')); label(svg,s2.x+7,s2.y,'9'); label(svg,midb.x,midb.y-10,'2/3',cssVar('--accent-2'));
+    caption(svg,200,262,'two cylinders \u2014 boom + bucket \u2014 F = 2'); };
+
+  STAGES.st_2_9=function(svg,t){ clear(svg); // convergence illustration with real residuals
+    var seq=newton3seq(); var n=seq.length; var idx=Math.min(n-1,Math.floor(t*n));
+    // plot residual norm bars
+    var x0=60,y0=210,bw=30,gap=14,maxh=150; var maxr=seq[0].nrm||1;
+    for(var i=0;i<n;i++){ var h=maxh*Math.min(1,seq[i].nrm/maxr); if(seq[i].nrm<1e-6) h=2;
+      var col=(i===idx)?cssVar('--accent-2'):cssVar('--panel-line');
+      svg.appendChild(el('rect',{x:x0+i*(bw+gap),y:y0-h,width:bw,height:h,rx:2,fill:col}));
+      caption(svg,x0+i*(bw+gap)+bw/2,y0+14,'it'+i);
+    }
+    label(svg,180,40,'residual |f| collapses',cssVar('--ink'));
+    caption(svg,180,60,'estimate \u2192 [1, 2, 3]');
+    caption(svg,180,262,'Newton on a 3\u00d73 system (Ex 2.9)'); };
+
+  STAGES.st_2_10=function(svg,t){ var poses=tlIter(); var n=poses.length; var f=t*(n-1); var i=Math.min(n-2,Math.floor(f)); var frac=f-i;
+    var xa=poses[i], xb=poses[i+1]; var x=[]; for(var k=0;k<6;k++) x[k]=xa[k]+(xb[k]-xa[k])*frac;
+    drawTwoLoop(svg,x,TL.th2,true);
+    caption(svg,180,268,'guess \u2192 assembled pose (Ex 2.10)'); };
+
+  // 3x3 Newton sequence (Ex 2.9)
+  function newton3seq(){ if(newton3seq._c) return newton3seq._c; var x=[0,0,0]; var out=[]; var f0=f3(x); out.push({x:x.slice(),nrm:nrm(f0)});
+    for(var it=0;it<6;it++){ var d=newtonStep(J3(x),f3(x)); x=[x[0]+d[0],x[1]+d[1],x[2]+d[2]]; out.push({x:x.slice(),nrm:nrm(f3(x))}); }
+    newton3seq._c=out; return out; }
+  function f3(x){ return [x[0]*x[0]+x[1]+x[2]-6, x[0]+x[1]*x[1]+x[2]-8, x[0]+x[1]+x[2]*x[2]-12]; }
+  function J3(x){ return [[2*x[0],1,1],[1,2*x[1],1],[1,1,2*x[2]]]; }
+  function nrm(f){ var s=0; for(var i=0;i<f.length;i++) s+=f[i]*f[i]; return Math.sqrt(s); }
+  // two-loop iterate poses (Ex 2.10)
+  function tlIter(){ if(tlIter._c) return tlIter._c; var x=[0,Math.PI/2,1.5,0,0,Math.PI/2]; var out=[x.slice()];
+    for(var it=0;it<6;it++){ var d=newtonStep(tlJ(x),tlF(x,TL.th2)); for(var i=0;i<6;i++) x[i]+=d[i]; out.push(x.slice()); }
+    tlIter._c=out; return out; }
+
+  /* ---------- stage controller ---------- */
+  function makeStage(id,draw,opts){ var svg=$(id); if(!svg) return; opts=opts||{}; var t=opts.t0||0; var speed=opts.speed||0.006; var raf=null,playing=false;
+    var btn=document.querySelector('[data-play="'+id+'"]'); var origLabel=btn?btn.innerHTML:'';
+    function render(){ draw(svg,t); }
+    function frame(){ t+=speed; if(t>=1) t-=1; draw(svg,t); if(playing) raf=requestAnimationFrame(frame); }
+    function play(){ if(reduceMotion){ t=(t+(opts.step||0.12))%1; render(); return; } playing=true; if(btn) btn.innerHTML='\u258D\u258D Pause'; if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(frame); }
+    function pause(){ playing=false; if(raf) cancelAnimationFrame(raf); if(btn) btn.innerHTML=origLabel; }
+    render();
+    if(btn) btn.addEventListener('click',function(){ if(reduceMotion){ play(); return; } if(playing) pause(); else play(); });
+    if('IntersectionObserver' in window){ var io=new IntersectionObserver(function(en){ en.forEach(function(e){ if(!e.isIntersecting && playing) pause(); }); }); io.observe(svg); }
+  }
+
+  /* ---------- stepper engine ---------- */
+  function initSteppers(){
+    var steppers=document.querySelectorAll('[data-stepper]');
+    Array.prototype.forEach.call(steppers,function(st){
+      var steps=Array.prototype.slice.call(st.querySelectorAll('.step'));
+      var answer=st.querySelector('[data-answer]');
+      var prev=st.querySelector('[data-prev]'), next=st.querySelector('[data-next]'), reveal=st.querySelector('[data-reveal]');
+      var curEl=st.querySelector('[data-cur]'), totEl=st.querySelector('[data-total]'), pips=st.querySelector('.progress-pips');
+      var idx=0, revealed=false, total=steps.length;
+      if(totEl) totEl.textContent=total;
+      var pipEls=[]; if(pips){ for(var i=0;i<total;i++){ var p=document.createElement('span'); p.className='pip'; pips.appendChild(p); pipEls.push(p);} }
+      function update(){
+        for(var i=0;i<steps.length;i++){ steps[i].hidden=(i!==idx)||revealed; }
+        if(answer) answer.hidden=!revealed;
+        if(curEl) curEl.textContent=revealed?total:(idx+1);
+        for(var j=0;j<pipEls.length;j++){ pipEls[j].className='pip'+( (revealed||j<idx)?' done':'')+((j===idx&&!revealed)?' cur':''); }
+        var onLast=(idx===total-1);
+        if(prev) prev.disabled=(idx===0&&!revealed);
+        if(next) next.hidden=onLast||revealed;
+        if(reveal) reveal.hidden=(!onLast)||revealed;
+      }
+      if(next) next.addEventListener('click',function(){ if(idx<total-1){ idx++; update(); } });
+      if(prev) prev.addEventListener('click',function(){ if(revealed){ revealed=false; update(); return;} if(idx>0){ idx--; update(); } });
+      if(reveal) reveal.addEventListener('click',function(){ revealed=true; update(); });
+      update();
+    });
+  }
+
+  /* ---------- four-bar solver ---------- */
+  function initFourbarSolver(){
+    var svg=$('fb_solver'); if(!svg) return;
+    var R1=$('fbR1'),R2=$('fbR2'),R3=$('fbR3'),R4=$('fbR4'),TH=$('fbTh2');
+    var mOpen=$('fbModeOpen'),mCross=$('fbModeCross');
+    var oTh3=$('fbTh3'),oTh4=$('fbTh4'),work=$('fbWork'),status=$('fb_status');
+    var mode=1, playing=false, raf=null, sweep=null;
+    function num(inp,d){ var v=parseFloat(inp.value); return isNaN(v)?d:v; }
+    function render(){
+      var r1=Math.max(0.1,num(R1,6)),r2=Math.max(0.1,num(R2,2)),r3=Math.max(0.1,num(R3,5)),r4=Math.max(0.1,num(R4,5));
+      var th2=(sweep!=null)?sweep:num(TH,60);
+      var sol=drawFourbar(svg,r1,r2,r3,r4,th2,mode,{});
+      function deg(r){ return (r/DEG).toFixed(1)+'\u00b0'; }
+      if(sol.ok){ oTh3.textContent=deg(sol.th3); oTh4.textContent=deg(sol.th4);
+        status.textContent='Solved at \u03b8\u2082 = '+(th2).toFixed(0)+'\u00b0 ('+(mode>0?'open':'crossed')+' mode).'; status.style.color='';
+      } else { oTh3.textContent='\u2014'; oTh4.textContent='\u2014';
+        status.textContent='No assembly at \u03b8\u2082 = '+(th2).toFixed(0)+'\u00b0 \u2014 the links cannot close (discriminant < 0).'; status.style.color=cssVar('--bad'); }
+      work.textContent='A = '+sol.A.toFixed(3)+'\nB = '+sol.B.toFixed(3)+'\nC = '+sol.C.toFixed(3)+
+        '\nA\u00b2+B\u00b2\u2212C\u00b2 = '+sol.disc.toFixed(3)+'\nu\u2084 = '+(sol.ok?sol.u.toFixed(4):'\u2014 (no real root)');
+    }
+    [R1,R2,R3,R4,TH].forEach(function(inp){ inp.addEventListener('input',function(){ sweep=null; render(); }); });
+    function setMode(mb){ mode=mb; mOpen.setAttribute('aria-pressed',mb>0?'true':'false'); mCross.setAttribute('aria-pressed',mb<0?'true':'false'); render(); }
+    mOpen.addEventListener('click',function(){ setMode(1); }); mCross.addEventListener('click',function(){ setMode(-1); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-fbpreset]'),function(b){ b.addEventListener('click',function(){ var v=b.getAttribute('data-fbpreset').split(','); R1.value=v[0];R2.value=v[1];R3.value=v[2];R4.value=v[3];TH.value=v[4]; sweep=null; render(); }); });
+    var play=document.querySelector('[data-play="fb_solver"]'); var orig=play?play.innerHTML:'';
+    function step(){ sweep=(sweep==null?num(TH,60):sweep)+1.4; if(sweep>=360) sweep-=360; TH.value=Math.round(sweep); render(); if(playing) raf=requestAnimationFrame(step); }
+    if(play) play.addEventListener('click',function(){ if(reduceMotion){ sweep=(sweep==null?num(TH,60):sweep)+30; TH.value=Math.round(sweep%360); render(); return; } if(playing){ playing=false; if(raf)cancelAnimationFrame(raf); play.innerHTML=orig; sweep=null; } else { playing=true; play.innerHTML='\u258D\u258D Pause'; raf=requestAnimationFrame(step); } });
+    render();
+  }
+
+  /* ---------- Newton lab ---------- */
+  function initNewtonLab(){
+    var tab3=$('nlTab3'),tab10=$('nlTab10'); if(!tab3) return;
+    var iterEl=$('nlIter'),normEl=$('nlNorm'),xEl=$('nlX'),fEl=$('nlF'),jEl=$('nlJac'),head=$('nlHead'),log=$('nlLog'),desc=$('nlDesc'),conv=$('nlConv'),pose=$('nl_pose');
+    var stepB=$('nlStep'),runB=$('nlRun'),resetB=$('nlReset');
+    var mode='alg', x, it, history;
+    function fmt(v){ return (v>=0?' ':'')+v.toFixed(4); }
+    function start(){
+      it=0; history=[];
+      if(mode==='alg'){ x=[0,0,0];
+        desc.textContent='Mode 1 \u2014 the algebraic system of Example 2.9: three coupled equations, true root [1, 2, 3]. Start from the poor guess [0, 0, 0].';
+        head.innerHTML='<tr><th>it</th><th>x\u2081</th><th>x\u2082</th><th>x\u2083</th><th>|f\u0304|</th></tr>';
+        pose.hidden=true;
+      } else { x=[0,Math.PI/2,1.5,0,0,Math.PI/2];
+        desc.textContent='Mode 2 \u2014 the two-loop mechanism of Examples 2.4 / 2.10 at crank angle \u03b8\u2082 = 58\u00b0. Unknowns are \u03b8\u2083, \u03b8\u2084, r\u2085, \u03b8\u2085, \u03b8\u2086, \u03b8\u2087 (radians and inches). Rough start shown.';
+        head.innerHTML='<tr><th>it</th><th>\u03b8\u2083</th><th>\u03b8\u2084</th><th>r\u2085</th><th>\u03b8\u2085</th><th>\u03b8\u2086</th><th>\u03b8\u2087</th><th>|f\u0304|</th></tr>';
+        pose.hidden=false;
+      }
+      conv.textContent=''; log.innerHTML=''; record(); render();
+    }
+    function curF(){ return mode==='alg'?f3(x):tlF(x,TL.th2); }
+    function curJ(){ return mode==='alg'?J3(x):tlJ(x); }
+    function record(){ var f=curF(); var nf=nrm(f); var tr=document.createElement('tr');
+      var cells='<td>'+it+'</td>'; for(var i=0;i<x.length;i++) cells+='<td>'+x[i].toFixed(3)+'</td>'; cells+='<td>'+nf.toExponential(1)+'</td>';
+      tr.innerHTML=cells; Array.prototype.forEach.call(log.querySelectorAll('tr'),function(r){ r.classList.remove('latest'); }); tr.className='latest'; log.appendChild(tr);
+    }
+    function matStr(M){ var s=''; for(var i=0;i<M.length;i++){ s+=(i?'\n':'')+'['; for(var j=0;j<M[i].length;j++){ s+=(j?'  ':'')+M[i][j].toFixed(2); } s+=']'; } return s; }
+    function render(){ var f=curF(); iterEl.textContent=it; normEl.textContent=nrm(f).toExponential(2);
+      xEl.textContent=x.map(function(v){return fmt(v);}).join('\n');
+      fEl.textContent=f.map(function(v){return fmt(v);}).join('\n');
+      jEl.textContent=matStr(curJ());
+      if(mode==='mech'){ drawTwoLoop(pose,x,TL.th2,true); }
+    }
+    function step(){ var f=curF(); if(nrm(f)<1e-10){ conv.textContent='Converged: residual below tolerance after '+it+' iterations.'; return false; }
+      var d=newtonStep(curJ(),f); for(var i=0;i<x.length;i++) x[i]+=d[i]; it++; record(); render();
+      if(nrm(curF())<1e-9){ conv.textContent='Converged: residual below tolerance after '+it+' iterations.'; }
+      return true; }
+    stepB.addEventListener('click',step);
+    runB.addEventListener('click',function(){ var guard=0; while(step() && guard<40){ guard++; } });
+    resetB.addEventListener('click',start);
+    function setMode(m,btn){ mode=m; tab3.setAttribute('aria-selected',m==='alg'?'true':'false'); tab10.setAttribute('aria-selected',m==='mech'?'true':'false'); start(); }
+    tab3.addEventListener('click',function(){ setMode('alg'); }); tab10.addEventListener('click',function(){ setMode('mech'); });
+    start();
+  }
+
+  /* ---------- quiz ---------- */
+  function initQuiz(){ Array.prototype.forEach.call(document.querySelectorAll('[data-q]'),function(q){ var opts=Array.prototype.slice.call(q.querySelectorAll('.opt')); var fb=q.querySelector('.feedback'); var done=false;
+    opts.forEach(function(o){ o.addEventListener('click',function(){ if(done) return; done=true; var correct=o.getAttribute('data-correct')==='1';
+      if(correct){ o.classList.add('correct'); } else { o.classList.add('wrong'); opts.forEach(function(x){ if(x.getAttribute('data-correct')==='1') x.classList.add('correct'); }); }
+      if(fb) fb.classList.add('show'); }); });
+  }); }
+
+  /* ---------- glossary filter ---------- */
+  function initGloss(){ var inp=$('glossSearch'),list=$('glossList'),none=$('glossNone'); if(!inp||!list) return; var items=Array.prototype.slice.call(list.querySelectorAll('div'));
+    inp.addEventListener('input',function(){ var qv=inp.value.trim().toLowerCase(),any=false; items.forEach(function(it){ var m=it.textContent.toLowerCase().indexOf(qv)!==-1; it.hidden=!m; if(m)any=true; }); if(none) none.hidden=any; });
+  }
+
+  /* ---------- nav active + reading progress ---------- */
+  function initNavProgress(){ var prog=$('readprog'); var sections=Array.prototype.slice.call(document.querySelectorAll('main section[id]')); var links=Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    function onScroll(){ var h=document.documentElement; var scrolled=h.scrollTop||document.body.scrollTop||window.pageYOffset||0; var max=(h.scrollHeight-h.clientHeight)||1; if(prog) prog.value=Math.min(100,Math.max(0,scrolled/max*100));
+      var cur=sections.length?sections[0].id:null, mid=scrolled+h.clientHeight*0.3;
+      sections.forEach(function(sec){ if(sec.offsetTop<=mid) cur=sec.id; });
+      links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href')==='#'+cur); });
+    }
+    window.addEventListener('scroll',onScroll,{passive:true}); window.addEventListener('resize',onScroll); onScroll();
+  }
+
+  /* ---------- boot ---------- */
+  function boot(){
+    initSteppers(); initQuiz(); initGloss(); initNavProgress();
+    makeStage('st_2_1',STAGES.st_2_1,{speed:0.004});
+    makeStage('st_2_2',STAGES.st_2_2,{speed:0.005});
+    makeStage('st_2_3',STAGES.st_2_3,{speed:0.005});
+    makeStage('st_2_4',STAGES.st_2_4,{speed:0.004});
+    makeStage('st_2_5',STAGES.st_2_5,{speed:0.005});
+    makeStage('st_2_6',STAGES.st_2_6,{speed:0.005});
+    makeStage('st_2_7',STAGES.st_2_7,{speed:0.005});
+    makeStage('st_2_8',STAGES.st_2_8,{speed:0.004});
+    makeStage('st_2_9',STAGES.st_2_9,{speed:0.05,step:0.16});
+    makeStage('st_2_10',STAGES.st_2_10,{speed:0.004});
+    makeStage('st_2_11',STAGES.st_2_11,{speed:0.005});
+    initFourbarSolver(); initNewtonLab();
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',boot); } else { boot(); }
+})();
+</script>
+</body>
+</html>
