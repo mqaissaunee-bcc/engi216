@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nonlinear System Solver · ENGI 216 · General-Purpose Workbench</title>
+<meta name="description" content="A general-purpose Newton–Raphson workbench: type any system of nonlinear equations, set initial guesses, and solve — with iteration history, convergence plot, and MATLAB/Python code export. ENGI 216, Brookdale Community College.">
+<style>
+:root{
+  --paper:#f3f1e7; --panel:#ffffff; --panel-line:#c9c4b0;
+  --ink:#10243a; --ink-soft:#2b4a66;
+  --accent:#0a7ea4; --accent-dk:#075a76;
+  --rust:#c2541d; --rust-soft:#e7d3c4;
+  --grid-line:rgba(10,126,164,.10);
+  --good:#1f7a4d; --good-bg:#e3f3e9; --bad:#a4231f; --bad-bg:#f7e3e2;
+  --warn:#8a6d1a; --warn-bg:#f7f0d8;
+  --code-bg:#0e1820; --code-ink:#e8edf2; --code-cyan:#7fd6ee;
+  --code-rust:#f0a878; --code-green:#8fd6a8; --code-dim:#7d93a6;
+  --maxw:1080px; --radius:10px;
+  --shadow:0 2px 4px rgba(16,36,58,.08),0 8px 22px rgba(16,36,58,.10);
+  --serif:"Iowan Old Style","Palatino Linotype","Palatino","Georgia",serif;
+  --sans:"Optima","Segoe UI","Helvetica Neue",system-ui,sans-serif;
+  --mono:"SFMono-Regular","JetBrains Mono","Cascadia Code",Consolas,"Liberation Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0e1820; --panel:#16242f; --panel-line:#2c4150;
+    --ink:#e8edf2; --ink-soft:#aebfcf;
+    --accent:#3bb6d8; --accent-dk:#7fd6ee;
+    --rust:#e0824a; --rust-soft:#3a2417;
+    --grid-line:rgba(59,182,216,.12);
+    --good:#5fc78e; --good-bg:#16352a; --bad:#f08a86; --bad-bg:#3a1e1d;
+    --warn:#e6c869; --warn-bg:#352d12; --code-bg:#0a1218;
+    --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.5);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background-color:var(--paper);
+  background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+  background-size:26px 26px;color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.62;
+}
+.skip-link{position:absolute;left:-9999px;top:0;z-index:999;background:var(--accent);
+  color:#fff;padding:10px 16px;border-radius:0 0 8px 0;font-family:var(--mono);font-size:.9rem}
+.skip-link:focus{left:0}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+header.site{border-bottom:2px solid var(--ink);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 92%,transparent),transparent);
+  padding:28px 0 20px}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--rust);margin:0 0 8px;font-weight:700}
+header.site h1{font-family:var(--serif);font-weight:700;line-height:1.08;margin:0 0 10px;
+  font-size:clamp(1.7rem,4.2vw,2.7rem);color:var(--ink)}
+header.site .sub{font-size:clamp(.98rem,2.1vw,1.15rem);color:var(--ink-soft);max-width:64ch;margin:0}
+.titleblock{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:16px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);
+  border-top:1px dashed var(--panel-line);padding-top:12px}
+.titleblock b{color:var(--ink)}
+nav.toc{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,var(--panel));
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--panel-line)}
+nav.toc .toc-inner{display:flex;gap:4px;overflow-x:auto;padding:6px 20px;max-width:var(--maxw);margin:0 auto}
+nav.toc a{font-family:var(--mono);font-size:.78rem;white-space:nowrap;color:var(--ink-soft);
+  text-decoration:none;padding:8px 12px;min-height:44px;display:inline-flex;align-items:center;border-radius:7px}
+nav.toc a:hover{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--ink)}
+nav.toc a:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+main{padding:8px 0 40px}
+section{margin:34px 0}
+h2{font-family:var(--serif);font-size:clamp(1.3rem,3vw,1.7rem);margin:0 0 6px;
+  border-bottom:1px solid var(--panel-line);padding-bottom:8px}
+h2 .num{display:block;font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+h3{font-family:var(--serif);font-size:1.13rem;margin:22px 0 6px}
+p{max-width:72ch}
+.panel{background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:18px}
+.callout{border-radius:var(--radius);padding:14px 16px;margin:16px 0;max-width:78ch;border:1px solid}
+.callout p{margin:.3em 0}
+.callout .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700;display:block;margin-bottom:4px}
+.analogy{background:color-mix(in srgb,var(--accent) 9%,var(--panel));border-color:color-mix(in srgb,var(--accent) 45%,var(--panel-line))}
+.analogy .tag{color:var(--accent-dk)}
+.realworld{background:color-mix(in srgb,var(--rust) 9%,var(--panel));border-color:color-mix(in srgb,var(--rust) 45%,var(--panel-line))}
+.realworld .tag{color:var(--rust)}
+label{font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;color:var(--ink-soft);
+  display:block;margin:0 0 4px;font-weight:700}
+textarea,input[type=number],input[type=text],select{
+  width:100%;font-family:var(--mono);font-size:.92rem;color:var(--ink);
+  background:color-mix(in srgb,var(--paper) 55%,var(--panel));
+  border:1px solid var(--panel-line);border-radius:7px;padding:10px;min-height:44px}
+textarea{resize:vertical;line-height:1.55}
+textarea:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,
+[role=tab]:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.iogrid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:880px){.iogrid{grid-template-columns:3fr 2fr}}
+.hint{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:4px 0 0}
+.btn{font-family:var(--mono);font-size:.86rem;font-weight:700;min-height:44px;min-width:44px;
+  padding:10px 18px;border-radius:8px;border:2px solid var(--accent-dk);cursor:pointer;
+  background:var(--accent);color:#fff}
+.btn:hover{background:var(--accent-dk)}
+.btn.secondary{background:var(--panel);color:var(--accent-dk);border-color:var(--accent)}
+.btn.secondary:hover{background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.btn.tiny{min-height:44px;padding:8px 12px;font-size:.78rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px;align-items:center}
+.presetbar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+.presetbar .grow{flex:1 1 240px}
+table.data{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:.82rem}
+table.data caption{text-align:left;font-family:var(--sans);font-size:.85rem;color:var(--ink-soft);padding:0 0 8px}
+table.data th,table.data td{border:1px solid var(--panel-line);padding:7px 9px;text-align:right;white-space:nowrap}
+table.data th{background:color-mix(in srgb,var(--accent) 10%,var(--panel));color:var(--ink);text-align:center}
+table.data td:first-child,table.data th:first-child{text-align:center}
+.tablewrap{overflow-x:auto;border-radius:8px}
+.unkrow input[type=number]{min-width:130px}
+.unkname{font-family:var(--mono);font-weight:700;color:var(--accent-dk)}
+.status{font-family:var(--mono);font-size:.86rem;border-radius:8px;padding:10px 14px;margin:12px 0;border:1px solid}
+.status.ok{background:var(--good-bg);color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent)}
+.status.err{background:var(--bad-bg);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.status.warn{background:var(--warn-bg);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.status.iter{background:color-mix(in srgb,var(--accent) 8%,var(--panel));color:var(--ink);border-color:var(--panel-line)}
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)}
+.chk input{width:20px;height:20px;min-height:0;accent-color:var(--accent)}
+.resultlist{font-family:var(--mono);font-size:.95rem;margin:8px 0;padding:0;list-style:none}
+.resultlist li{padding:7px 0;border-bottom:1px dashed var(--panel-line);display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline}
+.resultlist .rn{font-weight:700;color:var(--accent-dk);min-width:5ch}
+.resultlist .deg{color:var(--ink-soft);font-size:.8rem}
+.conv-canvas{width:100%;max-width:680px;height:auto;background:var(--panel);
+  border:1px solid var(--panel-line);border-radius:8px;display:block;margin-top:14px}
+[role=tablist]{display:flex;gap:4px;border-bottom:2px solid var(--panel-line);margin:14px 0 0;flex-wrap:wrap}
+[role=tab]{font-family:var(--mono);font-size:.82rem;font-weight:700;min-height:44px;padding:10px 16px;
+  border:1px solid var(--panel-line);border-bottom:none;border-radius:8px 8px 0 0;cursor:pointer;
+  background:color-mix(in srgb,var(--paper) 60%,var(--panel));color:var(--ink-soft)}
+[role=tab][aria-selected=true]{background:var(--code-bg);color:var(--code-cyan);border-color:var(--code-bg)}
+.langpanel{margin:0}
+pre.code{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:.8rem;
+  line-height:1.55;padding:16px;border-radius:0 8px 8px 8px;overflow-x:auto;margin:0;tab-size:4}
+.codebar{display:flex;justify-content:flex-end;gap:8px;background:var(--code-bg);
+  padding:8px 8px 0;border-radius:0 8px 0 0;margin-top:0}
+details.helpbox{background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius);
+  margin:12px 0;box-shadow:var(--shadow)}
+details.helpbox summary{font-family:var(--serif);font-weight:700;font-size:1.05rem;cursor:pointer;
+  padding:14px 18px;min-height:44px;list-style-position:inside}
+details.helpbox .body{padding:0 18px 16px}
+table.syntax{border-collapse:collapse;font-size:.85rem;width:100%}
+table.syntax th,table.syntax td{border:1px solid var(--panel-line);padding:6px 10px;text-align:left}
+table.syntax th{background:color-mix(in srgb,var(--accent) 10%,var(--panel))}
+table.syntax code{font-family:var(--mono);font-size:.82rem;color:var(--accent-dk)}
+kbd,code.inline{font-family:var(--mono);font-size:.85em;background:color-mix(in srgb,var(--accent) 10%,var(--panel));
+  border:1px solid var(--panel-line);border-radius:4px;padding:1px 5px;color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+footer.site{border-top:2px solid var(--ink);margin-top:30px;padding:20px 0 36px;
+  font-family:var(--mono);font-size:.76rem;color:var(--ink-soft)}
+footer.site p{margin:.3em 0}
+@media print{
+  nav.toc,.btnrow,.codebar,.presetbar{display:none}
+  body{background:none;font-size:12px}
+  .panel,details.helpbox{box-shadow:none}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <p class="eyebrow">ENGI 216 · Computational Toolkit · General-Purpose Tool</p>
+    <h1>Nonlinear System Solver</h1>
+    <p class="sub">Type <em>any</em> system of nonlinear equations — mechanism loops, circuit equations,
+      heat balances, anything — set initial guesses, and watch Newton&ndash;Raphson find the root.
+      No MATLAB license, no installation, works offline.</p>
+    <div class="titleblock">
+      <span>COURSE <b>ENGI 216 — Dynamics &amp; Kinematics of Machines</b></span>
+      <span>METHOD <b>Newton&ndash;Raphson, finite-difference Jacobian</b></span>
+      <span>CAPACITY <b>up to 8 equations / 8 unknowns</b></span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Tool sections">
+  <div class="toc-inner">
+    <a href="#workbench">Workbench</a>
+    <a href="#results">Results</a>
+    <a href="#code">Export code</a>
+    <a href="#help">Syntax &amp; help</a>
+  </div>
+</nav>
+
+<main id="main">
+<div class="wrap">
+
+<section id="workbench" aria-labelledby="wbH">
+  <h2 id="wbH"><span class="num">Step 1 — Define the problem</span>Equations, parameters, and guesses</h2>
+
+  <div class="callout analogy">
+    <span class="tag">💡 Analogy — the initial guess is where you drop the marble</span>
+    <p>Newton&rsquo;s method is like releasing a marble onto a hilly landscape: it rolls quickly to the
+    bottom of <em>whichever valley you drop it in</em>. A four-bar linkage has two valleys — the open and
+    crossed configurations — so your initial guess chooses which assembly the solver finds. If the marble
+    lands on a ridge (a singular Jacobian), it doesn&rsquo;t know which way to roll.</p>
+  </div>
+
+  <div class="panel">
+    <div class="presetbar">
+      <div class="grow">
+        <label for="presetSel">Load an example problem</label>
+        <select id="presetSel">
+          <option value="fourbar">Four-bar linkage position (2×2) — Ch. 2</option>
+          <option value="crankslider">Offset crank-slider position (2×2) — Ch. 2</option>
+          <option value="circleline">Circle ∩ line intersection (2×2) — warm-up</option>
+          <option value="bf3">3×3 benchmark system (Burden &amp; Faires)</option>
+          <option value="blank">Blank — start from scratch</option>
+        </select>
+      </div>
+      <button type="button" class="btn secondary tiny" id="loadPresetBtn">Load example</button>
+    </div>
+
+    <div class="iogrid">
+      <div>
+        <label for="eqText">Equations — one per line, written so each line equals zero (an <code class="inline">=</code> sign is allowed)</label>
+        <textarea id="eqText" rows="6" spellcheck="false" autocomplete="off"></textarea>
+        <p class="hint">Example: <code class="inline">r2*cos(th2) + r3*cos(th3) - r4*cos(th4) - r1 = 0</code> · use <code class="inline">*</code> for every multiplication · <code class="inline">#</code> starts a comment</p>
+      </div>
+      <div>
+        <label for="parText">Known parameters — <code class="inline">name = value</code>, one per line</label>
+        <textarea id="parText" rows="6" spellcheck="false" autocomplete="off"></textarea>
+        <p class="hint">Values may use earlier names and math, e.g. <code class="inline">th2 = deg2rad(60)</code>. Anything in the equations that is <em>not</em> listed here becomes an unknown.</p>
+      </div>
+    </div>
+
+    <div id="errBox" class="status err" role="alert" hidden></div>
+
+    <h3 id="unkH">Unknowns detected &amp; initial guesses</h3>
+    <p class="hint" id="unkHint">Unknowns are found automatically from your equations. Give each one a starting value (angles in radians). Tick <b>Angle?</b> to also show that result in degrees.</p>
+    <div class="tablewrap">
+      <table class="data" aria-labelledby="unkH" aria-describedby="unkHint">
+        <thead><tr><th scope="col">#</th><th scope="col">Unknown</th><th scope="col">Initial guess</th><th scope="col">Angle?</th></tr></thead>
+        <tbody id="unkBody"><tr><td colspan="4">— type equations above —</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="settings">
+      <div><label for="tolIn">Tolerance ‖F‖<sub>∞</sub></label>
+        <input type="number" id="tolIn" value="1e-9" step="any" min="0"></div>
+      <div><label for="maxIn">Max iterations</label>
+        <input type="number" id="maxIn" value="50" step="1" min="1" max="500"></div>
+      <label class="chk"><input type="checkbox" id="dampChk" checked>
+        Damped steps (halve the step if ‖F‖ grows)</label>
+      <label class="chk"><input type="checkbox" id="degChk">
+        Show degree equivalents in results</label>
+    </div>
+
+    <div class="btnrow">
+      <button type="button" class="btn" id="solveBtn">Solve</button>
+      <button type="button" class="btn secondary" id="stepBtn">Step once</button>
+      <button type="button" class="btn secondary" id="resetBtn">Reset iterations</button>
+    </div>
+    <p id="liveStatus" class="sr-only" aria-live="polite"></p>
+  </div>
+</section>
+
+<section id="results" aria-labelledby="resH">
+  <h2 id="resH"><span class="num">Step 2 — Read the answer</span>Solution, iteration history, convergence</h2>
+  <div class="panel">
+    <div id="solStatus" class="status iter">Press <b>Solve</b> (or <b>Step once</b>) to begin.</div>
+    <ul class="resultlist" id="solList" hidden></ul>
+    <h3 id="iterH">Iteration history</h3>
+    <div class="tablewrap">
+      <table class="data" id="iterTable" aria-labelledby="iterH">
+        <thead id="iterHead"><tr><th scope="col">k</th></tr></thead>
+        <tbody id="iterBody"><tr><td>—</td></tr></tbody>
+      </table>
+    </div>
+    <canvas id="convCanvas" class="conv-canvas" width="680" height="300" role="img"
+      aria-label="Convergence plot: no data yet."></canvas>
+    <p class="hint">Each point is log₁₀‖F‖<sub>∞</sub> after iteration k. A steepening drop is the signature of
+      Newton&rsquo;s quadratic convergence — the number of correct digits roughly <em>doubles</em> each step near the root.</p>
+  </div>
+
+  <div class="callout realworld">
+    <span class="tag">🔧 Real world — this exact loop runs everywhere</span>
+    <p>Every time SPICE simulates a circuit, ANSYS solves a nonlinear structure, or an industrial robot
+    computes where to put its wrist, a Newton iteration just like this one runs — often thousands of times
+    per second. The robot&rsquo;s controller solves its position equations each servo cycle and uses the
+    <em>previous</em> answer as the next initial guess, which is why it converges in one or two steps.</p>
+  </div>
+</section>
+
+<section id="code" aria-labelledby="codeH">
+  <h2 id="codeH"><span class="num">Step 3 — Take it with you</span>Export your problem as MATLAB or Python</h2>
+  <p>The code below is generated from <em>your</em> equations exactly as typed above, so you can verify the
+  tool&rsquo;s answer independently and reuse the script in lab reports.</p>
+  <div role="tablist" aria-label="Export language">
+    <button role="tab" id="codetab-matlab" aria-controls="codepanel-matlab" aria-selected="true" type="button">MATLAB</button>
+    <button role="tab" id="codetab-python" aria-controls="codepanel-python" aria-selected="false" tabindex="-1" type="button">Python</button>
+  </div>
+  <div class="langpanel" id="codepanel-matlab" role="tabpanel" aria-labelledby="codetab-matlab">
+    <div class="codebar"><button type="button" class="btn secondary tiny" id="copyM">Copy MATLAB</button></div>
+    <pre class="code" id="mCode" tabindex="0">% type equations above — code appears here</pre>
+  </div>
+  <div class="langpanel" id="codepanel-python" role="tabpanel" aria-labelledby="codetab-python" hidden>
+    <div class="codebar"><button type="button" class="btn secondary tiny" id="copyP">Copy Python</button></div>
+    <pre class="code" id="pCode" tabindex="0"># type equations above — code appears here</pre>
+  </div>
+</section>
+
+<section id="help" aria-labelledby="helpH">
+  <h2 id="helpH"><span class="num">Reference</span>Input syntax &amp; troubleshooting</h2>
+
+  <details class="helpbox" open>
+    <summary>What can I type? — operators, functions, constants</summary>
+    <div class="body">
+      <div class="tablewrap">
+      <table class="syntax">
+        <thead><tr><th scope="col">Category</th><th scope="col">Available</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Operators</td><td><code>+ &nbsp; - &nbsp; * &nbsp; / &nbsp; ^</code></td>
+            <td><code>^</code> is power; write <code>2*x</code>, never <code>2x</code></td></tr>
+          <tr><td>Trig (radians)</td><td><code>sin cos tan asin acos atan atan2(y,x)</code></td>
+            <td>convert with <code>deg2rad( )</code> / <code>rad2deg( )</code></td></tr>
+          <tr><td>Exponential</td><td><code>exp ln log log10 sqrt</code></td>
+            <td><code>ln</code> = natural log; <code>log</code> = <code>log10</code> = base-10</td></tr>
+          <tr><td>Other</td><td><code>abs sign min(a,b) max(a,b) sinh cosh tanh</code></td><td></td></tr>
+          <tr><td>Constants</td><td><code>pi &nbsp; e</code></td><td>π and Euler&rsquo;s number</td></tr>
+          <tr><td>Names</td><td><code>th3, r_4, θ4, beta …</code></td>
+            <td>letters (Greek OK), digits, underscore; case-sensitive</td></tr>
+          <tr><td>Comments</td><td><code># anything after a hash</code></td><td>works in both boxes</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="hint">Equations may be written either as <code class="inline">expression = expression</code> or as a bare
+      expression that the solver drives to zero. Lines are independent; the system must be square
+      (same number of equations as unknowns).</p>
+    </div>
+  </details>
+
+  <details class="helpbox">
+    <summary>It didn&rsquo;t converge — now what?</summary>
+    <div class="body">
+      <p><b>Move the initial guess.</b> The single most common fix. Sketch the mechanism (or the curves) and
+      estimate angles within ±30°; Newton usually needs only a &ldquo;same valley&rdquo; guess, not a precise one.</p>
+      <p><b>Singular Jacobian (det J ≈ 0)?</b> You may be starting <em>at</em> a dead position or a fold of the
+      mechanism — for a four-bar that is where links 3 and 4 line up. Nudge the guess away from it.</p>
+      <p><b>Oscillating ‖F‖?</b> Leave damping on: the solver halves the step until the residual actually
+      decreases, trading a little speed for a lot of robustness.</p>
+      <p><b>Wrong branch?</b> The answer is valid but it&rsquo;s the <em>other</em> assembly (crossed instead of
+      open). Flip the sign or reflect the angle in your guess to land in the other valley.</p>
+      <p><b>Check the units.</b> All trig here is in radians. A guess of <code class="inline">60</code> meant as
+      degrees is really 3437° — write <code class="inline">deg2rad(60)</code> in parameters, or 1.05 as the guess.</p>
+    </div>
+  </details>
+
+  <details class="helpbox">
+    <summary>How the solver works under the hood</summary>
+    <div class="body">
+      <p>Each iteration evaluates the residual vector <b>F</b>(x), builds the Jacobian by <em>central finite
+      differences</em> (each column costs two extra evaluations of <b>F</b>), solves
+      <b>J</b>&nbsp;Δx&nbsp;=&nbsp;&minus;<b>F</b> by Gaussian elimination with partial pivoting, and updates
+      x&nbsp;←&nbsp;x&nbsp;+&nbsp;λΔx. With damping enabled, λ starts at 1 and halves until ‖F‖ decreases.
+      Iteration stops when ‖F‖<sub>∞</sub> &lt; tolerance or the step becomes negligibly small.</p>
+      <p>This is the same algorithm you built by hand in the
+      <em>Newton&rsquo;s Method for Systems</em> teaching module — there you watched it on fixed examples;
+      here you bring your own equations. The finite-difference Jacobian means you never differentiate by hand,
+      at the cost of a few extra function evaluations per step.</p>
+      <div class="callout analogy">
+        <span class="tag">💡 Analogy — finite differences are a wiggle test</span>
+        <p>Instead of deriving ∂f/∂x with calculus, the solver <em>wiggles</em> each unknown a tiny amount and
+        measures how much every equation responds — like finding which breaker controls an outlet by flipping
+        each one and checking the lamp. Slightly slower than knowing the wiring diagram, but it always works.</p>
+      </div>
+    </div>
+  </details>
+</section>
+
+</div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><b>Nonlinear System Solver</b> — companion to the <em>Newton&rsquo;s Method for Systems</em> teaching module.</p>
+    <p>Method reference: Stanišić, <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em>, Cengage 2015 (vector-loop position equations); Burden &amp; Faires, <em>Numerical Analysis</em> (Newton&rsquo;s method for systems).</p>
+    <p>Built for ENGI 216 · Brookdale Community College · 2026</p>
+  </div>
+</footer>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* ============ expression language: tokenizer + parser + evaluator ============ */
+var CONSTS={pi:Math.PI,e:Math.E};
+var FNS={
+  sin:[1,Math.sin],cos:[1,Math.cos],tan:[1,Math.tan],
+  asin:[1,Math.asin],acos:[1,Math.acos],atan:[1,Math.atan],atan2:[2,Math.atan2],
+  sqrt:[1,Math.sqrt],exp:[1,Math.exp],ln:[1,Math.log],log:[1,function(v){return Math.log10(v);}],
+  log10:[1,function(v){return Math.log10(v);}],abs:[1,Math.abs],sign:[1,Math.sign],
+  min:[2,Math.min],max:[2,Math.max],
+  sinh:[1,Math.sinh],cosh:[1,Math.cosh],tanh:[1,Math.tanh],
+  deg2rad:[1,function(d){return d*Math.PI/180;}],rad2deg:[1,function(r){return r*180/Math.PI;}]
+};
+function ParseError(msg){this.message=msg;}
+
+function tokenize(src){
+  var toks=[],i=0,n=src.length;
+  var idStart=/[A-Za-z_\u0370-\u03FF]/, idBody=/[A-Za-z0-9_\u0370-\u03FF]/, digit=/[0-9]/;
+  while(i<n){
+    var c=src[i];
+    if(c===' '||c==='\t'){i++;continue;}
+    if(digit.test(c)||(c==='.'&&digit.test(src[i+1]||''))){
+      var j=i,seenDot=false;
+      while(j<n&&(digit.test(src[j])||(src[j]==='.'&&!seenDot))){if(src[j]==='.')seenDot=true;j++;}
+      if((src[j]==='e'||src[j]==='E')){
+        var k=j+1; if(src[k]==='+'||src[k]==='-')k++;
+        if(digit.test(src[k]||'')){k++;while(k<n&&digit.test(src[k]))k++;j=k;}
+      }
+      toks.push({t:'num',v:parseFloat(src.slice(i,j))}); i=j; continue;
+    }
+    if(idStart.test(c)){
+      var j2=i; while(j2<n&&idBody.test(src[j2]))j2++;
+      toks.push({t:'id',v:src.slice(i,j2)}); i=j2; continue;
+    }
+    if('+-*/^(),'.indexOf(c)>=0){toks.push({t:c}); i++; continue;}
+    throw new ParseError('Unexpected character \u201C'+c+'\u201D');
+  }
+  return toks;
+}
+
+function parseExpr(src){
+  var toks=tokenize(src),pos=0;
+  function peek(){return toks[pos];}
+  function next(){return toks[pos++];}
+  function expect(t){var tk=next(); if(!tk||tk.t!==t)throw new ParseError('Expected \u201C'+t+'\u201D'); return tk;}
+  function adjacencyCheck(){
+    var tk=peek();
+    if(tk&&(tk.t==='num'||tk.t==='id'||tk.t==='('))
+      throw new ParseError('Missing operator \u2014 write 2*x or r3*cos(th3), not 2x or r3cos(th3)');
+  }
+  function atom(){
+    var tk=next();
+    if(!tk)throw new ParseError('Expression ended unexpectedly');
+    if(tk.t==='num'){adjacencyCheck();return {t:'num',v:tk.v};}
+    if(tk.t==='id'){
+      if(peek()&&peek().t==='('){
+        next();
+        var args=[expr()];
+        while(peek()&&peek().t===','){next();args.push(expr());}
+        expect(')');
+        if(!FNS[tk.v])throw new ParseError('Unknown function \u201C'+tk.v+'\u201D');
+        if(FNS[tk.v][0]!==args.length)
+          throw new ParseError(tk.v+'( ) takes '+FNS[tk.v][0]+' argument'+(FNS[tk.v][0]>1?'s':''));
+        adjacencyCheck();
+        return {t:'call',name:tk.v,args:args};
+      }
+      adjacencyCheck();
+      return {t:'var',name:tk.v};
+    }
+    if(tk.t==='('){var ein=expr();expect(')');adjacencyCheck();return ein;}
+    throw new ParseError('Unexpected \u201C'+tk.t+'\u201D');
+  }
+  function power(){
+    var base=atom();
+    if(peek()&&peek().t==='^'){next();var ex=unary();return {t:'bin',op:'^',l:base,r:ex};}
+    return base;
+  }
+  function unary(){
+    var tk=peek();
+    if(tk&&(tk.t==='-'||tk.t==='+')){next();var a=unary();return tk.t==='-'?{t:'neg',a:a}:a;}
+    return power();
+  }
+  function term(){
+    var l=unary();
+    while(peek()&&(peek().t==='*'||peek().t==='/')){var op=next().t;l={t:'bin',op:op,l:l,r:unary()};}
+    return l;
+  }
+  function expr(){
+    var l=term();
+    while(peek()&&(peek().t==='+'||peek().t==='-')){var op=next().t;l={t:'bin',op:op,l:l,r:term()};}
+    return l;
+  }
+  var ast=expr();
+  if(pos<toks.length)throw new ParseError('Unexpected input after expression');
+  return ast;
+}
+
+function evalAst(node,scope){
+  switch(node.t){
+    case 'num':return node.v;
+    case 'var':
+      if(Object.prototype.hasOwnProperty.call(scope,node.name))return scope[node.name];
+      if(Object.prototype.hasOwnProperty.call(CONSTS,node.name))return CONSTS[node.name];
+      throw new ParseError('Unknown name \u201C'+node.name+'\u201D');
+    case 'neg':return -evalAst(node.a,scope);
+    case 'bin':{
+      var a=evalAst(node.l,scope),b=evalAst(node.r,scope);
+      switch(node.op){case '+':return a+b;case '-':return a-b;case '*':return a*b;
+        case '/':return a/b;case '^':return Math.pow(a,b);}
+    }
+    case 'call':{
+      var f=FNS[node.name][1];
+      if(node.args.length===1)return f(evalAst(node.args[0],scope));
+      return f(evalAst(node.args[0],scope),evalAst(node.args[1],scope));
+    }
+  }
+  throw new ParseError('Bad expression node');
+}
+
+function collectVars(node,out){
+  switch(node.t){
+    case 'var':if(!Object.prototype.hasOwnProperty.call(CONSTS,node.name)&&out.indexOf(node.name)<0)out.push(node.name);break;
+    case 'neg':collectVars(node.a,out);break;
+    case 'bin':collectVars(node.l,out);collectVars(node.r,out);break;
+    case 'call':node.args.forEach(function(a){collectVars(a,out);});break;
+  }
+}
+
+/* ============ problem compilation ============ */
+function stripComment(line){var h=line.indexOf('#');return h>=0?line.slice(0,h):line;}
+
+function compileProblem(){
+  var prob={params:{},paramList:[],eqs:[],eqSrc:[],unknowns:[],error:null};
+  /* parameters */
+  var plines=$('parText').value.split('\n');
+  for(var i=0;i<plines.length;i++){
+    var raw=stripComment(plines[i]).trim();
+    if(!raw)continue;
+    var eqi=raw.indexOf('=');
+    if(eqi<1){prob.error='Parameter line '+(i+1)+': expected \u201Cname = value\u201D';return prob;}
+    var name=raw.slice(0,eqi).trim(), rhs=raw.slice(eqi+1).trim();
+    if(!/^[A-Za-z_\u0370-\u03FF][A-Za-z0-9_\u0370-\u03FF]*$/.test(name)){
+      prob.error='Parameter line '+(i+1)+': \u201C'+name+'\u201D is not a valid name';return prob;}
+    if(FNS[name]||Object.prototype.hasOwnProperty.call(CONSTS,name)){
+      prob.error='Parameter line '+(i+1)+': \u201C'+name+'\u201D is reserved';return prob;}
+    try{
+      var ast=parseExpr(rhs);
+      var used=[];collectVars(ast,used);
+      for(var u=0;u<used.length;u++)
+        if(!Object.prototype.hasOwnProperty.call(prob.params,used[u]))
+          throw new ParseError('uses \u201C'+used[u]+'\u201D before it is defined');
+      var val=evalAst(ast,prob.params);
+      if(!isFinite(val))throw new ParseError('does not evaluate to a finite number');
+      prob.params[name]=val;
+      prob.paramList.push({name:name,src:rhs,value:val});
+    }catch(ex){prob.error='Parameter \u201C'+name+'\u201D: '+ex.message;return prob;}
+  }
+  /* equations */
+  var elines=$('eqText').value.split('\n');
+  for(var j=0;j<elines.length;j++){
+    var line=stripComment(elines[j]).trim();
+    if(!line)continue;
+    var parts=line.split('=');
+    if(parts.length>2){prob.error='Equation line '+(j+1)+': more than one \u201C=\u201D';return prob;}
+    try{
+      var ast2;
+      if(parts.length===2){
+        var L=parseExpr(parts[0]),R=parseExpr(parts[1]);
+        ast2=(R.t==='num'&&R.v===0)?L:{t:'bin',op:'-',l:L,r:R};
+      }else ast2=parseExpr(parts[0]);
+      prob.eqs.push(ast2);
+      prob.eqSrc.push(line);
+    }catch(ex){prob.error='Equation line '+(j+1)+': '+ex.message;return prob;}
+  }
+  /* unknowns = names used in equations but not defined as parameters */
+  var names=[];
+  prob.eqs.forEach(function(a){collectVars(a,names);});
+  prob.unknowns=names.filter(function(nm){return !Object.prototype.hasOwnProperty.call(prob.params,nm);});
+  return prob;
+}
+
+/* ============ numerics ============ */
+function residual(prob,x){
+  var scope={};
+  for(var k in prob.params)scope[k]=prob.params[k];
+  for(var i=0;i<prob.unknowns.length;i++)scope[prob.unknowns[i]]=x[i];
+  return prob.eqs.map(function(ast){return evalAst(ast,scope);});
+}
+function infNorm(v){var m=0;for(var i=0;i<v.length;i++){var a=Math.abs(v[i]);if(a>m)m=a;}return m;}
+function fdJacobian(prob,x){
+  var n=x.length,J=[];
+  for(var r=0;r<n;r++)J.push(new Array(n));
+  for(var j=0;j<n;j++){
+    var h=1e-6*(1+Math.abs(x[j]));
+    var xp=x.slice(),xm=x.slice();
+    xp[j]+=h;xm[j]-=h;
+    var fp=residual(prob,xp),fm=residual(prob,xm);
+    for(var i2=0;i2<n;i2++)J[i2][j]=(fp[i2]-fm[i2])/(2*h);
+  }
+  return J;
+}
+function gaussSolve(A,b){           /* solves A dx = b in place; returns dx or null if singular */
+  var n=b.length,M=A.map(function(r){return r.slice();}),v=b.slice();
+  for(var c=0;c<n;c++){
+    var piv=c,best=Math.abs(M[c][c]);
+    for(var r=c+1;r<n;r++)if(Math.abs(M[r][c])>best){best=Math.abs(M[r][c]);piv=r;}
+    if(best<1e-13)return null;
+    if(piv!==c){var t=M[piv];M[piv]=M[c];M[c]=t;var tv=v[piv];v[piv]=v[c];v[c]=tv;}
+    for(var r2=c+1;r2<n;r2++){
+      var f=M[r2][c]/M[c][c];
+      for(var c2=c;c2<n;c2++)M[r2][c2]-=f*M[c][c2];
+      v[r2]-=f*v[c];
+    }
+  }
+  var dx=new Array(n);
+  for(var i=n-1;i>=0;i--){
+    var s=v[i];
+    for(var c3=i+1;c3<n;c3++)s-=M[i][c3]*dx[c3];
+    dx[i]=s/M[i][i];
+  }
+  return dx;
+}
+
+/* ============ solver state & UI ============ */
+var state=null;   /* {prob,x,k,hist:[{x,fnorm,dnorm}],finished,msgClass,msgText} */
+var guessCache={};
+var angleCache={};   /* name -> true/false: show degree equivalent for this unknown */
+function isAngleName(nm){
+  return /^(th|theta|phi|psi|alpha|beta|gamma|ang|[\u03B8\u03C6\u03C8\u03B1\u03B2\u03B3\u0398\u03A6\u03A8])/i.test(nm);
+}
+var STORAGE_KEY='engi216-nlsolver-v1';
+
+function fmt(v){
+  if(!isFinite(v))return String(v);
+  if(v===0)return '0';
+  var a=Math.abs(v);
+  if(a>=1e6||a<1e-4)return v.toExponential(5);
+  return String(Number(v.toPrecision(8)));
+}
+function fmtShort(v){
+  if(!isFinite(v))return String(v);
+  if(v===0)return '0';
+  var a=Math.abs(v);
+  if(a>=1e5||a<1e-3)return v.toExponential(3);
+  return String(Number(v.toPrecision(6)));
+}
+
+function showError(msg){
+  var box=$('errBox');
+  if(msg){box.textContent='\u26A0 '+msg;box.hidden=false;}
+  else box.hidden=true;
+}
+
+function refreshProblem(){
+  var prob=compileProblem();
+  showError(prob.error);
+  renderUnknowns(prob);
+  if(!prob.error)renderCode(prob);
+  saveState();
+  invalidateIterations();
+  return prob;
+}
+
+function renderUnknowns(prob){
+  var tb=$('unkBody');
+  tb.textContent='';
+  if(prob.error||prob.unknowns.length===0){
+    var tr=document.createElement('tr'),td=document.createElement('td');
+    td.colSpan=4;td.style.textAlign='center';
+    td.textContent=prob.error?'\u2014 fix the error above \u2014':'\u2014 type equations above \u2014';
+    tr.appendChild(td);tb.appendChild(tr);
+    return;
+  }
+  prob.unknowns.forEach(function(nm,i){
+    var tr=document.createElement('tr');tr.className='unkrow';
+    var td1=document.createElement('td');td1.textContent=String(i+1);
+    var td2=document.createElement('td');
+    var sp=document.createElement('span');sp.className='unkname';sp.textContent=nm;td2.appendChild(sp);
+    var td3=document.createElement('td');
+    var inp=document.createElement('input');
+    inp.type='number';inp.step='any';inp.id='guess-'+i;
+    inp.setAttribute('aria-label','Initial guess for '+nm);
+    inp.value=Object.prototype.hasOwnProperty.call(guessCache,nm)?guessCache[nm]:'1';
+    inp.addEventListener('input',function(){guessCache[nm]=inp.value;saveState();invalidateIterations();});
+    td3.appendChild(inp);
+    var td4=document.createElement('td');td4.style.textAlign='center';
+    var chk=document.createElement('input');
+    chk.type='checkbox';chk.id='angle-'+i;chk.style.width='20px';chk.style.height='20px';
+    chk.setAttribute('aria-label','Treat '+nm+' as an angle (show degrees in results)');
+    chk.checked=Object.prototype.hasOwnProperty.call(angleCache,nm)?angleCache[nm]:isAngleName(nm);
+    angleCache[nm]=chk.checked;
+    chk.addEventListener('change',function(){
+      angleCache[nm]=chk.checked;saveState();
+      if(state&&state.finished&&!$('solList').hidden)renderSolution();
+    });
+    td4.appendChild(chk);
+    tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td4);
+    tb.appendChild(tr);
+  });
+}
+
+function setStatus(cls,text){
+  var el=$('solStatus');
+  el.className='status '+cls;
+  el.textContent=text;
+  $('liveStatus').textContent=text;
+}
+
+function invalidateIterations(){
+  if(state){state=null;renderIterations();setStatus('iter','Problem changed \u2014 press Solve to run again.');$('solList').hidden=true;drawConvergence();}
+}
+
+function beginRun(){
+  var prob=compileProblem();
+  showError(prob.error);
+  renderUnknowns(prob);
+  if(prob.error)return null;
+  if(prob.eqs.length===0){setStatus('warn','No equations yet \u2014 type at least one above.');return null;}
+  if(prob.eqs.length!==prob.unknowns.length){
+    setStatus('err','System is not square: '+prob.eqs.length+' equation'+(prob.eqs.length!==1?'s':'')+
+      ' but '+prob.unknowns.length+' unknown'+(prob.unknowns.length!==1?'s':'')+
+      '. Add equations, or define extra names as parameters.');
+    return null;
+  }
+  if(prob.unknowns.length>8){setStatus('err','This tool handles up to 8 unknowns; you have '+prob.unknowns.length+'.');return null;}
+  var x=prob.unknowns.map(function(nm,i){
+    var el=$('guess-'+i);var v=el?parseFloat(el.value):NaN;
+    return isFinite(v)?v:0;
+  });
+  var f0;
+  try{f0=residual(prob,x);}catch(ex){setStatus('err','Could not evaluate equations: '+ex.message);return null;}
+  if(f0.some(function(v){return !isFinite(v);})){
+    setStatus('err','Equations evaluate to NaN/\u221E at the initial guess (division by zero, sqrt of a negative, \u2026). Move the guess.');
+    return null;
+  }
+  state={prob:prob,x:x,k:0,finished:false,
+    hist:[{x:x.slice(),fnorm:infNorm(f0),dnorm:null}]};
+  renderIterations();
+  drawConvergence();
+  return state;
+}
+
+function oneStep(){
+  if(!state||state.finished)return;
+  var prob=state.prob,x=state.x;
+  var f=residual(prob,x),fn=infNorm(f);
+  var tol=parseFloat($('tolIn').value);if(!isFinite(tol)||tol<=0)tol=1e-9;
+  if(fn<tol){finishRun('ok');return;}
+  var J=fdJacobian(prob,x);
+  var negf=f.map(function(v){return -v;});
+  var dx=gaussSolve(J,negf);
+  if(!dx){state.finished=true;
+    setStatus('err','Singular Jacobian at iteration '+state.k+' (det J \u2248 0). You are likely at a dead/fold position \u2014 move the initial guess.');
+    return;}
+  var lam=1,trial,tn,damped=$('dampChk').checked;
+  for(var h=0;h<10;h++){
+    trial=x.map(function(v,i){return v+lam*dx[i];});
+    var tf;
+    try{tf=residual(prob,trial);}catch(ex){tf=[NaN];}
+    tn=infNorm(tf);
+    if(!damped||(isFinite(tn)&&tn<fn))break;
+    lam/=2;
+  }
+  state.x=trial;state.k++;
+  state.hist.push({x:trial.slice(),fnorm:tn,dnorm:lam*infNorm(dx)});
+  var maxIt=parseInt($('maxIn').value,10);if(!isFinite(maxIt)||maxIt<1)maxIt=50;
+  if(!isFinite(tn)){state.finished=true;setStatus('err','Residual became NaN/\u221E at iteration '+state.k+' \u2014 diverged. Try a different initial guess.');}
+  else if(tn<tol)finishRun('ok');
+  else if(state.k>=maxIt){state.finished=true;
+    setStatus('warn','Stopped after '+maxIt+' iterations with \u2016F\u2016\u221E = '+fmtShort(tn)+
+      ' (tolerance not met). See \u201CIt didn\u2019t converge\u201D in the help section.');}
+  renderIterations();
+  drawConvergence();
+}
+
+function finishRun(){
+  state.finished=true;
+  var fn=state.hist[state.hist.length-1].fnorm;
+  setStatus('ok','\u2713 Converged in '+state.k+' iteration'+(state.k!==1?'s':'')+
+    ' \u2014 \u2016F\u2016\u221E = '+fmtShort(fn));
+  renderSolution();
+}
+
+function renderSolution(){
+  var ul=$('solList');ul.textContent='';
+  var showDeg=$('degChk').checked;
+  state.prob.unknowns.forEach(function(nm,i){
+    var li=document.createElement('li');
+    var s1=document.createElement('span');s1.className='rn';s1.textContent=nm;
+    var s2=document.createElement('span');s2.textContent='= '+fmt(state.x[i]);
+    li.appendChild(s1);li.appendChild(s2);
+    if(showDeg&&angleCache[nm]){
+      var s3=document.createElement('span');s3.className='deg';
+      s3.textContent='(= '+fmtShort(state.x[i]*180/Math.PI)+'\u00B0)';
+      li.appendChild(s3);
+    }
+    ul.appendChild(li);
+  });
+  ul.hidden=false;
+}
+
+function renderIterations(){
+  var head=$('iterHead'),body=$('iterBody');
+  head.textContent='';body.textContent='';
+  if(!state){
+    var tr0=document.createElement('tr'),th0=document.createElement('th');
+    th0.scope='col';th0.textContent='k';tr0.appendChild(th0);head.appendChild(tr0);
+    var trb=document.createElement('tr'),tdb=document.createElement('td');
+    tdb.textContent='\u2014';trb.appendChild(tdb);body.appendChild(trb);
+    return;
+  }
+  var tr=document.createElement('tr');
+  var cols=['k'].concat(state.prob.unknowns).concat(['\u2016F\u2016\u221E','\u2016\u0394x\u2016\u221E']);
+  cols.forEach(function(c){var th=document.createElement('th');th.scope='col';th.textContent=c;tr.appendChild(th);});
+  head.appendChild(tr);
+  state.hist.forEach(function(row,k){
+    var trr=document.createElement('tr');
+    var td=document.createElement('td');td.textContent=String(k);trr.appendChild(td);
+    row.x.forEach(function(v){var tdx=document.createElement('td');tdx.textContent=fmtShort(v);trr.appendChild(tdx);});
+    var tdf=document.createElement('td');tdf.textContent=fmtShort(row.fnorm);trr.appendChild(tdf);
+    var tdd=document.createElement('td');tdd.textContent=row.dnorm===null?'\u2014':fmtShort(row.dnorm);trr.appendChild(tdd);
+    body.appendChild(trr);
+  });
+}
+
+/* ============ convergence plot ============ */
+function cssVar(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
+function drawConvergence(){
+  var cv=$('convCanvas'),ctx=cv.getContext('2d');
+  var W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  var panel=cssVar('--panel'),line=cssVar('--panel-line'),ink=cssVar('--ink'),
+      accent=cssVar('--accent'),soft=cssVar('--ink-soft');
+  ctx.fillStyle=panel;ctx.fillRect(0,0,W,H);
+  var mL=64,mR=16,mT=18,mB=40,pw=W-mL-mR,ph=H-mT-mB;
+  if(!state||state.hist.length<1){
+    ctx.fillStyle=soft;ctx.font='14px monospace';
+    ctx.fillText('Convergence plot \u2014 run the solver to see \u2016F\u2016 fall',mL,H/2);
+    cv.setAttribute('aria-label','Convergence plot: no data yet.');
+    return;
+  }
+  var logs=state.hist.map(function(r){return r.fnorm>0?Math.log10(r.fnorm):-16;});
+  var ymin=Math.min.apply(null,logs),ymax=Math.max.apply(null,logs);
+  ymin=Math.floor(Math.min(ymin,-1))-1; ymax=Math.ceil(Math.max(ymax,0))+1;
+  var n=logs.length;
+  function px(k){return mL+(n===1?0:pw*k/(n-1));}
+  function py(v){return mT+ph*(ymax-v)/(ymax-ymin);}
+  /* gridlines + y labels */
+  ctx.strokeStyle=line;ctx.fillStyle=soft;ctx.font='11px monospace';ctx.lineWidth=1;
+  var gstep=Math.max(1,Math.ceil((ymax-ymin)/9));
+  for(var g=ymax;g>=ymin;g-=gstep){
+    ctx.beginPath();ctx.moveTo(mL,py(g)+.5);ctx.lineTo(W-mR,py(g)+.5);ctx.stroke();
+    ctx.fillText('1e'+g,8,py(g)+4);
+  }
+  /* x labels */
+  for(var k=0;k<n;k++){if(n<=12||k%Math.ceil(n/12)===0)ctx.fillText(String(k),px(k)-3,H-mB+18);}
+  ctx.fillText('iteration k',mL+pw/2-32,H-8);
+  ctx.save();ctx.translate(14,mT+ph/2+46);ctx.rotate(-Math.PI/2);
+  ctx.fillText('log\u2081\u2080 \u2016F\u2016\u221E','0','0');ctx.restore();
+  /* polyline + points */
+  ctx.strokeStyle=accent;ctx.lineWidth=2.5;ctx.beginPath();
+  for(var k2=0;k2<n;k2++){var X=px(k2),Y=py(logs[k2]);if(k2===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);}
+  ctx.stroke();
+  ctx.fillStyle=ink;
+  for(var k3=0;k3<n;k3++){ctx.beginPath();ctx.arc(px(k3),py(logs[k3]),4,0,2*Math.PI);ctx.fill();}
+  cv.setAttribute('aria-label','Convergence plot: residual norm fell from '+
+    fmtShort(state.hist[0].fnorm)+' to '+fmtShort(state.hist[n-1].fnorm)+
+    ' over '+(n-1)+' iterations.');
+}
+
+/* ============ code generation ============ */
+var PREC={'+':1,'-':1,'*':2,'/':2,'^':4};
+function emit(node,lang,unkIndex){
+  /* lang: 'm' (MATLAB) or 'p' (Python/NumPy). unkIndex maps name -> i (unused: names kept). */
+  var FMAP={
+    m:{ln:'log',log:'log10',log10:'log10'},
+    p:{sin:'np.sin',cos:'np.cos',tan:'np.tan',asin:'np.arcsin',acos:'np.arccos',atan:'np.arctan',
+       atan2:'np.arctan2',sqrt:'np.sqrt',exp:'np.exp',ln:'np.log',log:'np.log10',log10:'np.log10',
+       abs:'np.abs',sign:'np.sign',sinh:'np.sinh',cosh:'np.cosh',tanh:'np.tanh',
+       deg2rad:'np.deg2rad',rad2deg:'np.rad2deg',min:'min',max:'max'}
+  };
+  function go(nd,parentPrec,rightOfPow){
+    switch(nd.t){
+      case 'num':{
+        var s=String(nd.v);
+        return s;
+      }
+      case 'var':{
+        if(nd.name==='pi')return lang==='m'?'pi':'np.pi';
+        if(nd.name==='e')return lang==='m'?'exp(1)':'np.e';
+        return nd.name;
+      }
+      case 'neg':{
+        var inner=go(nd.a,3,false);
+        var out='-'+inner;
+        return parentPrec>3||rightOfPow?'('+out+')':out;
+      }
+      case 'bin':{
+        var p=PREC[nd.op];
+        var op=nd.op==='^'?(lang==='m'?'^':'**'):nd.op;
+        var L=go(nd.l,p,nd.op==='^');
+        /* right side: '+','*' reuse p; '-','/','^' need p+1 ('^' is left-assoc in MATLAB) */
+        var rp=(nd.op==='+'||nd.op==='*')?p:p+1;
+        var R=go(nd.r,rp,false);
+        return wrap(L+op+R,p,parentPrec);
+      }
+      case 'call':{
+        var nm=(FMAP[lang]&&FMAP[lang][nd.name])||nd.name;
+        return nm+'('+nd.args.map(function(a){return go(a,0,false);}).join(', ')+')';
+      }
+    }
+    return '?';
+  }
+  function wrap(s,p,parentPrec){return p<parentPrec?'('+s+')':s;}
+  return go(node,0,false);
+}
+function emitEq(node,lang){return emit(node,lang);}
+
+function renderCode(prob){
+  if(prob.eqs.length===0||prob.unknowns.length===0){
+    $('mCode').textContent='% type equations above \u2014 code appears here';
+    $('pCode').textContent='# type equations above \u2014 code appears here';
+    return;
+  }
+  var unk=prob.unknowns;
+  var guesses=unk.map(function(nm,i){
+    var el=$('guess-'+i);var v=el?parseFloat(el.value):NaN;
+    return isFinite(v)?String(v):'1';
+  });
+  /* ---- MATLAB ---- */
+  var m=[];
+  m.push('function nonlinear_solve');
+  m.push('% Generated by the ENGI 216 Nonlinear System Solver');
+  m.push('% Unknowns: '+unk.join(', '));
+  m.push('x = ['+guesses.join('; ')+'];   % initial guess ['+unk.join('; ')+']');
+  m.push('tol = '+($('tolIn').value||'1e-9')+';  maxit = '+($('maxIn').value||'50')+';');
+  m.push('for k = 0:maxit');
+  m.push('    Fx = F(x);');
+  m.push('    fprintf(\'k=%2d  ||F||=%.3e\\n\', k, max(abs(Fx)));');
+  m.push('    if max(abs(Fx)) < tol, break; end');
+  m.push('    J = jacFD(@F, x);');
+  m.push('    x = x - J \\ Fx;          % solve J*dx = -F, then x = x + dx');
+  m.push('end');
+  m.push('disp(\'Solution:\');');
+  unk.forEach(function(nm,i){m.push('fprintf(\''+nm+' = %.10g\\n\', x('+(i+1)+'));');});
+  m.push('end');
+  m.push('');
+  m.push('function out = F(x)');
+  unk.forEach(function(nm,i){m.push(nm+' = x('+(i+1)+');');});
+  prob.paramList.forEach(function(p){m.push(p.name+' = '+p.src+';');});
+  m.push('out = [');
+  prob.eqs.forEach(function(ast,i){m.push('    '+emitEq(ast,'m')+(i<prob.eqs.length-1?';':'')+'   % eq '+(i+1));});
+  m.push('];');
+  m.push('end');
+  m.push('');
+  m.push('function J = jacFD(F, x)');
+  m.push('% Jacobian by central finite differences');
+  m.push('n = numel(x); J = zeros(n);');
+  m.push('for j = 1:n');
+  m.push('    h = 1e-6*(1 + abs(x(j)));');
+  m.push('    xp = x; xp(j) = xp(j) + h;');
+  m.push('    xm = x; xm(j) = xm(j) - h;');
+  m.push('    J(:, j) = (F(xp) - F(xm)) / (2*h);');
+  m.push('end');
+  m.push('end');
+  $('mCode').textContent=m.join('\n');
+  /* ---- Python ---- */
+  var p=[];
+  p.push('# Generated by the ENGI 216 Nonlinear System Solver');
+  p.push('# Unknowns: '+unk.join(', '));
+  p.push('import numpy as np');
+  p.push('');
+  p.push('def F(x):');
+  p.push('    '+unk.join(', ')+(unk.length===1?',':'')+' = x');
+  prob.paramList.forEach(function(pp){p.push('    '+pp.name+' = '+emitEq(parseExpr(pp.src),'p'));});
+  p.push('    return np.array([');
+  prob.eqs.forEach(function(ast,i){p.push('        '+emitEq(ast,'p')+',   # eq '+(i+1));});
+  p.push('    ])');
+  p.push('');
+  p.push('def jac_fd(F, x):');
+  p.push('    """Jacobian by central finite differences."""');
+  p.push('    n = x.size');
+  p.push('    J = np.zeros((n, n))');
+  p.push('    for j in range(n):');
+  p.push('        h = 1e-6*(1 + abs(x[j]))');
+  p.push('        xp = x.copy(); xp[j] += h');
+  p.push('        xm = x.copy(); xm[j] -= h');
+  p.push('        J[:, j] = (F(xp) - F(xm)) / (2*h)');
+  p.push('    return J');
+  p.push('');
+  p.push('x = np.array(['+guesses.join(', ')+'])   # initial guess ['+unk.join(', ')+']');
+  p.push('tol, maxit = '+($('tolIn').value||'1e-9')+', '+($('maxIn').value||'50'));
+  p.push('for k in range(maxit + 1):');
+  p.push('    Fx = F(x)');
+  p.push('    print(f"k={k:2d}  ||F||={np.max(np.abs(Fx)):.3e}")');
+  p.push('    if np.max(np.abs(Fx)) < tol:');
+  p.push('        break');
+  p.push('    x = x - np.linalg.solve(jac_fd(F, x), Fx)');
+  p.push('');
+  p.push('print("Solution:")');
+  p.push('for name, val in zip('+JSON.stringify(unk)+', x):');
+  p.push('    print(f"{name} = {val:.10g}")');
+  p.push('');
+  p.push('# Optional cross-check:');
+  p.push('# from scipy.optimize import fsolve');
+  p.push('# print(fsolve(F, ['+guesses.join(', ')+']))');
+  $('pCode').textContent=p.join('\n');
+}
+
+/* ============ presets ============ */
+var PRESETS={
+  fourbar:{
+    eq:'# Four-bar position equations (vector loop, Stani\u0161i\u0107 Ch. 2)\nr2*cos(th2) + r3*cos(th3) - r4*cos(th4) - r1 = 0\nr2*sin(th2) + r3*sin(th3) - r4*sin(th4) = 0',
+    par:'# lengths in meters, angles in radians\nr1 = 0.4\nr2 = 0.15\nr3 = 0.45\nr4 = 0.35\nth2 = deg2rad(60)',
+    guesses:{th3:'0.35',th4:'1.6'}
+  },
+  crankslider:{
+    eq:'# Offset crank-slider position equations\nr2*cos(th2) + r3*cos(th3) - d = 0\nr2*sin(th2) + r3*sin(th3) - e = 0',
+    par:'r2 = 0.1\nr3 = 0.3\ne = 0.05   # slider offset\nth2 = deg2rad(45)',
+    guesses:{th3:'-0.2',d:'0.35'}
+  },
+  circleline:{
+    eq:'# Where does the line y = x + 1 cross the circle of radius 2?\nx^2 + y^2 = 4\ny = x + 1',
+    par:'# (no parameters needed)',
+    guesses:{x:'1',y:'2'}
+  },
+  bf3:{
+    eq:'# Classic 3-equation benchmark (Burden & Faires, Numerical Analysis)\n3*x - cos(y*z) - 0.5 = 0\nx^2 - 81*(y + 0.1)^2 + sin(z) + 1.06 = 0\nexp(-x*y) + 20*z + (10*pi - 3)/3 = 0',
+    par:'# (no parameters needed)',
+    guesses:{x:'0.1',y:'0.1',z:'-0.1'}
+  },
+  blank:{eq:'',par:'',guesses:{}}
+};
+function loadPreset(key,skipConfirm){
+  var p=PRESETS[key];if(!p)return;
+  if(!skipConfirm&&($('eqText').value.trim()||$('parText').value.trim())){
+    if(!window.confirm('Replace the current equations and parameters with this example?'))return;
+  }
+  $('eqText').value=p.eq;
+  $('parText').value=p.par;
+  guessCache={};
+  angleCache={};
+  for(var k in p.guesses)guessCache[k]=p.guesses[k];
+  refreshProblem();
+  setStatus('iter','Example loaded \u2014 press Solve.');
+  $('solList').hidden=true;
+}
+
+/* ============ persistence ============ */
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({
+      eq:$('eqText').value,par:$('parText').value,guesses:guessCache,angles:angleCache,
+      tol:$('tolIn').value,max:$('maxIn').value,
+      damp:$('dampChk').checked,deg:$('degChk').checked
+    }));
+  }catch(ex){/* private mode etc. */}
+}
+function loadSaved(){
+  try{
+    var raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return false;
+    var s=JSON.parse(raw);
+    if(typeof s.eq!=='string')return false;
+    $('eqText').value=s.eq;$('parText').value=s.par||'';
+    guessCache=s.guesses||{};
+    angleCache=s.angles||{};
+    if(s.tol)$('tolIn').value=s.tol;
+    if(s.max)$('maxIn').value=s.max;
+    $('dampChk').checked=s.damp!==false;
+    $('degChk').checked=!!s.deg;
+    return s.eq.trim().length>0;
+  }catch(ex){return false;}
+}
+
+/* ============ clipboard ============ */
+function copyText(text,btn,label){
+  function done(ok){
+    var old=label;
+    btn.textContent=ok?'\u2713 Copied':'Copy failed \u2014 select manually';
+    setTimeout(function(){btn.textContent=old;},1800);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){done(true);},function(){done(false);});
+  }else done(false);
+}
+
+/* ============ tabs ============ */
+function initTabs(){
+  var tabs=[$('codetab-matlab'),$('codetab-python')];
+  var panels={'codetab-matlab':$('codepanel-matlab'),'codetab-python':$('codepanel-python')};
+  function select(tab){
+    tabs.forEach(function(t){
+      var on=t===tab;
+      t.setAttribute('aria-selected',on?'true':'false');
+      t.tabIndex=on?0:-1;
+      panels[t.id].hidden=!on;
+    });
+    tab.focus();
+  }
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){select(t);});
+    t.addEventListener('keydown',function(ev){
+      var i=tabs.indexOf(t);
+      if(ev.key==='ArrowRight'||ev.key==='ArrowDown'){ev.preventDefault();select(tabs[(i+1)%tabs.length]);}
+      if(ev.key==='ArrowLeft'||ev.key==='ArrowUp'){ev.preventDefault();select(tabs[(i-1+tabs.length)%tabs.length]);}
+      if(ev.key==='Home'){ev.preventDefault();select(tabs[0]);}
+      if(ev.key==='End'){ev.preventDefault();select(tabs[tabs.length-1]);}
+    });
+  });
+}
+
+/* ============ wire up ============ */
+var debounceTimer=null;
+function debouncedRefresh(){
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(refreshProblem,350);
+}
+$('eqText').addEventListener('input',debouncedRefresh);
+$('parText').addEventListener('input',debouncedRefresh);
+$('tolIn').addEventListener('input',function(){saveState();});
+$('maxIn').addEventListener('input',function(){saveState();});
+$('dampChk').addEventListener('change',function(){saveState();});
+$('degChk').addEventListener('change',function(){saveState();if(state&&state.finished&&!$('solList').hidden)renderSolution();});
+
+$('solveBtn').addEventListener('click',function(){
+  var st=beginRun();
+  if(!st)return;
+  setStatus('iter','Solving\u2026');
+  var maxIt=parseInt($('maxIn').value,10);if(!isFinite(maxIt)||maxIt<1)maxIt=50;
+  var guard=0;
+  while(!state.finished&&guard<maxIt+2){oneStep();guard++;}
+});
+$('stepBtn').addEventListener('click',function(){
+  if(!state||state.finished){
+    var st=beginRun();
+    if(!st)return;
+    setStatus('iter','Initialized at the guess \u2014 \u2016F\u2016\u221E = '+fmtShort(state.hist[0].fnorm)+'. Press Step again.');
+    return;
+  }
+  oneStep();
+  if(!state.finished)
+    setStatus('iter','Iteration '+state.k+' \u2014 \u2016F\u2016\u221E = '+fmtShort(state.hist[state.hist.length-1].fnorm));
+});
+$('resetBtn').addEventListener('click',function(){
+  state=null;renderIterations();drawConvergence();
+  $('solList').hidden=true;
+  setStatus('iter','Reset \u2014 press Solve or Step once to begin.');
+});
+$('loadPresetBtn').addEventListener('click',function(){loadPreset($('presetSel').value,false);});
+$('copyM').addEventListener('click',function(){copyText($('mCode').textContent,$('copyM'),'Copy MATLAB');});
+$('copyP').addEventListener('click',function(){copyText($('pCode').textContent,$('copyP'),'Copy Python');});
+
+if(window.matchMedia){
+  var mq=window.matchMedia('(prefers-color-scheme: dark)');
+  if(mq.addEventListener)mq.addEventListener('change',function(){drawConvergence();});
+}
+
+initTabs();
+if(!loadSaved())loadPreset('fourbar',true);
+else refreshProblem();
+drawConvergence();
+})();
+</script>
+</body>
+</html>
