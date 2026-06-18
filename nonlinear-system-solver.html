@@ -225,30 +225,32 @@ footer.site p{margin:.3em 0}
       <div class="grow">
         <label for="presetSel">Load an example problem</label>
         <select id="presetSel">
+          <option value="custom" hidden>✎ Custom / edited problem</option>
           <optgroup label="Warm-up (math)">
-            <option value="circleline">Circle ∩ line intersection (2×2)</option>
-            <option value="bf3">3×3 benchmark system</option>
+            <option value="circleline">∿ Circle ∩ line intersection (2×2) · quadratic</option>
+            <option value="bf3">∿ 3×3 benchmark system · mixed</option>
           </optgroup>
           <optgroup label="Mechanisms &amp; dynamics">
-            <option value="fourbar">Four-bar linkage position (2×2)</option>
-            <option value="crankslider">Offset crank-slider position (2×2)</option>
+            <option value="fourbar">∿ Four-bar linkage position (2×2) · trig</option>
+            <option value="crankslider">∿ Offset crank-slider position (2×2) · trig</option>
           </optgroup>
           <optgroup label="Physics">
-            <option value="projectile">Projectile launch angle to hit a target (1×1)</option>
-            <option value="kepler">Kepler&rsquo;s equation — orbital position (1×1)</option>
-            <option value="wien">Wien&rsquo;s law — blackbody peak wavelength (1×1)</option>
+            <option value="projectile">∿ Projectile launch angle to hit a target (1×1) · trig</option>
+            <option value="kepler">∿ Kepler&rsquo;s equation — orbital position (1×1) · trig</option>
+            <option value="wien">∿ Wien&rsquo;s law — blackbody peak wavelength (1×1) · exponential</option>
           </optgroup>
           <optgroup label="Electronics">
-            <option value="diode">Diode + resistor load-line (2×2)</option>
+            <option value="diode">∿ Diode + resistor load-line (2×2) · exponential</option>
           </optgroup>
           <optgroup label="Statics &amp; structures">
-            <option value="catenary">Catenary — hanging-cable parameter (1×1)</option>
+            <option value="catenary">∿ Catenary — hanging-cable parameter (1×1) · hyperbolic</option>
           </optgroup>
           <optgroup label="Fluid mechanics">
-            <option value="colebrook">Colebrook — pipe friction factor (1×1)</option>
+            <option value="colebrook">∿ Colebrook — pipe friction factor (1×1) · logarithmic</option>
           </optgroup>
           <option value="blank">Blank — start from scratch</option>
         </select>
+        <p class="hint" id="presetLegend"><b>∿</b> marks a nonlinear system — every example here is nonlinear (that is what this tool solves). The word after the dot is the <em>source</em> of the nonlinearity (trig, exponential, …).</p>
       </div>
       <button type="button" class="btn secondary tiny" id="loadPresetBtn">Load example</button>
     </div>
@@ -659,8 +661,7 @@ var angleCache={};   /* name -> true/false: show degree equivalent for this unkn
 function isAngleName(nm){
   return /^(th|theta|phi|psi|alpha|beta|gamma|ang|[\u03B8\u03C6\u03C8\u03B1\u03B2\u03B3\u0398\u03A6\u03A8])/i.test(nm);
 }
-var STORAGE_KEY='nlsolver-v1';
-var STORAGE_KEY_LEGACY='engi216-nlsolver-v1';
+var STORAGE_KEY='nlsolver-v2';
 
 function fmt(v){
   if(!isFinite(v))return String(v);
@@ -1045,7 +1046,7 @@ function renderCode(prob){
 /* ============ presets ============ */
 var PRESETS={
   fourbar:{
-    eq:'# Four-bar linkage position equations (vector loop)\nr2*cos(th2) + r3*cos(th3) - r4*cos(th4) - r1 = 0\nr2*sin(th2) + r3*sin(th3) - r4*sin(th4) = 0',
+    eq:'# Four-bar linkage position equations\nr2*cos(th2) + r3*cos(th3) - r4*cos(th4) - r1 = 0\nr2*sin(th2) + r3*sin(th3) - r4*sin(th4) = 0',
     par:'# lengths in meters, angles in radians\nr1 = 0.4\nr2 = 0.15\nr3 = 0.45\nr4 = 0.35\nth2 = deg2rad(60)',
     guesses:{th3:'0.35',th4:'1.6'}, angles:{th3:true,th4:true}
   },
@@ -1107,9 +1108,22 @@ function loadPreset(key,skipConfirm){
   angleCache={};
   for(var k in p.guesses)guessCache[k]=p.guesses[k];
   if(p.angles)for(var a in p.angles)angleCache[a]=p.angles[a];
+  $('presetSel').value=key;        /* keep dropdown in sync with what is loaded */
   refreshProblem();
   setStatus('iter','Example loaded \u2014 press Solve.');
   $('solList').hidden=true;
+}
+/* Which preset (if any) exactly matches the current equation/parameter text? */
+function detectPreset(){
+  var eq=$('eqText').value, par=$('parText').value;
+  for(var k in PRESETS){
+    if(PRESETS[k].eq===eq && PRESETS[k].par===par) return k;
+  }
+  return null;
+}
+/* Make the dropdown reflect the current contents (a known preset, or "Custom"). */
+function syncPresetSelect(){
+  $('presetSel').value = detectPreset() || 'custom';
 }
 
 /* ============ persistence ============ */
@@ -1124,7 +1138,7 @@ function saveState(){
 }
 function loadSaved(){
   try{
-    var raw=localStorage.getItem(STORAGE_KEY)||localStorage.getItem(STORAGE_KEY_LEGACY);
+    var raw=localStorage.getItem(STORAGE_KEY);
     if(!raw)return false;
     var s=JSON.parse(raw);
     if(typeof s.eq!=='string')return false;
@@ -1179,7 +1193,7 @@ function initTabs(){
 var debounceTimer=null;
 function debouncedRefresh(){
   clearTimeout(debounceTimer);
-  debounceTimer=setTimeout(refreshProblem,350);
+  debounceTimer=setTimeout(function(){refreshProblem();syncPresetSelect();},350);
 }
 $('eqText').addEventListener('input',debouncedRefresh);
 $('parText').addEventListener('input',debouncedRefresh);
@@ -1221,8 +1235,12 @@ if(window.matchMedia){
 }
 
 initTabs();
-if(!loadSaved())loadPreset('fourbar',true);
-else refreshProblem();
+if(!loadSaved()){
+  loadPreset('fourbar',true);     /* sets equations, parameters, AND dropdown together */
+}else{
+  refreshProblem();
+  syncPresetSelect();             /* restored content: match the dropdown to it (or "Custom") */
+}
 drawConvergence();
 })();
 </script>
