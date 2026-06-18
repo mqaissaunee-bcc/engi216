@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nonlinear System Solver · ENGI 216 · General-Purpose Workbench</title>
-<meta name="description" content="A general-purpose Newton–Raphson workbench: type any system of nonlinear equations, set initial guesses, and solve — with iteration history, convergence plot, and MATLAB/Python code export. ENGI 216, Brookdale Community College.">
+<title>Nonlinear System Solver · General-Purpose Workbench</title>
+<meta name="description" content="A general-purpose Newton–Raphson workbench: type any system of nonlinear equations, set initial guesses, and solve — with iteration history, convergence plot, and MATLAB/Python code export.">
 <style>
 :root{
   --paper:#f3f1e7; --panel:#ffffff; --panel-line:#c9c4b0;
@@ -83,6 +83,13 @@ p{max-width:72ch}
   font-weight:700;display:block;margin-bottom:4px}
 .analogy{background:color-mix(in srgb,var(--accent) 9%,var(--panel));border-color:color-mix(in srgb,var(--accent) 45%,var(--panel-line))}
 .analogy .tag{color:var(--accent-dk)}
+/* collapsible callout / reserved as <details> */
+details.callout>summary,details.reserved>summary{cursor:pointer;list-style:none;outline-offset:3px}
+details.callout>summary::-webkit-details-marker,details.reserved>summary::-webkit-details-marker{display:none}
+details.callout>summary .tag::before,details.reserved>summary .tag::before{content:"\25B8\00a0";font-size:.85em}
+details.callout[open]>summary .tag::before,details.reserved[open]>summary .tag::before{content:"\25BE\00a0"}
+details.callout>summary .tag,details.reserved>summary .tag{margin-bottom:0}
+details.callout[open]>summary .tag,details.reserved[open]>summary .tag{margin-bottom:6px}
 .realworld{background:color-mix(in srgb,var(--rust) 9%,var(--panel));border-color:color-mix(in srgb,var(--rust) 45%,var(--panel-line))}
 .realworld .tag{color:var(--rust)}
 label{font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;color:var(--ink-soft);
@@ -175,13 +182,12 @@ footer.site p{margin:.3em 0}
 
 <header class="site">
   <div class="wrap">
-    <p class="eyebrow">ENGI 216 · Computational Toolkit · General-Purpose Tool</p>
+    <p class="eyebrow">General-Purpose Tool · Newton–Raphson Workbench</p>
     <h1>Nonlinear System Solver</h1>
     <p class="sub">Type <em>any</em> system of nonlinear equations — mechanism loops, circuit equations,
       heat balances, anything — set initial guesses, and watch Newton&ndash;Raphson find the root.
       No MATLAB license, no installation, works offline.</p>
     <div class="titleblock">
-      <span>COURSE <b>ENGI 216 — Dynamics &amp; Kinematics of Machines</b></span>
       <span>METHOD <b>Newton&ndash;Raphson, finite-difference Jacobian</b></span>
       <span>CAPACITY <b>up to 8 equations / 8 unknowns</b></span>
     </div>
@@ -203,13 +209,16 @@ footer.site p{margin:.3em 0}
 <section id="workbench" aria-labelledby="wbH">
   <h2 id="wbH"><span class="num">Step 1 — Define the problem</span>Equations, parameters, and guesses</h2>
 
-  <div class="callout analogy">
-    <span class="tag">💡 Analogy — the initial guess is where you drop the marble</span>
+  <details class="callout analogy" open>
+    <summary><span class="tag">💡 Analogy — the initial guess is where you drop the marble</span></summary>
     <p>Newton&rsquo;s method is like releasing a marble onto a hilly landscape: it rolls quickly to the
-    bottom of <em>whichever valley you drop it in</em>. A four-bar linkage has two valleys — the open and
-    crossed configurations — so your initial guess chooses which assembly the solver finds. If the marble
-    lands on a ridge (a singular Jacobian), it doesn&rsquo;t know which way to roll.</p>
-  </div>
+    bottom of <em>whichever valley you drop it in</em>. Most engineering systems have more than one valid
+    solution, and your initial guess decides which one you land in — the open vs. crossed assembly of a
+    linkage, the low vs. high arc of a projectile, an amplifier&rsquo;s intended operating point vs. a
+    spurious one, or the two places a circle and a line cross. If you drop the marble on a flat ridge
+    (a singular Jacobian), it can&rsquo;t tell which way to roll and the method stalls — nudge the guess
+    toward the answer you actually want.</p>
+  </details>
 
   <div class="panel">
     <div class="presetbar">
@@ -218,11 +227,11 @@ footer.site p{margin:.3em 0}
         <select id="presetSel">
           <optgroup label="Warm-up (math)">
             <option value="circleline">Circle ∩ line intersection (2×2)</option>
-            <option value="bf3">3×3 benchmark system (Burden &amp; Faires)</option>
+            <option value="bf3">3×3 benchmark system</option>
           </optgroup>
           <optgroup label="Mechanisms &amp; dynamics">
-            <option value="fourbar">Four-bar linkage position (2×2) — Ch. 2</option>
-            <option value="crankslider">Offset crank-slider position (2×2) — Ch. 2</option>
+            <option value="fourbar">Four-bar linkage position (2×2)</option>
+            <option value="crankslider">Offset crank-slider position (2×2)</option>
           </optgroup>
           <optgroup label="Physics">
             <option value="projectile">Projectile launch angle to hit a target (1×1)</option>
@@ -257,15 +266,15 @@ footer.site p{margin:.3em 0}
       </div>
     </div>
 
-    <div class="reserved" role="note" aria-label="Reserved names">
-      <span class="tag">⚠ Reserved names — don&rsquo;t use these as your own variables or parameters</span>
+    <details class="reserved" open>
+      <summary><span class="tag">⚠ Reserved names — don&rsquo;t use these as your own variables or parameters</span></summary>
       <p><span class="grp">Constants:</span> <code>pi</code> (π ≈ 3.14159), <code>e</code> (Euler&rsquo;s number ≈ 2.71828).
         That is why a slider offset or orbital eccentricity is written <code>ecc</code> in the examples, not <code>e</code>.</p>
       <p><span class="grp">Functions:</span> <code>sin</code> <code>cos</code> <code>tan</code> <code>asin</code> <code>acos</code> <code>atan</code> <code>atan2</code>
         <code>sqrt</code> <code>exp</code> <code>ln</code> <code>log</code> <code>log10</code> <code>abs</code> <code>sign</code>
         <code>min</code> <code>max</code> <code>sinh</code> <code>cosh</code> <code>tanh</code> <code>deg2rad</code> <code>rad2deg</code>.</p>
       <p>Everything else is fair game: <code>th3</code>, <code>r_4</code>, <code>Vd</code>, <code>theta</code>, <code>E</code>, Greek letters, etc.</p>
-    </div>
+    </details>
 
     <div id="errBox" class="status err" role="alert" hidden></div>
 
@@ -326,7 +335,7 @@ footer.site p{margin:.3em 0}
 <section id="code" aria-labelledby="codeH">
   <h2 id="codeH"><span class="num">Step 3 — Take it with you</span>Export your problem as MATLAB or Python</h2>
   <p>The code below is generated from <em>your</em> equations exactly as typed above, so you can verify the
-  tool&rsquo;s answer independently and reuse the script in lab reports.</p>
+  tool&rsquo;s answer independently and reuse the script in your own work.</p>
   <div role="tablist" aria-label="Export language">
     <button role="tab" id="codetab-matlab" aria-controls="codepanel-matlab" aria-selected="true" type="button">MATLAB</button>
     <button role="tab" id="codetab-python" aria-controls="codepanel-python" aria-selected="false" tabindex="-1" type="button">Python</button>
@@ -395,10 +404,9 @@ footer.site p{margin:.3em 0}
       <b>J</b>&nbsp;Δx&nbsp;=&nbsp;&minus;<b>F</b> by Gaussian elimination with partial pivoting, and updates
       x&nbsp;←&nbsp;x&nbsp;+&nbsp;λΔx. With damping enabled, λ starts at 1 and halves until ‖F‖ decreases.
       Iteration stops when ‖F‖<sub>∞</sub> &lt; tolerance or the step becomes negligibly small.</p>
-      <p>This is the same algorithm you built by hand in the
-      <em>Newton&rsquo;s Method for Systems</em> teaching module — there you watched it on fixed examples;
-      here you bring your own equations. The finite-difference Jacobian means you never differentiate by hand,
-      at the cost of a few extra function evaluations per step.</p>
+      <p>The finite-difference Jacobian means you never differentiate by hand,
+      at the cost of a few extra function evaluations per step. It is exactly the algorithm behind
+      MATLAB&rsquo;s <code class="inline">fsolve</code> and SciPy&rsquo;s <code class="inline">scipy.optimize.fsolve</code>.</p>
       <div class="callout analogy">
         <span class="tag">💡 Analogy — finite differences are a wiggle test</span>
         <p>Instead of deriving ∂f/∂x with calculus, the solver <em>wiggles</em> each unknown a tiny amount and
@@ -414,9 +422,8 @@ footer.site p{margin:.3em 0}
 
 <footer class="site">
   <div class="wrap">
-    <p><b>Nonlinear System Solver</b> — companion to the <em>Newton&rsquo;s Method for Systems</em> teaching module.</p>
-    <p>Method reference: Stanišić, <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em>, Cengage 2015 (vector-loop position equations); Burden &amp; Faires, <em>Numerical Analysis</em> (Newton&rsquo;s method for systems).</p>
-    <p>Built for ENGI 216 · Brookdale Community College · 2026</p>
+    <p><b>Nonlinear System Solver</b> — a self-contained Newton–Raphson workbench for any square system of nonlinear equations.</p>
+    <p>Method: Newton–Raphson iteration with a central finite-difference Jacobian, solved by Gaussian elimination with partial pivoting and optional step damping. Runs entirely in your browser; no data leaves the page.</p>
   </div>
 </footer>
 <script>
@@ -652,7 +659,8 @@ var angleCache={};   /* name -> true/false: show degree equivalent for this unkn
 function isAngleName(nm){
   return /^(th|theta|phi|psi|alpha|beta|gamma|ang|[\u03B8\u03C6\u03C8\u03B1\u03B2\u03B3\u0398\u03A6\u03A8])/i.test(nm);
 }
-var STORAGE_KEY='engi216-nlsolver-v1';
+var STORAGE_KEY='nlsolver-v1';
+var STORAGE_KEY_LEGACY='engi216-nlsolver-v1';
 
 function fmt(v){
   if(!isFinite(v))return String(v);
@@ -957,7 +965,7 @@ function renderCode(prob){
   /* ---- MATLAB ---- */
   var m=[];
   m.push('function nonlinear_solve');
-  m.push('% Generated by the ENGI 216 Nonlinear System Solver');
+  m.push('% Generated by the Nonlinear System Solver');
   m.push('% Unknowns: '+unk.join(', '));
   m.push('x = ['+guesses.join('; ')+'];   % initial guess ['+unk.join('; ')+']');
   m.push('tol = '+($('tolIn').value||'1e-9')+';  maxit = '+($('maxIn').value||'50')+';');
@@ -993,7 +1001,7 @@ function renderCode(prob){
   $('mCode').textContent=m.join('\n');
   /* ---- Python ---- */
   var p=[];
-  p.push('# Generated by the ENGI 216 Nonlinear System Solver');
+  p.push('# Generated by the Nonlinear System Solver');
   p.push('# Unknowns: '+unk.join(', '));
   p.push('import numpy as np');
   p.push('');
@@ -1037,7 +1045,7 @@ function renderCode(prob){
 /* ============ presets ============ */
 var PRESETS={
   fourbar:{
-    eq:'# Four-bar position equations (vector loop, Stani\u0161i\u0107 Ch. 2)\nr2*cos(th2) + r3*cos(th3) - r4*cos(th4) - r1 = 0\nr2*sin(th2) + r3*sin(th3) - r4*sin(th4) = 0',
+    eq:'# Four-bar linkage position equations (vector loop)\nr2*cos(th2) + r3*cos(th3) - r4*cos(th4) - r1 = 0\nr2*sin(th2) + r3*sin(th3) - r4*sin(th4) = 0',
     par:'# lengths in meters, angles in radians\nr1 = 0.4\nr2 = 0.15\nr3 = 0.45\nr4 = 0.35\nth2 = deg2rad(60)',
     guesses:{th3:'0.35',th4:'1.6'}, angles:{th3:true,th4:true}
   },
@@ -1052,7 +1060,7 @@ var PRESETS={
     guesses:{x:'1',y:'2'}, angles:{x:false,y:false}
   },
   bf3:{
-    eq:'# Classic 3-equation benchmark (Burden & Faires, Numerical Analysis)\n3*x - cos(y*z) - 0.5 = 0\nx^2 - 81*(y + 0.1)^2 + sin(z) + 1.06 = 0\nexp(-x*y) + 20*z + (10*pi - 3)/3 = 0',
+    eq:'# Classic 3-equation nonlinear benchmark system\n3*x - cos(y*z) - 0.5 = 0\nx^2 - 81*(y + 0.1)^2 + sin(z) + 1.06 = 0\nexp(-x*y) + 20*z + (10*pi - 3)/3 = 0',
     par:'# (no parameters needed)',
     guesses:{x:'0.1',y:'0.1',z:'-0.1'}, angles:{x:false,y:false,z:false}
   },
@@ -1116,7 +1124,7 @@ function saveState(){
 }
 function loadSaved(){
   try{
-    var raw=localStorage.getItem(STORAGE_KEY);
+    var raw=localStorage.getItem(STORAGE_KEY)||localStorage.getItem(STORAGE_KEY_LEGACY);
     if(!raw)return false;
     var s=JSON.parse(raw);
     if(typeof s.eq!=='string')return false;
