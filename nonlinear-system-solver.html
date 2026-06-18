@@ -97,6 +97,14 @@ textarea:focus-visible,input:focus-visible,select:focus-visible,button:focus-vis
 .iogrid{display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:880px){.iogrid{grid-template-columns:3fr 2fr}}
 .hint{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:4px 0 0}
+.reserved{margin-top:10px;border:1px dashed var(--panel-line);border-radius:8px;
+  background:color-mix(in srgb,var(--warn) 7%,var(--panel));padding:10px 12px}
+.reserved .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  font-weight:700;color:var(--warn);display:block;margin-bottom:4px}
+.reserved p{font-size:.78rem;margin:.25em 0;max-width:none}
+.reserved code{font-family:var(--mono);font-size:.78rem;background:color-mix(in srgb,var(--accent) 10%,var(--panel));
+  border:1px solid var(--panel-line);border-radius:4px;padding:1px 5px;color:var(--ink);white-space:nowrap}
+.reserved .grp{font-weight:700;color:var(--ink)}
 .btn{font-family:var(--mono);font-size:.86rem;font-weight:700;min-height:44px;min-width:44px;
   padding:10px 18px;border-radius:8px;border:2px solid var(--accent-dk);cursor:pointer;
   background:var(--accent);color:#fff}
@@ -208,10 +216,28 @@ footer.site p{margin:.3em 0}
       <div class="grow">
         <label for="presetSel">Load an example problem</label>
         <select id="presetSel">
-          <option value="fourbar">Four-bar linkage position (2×2) — Ch. 2</option>
-          <option value="crankslider">Offset crank-slider position (2×2) — Ch. 2</option>
-          <option value="circleline">Circle ∩ line intersection (2×2) — warm-up</option>
-          <option value="bf3">3×3 benchmark system (Burden &amp; Faires)</option>
+          <optgroup label="Warm-up (math)">
+            <option value="circleline">Circle ∩ line intersection (2×2)</option>
+            <option value="bf3">3×3 benchmark system (Burden &amp; Faires)</option>
+          </optgroup>
+          <optgroup label="Mechanisms &amp; dynamics">
+            <option value="fourbar">Four-bar linkage position (2×2) — Ch. 2</option>
+            <option value="crankslider">Offset crank-slider position (2×2) — Ch. 2</option>
+          </optgroup>
+          <optgroup label="Physics">
+            <option value="projectile">Projectile launch angle to hit a target (1×1)</option>
+            <option value="kepler">Kepler&rsquo;s equation — orbital position (1×1)</option>
+            <option value="wien">Wien&rsquo;s law — blackbody peak wavelength (1×1)</option>
+          </optgroup>
+          <optgroup label="Electronics">
+            <option value="diode">Diode + resistor load-line (2×2)</option>
+          </optgroup>
+          <optgroup label="Statics &amp; structures">
+            <option value="catenary">Catenary — hanging-cable parameter (1×1)</option>
+          </optgroup>
+          <optgroup label="Fluid mechanics">
+            <option value="colebrook">Colebrook — pipe friction factor (1×1)</option>
+          </optgroup>
           <option value="blank">Blank — start from scratch</option>
         </select>
       </div>
@@ -231,10 +257,20 @@ footer.site p{margin:.3em 0}
       </div>
     </div>
 
+    <div class="reserved" role="note" aria-label="Reserved names">
+      <span class="tag">⚠ Reserved names — don&rsquo;t use these as your own variables or parameters</span>
+      <p><span class="grp">Constants:</span> <code>pi</code> (π ≈ 3.14159), <code>e</code> (Euler&rsquo;s number ≈ 2.71828).
+        That is why a slider offset or orbital eccentricity is written <code>ecc</code> in the examples, not <code>e</code>.</p>
+      <p><span class="grp">Functions:</span> <code>sin</code> <code>cos</code> <code>tan</code> <code>asin</code> <code>acos</code> <code>atan</code> <code>atan2</code>
+        <code>sqrt</code> <code>exp</code> <code>ln</code> <code>log</code> <code>log10</code> <code>abs</code> <code>sign</code>
+        <code>min</code> <code>max</code> <code>sinh</code> <code>cosh</code> <code>tanh</code> <code>deg2rad</code> <code>rad2deg</code>.</p>
+      <p>Everything else is fair game: <code>th3</code>, <code>r_4</code>, <code>Vd</code>, <code>theta</code>, <code>E</code>, Greek letters, etc.</p>
+    </div>
+
     <div id="errBox" class="status err" role="alert" hidden></div>
 
     <h3 id="unkH">Unknowns detected &amp; initial guesses</h3>
-    <p class="hint" id="unkHint">Unknowns are found automatically from your equations. Give each one a starting value (angles in radians). Tick <b>Angle?</b> to also show that result in degrees.</p>
+    <p class="hint" id="unkHint">Unknowns are found automatically from your equations. Give each one a starting value (the solver works in radians for angles). Tick <b>Angle?</b> and the result is shown in <b>both radians and degrees</b>.</p>
     <div class="tablewrap">
       <table class="data" aria-labelledby="unkH" aria-describedby="unkHint">
         <thead><tr><th scope="col">#</th><th scope="col">Unknown</th><th scope="col">Initial guess</th><th scope="col">Angle?</th></tr></thead>
@@ -249,8 +285,6 @@ footer.site p{margin:.3em 0}
         <input type="number" id="maxIn" value="50" step="1" min="1" max="500"></div>
       <label class="chk"><input type="checkbox" id="dampChk" checked>
         Damped steps (halve the step if ‖F‖ grows)</label>
-      <label class="chk"><input type="checkbox" id="degChk">
-        Show degree equivalents in results</label>
     </div>
 
     <div class="btnrow">
@@ -773,16 +807,19 @@ function finishRun(){
 
 function renderSolution(){
   var ul=$('solList');ul.textContent='';
-  var showDeg=$('degChk').checked;
   state.prob.unknowns.forEach(function(nm,i){
     var li=document.createElement('li');
     var s1=document.createElement('span');s1.className='rn';s1.textContent=nm;
-    var s2=document.createElement('span');s2.textContent='= '+fmt(state.x[i]);
-    li.appendChild(s1);li.appendChild(s2);
-    if(showDeg&&angleCache[nm]){
+    li.appendChild(s1);
+    if(angleCache[nm]){
+      var s2=document.createElement('span');
+      s2.textContent='= '+fmt(state.x[i])+' rad';
       var s3=document.createElement('span');s3.className='deg';
-      s3.textContent='(= '+fmtShort(state.x[i]*180/Math.PI)+'\u00B0)';
-      li.appendChild(s3);
+      s3.textContent='= '+fmtShort(state.x[i]*180/Math.PI)+'\u00B0';
+      li.appendChild(s2);li.appendChild(s3);
+    }else{
+      var s2b=document.createElement('span');s2b.textContent='= '+fmt(state.x[i]);
+      li.appendChild(s2b);
     }
     ul.appendChild(li);
   });
@@ -1002,24 +1039,54 @@ var PRESETS={
   fourbar:{
     eq:'# Four-bar position equations (vector loop, Stani\u0161i\u0107 Ch. 2)\nr2*cos(th2) + r3*cos(th3) - r4*cos(th4) - r1 = 0\nr2*sin(th2) + r3*sin(th3) - r4*sin(th4) = 0',
     par:'# lengths in meters, angles in radians\nr1 = 0.4\nr2 = 0.15\nr3 = 0.45\nr4 = 0.35\nth2 = deg2rad(60)',
-    guesses:{th3:'0.35',th4:'1.6'}
+    guesses:{th3:'0.35',th4:'1.6'}, angles:{th3:true,th4:true}
   },
   crankslider:{
-    eq:'# Offset crank-slider position equations\nr2*cos(th2) + r3*cos(th3) - d = 0\nr2*sin(th2) + r3*sin(th3) - e = 0',
-    par:'r2 = 0.1\nr3 = 0.3\ne = 0.05   # slider offset\nth2 = deg2rad(45)',
-    guesses:{th3:'-0.2',d:'0.35'}
+    eq:'# Offset crank-slider position equations\n# d = slider position, ecc = vertical offset of the slide\nr2*cos(th2) + r3*cos(th3) - d = 0\nr2*sin(th2) + r3*sin(th3) - ecc = 0',
+    par:'r2 = 0.1\nr3 = 0.3\necc = 0.05   # slider offset (NOT "e" \u2014 that is Euler\u2019s number)\nth2 = deg2rad(45)',
+    guesses:{th3:'-0.2',d:'0.35'}, angles:{th3:true,d:false}
   },
   circleline:{
     eq:'# Where does the line y = x + 1 cross the circle of radius 2?\nx^2 + y^2 = 4\ny = x + 1',
     par:'# (no parameters needed)',
-    guesses:{x:'1',y:'2'}
+    guesses:{x:'1',y:'2'}, angles:{x:false,y:false}
   },
   bf3:{
     eq:'# Classic 3-equation benchmark (Burden & Faires, Numerical Analysis)\n3*x - cos(y*z) - 0.5 = 0\nx^2 - 81*(y + 0.1)^2 + sin(z) + 1.06 = 0\nexp(-x*y) + 20*z + (10*pi - 3)/3 = 0',
     par:'# (no parameters needed)',
-    guesses:{x:'0.1',y:'0.1',z:'-0.1'}
+    guesses:{x:'0.1',y:'0.1',z:'-0.1'}, angles:{x:false,y:false,z:false}
   },
-  blank:{eq:'',par:'',guesses:{}}
+  projectile:{
+    eq:'# PHYSICS \u2014 at what launch angle does a projectile land exactly on the target?\n# Range of a projectile (level ground):  R = v^2 * sin(2*theta) / g\n# Solve for the launch angle theta. (There are TWO answers: a low\n# arc and a high \u201clob\u201d \u2014 change the guess below to find each one.)\nv^2 * sin(2*theta) / g - R = 0',
+    par:'v = 30      # launch speed, m/s\ng = 9.81    # gravity, m/s^2\nR = 50      # target range, m',
+    guesses:{theta:'0.35'}, angles:{theta:true}
+  },
+  kepler:{
+    eq:'# PHYSICS / ORBITAL MECHANICS \u2014 Kepler\u2019s equation\n# Given the mean anomaly M and orbit eccentricity ecc, find the\n# eccentric anomaly E (the angle used to locate a planet on its orbit).\n#   M = E - ecc * sin(E)\nE - ecc * sin(E) - M = 0',
+    par:'M = 0.8      # mean anomaly, radians\necc = 0.3    # eccentricity (0 = circle).  NOT "e" \u2014 that is Euler\u2019s number',
+    guesses:{E:'0.8'}, angles:{E:true}
+  },
+  wien:{
+    eq:'# PHYSICS \u2014 Wien\u2019s displacement law (peak wavelength of a hot object)\n# The peak of blackbody radiation satisfies a transcendental equation.\n# Solve x, then the peak wavelength is  lambda_peak = h*c / (x*k*T).\n# x = 5*(1 - exp(-x))   ->  driven to zero below.  Expect x \u2248 4.965.\nx - 5*(1 - exp(-x)) = 0',
+    par:'# (no parameters needed \u2014 x is a pure number)',
+    guesses:{x:'5'}, angles:{x:false}
+  },
+  diode:{
+    eq:'# ELECTRONICS \u2014 diode in series with a resistor (find the operating point)\n# Shockley diode law:   I = Is*(exp(Vd/(n*Vt)) - 1)\n# Kirchhoff / Ohm:      (Vs - Vd)/R = I       (the \u201cload line\u201d)\n# Unknowns: diode voltage Vd and current I.\nI - Is*(exp(Vd/(n*Vt)) - 1) = 0\n(Vs - Vd)/R - I = 0',
+    par:'Vs = 5        # source voltage, V\nR  = 1000     # series resistance, ohms\nIs = 1e-12    # diode saturation current, A\nn  = 1        # ideality factor\nVt = 0.025852 # thermal voltage at ~300 K, V',
+    guesses:{Vd:'0.6',I:'0.004'}, angles:{Vd:false,I:false}
+  },
+  catenary:{
+    eq:'# STATICS / STRUCTURES \u2014 a cable hanging under its own weight (catenary)\n# A flexible cable spans 2*a horizontally; its half-length is L2.\n# The shape parameter c satisfies:  c * sinh(a/c) = L2\n# Solve for c, then sag = c*cosh(a/c) - c.\nc * sinh(a/c) - L2 = 0',
+    par:'a  = 10     # half of the horizontal span, m\nL2 = 11     # half of the cable\u2019s arc length, m',
+    guesses:{c:'12'}, angles:{c:false}
+  },
+  colebrook:{
+    eq:'# FLUID MECHANICS \u2014 Colebrook equation for turbulent pipe friction\n# Implicit in the Darcy friction factor f:\n#   1/sqrt(f) = -2*log10( eps/(3.7*D) + 2.51/(Re*sqrt(f)) )\n# (log10 here is base-10.)  Solve for f, then head loss follows from Darcy\u2013Weisbach.\n1/sqrt(f) + 2*log10( eps/(3.7*D) + 2.51/(Re*sqrt(f)) ) = 0',
+    par:'eps = 0.0001   # pipe roughness, m\nD   = 0.1      # pipe diameter, m\nRe  = 1e5      # Reynolds number (dimensionless)',
+    guesses:{f:'0.02'}, angles:{f:false}
+  },
+  blank:{eq:'',par:'',guesses:{},angles:{}}
 };
 function loadPreset(key,skipConfirm){
   var p=PRESETS[key];if(!p)return;
@@ -1031,6 +1098,7 @@ function loadPreset(key,skipConfirm){
   guessCache={};
   angleCache={};
   for(var k in p.guesses)guessCache[k]=p.guesses[k];
+  if(p.angles)for(var a in p.angles)angleCache[a]=p.angles[a];
   refreshProblem();
   setStatus('iter','Example loaded \u2014 press Solve.');
   $('solList').hidden=true;
@@ -1042,7 +1110,7 @@ function saveState(){
     localStorage.setItem(STORAGE_KEY,JSON.stringify({
       eq:$('eqText').value,par:$('parText').value,guesses:guessCache,angles:angleCache,
       tol:$('tolIn').value,max:$('maxIn').value,
-      damp:$('dampChk').checked,deg:$('degChk').checked
+      damp:$('dampChk').checked
     }));
   }catch(ex){/* private mode etc. */}
 }
@@ -1058,7 +1126,6 @@ function loadSaved(){
     if(s.tol)$('tolIn').value=s.tol;
     if(s.max)$('maxIn').value=s.max;
     $('dampChk').checked=s.damp!==false;
-    $('degChk').checked=!!s.deg;
     return s.eq.trim().length>0;
   }catch(ex){return false;}
 }
@@ -1111,7 +1178,6 @@ $('parText').addEventListener('input',debouncedRefresh);
 $('tolIn').addEventListener('input',function(){saveState();});
 $('maxIn').addEventListener('input',function(){saveState();});
 $('dampChk').addEventListener('change',function(){saveState();});
-$('degChk').addEventListener('change',function(){saveState();if(state&&state.finished&&!$('solList').hidden)renderSolution();});
 
 $('solveBtn').addEventListener('click',function(){
   var st=beginRun();
