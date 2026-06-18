@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TI Graphing Calculator — Worked Examples Across the Disciplines</title>
+<meta name="description" content="A keystroke-by-keystroke tutorial for the TI-84 Plus CE / TI-83-84 Plus simulator: worked examples in mathematics, physics, electronics, engineering, chemistry, statistics, and finance, plus copy-and-paste TI-BASIC programs.">
+<style>
+  :root{
+    --bg:#f4f1ea; --surface:#fffdf8; --surface-2:#f7f3ea; --ink:#1d1b18; --muted:#5e564a;
+    --line:#e3ddd0; --line-strong:#cfc7b6;
+    --accent:#1f5f8b; --accent-ink:#16455f;
+    --second:#2c5fa0; --alpha:#2f7d43;
+    --key-bg:#fbfaf6; --key-ink:#23211d; --key-line:#cdc6b8; --key-shadow:#d8d1c2;
+    --code-bg:#1f232b; --code-ink:#eef1f5; --code-line:#333a45;
+    --result-bg:#eef4f0; --result-ink:#143a2a; --result-line:#cfe3d6;
+    --tip-bg:#fbf3e2; --tip-ink:#5b4413; --tip-line:#ecd9ad;
+    --radius:14px; --radius-sm:9px;
+    --font-sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --font-serif:"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --maxw:1080px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#16181c; --surface:#1f2228; --surface-2:#23272e; --ink:#ecebe6; --muted:#a7a397;
+      --line:#31353d; --line-strong:#414751;
+      --accent:#7fc2ec; --accent-ink:#bfe0f6;
+      --second:#7fb2ec; --alpha:#7ed094;
+      --key-bg:#2b2f37; --key-ink:#ecebe6; --key-line:#454b56; --key-shadow:#15171b;
+      --code-bg:#11141a; --code-ink:#e7ebf1; --code-line:#2a313c;
+      --result-bg:#17241d; --result-ink:#bfe6cf; --result-line:#2c4738;
+      --tip-bg:#2a2410; --tip-ink:#e8d9a8; --tip-line:#4a3f1c;
+    }
+  }
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-sans); line-height:1.62;
+    font-size:clamp(15px,0.55vw + 13.5px,17px);
+  }
+  .skip-link{
+    position:absolute; left:-999px; top:0; background:var(--accent); color:#fff;
+    padding:10px 16px; border-radius:0 0 8px 0; z-index:50; text-decoration:none; font-weight:600;
+  }
+  .skip-link:focus{ left:0; }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 clamp(16px,4vw,40px); }
+
+  header.masthead{ padding:clamp(28px,5vw,56px) 0 18px; border-bottom:1px solid var(--line); }
+  .eyebrow{ font-family:var(--font-mono); font-size:.74rem; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-ink); margin:0 0 10px; }
+  h1{
+    font-family:var(--font-serif); font-weight:600; line-height:1.08;
+    font-size:clamp(1.9rem,4.4vw,3.1rem); margin:0 0 .35em; letter-spacing:-0.01em;
+  }
+  .lede{ font-size:clamp(1.02rem,1vw + .8rem,1.2rem); color:var(--muted); max-width:64ch; margin:0 0 1.4em; }
+
+  .legend{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; margin:8px 0 4px; display:grid; gap:12px;
+  }
+  .legend h2{ font-size:.82rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin:0; font-family:var(--font-mono); }
+  .legend-row{ display:flex; flex-wrap:wrap; gap:18px 26px; align-items:flex-start; }
+  .legend-item{ display:flex; gap:9px; align-items:center; font-size:.92rem; color:var(--muted); }
+  .legend-item .desc{ max-width:34ch; }
+
+  /* key chips */
+  .k{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:30px; min-height:30px; padding:3px 9px;
+    background:var(--key-bg); color:var(--key-ink);
+    border:1px solid var(--key-line); border-bottom-width:2px; border-radius:8px;
+    box-shadow:0 1px 0 var(--key-shadow);
+    font-family:var(--font-mono); font-size:.82rem; font-weight:600; white-space:nowrap;
+    vertical-align:middle;
+  }
+  .k.k2{ background:var(--second); border-color:var(--second); color:#fff; }
+  .k.ka{ background:var(--alpha); border-color:var(--alpha); color:#fff; }
+  @media (prefers-color-scheme: dark){
+    .k.k2,.k.ka{ color:#0c0e12; }
+  }
+  .seq{ display:flex; flex-wrap:wrap; align-items:center; gap:7px; }
+  .seq .plus{ color:var(--line-strong); font-weight:700; padding:0 1px; }
+  .cap{ font-family:var(--font-mono); font-size:.8rem; color:var(--muted); padding:2px 6px;
+        background:var(--surface-2); border:1px dashed var(--line-strong); border-radius:6px; }
+
+  /* nav tabs */
+  nav.tabs{ position:sticky; top:0; z-index:30; background:var(--bg);
+    border-bottom:1px solid var(--line); margin-top:22px; }
+  .tablist{ display:flex; gap:4px; overflow-x:auto; padding:8px 0; max-width:var(--maxw); margin:0 auto;
+    padding-left:clamp(16px,4vw,40px); padding-right:clamp(16px,4vw,40px); scrollbar-width:thin; }
+  .tab{
+    appearance:none; border:1px solid transparent; background:transparent; color:var(--muted);
+    font-family:var(--font-sans); font-size:.94rem; font-weight:600; cursor:pointer;
+    padding:9px 15px; min-height:44px; border-radius:999px; white-space:nowrap;
+  }
+  .tab:hover{ color:var(--ink); background:var(--surface-2); }
+  .tab[aria-selected="true"]{ color:#fff; background:var(--accent); border-color:var(--accent); }
+  @media (prefers-color-scheme: dark){ .tab[aria-selected="true"]{ color:#0c0e12; } }
+  .tab:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+  main{ padding:28px 0 10px; }
+  .panel{ display:none; }
+  .panel.active{ display:block; animation:fade .2s ease; }
+  @keyframes fade{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ .panel.active{ animation:none; } }
+
+  .panel-intro{ max-width:68ch; color:var(--muted); margin:0 0 22px; }
+  .panel h2.section-title{ font-family:var(--font-serif); font-weight:600; font-size:clamp(1.5rem,2.6vw,2rem); margin:.1em 0 .3em; }
+
+  .grid{ display:grid; gap:18px; grid-template-columns:1fr; }
+  @media (min-width:760px){ .grid{ grid-template-columns:1fr 1fr; } }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px 20px 18px; display:flex; flex-direction:column; gap:13px;
+  }
+  .card.wide{ grid-column:1 / -1; }
+  .card h3{ margin:0; font-size:1.08rem; font-weight:600; letter-spacing:-0.01em; }
+  .card .formula{ font-family:var(--font-mono); font-size:.9rem; color:var(--accent-ink);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:7px 10px; }
+  .card p{ margin:0; color:var(--muted); }
+  .card p.given{ color:var(--ink); }
+  .klabel{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:-4px; }
+
+  .result{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    background:var(--result-bg); border:1px solid var(--result-line); border-radius:var(--radius-sm);
+    padding:9px 12px; color:var(--result-ink);
+  }
+  .result .lbl{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; opacity:.8; }
+  .result .val{ font-family:var(--font-mono); font-weight:600; font-size:1.02rem; }
+
+  .tip{ background:var(--tip-bg); border:1px solid var(--tip-line); color:var(--tip-ink);
+    border-radius:var(--radius-sm); padding:10px 13px; font-size:.9rem; }
+  .tip b{ font-weight:700; }
+  .tip-block{ margin-bottom:20px; }
+
+  ol.steps{ margin:0; padding-left:1.2em; color:var(--ink); }
+  ol.steps li{ margin:.28em 0; }
+  ol.steps code, p code, li code{ font-family:var(--font-mono); font-size:.86em;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
+
+  /* program cards */
+  .prog{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:13px; }
+  .prog-head{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; justify-content:space-between; }
+  .prog-head h3{ margin:0; font-size:1.12rem; }
+  .prog-name{ font-family:var(--font-mono); font-size:.78rem; background:var(--accent); color:#fff;
+    padding:3px 9px; border-radius:6px; letter-spacing:.05em; }
+  @media (prefers-color-scheme: dark){ .prog-name{ color:#0c0e12; } }
+  .codewrap{ position:relative; }
+  pre{ margin:0; background:var(--code-bg); color:var(--code-ink); border:1px solid var(--code-line);
+    border-radius:var(--radius-sm); padding:14px 14px; overflow-x:auto; }
+  pre code{ font-family:var(--font-mono); font-size:.86rem; line-height:1.55; background:none; border:none; padding:0; color:inherit; white-space:pre; }
+  .copy-btn{
+    appearance:none; cursor:pointer; font-family:var(--font-sans); font-weight:600; font-size:.82rem;
+    background:var(--surface-2); color:var(--ink); border:1px solid var(--line-strong);
+    border-radius:8px; padding:7px 13px; min-height:38px;
+  }
+  .copy-btn:hover{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  @media (prefers-color-scheme: dark){ .copy-btn:hover{ color:#0c0e12; } }
+  .copy-btn:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .copy-status{ font-family:var(--font-mono); font-size:.78rem; color:var(--alpha); min-height:1em; }
+
+  .run-example{ font-size:.9rem; color:var(--muted); }
+  .run-example b{ color:var(--ink); }
+
+  footer{ border-top:1px solid var(--line); margin-top:40px; padding:22px 0 40px; color:var(--muted); font-size:.88rem; }
+  footer .program{ color:var(--ink); font-weight:600; }
+  a{ color:var(--accent-ink); }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Companion Guide · TI-84 Plus CE / TI-83·84 Plus Simulator</p>
+    <h1>Worked Examples Across the Disciplines</h1>
+    <p class="lede">Open the calculator simulator in one window and this guide in another. Every example gives the exact keys to press and the value you should see on the screen — from algebra and trigonometry to circuits, statics, gas laws, regression, and finance — plus a set of TI-BASIC programs you can copy straight into the editor.</p>
+
+    <div class="legend">
+      <h2>How to read the keystrokes</h2>
+      <div class="legend-row">
+        <span class="legend-item"><span class="k">5</span><span class="desc">A normal key — press once.</span></span>
+        <span class="legend-item"><span class="k k2">2nd</span><span class="desc">The blue modifier; press it, then the next key uses its blue label.</span></span>
+        <span class="legend-item"><span class="k ka">ALPHA</span><span class="desc">The green modifier for letters.</span></span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-item"><span class="seq"><span class="k k2">2nd</span><span class="k">x²</span></span><span class="cap">→ √(</span></span>
+        <span class="legend-item"><span class="seq"><span class="k k2">2nd</span><span class="k">LN</span></span><span class="cap">→ e^(</span></span>
+        <span class="legend-item"><span class="seq"><span class="k k2">2nd</span><span class="k">^</span></span><span class="cap">→ π</span></span>
+        <span class="legend-item"><span class="k">(−)</span><span class="desc">the negative-sign key (distinct from the − subtraction key).</span></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Disciplines">
+  <div class="tablist" role="tablist" aria-label="Choose a discipline">
+    <button class="tab" id="tab-start"  role="tab" aria-selected="true"  aria-controls="panel-start"  tabindex="0">Start here</button>
+    <button class="tab" id="tab-math"   role="tab" aria-selected="false" aria-controls="panel-math"   tabindex="-1">Mathematics</button>
+    <button class="tab" id="tab-phys"   role="tab" aria-selected="false" aria-controls="panel-phys"   tabindex="-1">Physics</button>
+    <button class="tab" id="tab-elec"   role="tab" aria-selected="false" aria-controls="panel-elec"   tabindex="-1">Electronics</button>
+    <button class="tab" id="tab-engr"   role="tab" aria-selected="false" aria-controls="panel-engr"   tabindex="-1">Engineering</button>
+    <button class="tab" id="tab-chem"   role="tab" aria-selected="false" aria-controls="panel-chem"   tabindex="-1">Chemistry</button>
+    <button class="tab" id="tab-stat"   role="tab" aria-selected="false" aria-controls="panel-stat"   tabindex="-1">Statistics &amp; Data</button>
+    <button class="tab" id="tab-fin"    role="tab" aria-selected="false" aria-controls="panel-fin"    tabindex="-1">Finance</button>
+    <button class="tab" id="tab-prog"   role="tab" aria-selected="false" aria-controls="panel-prog"   tabindex="-1">TI-BASIC Programs</button>
+  </div>
+</nav>
+
+<main id="main">
+  <div class="wrap">
+
+  <!-- ================= START ================= -->
+  <section class="panel active" id="panel-start" role="tabpanel" aria-labelledby="tab-start" tabindex="0">
+    <h2 class="section-title">Getting oriented</h2>
+    <p class="panel-intro">A few habits make everything below go smoothly. The simulator behaves like the real hardware: you build an expression on the home screen, then press <span class="k">ENTER</span> to evaluate it. Results stack up the screen, and the last answer is reusable.</p>
+    <div class="grid">
+      <article class="card">
+        <h3>Set the angle mode first</h3>
+        <p>Trigonometry gives different numbers in degrees versus radians. Choose deliberately.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">MODE</span><span class="cap">move to Degree or Radian, press ENTER</span></div>
+        <div class="tip"><b>Rule of thumb:</b> physics and engineering examples here assume <b>Degree</b> mode unless noted. Watch the top-of-screen indicator.</div>
+      </article>
+      <article class="card">
+        <h3>Reuse the last answer</h3>
+        <p>Every result is stored in <span class="cap">Ans</span>. Start a new line with an operator and it inserts Ans automatically, or call it directly.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k k2">2nd</span><span class="k">(−)</span><span class="cap">→ Ans</span></div>
+        <p>Example: after computing a current, type <span class="k">×</span> <span class="k">2</span> <span class="k">2</span> <span class="k">0</span> <span class="k">ENTER</span> to multiply the previous answer by 220.</p>
+      </article>
+      <article class="card">
+        <h3>The 2nd and ALPHA modifiers</h3>
+        <p>Most keys carry three meanings: the printed face, a blue label (after <span class="k k2">2nd</span>), and a green letter (after <span class="k ka">ALPHA</span>). Store a value to a variable with <span class="k">STO▸</span>, which arms ALPHA so you can pick the letter.</p>
+        <div class="seq"><span class="k">5</span><span class="k">STO▸</span><span class="k ka">A</span><span class="cap">5→A</span></div>
+      </article>
+      <article class="card">
+        <h3>Fixing a typo</h3>
+        <p><span class="k">DEL</span> removes the character at the cursor; <span class="k">CLEAR</span> wipes the current line. Arrow keys move through a long expression so you can edit in place before pressing ENTER.</p>
+        <div class="tip">Implicit multiplication works: <code>2A</code>, <code>3(4+1)</code>, and <code>2π</code> all evaluate as products.</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= MATH ================= -->
+  <section class="panel" id="panel-math" role="tabpanel" aria-labelledby="tab-math" tabindex="0" hidden>
+    <h2 class="section-title">Mathematics</h2>
+    <p class="panel-intro">Order of operations, roots and powers, trigonometry, logarithms, counting, and solving a linear system with matrices.</p>
+    <div class="grid">
+
+      <article class="card">
+        <h3>Order of operations</h3>
+        <p class="given">Evaluate 3 + 4 × 5².</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">3</span><span class="k">+</span><span class="k">4</span><span class="k">×</span><span class="k">5</span><span class="k">x²</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">103</span></div>
+        <p>The calculator squares first (25), multiplies (100), then adds.</p>
+      </article>
+
+      <article class="card">
+        <h3>Roots and powers</h3>
+        <p class="given">Compute √(2² + 3²).</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k k2">2nd</span><span class="k">x²</span><span class="cap">√(</span><span class="k">2</span><span class="k">x²</span><span class="k">+</span><span class="k">3</span><span class="k">x²</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">3.605551276</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Trigonometry <span class="cap">Degree</span></h3>
+        <p class="given">Find sin 30°.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">SIN</span><span class="k">3</span><span class="k">0</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">.5</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Inverse trig <span class="cap">Degree</span></h3>
+        <p class="given">Find the angle whose cosine is 0.5.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k k2">2nd</span><span class="k">COS</span><span class="cap">cos⁻¹(</span><span class="k">.</span><span class="k">5</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">60</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Logarithms</h3>
+        <p class="given">Confirm that ln(e²) = 2.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">LN</span><span class="k k2">2nd</span><span class="k">LN</span><span class="cap">e^(</span><span class="k">2</span><span class="k">)</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">2</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Scientific notation</h3>
+        <p class="given">Two moles of particles: 6.022×10²³ × 2.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">6</span><span class="k">.</span><span class="k">0</span><span class="k">2</span><span class="k">2</span><span class="k k2">2nd</span><span class="k">,</span><span class="cap">E</span><span class="k">2</span><span class="k">3</span><span class="k">×</span><span class="k">2</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">1.2044e24</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Counting — combinations</h3>
+        <p class="given">How many 5-card poker hands from 52 cards? 52 nCr 5.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">5</span><span class="k">2</span><span class="k">MATH</span><span class="cap">choose nCr</span><span class="k">5</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">2598960</span></div>
+        <p>Factorials live in the same <span class="k">MATH</span> menu: <span class="k">8</span> <span class="k">MATH</span> <span class="cap">!</span> <span class="k">ENTER</span> gives 40320.</p>
+      </article>
+
+      <article class="card wide">
+        <h3>Solve a linear system with matrices</h3>
+        <p class="formula">2x + 3y = 8 · x − y = −1</p>
+        <p>Write it as [A]·X = [B] with A = [[2, 3],[1, −1]] and B = [[8],[−1]]. Then X = [A]⁻¹[B].</p>
+        <ol class="steps">
+          <li>Open the matrix editor: <span class="k k2">2nd</span> <span class="k">x⁻¹</span> <span class="cap">MATRIX</span> → <b>EDIT</b> → <b>[A]</b>.</li>
+          <li>Set dimensions <code>2 × 2</code>, then enter <code>2, 3, 1, −1</code> (press ENTER after each, using <span class="k">(−)</span> for the negative).</li>
+          <li>Back to <span class="k k2">2nd</span> <span class="k">x⁻¹</span> → <b>EDIT</b> → <b>[B]</b>; set <code>2 × 1</code> and enter <code>8, −1</code>.</li>
+          <li>Quit to the home screen (<span class="k k2">2nd</span> <span class="k">MODE</span>), then build <code>[A]⁻¹[B]</code>: insert [A] via <span class="cap">MATRIX → NAMES → [A]</span>, press <span class="k">x⁻¹</span>, then insert [B] the same way and press <span class="k">ENTER</span>.</li>
+        </ol>
+        <div class="result"><span class="lbl">Display</span><span class="val">[[1] [2]]  →  x = 1, y = 2</span></div>
+        <div class="tip">The determinant is on the same menu: <span class="cap">MATRIX → MATH → det(</span> then <span class="cap">NAMES → [A]</span> gives <b>−5</b>, confirming the system has a unique solution.</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= PHYSICS ================= -->
+  <section class="panel" id="panel-phys" role="tabpanel" aria-labelledby="tab-phys" tabindex="0" hidden>
+    <h2 class="section-title">Physics</h2>
+    <p class="panel-intro">Kinematics, projectile motion, and energy. Use <b>Degree</b> mode for the projectile example.</p>
+    <div class="grid">
+
+      <article class="card">
+        <h3>Velocity under constant acceleration</h3>
+        <p class="formula">v = v₀ + a t</p>
+        <p class="given">v₀ = 5 m/s, a = 2 m/s², t = 3 s.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">5</span><span class="k">+</span><span class="k">2</span><span class="k">×</span><span class="k">3</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">11</span><span class="lbl">m/s</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Free-fall displacement</h3>
+        <p class="formula">d = ½ a t²</p>
+        <p class="given">a = 9.8 m/s², t = 2 s (dropped from rest).</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">.</span><span class="k">5</span><span class="k">×</span><span class="k">9</span><span class="k">.</span><span class="k">8</span><span class="k">×</span><span class="k">2</span><span class="k">x²</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">19.6</span><span class="lbl">m</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Projectile range <span class="cap">Degree</span></h3>
+        <p class="formula">R = v² · sin(2θ) / g</p>
+        <p class="given">v = 20 m/s, θ = 30°, g = 9.8 m/s².</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">2</span><span class="k">0</span><span class="k">x²</span><span class="k">×</span><span class="k">SIN</span><span class="k">2</span><span class="k">×</span><span class="k">3</span><span class="k">0</span><span class="k">)</span><span class="k">÷</span><span class="k">9</span><span class="k">.</span><span class="k">8</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 35.35</span><span class="lbl">m</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Kinetic energy</h3>
+        <p class="formula">KE = ½ m v²</p>
+        <p class="given">m = 3 kg, v = 4 m/s.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">.</span><span class="k">5</span><span class="k">×</span><span class="k">3</span><span class="k">×</span><span class="k">4</span><span class="k">x²</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">24</span><span class="lbl">J</span></div>
+      </article>
+
+      <article class="card wide">
+        <h3>Graph position versus time</h3>
+        <p class="formula">x(t) = v₀ t + ½ a t²,  with v₀ = 5, a = 2</p>
+        <p>Use X as the time variable.</p>
+        <ol class="steps">
+          <li>Press <span class="k">Y=</span> and enter Y₁: <span class="k">5</span> <span class="k">X,T,θ,n</span> <span class="k">+</span> <span class="k">.</span> <span class="k">5</span> <span class="k">×</span> <span class="k">2</span> <span class="k">X,T,θ,n</span> <span class="k">x²</span> &nbsp;→&nbsp; <code>5X+.5·2X²</code>.</li>
+          <li>Press <span class="k">WINDOW</span> and set X from 0 to 10, Y from 0 to 150.</li>
+          <li>Press <span class="k">GRAPH</span> to see the parabola, then <span class="k">TRACE</span> and arrow along it; or press <span class="k">2nd</span> <span class="k">GRAPH</span> for the TABLE of values.</li>
+        </ol>
+        <div class="tip">At t = 5 s the table shows x = 50 m, matching <code>5·5 + ½·2·5² = 25 + 25</code>.</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= ELECTRONICS ================= -->
+  <section class="panel" id="panel-elec" role="tabpanel" aria-labelledby="tab-elec" tabindex="0" hidden>
+    <h2 class="section-title">Electronics</h2>
+    <p class="panel-intro">Ohm&rsquo;s law, resistor networks, RC timing, gain in decibels, and the voltage divider. The reciprocal key <span class="k">x⁻¹</span> makes parallel combinations painless.</p>
+    <div class="grid">
+
+      <article class="card">
+        <h3>Ohm&rsquo;s law</h3>
+        <p class="formula">V = I · R</p>
+        <p class="given">I = 0.5 A through R = 220 Ω.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">.</span><span class="k">5</span><span class="k">×</span><span class="k">2</span><span class="k">2</span><span class="k">0</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">110</span><span class="lbl">V</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Resistors in series</h3>
+        <p class="formula">Rₛ = R₁ + R₂ + R₃</p>
+        <p class="given">100 Ω, 220 Ω, 330 Ω.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">+</span><span class="k">2</span><span class="k">2</span><span class="k">0</span><span class="k">+</span><span class="k">3</span><span class="k">3</span><span class="k">0</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">650</span><span class="lbl">Ω</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Resistors in parallel</h3>
+        <p class="formula">Rₚ = (1/R₁ + 1/R₂)⁻¹</p>
+        <p class="given">100 Ω in parallel with 100 Ω.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">(</span><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">x⁻¹</span><span class="k">+</span><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">x⁻¹</span><span class="k">)</span><span class="k">x⁻¹</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">50</span><span class="lbl">Ω</span></div>
+      </article>
+
+      <article class="card">
+        <h3>RC time constant</h3>
+        <p class="formula">τ = R · C</p>
+        <p class="given">R = 10 kΩ, C = 100 µF = 100×10⁻⁶ F.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">×</span><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k k2">2nd</span><span class="k">,</span><span class="cap">E</span><span class="k">(−)</span><span class="k">6</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">1</span><span class="lbl">s</span></div>
+      </article>
+
+      <article class="card">
+        <h3>RC charging voltage</h3>
+        <p class="formula">V(t) = Vₛ(1 − e^(−t/τ)),  at t = τ</p>
+        <p class="given">Vₛ = 5 V.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">5</span><span class="k">×</span><span class="k">(</span><span class="k">1</span><span class="k">−</span><span class="k k2">2nd</span><span class="k">LN</span><span class="cap">e^(</span><span class="k">(−)</span><span class="k">1</span><span class="k">)</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 3.1606</span><span class="lbl">V</span></div>
+        <p>After one time constant the capacitor reaches about 63% of the supply.</p>
+      </article>
+
+      <article class="card">
+        <h3>Gain in decibels</h3>
+        <p class="formula">A(dB) = 20 · log(V_out / V_in)</p>
+        <p class="given">V_out = 2 V, V_in = 1 V.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">2</span><span class="k">0</span><span class="k">×</span><span class="k">LOG</span><span class="k">2</span><span class="k">÷</span><span class="k">1</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 6.0206</span><span class="lbl">dB</span></div>
+      </article>
+
+      <article class="card wide">
+        <h3>Voltage divider</h3>
+        <p class="formula">V_out = V_in · R₂ / (R₁ + R₂)</p>
+        <p class="given">V_in = 9 V, R₁ = 1 kΩ, R₂ = 2 kΩ.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">9</span><span class="k">×</span><span class="k">2</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">÷</span><span class="k">(</span><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">+</span><span class="k">2</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">6</span><span class="lbl">V</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= ENGINEERING ================= -->
+  <section class="panel" id="panel-engr" role="tabpanel" aria-labelledby="tab-engr" tabindex="0" hidden>
+    <h2 class="section-title">Engineering</h2>
+    <p class="panel-intro">Unit conversion, force resultants, linear interpolation, and a three-equation system solved with matrices.</p>
+    <div class="grid">
+
+      <article class="card">
+        <h3>Unit conversion</h3>
+        <p class="given">Convert 60 mph to ft/s: × 5280 ft/mi ÷ 3600 s/hr.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">6</span><span class="k">0</span><span class="k">×</span><span class="k">5</span><span class="k">2</span><span class="k">8</span><span class="k">0</span><span class="k">÷</span><span class="k">3</span><span class="k">6</span><span class="k">0</span><span class="k">0</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">88</span><span class="lbl">ft/s</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Resultant of perpendicular forces</h3>
+        <p class="formula">R = √(Fₓ² + F_y²)</p>
+        <p class="given">Fₓ = 30 N, F_y = 40 N.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k k2">2nd</span><span class="k">x²</span><span class="cap">√(</span><span class="k">3</span><span class="k">0</span><span class="k">x²</span><span class="k">+</span><span class="k">4</span><span class="k">0</span><span class="k">x²</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">50</span><span class="lbl">N</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Direction of the resultant <span class="cap">Degree</span></h3>
+        <p class="formula">θ = tan⁻¹(F_y / Fₓ)</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k k2">2nd</span><span class="k">TAN</span><span class="cap">tan⁻¹(</span><span class="k">4</span><span class="k">0</span><span class="k">÷</span><span class="k">3</span><span class="k">0</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 53.13</span><span class="lbl">degrees</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Linear interpolation</h3>
+        <p class="formula">y = y₁ + (y₂ − y₁)(x − x₁)/(x₂ − x₁)</p>
+        <p class="given">Between (0, 10) and (10, 30); find y at x = 4.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">1</span><span class="k">0</span><span class="k">+</span><span class="k">(</span><span class="k">3</span><span class="k">0</span><span class="k">−</span><span class="k">1</span><span class="k">0</span><span class="k">)</span><span class="k">×</span><span class="k">4</span><span class="k">÷</span><span class="k">1</span><span class="k">0</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">18</span></div>
+      </article>
+
+      <article class="card wide">
+        <h3>Three-equation system with matrices</h3>
+        <p class="formula">x + y + z = 6 · 2y + 5z = −4 · 2x + 5y − z = 27</p>
+        <p>Coefficient matrix A = [[1,1,1],[0,2,5],[2,5,−1]], constants B = [[6],[−4],[27]]; solve X = [A]⁻¹[B].</p>
+        <ol class="steps">
+          <li>Edit [A] as a <code>3 × 3</code> and type the nine coefficients row by row.</li>
+          <li>Edit [B] as a <code>3 × 1</code> with <code>6, −4, 27</code>.</li>
+          <li>On the home screen compute <code>[A]⁻¹[B]</code>.</li>
+        </ol>
+        <div class="result"><span class="lbl">Display</span><span class="val">[[5] [3] [−2]]  →  x = 5, y = 3, z = −2</span></div>
+        <div class="tip">This is the workhorse for truss joints, mesh-current equations, and material balances — change the numbers, reuse the keystrokes.</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= CHEMISTRY ================= -->
+  <section class="panel" id="panel-chem" role="tabpanel" aria-labelledby="tab-chem" tabindex="0" hidden>
+    <h2 class="section-title">Chemistry</h2>
+    <p class="panel-intro">The ideal gas law, pH and its inverse, and a dilution calculation. These lean on scientific notation and base-10 logs.</p>
+    <div class="grid">
+
+      <article class="card">
+        <h3>Ideal gas law — solve for P</h3>
+        <p class="formula">P = nRT / V   (R = 0.08206 L·atm/mol·K)</p>
+        <p class="given">n = 1 mol, T = 298 K, V = 24.5 L.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">1</span><span class="k">×</span><span class="k">.</span><span class="k">0</span><span class="k">8</span><span class="k">2</span><span class="k">0</span><span class="k">6</span><span class="k">×</span><span class="k">2</span><span class="k">9</span><span class="k">8</span><span class="k">÷</span><span class="k">2</span><span class="k">4</span><span class="k">.</span><span class="k">5</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 0.998</span><span class="lbl">atm</span></div>
+      </article>
+
+      <article class="card">
+        <h3>pH from hydrogen-ion concentration</h3>
+        <p class="formula">pH = −log[H⁺]</p>
+        <p class="given">[H⁺] = 1×10⁻⁴ M.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">(−)</span><span class="k">LOG</span><span class="k">1</span><span class="k k2">2nd</span><span class="k">,</span><span class="cap">E</span><span class="k">(−)</span><span class="k">4</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">4</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Concentration from pH</h3>
+        <p class="formula">[H⁺] = 10^(−pH)</p>
+        <p class="given">pH = 3.5.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k k2">2nd</span><span class="k">LOG</span><span class="cap">10^(</span><span class="k">(−)</span><span class="k">3</span><span class="k">.</span><span class="k">5</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 3.1623e−4</span><span class="lbl">M</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Dilution — solve for V₁</h3>
+        <p class="formula">C₁V₁ = C₂V₂  →  V₁ = C₂V₂ / C₁</p>
+        <p class="given">Make V₂ = 500 mL of 0.1 M from a 2 M stock.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">.</span><span class="k">1</span><span class="k">×</span><span class="k">5</span><span class="k">0</span><span class="k">0</span><span class="k">÷</span><span class="k">2</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">25</span><span class="lbl">mL of stock</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= STATISTICS ================= -->
+  <section class="panel" id="panel-stat" role="tabpanel" aria-labelledby="tab-stat" tabindex="0" hidden>
+    <h2 class="section-title">Statistics &amp; Data</h2>
+    <p class="panel-intro">Enter data into the list editor, summarize one variable, and fit a line to paired data. This is where the STAT key earns its keep.</p>
+    <div class="grid">
+
+      <article class="card wide">
+        <h3>One-variable statistics</h3>
+        <p class="given">Quiz scores: 12, 15, 15, 18, 20, 22.</p>
+        <ol class="steps">
+          <li>Press <span class="k">STAT</span> → <b>Edit lists</b>.</li>
+          <li>In L1 type each value followed by <span class="k">ENTER</span>: <code>12, 15, 15, 18, 20, 22</code>.</li>
+          <li>Press <span class="k">STAT</span> → <b>1-Var Stats (L1)</b>.</li>
+        </ol>
+        <div class="result"><span class="lbl">Reads</span><span class="val">mean = 17 · Med = 16.5 · n = 6 · minX = 12 · maxX = 22</span></div>
+        <p>Scroll the results with the up/down arrows; <span class="cap">Sx</span> is the sample standard deviation and <span class="cap">σx</span> the population value.</p>
+      </article>
+
+      <article class="card wide">
+        <h3>Linear regression — fit y = ax + b</h3>
+        <p class="given">Hours studied (L1): 1, 2, 3, 4, 5. Exam score (L2): 52, 60, 68, 77, 85.</p>
+        <ol class="steps">
+          <li>Press <span class="k">STAT</span> → <b>Edit lists</b>; enter the five x-values in L1, then arrow to L2 and enter the five scores.</li>
+          <li>Press <span class="k">STAT</span> → <b>LinReg(ax+b) L1,L2</b>.</li>
+        </ol>
+        <div class="result"><span class="lbl">Reads</span><span class="val">a = 8.3 · b = 43.5 · r ≈ 0.9998</span></div>
+        <p>The slope says each extra study hour adds about 8.3 points; r near 1 signals a very strong positive linear relationship.</p>
+        <div class="tip"><b>Predict:</b> back on the home screen, evaluate the fitted line at x = 6 with <span class="k">8</span> <span class="k">.</span> <span class="k">3</span> <span class="k">×</span> <span class="k">6</span> <span class="k">+</span> <span class="k">4</span> <span class="k">3</span> <span class="k">.</span> <span class="k">5</span> <span class="k">ENTER</span> → <b>93.3</b>.</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= FINANCE ================= -->
+  <section class="panel" id="panel-fin" role="tabpanel" aria-labelledby="tab-fin" tabindex="0" hidden>
+    <h2 class="section-title">Finance &amp; Business</h2>
+    <p class="panel-intro">Compound growth, the future value of a stream of payments, and a quick return-on-investment check.</p>
+    <div class="grid">
+
+      <article class="card wide">
+        <h3>Compound interest</h3>
+        <p class="formula">A = P(1 + r/n)^(n·t)</p>
+        <p class="given">P = $1000, r = 5% (0.05), compounded monthly (n = 12), for t = 10 years.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">×</span><span class="k">(</span><span class="k">1</span><span class="k">+</span><span class="k">.</span><span class="k">0</span><span class="k">5</span><span class="k">÷</span><span class="k">1</span><span class="k">2</span><span class="k">)</span><span class="k">^</span><span class="k">(</span><span class="k">1</span><span class="k">2</span><span class="k">×</span><span class="k">1</span><span class="k">0</span><span class="k">)</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 1647.01</span><span class="lbl">dollars</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Future value of an annuity</h3>
+        <p class="formula">FV = PMT · ((1 + i)ⁿ − 1) / i</p>
+        <p class="given">PMT = $200/month, i = 0.5%/month (0.005), n = 60 months.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">2</span><span class="k">0</span><span class="k">0</span><span class="k">×</span><span class="k">(</span><span class="k">(</span><span class="k">1</span><span class="k">.</span><span class="k">0</span><span class="k">0</span><span class="k">5</span><span class="k">)</span><span class="k">^</span><span class="k">6</span><span class="k">0</span><span class="k">−</span><span class="k">1</span><span class="k">)</span><span class="k">÷</span><span class="k">.</span><span class="k">0</span><span class="k">0</span><span class="k">5</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">≈ 13954.01</span><span class="lbl">dollars</span></div>
+      </article>
+
+      <article class="card">
+        <h3>Return on investment</h3>
+        <p class="formula">ROI = (gain − cost) / cost × 100</p>
+        <p class="given">Sold for $1500, cost $1000.</p>
+        <p class="klabel">Keys</p>
+        <div class="seq"><span class="k">(</span><span class="k">1</span><span class="k">5</span><span class="k">0</span><span class="k">0</span><span class="k">−</span><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">)</span><span class="k">÷</span><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">0</span><span class="k">×</span><span class="k">1</span><span class="k">0</span><span class="k">0</span><span class="k">ENTER</span></div>
+        <div class="result"><span class="lbl">Display</span><span class="val">50</span><span class="lbl">percent</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= PROGRAMS ================= -->
+  <section class="panel" id="panel-prog" role="tabpanel" aria-labelledby="tab-prog" tabindex="0" hidden>
+    <h2 class="section-title">TI-BASIC Programs</h2>
+    <p class="panel-intro">Type a program once and reuse it forever. These five run as-is on the simulator. To enter one: press <span class="k">PRGM</span> → <b>+ New program</b>, give it a name, then type the code (the editor takes your keyboard, and pressing <span class="k">PRGM</span> inside the editor inserts commands such as <code>Disp</code> and <code>If</code>). Quit with <span class="k k2">2nd</span> <span class="k">MODE</span>, then run it from <span class="k">PRGM</span> → choose the program → <b>Run</b>.</p>
+
+    <div class="tip tip-block">The <b>Copy</b> button puts the source on your clipboard. You can paste it directly into the program editor instead of typing it key by key. Symbols to note: <code>→</code> is the <span class="k">STO▸</span> key, <code>²</code> is <span class="k">x²</span>, and <code>√(</code> is <span class="k k2">2nd</span> <span class="k">x²</span>.</div>
+
+    <div class="grid">
+
+      <article class="prog wide">
+        <div class="prog-head"><h3>Quadratic formula</h3><span class="prog-name">QUADRATIC</span></div>
+        <p>Solves a·x² + b·x + c = 0 and reports both real roots (or a no-real-roots message).</p>
+        <div class="codewrap">
+<pre><code>Prompt A
+Prompt B
+Prompt C
+B²-4AC→D
+If D&lt;0
+Then
+Disp "NO REAL ROOTS"
+Stop
+End
+(-B+√(D))/(2A)→M
+(-B-√(D))/(2A)→N
+Disp "X1=",M
+Disp "X2=",N</code></pre>
+        </div>
+        <div class="prog-head">
+          <button class="copy-btn" type="button">Copy program</button>
+          <span class="copy-status" role="status" aria-live="polite"></span>
+        </div>
+        <p class="run-example">Sample run: A = <b>1</b>, B = <b>−5</b>, C = <b>6</b> → <b>X1 = 3, X2 = 2</b>.</p>
+      </article>
+
+      <article class="prog">
+        <div class="prog-head"><h3>Ohm&rsquo;s law + power</h3><span class="prog-name">OHMS</span></div>
+        <p>Enter current and resistance; returns voltage and dissipated power.</p>
+        <div class="codewrap">
+<pre><code>Prompt I
+Prompt R
+I*R→V
+I²*R→P
+Disp "V (volts)=",V
+Disp "P (watts)=",P</code></pre>
+        </div>
+        <div class="prog-head">
+          <button class="copy-btn" type="button">Copy program</button>
+          <span class="copy-status" role="status" aria-live="polite"></span>
+        </div>
+        <p class="run-example">Sample run: I = <b>0.5</b>, R = <b>220</b> → <b>V = 110, P = 55</b>.</p>
+      </article>
+
+      <article class="prog">
+        <div class="prog-head"><h3>Parallel resistance</h3><span class="prog-name">RPAR</span></div>
+        <p>Combines two resistors in parallel using the reciprocal key.</p>
+        <div class="codewrap">
+<pre><code>Prompt R
+Prompt S
+(R⁻¹+S⁻¹)⁻¹→T
+Disp "RP (ohms)=",T</code></pre>
+        </div>
+        <div class="prog-head">
+          <button class="copy-btn" type="button">Copy program</button>
+          <span class="copy-status" role="status" aria-live="polite"></span>
+        </div>
+        <p class="run-example">Sample run: R = <b>100</b>, S = <b>100</b> → <b>RP = 50</b>.</p>
+      </article>
+
+      <article class="prog">
+        <div class="prog-head"><h3>Projectile range</h3><span class="prog-name">RANGE</span></div>
+        <p>Launch speed and angle in; horizontal range out. <b>Set Degree mode first.</b></p>
+        <div class="codewrap">
+<pre><code>Prompt V
+Prompt A
+V²*sin(2A)/9.8→R
+Disp "RANGE (m)=",R</code></pre>
+        </div>
+        <div class="prog-head">
+          <button class="copy-btn" type="button">Copy program</button>
+          <span class="copy-status" role="status" aria-live="polite"></span>
+        </div>
+        <p class="run-example">Sample run: V = <b>20</b>, A = <b>30</b> → <b>RANGE ≈ 35.35</b>.</p>
+      </article>
+
+      <article class="prog">
+        <div class="prog-head"><h3>Compound interest</h3><span class="prog-name">COMPND</span></div>
+        <p>Principal, annual rate, periods per year, and years in; final amount out.</p>
+        <div class="codewrap">
+<pre><code>Prompt P
+Prompt R
+Prompt N
+Prompt T
+P(1+R/N)^(N*T)→F
+Disp "AMOUNT=",F</code></pre>
+        </div>
+        <div class="prog-head">
+          <button class="copy-btn" type="button">Copy program</button>
+          <span class="copy-status" role="status" aria-live="polite"></span>
+        </div>
+        <p class="run-example">Sample run: P = <b>1000</b>, R = <b>.05</b>, N = <b>12</b>, T = <b>10</b> → <b>AMOUNT ≈ 1647.01</b>.</p>
+      </article>
+    </div>
+  </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Companion to the TI Graphing Calculator Simulator · Built for <span class="program">Engineering &amp; Technology</span> · Brookdale Community College · <span class="year">2026</span></p>
+    <p>Educational simulation for the TI-84 Plus CE and TI-83/84 Plus. Not affiliated with or endorsed by Texas Instruments.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- Tabs ----------
+  var tablist = document.querySelector('.tablist');
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+  var STORE = 'ti-tutorial-tab-v1';
+
+  function selectTab(idx, focus) {
+    tabs.forEach(function (t, i) {
+      var on = i === idx;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      if (panels[i]) {
+        panels[i].classList.toggle('active', on);
+        if (on) panels[i].removeAttribute('hidden'); else panels[i].setAttribute('hidden', '');
+      }
+    });
+    if (focus) tabs[idx].focus();
+    if (tabs[idx] && tablist) {
+      var t = tabs[idx];
+      if (t.offsetLeft < tablist.scrollLeft || t.offsetLeft + t.offsetWidth > tablist.scrollLeft + tablist.clientWidth) {
+        tablist.scrollTo({ left: t.offsetLeft - 12, behavior: 'smooth' });
+      }
+    }
+    try { localStorage.setItem(STORE, String(idx)); } catch (e) {}
+  }
+
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () { selectTab(i, false); });
+    tab.addEventListener('keydown', function (ev) {
+      var n = tabs.length, k = ev.key, next = -1;
+      if (k === 'ArrowRight' || k === 'ArrowDown') next = (i + 1) % n;
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') next = (i - 1 + n) % n;
+      else if (k === 'Home') next = 0;
+      else if (k === 'End') next = n - 1;
+      if (next >= 0) { ev.preventDefault(); selectTab(next, true); }
+    });
+  });
+
+  var startIdx = 0;
+  try { var saved = parseInt(localStorage.getItem(STORE), 10); if (saved >= 0 && saved < tabs.length) startIdx = saved; } catch (e) {}
+  selectTab(startIdx, false);
+
+  // ---------- Copy buttons ----------
+  function flash(el, msg) { el.textContent = msg; setTimeout(function () { el.textContent = ''; }, 1900); }
+  function copyText(text, statusEl) {
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        flash(statusEl, 'Copied!');
+      } catch (e) { flash(statusEl, 'Press Ctrl/Cmd+C'); }
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash(statusEl, 'Copied!'); }, fallback);
+      } else { fallback(); }
+    } catch (e) { fallback(); }
+  }
+
+  document.querySelectorAll('.prog').forEach(function (card) {
+    var btn = card.querySelector('.copy-btn');
+    var code = card.querySelector('pre code');
+    var status = card.querySelector('.copy-status');
+    if (btn && code) {
+      btn.addEventListener('click', function () { copyText(code.textContent, status); });
+    }
+  });
+})();
+</script>
+</body>
+</html>
