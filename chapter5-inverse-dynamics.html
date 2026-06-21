@@ -684,6 +684,88 @@
   }
   .notes-modal-foot .spacer{ flex:1; }
 
+  /* --- Image attachments (screenshots) for the current section --- */
+  .notes-img-wrap{
+    margin-top:14px; padding-top:14px;
+    border-top:1px dotted var(--panel-line);
+  }
+  .notes-img-wrap > h3{
+    margin:0 0 8px; font-size:.84rem;
+    font-family:var(--mono); letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .notes-dropzone{
+    border:1.5px dashed var(--panel-line); border-radius:8px;
+    padding:14px; background:var(--paper);
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    transition:border-color .15s, background .15s;
+  }
+  .notes-dropzone.drag{ border-color:var(--accent); background:var(--paper-2); }
+  @media (prefers-reduced-motion: reduce){ .notes-dropzone{ transition:none; } }
+  .notes-img-addbtn{
+    min-height:40px; padding:8px 14px;
+    font-family:var(--mono); font-size:.78rem; font-weight:700;
+    letter-spacing:.05em; text-transform:uppercase;
+    border-radius:6px; cursor:pointer;
+    border:1.5px solid var(--accent); background:var(--accent); color:#fff;
+  }
+  .notes-img-addbtn:hover, .notes-img-addbtn:focus-visible{
+    background:var(--accent-dk); border-color:var(--accent-dk); outline:none;
+  }
+  .notes-img-addbtn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .notes-dropzone .hint{
+    font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); line-height:1.4;
+  }
+  .notes-img-status{
+    font-family:var(--mono); font-size:.72rem; color:var(--ink-soft);
+    margin:8px 0 0; min-height:1em;
+  }
+  .notes-img-status.warn{ color:var(--bad); }
+  .notes-img-grid{
+    list-style:none; padding:0; margin:10px 0 0;
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px;
+  }
+  .notes-img-fig{
+    margin:0; border:1px solid var(--panel-line); border-radius:8px;
+    background:var(--paper); padding:8px; display:flex; flex-direction:column; gap:6px;
+  }
+  .notes-img-fig img{
+    width:100%; height:120px; object-fit:contain;
+    background:var(--paper-2); border-radius:4px;
+  }
+  .notes-img-fig .alt-row{ display:flex; flex-direction:column; gap:3px; }
+  .notes-img-fig .alt-row label{
+    font-family:var(--mono); font-size:.62rem; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+  .notes-img-fig .alt-row input{
+    width:100%; box-sizing:border-box; padding:5px 8px; min-height:30px;
+    background:var(--paper); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:4px;
+    font-family:var(--sans); font-size:.82rem;
+  }
+  .notes-img-fig .alt-row input:focus{
+    outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);
+  }
+  .notes-img-fig .fig-foot{
+    display:flex; justify-content:space-between; align-items:center; gap:6px;
+  }
+  .notes-img-fig .dims{ font-family:var(--mono); font-size:.66rem; color:var(--ink-soft); }
+  .notes-img-remove{
+    background:transparent; border:1px solid var(--panel-line);
+    color:var(--ink-soft); padding:3px 9px; border-radius:4px;
+    font-family:var(--mono); font-size:.66rem; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.05em; min-height:28px;
+  }
+  .notes-img-remove:hover, .notes-img-remove:focus-visible{
+    color:var(--bad); border-color:var(--bad); outline:none;
+  }
+  .notes-img-disabled{
+    font-family:var(--mono); font-size:.74rem; color:var(--ink-soft);
+    background:var(--paper-2); border:1px dashed var(--panel-line);
+    border-radius:6px; padding:10px 12px;
+  }
+
   /* TOC indicator dots — one orange dot per section that has notes */
   nav.toc a .toc-note-dot{
     display:inline-block;
@@ -751,7 +833,55 @@
       font-size:11pt; line-height:1.5;
       margin:6pt 0 10pt;
     }
+    body.printing-notes .notes-print-only figure.note-fig{
+      margin:6pt 0 12pt; padding:0;
+      page-break-inside:avoid; break-inside:avoid;
+    }
+    body.printing-notes .notes-print-only figure.note-fig img{
+      max-width:100%; max-height:5in; height:auto;
+      border:1px solid #ccc;
+    }
+    body.printing-notes .notes-print-only figure.note-fig figcaption{
+      font-family:var(--mono); font-size:9pt; color:#444; margin-top:3pt;
+    }
   }
+  /* --- "Finished the chapter" export reminder toast --- */
+  .notes-reminder{
+    position:fixed; left:50%; bottom:80px; transform:translate(-50%,0);
+    z-index:60; max-width:460px; width:calc(100% - 36px);
+    background:var(--panel); color:var(--ink);
+    border:1px solid var(--accent); border-left:4px solid var(--accent-2);
+    border-radius:10px; box-shadow:0 8px 28px rgba(16,36,58,.28);
+    padding:14px 16px; display:flex; flex-direction:column; gap:10px;
+    animation:notesReminderIn .25s ease-out;
+  }
+  .notes-reminder[hidden]{ display:none; }
+  @keyframes notesReminderIn{
+    from{ opacity:0; transform:translate(-50%,12px); }
+    to{ opacity:1; transform:translate(-50%,0); }
+  }
+  @media (prefers-reduced-motion: reduce){ .notes-reminder{ animation:none; } }
+  .notes-reminder .nr-row{ display:flex; align-items:flex-start; gap:10px; }
+  .notes-reminder .nr-icon{ font-size:1.2rem; line-height:1.2; }
+  .notes-reminder .nr-msg{ margin:0; font-size:.92rem; line-height:1.45; }
+  .notes-reminder .nr-msg strong{ color:var(--accent-dk); }
+  .notes-reminder .nr-actions{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+  .notes-reminder button{
+    min-height:38px; padding:8px 14px; border-radius:6px; cursor:pointer;
+    font-family:var(--mono); font-size:.76rem; font-weight:700;
+    letter-spacing:.04em; text-transform:uppercase;
+  }
+  .notes-reminder .nr-save{ border:1.5px solid var(--accent); background:var(--accent); color:#fff; }
+  .notes-reminder .nr-save:hover, .notes-reminder .nr-save:focus-visible{
+    background:var(--accent-dk); border-color:var(--accent-dk); outline:none;
+  }
+  .notes-reminder .nr-save:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .notes-reminder .nr-dismiss{ border:1.5px solid var(--panel-line); background:transparent; color:var(--ink-soft); }
+  .notes-reminder .nr-dismiss:hover, .notes-reminder .nr-dismiss:focus-visible{
+    color:var(--ink); border-color:var(--ink-soft); outline:none;
+  }
+  @media (max-width:560px){ .notes-reminder{ bottom:96px; } }
+
   .notes-print-only{ display:none; }
 </style>
 </head>
@@ -1782,6 +1912,17 @@
         <button type="button" class="notes-clear-section" id="notesClearSection">Clear this section</button>
       </div>
 
+      <div class="notes-img-wrap" id="notesImgWrap">
+        <h3>Screenshots for this section</h3>
+        <div class="notes-dropzone" id="notesDropzone">
+          <button type="button" class="notes-img-addbtn" id="notesImgAddBtn">📎 Add image</button>
+          <span class="hint">…or paste a screenshot (Ctrl/⌘+V) or drag an image file here.</span>
+          <input type="file" id="notesImgInput" accept="image/*" multiple hidden>
+        </div>
+        <p class="notes-img-status" id="notesImgStatus" aria-live="polite"></p>
+        <ul class="notes-img-grid" id="notesImgGrid"></ul>
+      </div>
+
       <div class="notes-all-list-wrap">
         <h3>All my notes for this chapter</h3>
         <ul class="notes-all-list" id="notesAllList"></ul>
@@ -1795,18 +1936,20 @@
 
       <div class="save-warn" role="note">
         <span class="h">⚠ Browser storage is temporary</span>
-        Your notes live in this browser only. <strong>Download a copy before closing the chapter</strong> so you don't lose them if you switch devices or clear browser data.
+        Your notes and screenshots live in this browser only. <strong>Use Print / Save as PDF to keep a permanent copy</strong> (the PDF includes your screenshots) before you switch devices or clear browser data.
       </div>
 
     </div>
     <div class="notes-modal-foot">
-      <button type="button" id="notesExportTxt">⬇ Download (.txt)</button>
       <button type="button" class="secondary" id="notesPrint">🖨 Print / Save as PDF</button>
       <span class="spacer"></span>
       <button type="button" class="danger" id="notesClearAll">✕ Clear all</button>
     </div>
   </div>
 </div>
+
+<!-- Print/PDF target (filled by NotesModule at print time) -->
+<div class="notes-print-only" id="notesPrintBlock"></div>
 
 <script>
 (function(){
@@ -3030,7 +3173,7 @@
     var allListUl     = document.getElementById("notesAllList");
     var allListEmpty  = document.getElementById("notesAllEmpty");
     var nameField     = document.getElementById("notesNameField");
-    var exportTxtBtn  = document.getElementById("notesExportTxt");
+    var exportTxtBtn  = null;
     var printBtn      = document.getElementById("notesPrint");
     var clearAllBtn   = document.getElementById("notesClearAll");
     var closeBtn      = document.getElementById("notesCloseBtn");
@@ -3066,7 +3209,8 @@
         var a = tocLinks[sec.id];
         if(!a) return;
         var existing = a.querySelector(".toc-note-dot");
-        if(loadNote(sec.id).length > 0){
+        var hasContent = loadNote(sec.id).length > 0 || (typeof Img !== "undefined" && Img && Img.has(sec.id));
+        if(hasContent){
           if(!existing){
             var dot = document.createElement("span");
             dot.className = "toc-note-dot";
@@ -3094,14 +3238,27 @@
     function refreshChip(){
       if(!chipStatus) return;
       var notes = collectNotes();
-      if(notes.length === 0){ chipStatus.textContent = "empty"; }
+      var imgTotal = (typeof Img !== "undefined" && Img) ? Img.totalCount() : 0;
+      var imgSecs  = (typeof Img !== "undefined" && Img) ? Img.sectionCount() : 0;
+      // Count distinct sections that have text and/or images
+      var secSet = Object.create(null);
+      notes.forEach(function(n){ secSet[n.sec.id] = true; });
+      var distinctSecs = Object.keys(secSet).length;
+      // add image-only sections
+      if(typeof Img !== "undefined" && Img){
+        allSectionsWithGeneral().forEach(function(sec){ if(Img.has(sec.id)) secSet[sec.id] = true; });
+        distinctSecs = Object.keys(secSet).length;
+      }
+      if(distinctSecs === 0){ chipStatus.textContent = "empty"; }
       else{
-        var total = 0; notes.forEach(function(n){ total += n.text.length; });
-        chipStatus.textContent = notes.length + " section" + (notes.length===1?"":"s") + " \u00B7 " + total + " chars";
+        var chars = 0; notes.forEach(function(n){ chars += n.text.length; });
+        var parts = [distinctSecs + " section" + (distinctSecs===1?"":"s"), chars + " chars"];
+        if(imgTotal > 0) parts.push(imgTotal + " img" + (imgTotal===1?"":"s"));
+        chipStatus.textContent = parts.join(" \u00B7 ");
       }
       if(fabCount){
-        if(notes.length === 0){ fabCount.hidden = true; }
-        else{ fabCount.hidden = false; fabCount.textContent = String(notes.length); }
+        if(distinctSecs === 0){ fabCount.hidden = true; }
+        else{ fabCount.hidden = false; fabCount.textContent = String(distinctSecs); }
       }
     }
 
@@ -3154,6 +3311,8 @@
       metaCount.textContent = existing.length + " characters";
       metaStatus.textContent = existing.length ? ("Saved \u00B7 " + fmtTime(storage.get(lastSavedKey()))) : "(empty)";
       if(autoTag) autoTag.hidden = manual ? true : false;
+      // Load this section's screenshots into the grid
+      if(typeof Img !== "undefined" && Img && Img.loadFor) Img.loadFor(id);
       // Update the "active" highlight in the list
       refreshAllList();
       // Focus the textarea for keyboard users (only if modal already open)
@@ -3193,27 +3352,29 @@
     /* ---------- Clear current section ---------- */
     clearSecBtn.addEventListener("click", function(){
       var sec = findSection(picker.value);
-      if(textarea.value.length === 0) return;
-      if(!confirm("Clear your notes for " + sec.num + "? This cannot be undone unless you have already downloaded a copy.")) return;
+      var hasImgs = (typeof Img !== "undefined" && Img && Img.has(picker.value));
+      if(textarea.value.length === 0 && !hasImgs) return;
+      if(!confirm("Clear your notes" + (hasImgs ? " and screenshots" : "") + " for " + sec.num + "? This cannot be undone unless you have already saved a PDF.")) return;
       textarea.value = "";
       saveNote(picker.value, "");
       metaCount.textContent = "0 characters";
       metaStatus.textContent = "Cleared";
-      refreshChip();
-      refreshAllList();
-      refreshTocDots();
-      textarea.focus();
+      var after = function(){ refreshChip(); refreshAllList(); refreshTocDots(); textarea.focus(); };
+      if(hasImgs){ Img.clearSection(picker.value).then(after); } else { after(); }
     });
 
     /* ---------- Clear all ---------- */
     clearAllBtn.addEventListener("click", function(){
       var notes = collectNotes();
-      if(notes.length === 0){
+      var imgTotal = (typeof Img !== "undefined" && Img) ? Img.totalCount() : 0;
+      if(notes.length === 0 && imgTotal === 0){
         alert("There are no notes to clear.");
         return;
       }
-      if(!confirm("Permanently delete ALL notes for this chapter? (" + notes.length +
-                  " section" + (notes.length===1?"":"s") + ") This cannot be undone unless you have already downloaded a copy.")) return;
+      var what = notes.length + " section" + (notes.length===1?"":"s") + " of notes";
+      if(imgTotal > 0) what += " and " + imgTotal + " image" + (imgTotal===1?"":"s");
+      if(!confirm("Permanently delete ALL notes for this chapter? (" + what +
+                  ") This cannot be undone unless you have already saved a PDF.")) return;
       allSectionsWithGeneral().forEach(function(sec){
         storage.remove(sectionKey(sec.id));
       });
@@ -3221,9 +3382,8 @@
       textarea.value = "";
       metaCount.textContent = "0 characters";
       metaStatus.textContent = "Cleared";
-      refreshChip();
-      refreshAllList();
-      refreshTocDots();
+      var after = function(){ refreshChip(); refreshAllList(); refreshTocDots(); };
+      if(typeof Img !== "undefined" && Img){ Img.clearAll().then(after); } else { after(); }
     });
 
     /* ---------- Name field ---------- */
@@ -3233,103 +3393,489 @@
       nameField.addEventListener("input", saveNameDebounced);
     }
 
-    /* ---------- Export builders ---------- */
-    function buildPlainText(){
-      var notes = collectNotes();
-      var lines = [];
-      lines.push(CHAPTER_TITLE);
-      lines.push(CHAPTER_COURSE);
-      var nm = loadName();
-      if(nm) lines.push("Student: " + nm);
-      lines.push("Date exported: " + new Date().toLocaleString());
-      lines.push("");
-      lines.push("============================================================");
-      lines.push("");
-      if(notes.length === 0){
-        lines.push("(No notes recorded for this chapter yet.)");
-      } else {
-        notes.forEach(function(n){
-          var heading = n.sec.num + " \u2014 " + n.sec.title;
-          lines.push(heading);
-          // dashed underline matched to heading length
-          var underline = "";
-          for(var u=0; u<heading.length; u++) underline += "-";
-          lines.push(underline);
-          lines.push(n.text);
-          lines.push("");
+    /* ============================================================
+       SCREENSHOTS — IndexedDB-backed image attachments per section.
+       Text notes stay in localStorage (above); only images live in
+       IndexedDB, stored as native blobs (no base64 bloat). A small
+       in-memory mirror (sectionsWithImages) keeps the chip / TOC dots
+       synchronous; the blobs themselves load async when a section is
+       shown or when building the print/PDF output.
+       ============================================================ */
+    var Img = (function(){
+      var DB_NAME = "engi216_notes_images";
+      var DB_VERSION = 1;
+      var STORE = "images";
+      var MAX_DIM = 1600;                       // longest side after downscale (px)
+      var ENCODE_TYPE = "image/webp";
+      var ENCODE_Q = 0.85;
+      var MAX_SOURCE_BYTES = 25 * 1024 * 1024;  // skip absurd source files
+      var MAX_PER_SECTION = 30;
+
+      var available = !!(window.indexedDB);
+      var dbPromise = null;
+      var sectionsWithImages = Object.create(null); // sectionId -> count (sync mirror)
+      var objectURLs = [];                            // live grid object URLs (revoke on reload)
+      var currentSection = null;
+
+      // DOM refs (assigned in init)
+      var wrap, dropzone, addBtn, fileInput, grid, statusEl;
+
+      /* ---- IndexedDB plumbing (promise wrappers) ---- */
+      function openDB(){
+        if(!available) return Promise.reject(new Error("no-indexeddb"));
+        if(dbPromise) return dbPromise;
+        dbPromise = new Promise(function(resolve, reject){
+          var req = window.indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = function(e){
+            var db = e.target.result;
+            if(!db.objectStoreNames.contains(STORE)){
+              var os = db.createObjectStore(STORE, { keyPath:"id", autoIncrement:true });
+              os.createIndex("by_section", ["chapter","section"], { unique:false });
+              os.createIndex("by_chapter", "chapter", { unique:false });
+            }
+          };
+          req.onsuccess = function(e){ resolve(e.target.result); };
+          req.onerror = function(){ reject(req.error || new Error("idb-open-failed")); };
+        });
+        return dbPromise;
+      }
+      function store(mode){
+        return openDB().then(function(db){
+          return db.transaction(STORE, mode).objectStore(STORE);
         });
       }
-      return lines.join("\n");
-    }
-
-    function downloadFile(filename, mime, content){
-      try{
-        var blob = new Blob([content], { type: mime + ";charset=utf-8" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function(){
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 100);
-      }catch(e){
-        var dataUri = "data:" + mime + ";charset=utf-8," + encodeURIComponent(content);
-        window.open(dataUri, "_blank");
+      function addRecord(rec){
+        return store("readwrite").then(function(os){
+          return new Promise(function(resolve, reject){
+            var r = os.add(rec);
+            r.onsuccess = function(){ rec.id = r.result; resolve(rec); };
+            r.onerror = function(){ reject(r.error); };
+          });
+        });
       }
-    }
+      function putRecord(rec){
+        return store("readwrite").then(function(os){
+          return new Promise(function(resolve, reject){
+            var r = os.put(rec);
+            r.onsuccess = function(){ resolve(); };
+            r.onerror = function(){ reject(r.error); };
+          });
+        });
+      }
+      function deleteRecord(id){
+        return store("readwrite").then(function(os){
+          return new Promise(function(resolve, reject){
+            var r = os.delete(id);
+            r.onsuccess = function(){ resolve(); };
+            r.onerror = function(){ reject(r.error); };
+          });
+        });
+      }
+      function listBySection(section){
+        return store("readonly").then(function(os){
+          return new Promise(function(resolve, reject){
+            var out = [];
+            var cur = os.index("by_section").openCursor(window.IDBKeyRange.only([CHAPTER_KEY, section]));
+            cur.onsuccess = function(e){ var k=e.target.result; if(k){ out.push(k.value); k.continue(); } else resolve(out); };
+            cur.onerror = function(){ reject(cur.error); };
+          });
+        });
+      }
+      function deleteChapter(){
+        return store("readwrite").then(function(os){
+          return new Promise(function(resolve, reject){
+            var cur = os.index("by_chapter").openCursor(window.IDBKeyRange.only(CHAPTER_KEY));
+            cur.onsuccess = function(e){ var k=e.target.result; if(k){ k.delete(); k.continue(); } else resolve(); };
+            cur.onerror = function(){ reject(cur.error); };
+          });
+        });
+      }
+      function loadMirror(){
+        // populate sectionsWithImages with counts for this chapter
+        return store("readonly").then(function(os){
+          return new Promise(function(resolve, reject){
+            var cur = os.index("by_chapter").openCursor(window.IDBKeyRange.only(CHAPTER_KEY));
+            cur.onsuccess = function(e){
+              var k = e.target.result;
+              if(k){ var s=k.value.section; sectionsWithImages[s]=(sectionsWithImages[s]||0)+1; k.continue(); }
+              else resolve();
+            };
+            cur.onerror = function(){ reject(cur.error); };
+          });
+        });
+      }
+      function bump(section, delta){
+        var c = (sectionsWithImages[section]||0) + delta;
+        if(c <= 0) delete sectionsWithImages[section]; else sectionsWithImages[section] = c;
+      }
 
-    function filenameBase(){
-      var nm = loadName().trim();
-      var safeName = nm ? nm.replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_|_$/g, "") : "notes";
-      // Derive the filename prefix from CHAPTER_KEY: "engi216_ch2" -> "engi216-ch2"
-      var prefix = CHAPTER_KEY.replace(/_/g, "-");
-      return prefix + "-" + safeName + "-" + fmtDateOnly();
-    }
+      /* ---- decode -> downscale -> re-encode ---- */
+      function decode(blob){
+        if(window.createImageBitmap){
+          return window.createImageBitmap(blob).then(
+            function(bmp){ return { drawable:bmp, width:bmp.width, height:bmp.height, close:function(){ try{bmp.close();}catch(e){} } }; },
+            function(){ return decodeViaImg(blob); }
+          );
+        }
+        return decodeViaImg(blob);
+      }
+      function decodeViaImg(blob){
+        return new Promise(function(resolve, reject){
+          var url = URL.createObjectURL(blob);
+          var im = new Image();
+          im.onload = function(){ resolve({ drawable:im, width:im.naturalWidth, height:im.naturalHeight, _url:url, close:function(){ URL.revokeObjectURL(url); } }); };
+          im.onerror = function(){ URL.revokeObjectURL(url); reject(new Error("decode-failed")); };
+          im.src = url;
+        });
+      }
+      function dataURLtoBlob(durl){
+        var parts = durl.split(","), mime = parts[0].match(/:(.*?);/)[1];
+        var bin = atob(parts[1]); var n = bin.length; var u8 = new Uint8Array(n);
+        while(n--) u8[n] = bin.charCodeAt(n);
+        return new Blob([u8], { type:mime });
+      }
+      function process(file){
+        return decode(file).then(function(src){
+          var scale = Math.min(1, MAX_DIM / Math.max(src.width, src.height));
+          var ow = Math.max(1, Math.round(src.width*scale));
+          var oh = Math.max(1, Math.round(src.height*scale));
+          var canvas = document.createElement("canvas");
+          canvas.width = ow; canvas.height = oh;
+          canvas.getContext("2d").drawImage(src.drawable, 0, 0, ow, oh);
+          if(src.close) src.close();
+          return new Promise(function(resolve){
+            if(canvas.toBlob){
+              canvas.toBlob(function(b){
+                if(b && b.size){ resolve({ blob:b, type:b.type||ENCODE_TYPE, w:ow, h:oh }); }
+                else canvas.toBlob(function(b2){
+                  if(b2 && b2.size) resolve({ blob:b2, type:b2.type||"image/jpeg", w:ow, h:oh });
+                  else { var du=canvas.toDataURL("image/jpeg",ENCODE_Q); resolve({ blob:dataURLtoBlob(du), type:"image/jpeg", w:ow, h:oh }); }
+                }, "image/jpeg", ENCODE_Q);
+              }, ENCODE_TYPE, ENCODE_Q);
+            } else {
+              var du = canvas.toDataURL("image/jpeg", ENCODE_Q);
+              resolve({ blob:dataURLtoBlob(du), type:"image/jpeg", w:ow, h:oh });
+            }
+          });
+        });
+      }
+      function blobToDataURL(blob){
+        return new Promise(function(resolve, reject){
+          var fr = new FileReader();
+          fr.onload = function(){ resolve(fr.result); };
+          fr.onerror = function(){ reject(fr.error); };
+          fr.readAsDataURL(blob);
+        });
+      }
+      function fmtKB(bytes){ return bytes < 1024 ? bytes + " B" : (bytes/1024 < 1024 ? Math.round(bytes/1024) + " KB" : (bytes/1048576).toFixed(1) + " MB"); }
 
-    exportTxtBtn.addEventListener("click", function(){
-      flushSave();
-      downloadFile(filenameBase() + ".txt", "text/plain", buildPlainText());
-    });
+      function setStatus(msg, warn){
+        if(!statusEl) return;
+        statusEl.textContent = msg || "";
+        statusEl.className = "notes-img-status" + (warn ? " warn" : "");
+      }
 
-    printBtn.addEventListener("click", function(){
+      /* ---- grid rendering for the current section ---- */
+      function revokeURLs(){ objectURLs.forEach(function(u){ try{ URL.revokeObjectURL(u); }catch(e){} }); objectURLs = []; }
+
+      function renderGrid(section){
+        if(!grid) return Promise.resolve();
+        revokeURLs();
+        while(grid.firstChild) grid.removeChild(grid.firstChild);
+        if(!available) return Promise.resolve();
+        return listBySection(section).then(function(recs){
+          recs.forEach(function(rec){
+            var li = document.createElement("li");
+            li.className = "notes-img-fig";
+            li.setAttribute("role","group");
+
+            var url = URL.createObjectURL(rec.blob);
+            objectURLs.push(url);
+            var im = document.createElement("img");
+            im.src = url;
+            im.alt = rec.alt && rec.alt.trim() ? rec.alt : ("Screenshot, " + (rec.w||"?") + " by " + (rec.h||"?") + " pixels");
+
+            var altRow = document.createElement("div");
+            altRow.className = "alt-row";
+            var altId = "imgalt_" + rec.id;
+            var lab = document.createElement("label");
+            lab.setAttribute("for", altId);
+            lab.textContent = "Description (alt text)";
+            var altInput = document.createElement("input");
+            altInput.type = "text"; altInput.id = altId; altInput.value = rec.alt || "";
+            altInput.placeholder = "Describe this image for accessibility";
+            altInput.maxLength = 250;
+            var altDebounced = debounce(function(){
+              rec.alt = altInput.value;
+              putRecord(rec).then(function(){ im.alt = rec.alt.trim() || im.alt; });
+            }, 400);
+            altInput.addEventListener("input", altDebounced);
+            altRow.appendChild(lab); altRow.appendChild(altInput);
+
+            var foot = document.createElement("div");
+            foot.className = "fig-foot";
+            var dims = document.createElement("span");
+            dims.className = "dims";
+            dims.textContent = (rec.w||"?") + "\u00D7" + (rec.h||"?") + " \u00B7 " + fmtKB(rec.blob.size||0);
+            var rm = document.createElement("button");
+            rm.type = "button"; rm.className = "notes-img-remove";
+            rm.textContent = "Remove";
+            rm.setAttribute("aria-label", "Remove this image");
+            rm.addEventListener("click", function(){
+              if(!confirm("Remove this image? This cannot be undone unless you have already saved a PDF.")) return;
+              deleteRecord(rec.id).then(function(){
+                bump(section, -1);
+                setStatus("Image removed.");
+                renderGrid(section);
+                refreshChip(); refreshTocDots();
+              });
+            });
+            foot.appendChild(dims); foot.appendChild(rm);
+
+            li.appendChild(im); li.appendChild(altRow); li.appendChild(foot);
+            grid.appendChild(li);
+          });
+        }).catch(function(){ /* leave grid empty on read error */ });
+      }
+
+      /* ---- adding files ---- */
+      function handleFiles(fileList){
+        if(!available){ setStatus("Image storage isn't available in this browser.", true); return; }
+        var files = Array.prototype.slice.call(fileList).filter(function(f){ return f && /^image\//.test(f.type); });
+        var skippedNonImage = fileList.length - files.length;
+        if(files.length === 0){
+          setStatus(skippedNonImage ? "Those weren't image files \u2014 nothing added." : "", !!skippedNonImage);
+          return;
+        }
+        var have = sectionsWithImages[currentSection] || 0;
+        var room = Math.max(0, MAX_PER_SECTION - have);
+        var overflow = files.length - room;
+        if(room === 0){ setStatus("Limit is " + MAX_PER_SECTION + " images per section.", true); return; }
+        if(overflow > 0) files = files.slice(0, room);
+
+        setStatus("Processing " + files.length + " image" + (files.length===1?"":"s") + "\u2026");
+        var section = currentSection;
+        var chain = Promise.resolve();
+        var added = 0;
+        files.forEach(function(file){
+          chain = chain.then(function(){
+            if(file.size > MAX_SOURCE_BYTES){ return; } // skip absurd source files
+            return process(file).then(function(out){
+              return addRecord({
+                chapter: CHAPTER_KEY, section: section,
+                blob: out.blob, type: out.type, alt: "",
+                w: out.w, h: out.h, added: new Date().toISOString()
+              }).then(function(){ added++; bump(section, 1); });
+            }).catch(function(){ /* skip this file, continue */ });
+          });
+        });
+        chain.then(function(){
+          var msg = "Added " + added + " image" + (added===1?"":"s") + ".";
+          if(overflow > 0) msg += " " + overflow + " skipped (per-section limit).";
+          setStatus(msg, added===0);
+          if(section === currentSection) renderGrid(section);
+          refreshChip(); refreshTocDots();
+        });
+      }
+
+      /* ---- init: refs + event wiring + mirror load ---- */
+      function init(){
+        wrap     = document.getElementById("notesImgWrap");
+        dropzone = document.getElementById("notesDropzone");
+        addBtn   = document.getElementById("notesImgAddBtn");
+        fileInput= document.getElementById("notesImgInput");
+        grid     = document.getElementById("notesImgGrid");
+        statusEl = document.getElementById("notesImgStatus");
+        if(!wrap) return Promise.resolve();
+
+        if(!available){
+          // Replace the dropzone with a graceful "unavailable" message.
+          if(dropzone){
+            var msg = document.createElement("div");
+            msg.className = "notes-img-disabled";
+            msg.textContent = "Image attachments need IndexedDB, which this browser/mode has disabled. Your text notes still work normally.";
+            dropzone.parentNode.replaceChild(msg, dropzone);
+          }
+          return Promise.resolve();
+        }
+
+        if(addBtn && fileInput){
+          addBtn.addEventListener("click", function(){ fileInput.value = ""; fileInput.click(); });
+          fileInput.addEventListener("change", function(){ if(fileInput.files && fileInput.files.length) handleFiles(fileInput.files); });
+        }
+        if(dropzone){
+          ["dragenter","dragover"].forEach(function(ev){
+            dropzone.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dropzone.classList.add("drag"); });
+          });
+          ["dragleave","dragend","drop"].forEach(function(ev){
+            dropzone.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dropzone.classList.remove("drag"); });
+          });
+          dropzone.addEventListener("drop", function(e){
+            var dt = e.dataTransfer; if(dt && dt.files && dt.files.length) handleFiles(dt.files);
+          });
+        }
+        // Paste-from-clipboard: intercept only when the clipboard carries an image.
+        backdrop.addEventListener("paste", function(e){
+          if(backdrop.hidden) return;
+          var items = e.clipboardData && e.clipboardData.items;
+          if(!items) return;
+          var imgs = [];
+          for(var i=0;i<items.length;i++){ if(items[i].kind === "file" && /^image\//.test(items[i].type)){ var f=items[i].getAsFile(); if(f) imgs.push(f); } }
+          if(imgs.length){ e.preventDefault(); handleFiles(imgs); }
+        });
+
+        return loadMirror().catch(function(){ /* mirror stays empty on error */ });
+      }
+
+      return {
+        available: available,
+        init: init,
+        loadFor: function(section){ currentSection = section; setStatus(""); return renderGrid(section); },
+        has: function(section){ return !!sectionsWithImages[section]; },
+        count: function(section){ return sectionsWithImages[section] || 0; },
+        totalCount: function(){ var t=0; for(var k in sectionsWithImages){ t += sectionsWithImages[k]; } return t; },
+        sectionCount: function(){ return Object.keys(sectionsWithImages).length; },
+        clearSection: function(section){
+          if(!available) return Promise.resolve();
+          return listBySection(section).then(function(recs){
+            return Promise.all(recs.map(function(r){ return deleteRecord(r.id); }));
+          }).then(function(){ delete sectionsWithImages[section]; if(section===currentSection) renderGrid(section); });
+        },
+        clearAll: function(){
+          if(!available) return Promise.resolve();
+          return deleteChapter().then(function(){ sectionsWithImages = Object.create(null); renderGrid(currentSection); });
+        },
+        getForPrint: function(section){
+          if(!available) return Promise.resolve([]);
+          return listBySection(section).then(function(recs){
+            return Promise.all(recs.map(function(r){
+              return blobToDataURL(r.blob).then(function(durl){ return { dataURL:durl, alt:r.alt||"", w:r.w, h:r.h }; });
+            }));
+          }).catch(function(){ return []; });
+        },
+        revoke: revokeURLs
+      };
+    })();
+
+    /* ---------- Print / Save as PDF (the permanent copy, includes screenshots) ---------- */
+    function runPrint(){
       flushSave();
       var block = document.getElementById("notesPrintBlock");
       if(!block) return;
-      var notes = collectNotes();
       var nm = loadName();
       var dateStr = new Date().toLocaleString();
-      var inner = '';
-      inner += '<h1>' + escapeHtml(CHAPTER_TITLE) + '</h1>';
-      inner += '<div class="meta">';
-      inner += escapeHtml(CHAPTER_COURSE);
-      if(nm) inner += ' &middot; Student: ' + escapeHtml(nm);
-      inner += ' &middot; Exported: ' + escapeHtml(dateStr);
-      inner += '</div>';
-      if(notes.length === 0){
-        inner += '<p><em>No notes recorded for this chapter yet.</em></p>';
-      } else {
-        notes.forEach(function(n){
-          inner += '<h2>' + escapeHtml(n.sec.num) + ' \u2014 ' + escapeHtml(n.sec.title) + '</h2>';
-          inner += '<div class="note-body">' + escapeHtml(n.text) + '</div>';
-        });
-      }
-      block.innerHTML = inner;
-      // Close the modal during print so its overlay doesn't show up
-      var wasOpen = !backdrop.hidden;
-      if(wasOpen){ closeModal(/*skipFocus*/true); }
-      document.body.classList.add("printing-notes");
-      setTimeout(function(){
-        window.print();
+      var hasImgs = (typeof Img !== "undefined" && Img && Img.available);
+
+      // Gather every section that has text and/or images, in canonical order.
+      var ordered = allSectionsWithGeneral();
+      var jobs = ordered.map(function(sec){
+        var text = loadNote(sec.id);
+        var sectionHasImgs = hasImgs && Img.has(sec.id);
+        if(!text && !sectionHasImgs) return Promise.resolve(null);
+        var imgsP = sectionHasImgs ? Img.getForPrint(sec.id) : Promise.resolve([]);
+        return imgsP.then(function(imgs){ return { sec:sec, text:text, imgs:imgs||[] }; })
+                    .catch(function(){ return { sec:sec, text:text, imgs:[] }; });
+      });
+
+      Promise.all(jobs).then(function(results){
+        var items = results.filter(Boolean);
+        var inner = '';
+        inner += '<h1>' + escapeHtml(CHAPTER_TITLE) + '</h1>';
+        inner += '<div class="meta">' + escapeHtml(CHAPTER_COURSE);
+        if(nm) inner += ' &middot; Student: ' + escapeHtml(nm);
+        inner += ' &middot; Exported: ' + escapeHtml(dateStr) + '</div>';
+        if(items.length === 0){
+          inner += '<p><em>No notes recorded for this chapter yet.</em></p>';
+        } else {
+          items.forEach(function(it){
+            inner += '<h2>' + escapeHtml(it.sec.num) + ' \u2014 ' + escapeHtml(it.sec.title) + '</h2>';
+            if(it.text) inner += '<div class="note-body">' + escapeHtml(it.text) + '</div>';
+            it.imgs.forEach(function(im, i){
+              var hasAlt = im.alt && im.alt.trim();
+              var alt = hasAlt ? im.alt : ("Screenshot " + (i+1) + " for " + it.sec.title);
+              inner += '<figure class="note-fig"><img src="' + im.dataURL + '" alt="' + escapeHtml(alt) + '">';
+              if(hasAlt) inner += '<figcaption>' + escapeHtml(im.alt) + '</figcaption>';
+              inner += '</figure>';
+            });
+          });
+        }
+        block.innerHTML = inner;
+        // Close the modal during print so its overlay doesn't show up
+        var wasOpen = !backdrop.hidden;
+        if(wasOpen){ closeModal(/*skipFocus*/true); }
+        document.body.classList.add("printing-notes");
         setTimeout(function(){
-          document.body.classList.remove("printing-notes");
-          block.innerHTML = "";
-          if(wasOpen) openModal();
-        }, 500);
-      }, 60);
-    });
+          window.print();
+          setTimeout(function(){
+            document.body.classList.remove("printing-notes");
+            block.innerHTML = "";
+            if(wasOpen) openModal();
+          }, 500);
+        }, 80);
+      });
+    }
+    printBtn.addEventListener("click", runPrint);
+
+    /* ---------- "Finished the chapter" export reminder ----------
+       Fires a single, dismissible toast the first time the student scrolls
+       to the end of the chapter AND has notes/screenshots worth saving.
+       Once per page load; never pops over the open modal. */
+    var EXPORT_REMINDER_THRESHOLD = 0.98;
+    var remindedThisSession = false;
+    var pendingReminder = false;
+    var crossedEnd = false;
+    var reminderEl = null;
+
+    function notesExist(){
+      return collectNotes().length > 0 || (typeof Img !== "undefined" && Img && Img.totalCount() > 0);
+    }
+    function buildReminder(){
+      if(reminderEl) return reminderEl;
+      var box = document.createElement("div");
+      box.className = "notes-reminder";
+      box.setAttribute("role", "region");
+      box.setAttribute("aria-label", "Save your notes reminder");
+      box.hidden = true;
+      var row = document.createElement("div"); row.className = "nr-row";
+      var icon = document.createElement("span"); icon.className = "nr-icon"; icon.setAttribute("aria-hidden","true"); icon.textContent = "\uD83D\uDCCC";
+      var msg = document.createElement("p"); msg.className = "nr-msg"; msg.setAttribute("aria-live","polite");
+      msg.innerHTML = "You've reached the end of the chapter. <strong>Save your notes as a PDF</strong> so you don't lose them \u2014 browser storage can be cleared at any time.";
+      row.appendChild(icon); row.appendChild(msg);
+      var actions = document.createElement("div"); actions.className = "nr-actions";
+      var save = document.createElement("button"); save.type = "button"; save.className = "nr-save"; save.textContent = "\uD83D\uDDA8 Save as PDF";
+      var dismiss = document.createElement("button"); dismiss.type = "button"; dismiss.className = "nr-dismiss"; dismiss.textContent = "Not now";
+      save.addEventListener("click", function(){ hideReminder(); runPrint(); });
+      dismiss.addEventListener("click", function(){ hideReminder(); });
+      actions.appendChild(save); actions.appendChild(dismiss);
+      box.appendChild(row); box.appendChild(actions);
+      document.body.appendChild(box);
+      reminderEl = box;
+      return box;
+    }
+    function showReminder(){
+      if(remindedThisSession || !notesExist()) return;
+      if(!backdrop.hidden){ pendingReminder = true; return; } // don't pop over the modal
+      remindedThisSession = true;
+      pendingReminder = false;
+      buildReminder().hidden = false;
+    }
+    function hideReminder(){ if(reminderEl) reminderEl.hidden = true; }
+    function checkFinish(){
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      if(max <= 40) return; // not meaningfully scrollable
+      var pct = h.scrollTop / max;
+      if(pct >= EXPORT_REMINDER_THRESHOLD){
+        if(!crossedEnd){ crossedEnd = true; showReminder(); }
+      } else if(pct < EXPORT_REMINDER_THRESHOLD - 0.05){
+        crossedEnd = false;
+      }
+    }
+    var finishRAF = 0;
+    window.addEventListener("scroll", function(){
+      if(finishRAF) return;
+      finishRAF = requestAnimationFrame(function(){ finishRAF = 0; checkFinish(); });
+    }, { passive:true });
 
     /* ---------- Modal open / close (ESC closes; backdrop does NOT) ---------- */
     var lastFocusedBeforeOpen = null;
@@ -3359,6 +3905,7 @@
       if(!skipFocus && lastFocusedBeforeOpen && lastFocusedBeforeOpen.focus){
         try{ lastFocusedBeforeOpen.focus(); }catch(e){}
       }
+      if(pendingReminder && !remindedThisSession){ showReminder(); }
     }
 
     // Triggers
@@ -3368,6 +3915,10 @@
 
     // ESC closes; backdrop click does NOT (per requirement)
     document.addEventListener("keydown", function(e){
+      // ESC dismisses the export reminder when the modal isn't open
+      if(e.key === "Escape" && backdrop.hidden && reminderEl && !reminderEl.hidden){
+        e.preventDefault(); hideReminder(); return;
+      }
       // ESC always closes the modal if open
       if(e.key === "Escape" && !backdrop.hidden){
         e.preventDefault();
@@ -3402,6 +3953,12 @@
     });
 
     /* ---------- Initial pass ---------- */
+    // Bring up the image subsystem (assigns refs + wires handlers synchronously,
+    // then loads the per-section image counts asynchronously).
+    Img.init().then(function(){
+      refreshChip();
+      refreshTocDots();
+    });
     refreshChip();
     refreshTocDots();
     refreshAllList();
@@ -3422,7 +3979,7 @@
       window.addEventListener("beforeunload", function(e){
         if(collectNotes().length > 0){
           e.preventDefault();
-          e.returnValue = "Your notes will be lost — download them first.";
+          e.returnValue = "Your notes will be lost \u2014 save a PDF first.";
           return e.returnValue;
         }
       });
