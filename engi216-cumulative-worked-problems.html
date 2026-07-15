@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENGI 216 · Cumulative Worked Problems — From Kinematics to Force Analysis</title>
+<meta name="description" content="Six cumulative ENGI 216 problems, each carried from the front-half kinematic analysis (vector loop, rolling contacts and gear trains, kinematic coefficients) straight through the back-half inverse-dynamics force analysis on the same mechanism. Fully worked, step-by-step, with original to-scale diagrams.">
+<style>
+  :root{
+    --ink:#10243a; --ink-soft:#2b4a66; --paper:#f3f1e7; --paper-2:#e9e6d6;
+    --panel:#ffffff; --panel-line:#c9c4b0; --accent:#0a7ea4; --accent-dk:#075a76;
+    --accent-2:#c2541d; --good:#1f7a4d; --good-bg:#e3f3e9; --bad:#a4231f; --bad-bg:#f7e3e2;
+    --warn:#8a6d1a; --warn-bg:#f7f0d8; --grid-line:rgba(10,126,164,.10);
+    --shadow:0 2px 4px rgba(16,36,58,.08), 0 8px 22px rgba(16,36,58,.10);
+    --radius:10px; --maxw:1080px;
+    --mono:"SFMono-Regular","JetBrains Mono","Cascadia Code",Consolas,"Liberation Mono",Menlo,monospace;
+    --serif:"Iowan Old Style","Palatino Linotype","Palatino","Georgia",serif;
+    --sans:"Optima","Segoe UI","Helvetica Neue",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#e8edf2; --ink-soft:#aebfcf; --paper:#0e1820; --paper-2:#132330;
+      --panel:#16242f; --panel-line:#2c4150; --accent:#3bb6d8; --accent-dk:#7fd6ee;
+      --accent-2:#e8853f; --good:#5fc78e; --good-bg:#16352a; --bad:#f08a86; --bad-bg:#3a1e1d;
+      --warn:#e6c869; --warn-bg:#352d12; --grid-line:rgba(59,182,216,.12);
+      --shadow:0 2px 4px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.5);
+    }
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+  body{
+    margin:0; font-family:var(--sans); color:var(--ink); background-color:var(--paper);
+    background-image:linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:26px 26px; line-height:1.62; font-size:17px;
+  }
+  .skip-link{ position:absolute; left:8px; top:-48px; background:var(--accent); color:#fff;
+    padding:10px 16px; border-radius:8px; z-index:1000; text-decoration:none; font-weight:700; transition:top .15s ease; }
+  .skip-link:focus{ top:8px; }
+
+  header.site{ background:linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%); color:#f3f1e7; padding:34px 20px 30px; position:relative; overflow:hidden; }
+  header.site::after{ content:""; position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px; pointer-events:none; }
+  header.site .wrap{ max-width:var(--maxw); margin:0 auto; position:relative; z-index:1; }
+  .chip{ display:inline-block; font-family:var(--mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase;
+    background:rgba(243,241,231,.14); color:#f3f1e7; padding:5px 12px; border-radius:20px; border:1px solid rgba(243,241,231,.25); }
+  header.site h1{ font-family:var(--serif); font-weight:700; font-size:clamp(1.7rem,4.4vw,2.6rem); margin:.4em 0 .2em; line-height:1.12; }
+  header.site .sub{ font-size:1.04rem; max-width:66ch; color:#e6e2d4; margin:.2em 0 1em; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:8px 22px; font-family:var(--mono); font-size:.8rem; color:#cfe0ec; }
+
+  nav.toc{ position:sticky; top:0; z-index:50; background:var(--panel); border-bottom:1px solid var(--panel-line); box-shadow:0 1px 0 rgba(0,0,0,.02); }
+  nav.toc .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 8px; display:flex; gap:2px; overflow-x:auto; scrollbar-width:thin; }
+  nav.toc a{ flex:0 0 auto; font-family:var(--mono); font-size:.76rem; letter-spacing:.03em; color:var(--ink-soft); text-decoration:none;
+    padding:12px 12px; border-bottom:3px solid transparent; white-space:nowrap; min-height:44px; display:flex; align-items:center; }
+  nav.toc a:hover{ color:var(--accent-dk); }
+  nav.toc a.active{ color:var(--accent-dk); border-bottom-color:var(--accent); font-weight:700; }
+  nav.toc a:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+
+  main{ max-width:var(--maxw); margin:0 auto; padding:26px 18px 60px; }
+  section{ scroll-margin-top:64px; margin:34px 0; }
+  h2{ font-family:var(--serif); font-size:clamp(1.35rem,3vw,1.9rem); color:var(--ink); border-bottom:2px solid var(--accent); padding-bottom:.2em; margin:.2em 0 .5em; }
+  h3{ font-family:var(--serif); font-size:1.2rem; color:var(--accent-dk); margin:1.2em 0 .3em; }
+  h4{ font-family:var(--mono); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-2); margin:1em 0 .2em; }
+  p{ margin:.6em 0; }
+  a{ color:var(--accent-dk); }
+
+  .card{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:18px 20px; margin:16px 0; box-shadow:var(--shadow); }
+  .lede{ font-size:1.05rem; }
+  .callout{ border-left:4px solid var(--accent-2); background:var(--warn-bg); padding:12px 16px; border-radius:0 8px 8px 0; margin:14px 0; }
+  .callout .h{ font-weight:700; color:var(--warn); font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; display:block; margin-bottom:3px; }
+  .analogy{ border-left:4px solid var(--accent); background:linear-gradient(180deg, var(--paper-2), var(--panel)); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; }
+  .analogy::before{ content:"\1F4A1"; position:absolute; left:14px; top:13px; font-size:1.2rem; line-height:1; }
+  .analogy .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; margin-bottom:3px; }
+  .analogy p:last-child{ margin-bottom:0; }
+  .realworld{ border:1px solid var(--panel-line); border-left:4px solid var(--accent-2); background:var(--panel); padding:14px 16px 14px 48px; border-radius:0 8px 8px 0; margin:14px 0; position:relative; box-shadow:var(--shadow); }
+  .realworld::before{ content:"\1F527"; position:absolute; left:14px; top:13px; font-size:1.15rem; line-height:1; }
+  .realworld .h{ display:block; font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin-bottom:3px; }
+  .realworld p:last-child{ margin-bottom:0; }
+
+  /* vector over-notation, font-independent (never combining marks) */
+  .vec{ position:relative; display:inline-block; }
+  .vec::after{ content:"\2192"; position:absolute; left:50%; top:-0.62em; transform:translateX(-50%) scaleX(1.2);
+    font-size:0.62em; line-height:1; font-weight:400; font-family:var(--sans), sans-serif; pointer-events:none; }
+  .dot{ position:relative; display:inline-block; }
+  .dot::after{ content:"\02D9"; position:absolute; left:50%; top:-0.72em; transform:translateX(-50%); font-size:1em; line-height:1; pointer-events:none; }
+  .ddot{ position:relative; display:inline-block; }
+  .ddot::after{ content:"\00A8"; position:absolute; left:50%; top:-0.72em; transform:translateX(-50%); font-size:1em; line-height:1; pointer-events:none; }
+
+  .eq{ font-family:var(--serif); font-size:1.12rem; text-align:center; margin:12px 0; padding:12px; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:8px; overflow-x:auto; }
+  .vle{ font-family:var(--serif); font-size:1.1rem; text-align:center; margin:12px 0; padding:11px; background:var(--paper-2); border:1px solid var(--panel-line); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; overflow-x:auto; }
+  .vle .vec{ font-weight:700; }
+  .eqn{ font-family:var(--mono); font-size:.92rem; background:#0c1c27; color:#dce9f0; border-radius:8px; padding:12px 14px; margin:10px 0; overflow-x:auto; white-space:pre; line-height:1.5; }
+  .eqn .c{ color:#ffd9a8; } .eqn .m{ color:#9fe6c4; } .eqn .k{ color:#8fc6d8; }
+  @media (prefers-color-scheme: dark){ .eqn{ background:#04121a; } }
+  .mini-eq{ font-family:var(--serif); font-size:1.03rem; background:var(--paper-2); border:1px solid var(--panel-line); border-radius:6px; padding:7px 11px; margin:8px 0; text-align:center; overflow-x:auto; }
+
+  /* problem + diagram */
+  .prob .diagram{ background:var(--panel); border:1px dashed var(--panel-line); border-radius:10px; padding:8px; margin:12px 0; }
+  .prob .cap{ font-family:var(--mono); font-size:.74rem; color:var(--ink-soft); text-align:center; margin-top:4px; }
+  svg.mech, svg.sch{ width:100%; height:auto; display:block; }
+  .gline,.wall{ stroke:var(--ink); stroke-width:2; }
+  .cl{ stroke:var(--accent); stroke-width:1; stroke-dasharray:6 4; }
+  .lk{ stroke:var(--accent-dk); stroke-linecap:round; fill:none; }
+  .lk2{ stroke:var(--accent-2); stroke-linecap:round; fill:none; }
+  .jt{ fill:var(--panel); stroke:var(--ink); stroke-width:2.5; }
+  .gnd{ fill:var(--ink); } .gnd-h{ stroke:var(--ink); stroke-width:1.5; }
+  .piston{ fill:var(--paper-2); stroke:var(--ink); stroke-width:2; }
+  .lbl{ fill:var(--ink); font:700 15px var(--serif); }
+  .dim{ fill:var(--accent-dk); font:italic 700 14px var(--serif); }
+  .dimline{ stroke:var(--accent-dk); stroke-width:1; }
+  .ang{ fill:var(--accent-dk); font:600 12px var(--mono); }
+  .ome{ fill:var(--accent-dk); font:italic 700 15px var(--serif); }
+  .inp{ stroke:var(--accent); stroke-width:2; fill:none; }
+  .load{ stroke:var(--accent-2); stroke-width:2.5; fill:none; }
+  .loadl{ fill:var(--accent-2); font:italic 700 15px var(--serif); }
+  .frc{ stroke:var(--bad); stroke-width:3; }
+  .frcl{ fill:var(--bad); font:italic 700 14px var(--serif); }
+  .ahfill{ fill:var(--accent-2); } .ahfill2{ fill:var(--accent); }
+  .gear{ fill:none; stroke:var(--accent-dk); stroke-width:2; }
+  .gear2{ fill:none; stroke:var(--accent-2); stroke-width:2; }
+  .gearfill{ fill:var(--paper-2); stroke:var(--ink); stroke-width:1.5; }
+  .shaftline{ stroke:var(--ink); stroke-width:2; }
+  .blk{ fill:var(--panel); stroke:var(--ink); stroke-width:2; }
+  .blkt{ fill:var(--ink); font:700 13px var(--sans); }
+  .flow{ stroke:var(--accent); stroke-width:2.5; fill:none; }
+
+  /* givens chips */
+  .knowns{ display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+  .kchip{ font-family:var(--mono); font-size:.76rem; padding:5px 10px; border-radius:6px; border:1px solid var(--panel-line); background:var(--paper-2); }
+  .kchip.g{ border-left:3px solid var(--good); } .kchip.u{ border-left:3px solid var(--accent-2); }
+  .phase-pill{ display:inline-block; font-family:var(--mono); font-weight:700; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; padding:5px 11px; border-radius:20px; }
+  .phase-pill.a{ background:var(--good-bg); color:var(--good); border:1px solid var(--good); }
+  .phase-pill.b{ background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn); }
+
+  /* stepper */
+  .stepper{ background:var(--panel); border:1px solid var(--panel-line); border-radius:10px; margin:14px 0; box-shadow:var(--shadow); overflow:hidden; }
+  .step-track{ padding:6px 16px 4px; }
+  .step{ animation:fade .25s ease; border-bottom:1px dashed var(--panel-line); padding:10px 0; }
+  .step:last-child{ border-bottom:none; }
+  @keyframes fade{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .step{ animation:none; } }
+  .step .st-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; text-transform:uppercase; color:var(--accent-dk); font-weight:700; display:flex; align-items:center; gap:8px; margin:.1em 0 .3em; }
+  .step p{ margin:.35em 0; font-size:.98rem; }
+  .step-controls{ display:flex; align-items:center; gap:8px; padding:10px 14px; flex-wrap:wrap; border-top:1px solid var(--panel-line); background:var(--paper-2); }
+  .step-count{ font-family:var(--mono); font-size:.78rem; color:var(--ink-soft); margin-left:auto; }
+
+  button,.btn{ font-family:var(--sans); font-size:.9rem; font-weight:600; background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 15px; min-height:44px; cursor:pointer; box-shadow:var(--shadow); }
+  button:hover,.btn:hover{ background:var(--accent-dk); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  button.secondary{ background:var(--panel); color:var(--accent-dk); border:1.5px solid var(--accent); box-shadow:none; }
+  button.secondary:hover{ background:var(--paper-2); }
+  button[disabled]{ opacity:.45; cursor:not-allowed; }
+
+  .answer{ margin:10px 0 6px; padding:14px 16px; border:2px solid var(--good); border-radius:10px; background:var(--good-bg); }
+  .answer .ans-h{ font-family:var(--mono); font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--good); display:block; margin-bottom:4px; }
+  .answer.neg{ border-color:var(--accent-2); background:var(--warn-bg); }
+  .answer.neg .ans-h{ color:var(--accent-2); }
+  .resgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-top:6px; }
+  .rc{ background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:8px 10px; font-family:var(--mono); font-size:.82rem; }
+  .rc b{ color:var(--accent-dk); }
+
+  table.tbl{ width:100%; border-collapse:collapse; margin:12px 0; font-size:.9rem; }
+  table.tbl th,table.tbl td{ border:1px solid var(--panel-line); padding:8px 10px; text-align:left; }
+  table.tbl th{ background:var(--paper-2); font-family:var(--mono); font-size:.76rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+
+  .refcard{ background:var(--panel); border:2px solid var(--ink); border-radius:12px; padding:0; margin:16px 0; overflow:hidden; }
+  .refcard .rc-head{ background:var(--ink); color:#f3f1e7; padding:12px 18px; font-family:var(--serif); font-size:1.15rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .refcard .rc-body{ padding:16px 18px; }
+  .rc-eq{ font-family:var(--serif); font-size:1.06rem; text-align:center; padding:9px; background:var(--paper-2); border-radius:8px; margin:0 0 10px; }
+
+  .gloss-search{ width:100%; max-width:420px; font-family:var(--sans); font-size:1rem; padding:10px 14px; min-height:44px; border:1.5px solid var(--panel-line); border-radius:8px; background:var(--panel); color:var(--ink); margin:6px 0 12px; }
+  .gloss-search:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  dl.gloss{ margin:0; } dl.gloss > div{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:8px 0; background:var(--panel); }
+  dl.gloss dt{ font-family:var(--serif); font-weight:700; font-size:1.04rem; color:var(--accent-dk); }
+  dl.gloss dd{ margin:.25em 0 0; font-size:.95rem; }
+  .gloss-none{ color:var(--ink-soft); font-style:italic; }
+
+  .res-cat{ font-family:var(--mono); font-size:.76rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-2); font-weight:700; margin:14px 0 4px; }
+  .res-list{ list-style:none; padding:0; margin:0; }
+  .res-list li{ border:1px solid var(--panel-line); border-radius:8px; padding:11px 14px; margin:7px 0; background:var(--panel); }
+  .res-list a{ font-weight:700; }
+  .ext::after{ content:" \2197"; font-size:.85em; color:var(--accent-2); }
+  .res-list .desc{ display:block; font-size:.88rem; color:var(--ink-soft); margin-top:2px; }
+
+  .obj{ list-style:none; padding:0; margin:0; }
+  .obj li{ padding:8px 8px 8px 34px; position:relative; margin:6px 0; }
+  .obj li::before{ content:"\2713"; position:absolute; left:8px; top:8px; color:var(--good); font-weight:700; }
+
+  .progress-dock{ position:sticky; bottom:0; z-index:40; background:var(--panel); border-top:1px solid var(--panel-line); padding:6px 0; }
+  .progress-dock .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:12px; }
+  .progress-dock label{ font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); white-space:nowrap; }
+  #readpct{ font-family:var(--mono); font-size:.72rem; color:var(--accent-dk); }
+  progress{ flex:1; height:10px; accent-color:var(--accent); }
+
+  footer{ background:var(--ink); color:#cfe0ec; padding:22px 18px; text-align:center; font-size:.86rem; }
+  footer .program{ color:#f3f1e7; font-weight:700; }
+  footer a{ color:#9fd8ee; }
+  .note{ font-size:.86rem; color:var(--ink-soft); }
+  hr.soft{ border:none; border-top:1px dashed var(--panel-line); margin:18px 0; }
+  .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 0; }
+
+  @media (max-width:760px){ .grid2{ grid-template-columns:1fr; } }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+
+  @media print{
+    nav.toc,.progress-dock,.step-controls,.toolbar,button,.gloss-search,.skip-link{ display:none !important; }
+    body{ background:#fff; font-size:12px; }
+    .step[hidden]{ display:block !important; }
+    .stepper,.card,.refcard,.example{ box-shadow:none; break-inside:avoid; }
+    .eqn{ background:#eee; color:#111; }
+    a[href^="http"]::after{ content:" (" attr(href) ")"; font-size:.8em; color:#555; word-break:break-all; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <span class="chip">ENGI 216 · Dynamics &amp; Kinematics of Machines</span>
+    <h1>Cumulative Worked Problems: From Kinematics to Force Analysis</h1>
+    <p class="sub">Six problems, each carried the whole way across the course &mdash; the front-half kinematic analysis (vector loop, rolling contacts &amp; gear trains, kinematic coefficients) solved first, then the <em>same mechanism</em> taken through the back-half inverse-dynamics force analysis. Every figure is drawn to scale; every number is worked out in full.</p>
+    <div class="meta-row">
+      <span>Stani&#353;i&#263; Vector-Loop &amp; Kinematic-Coefficient framework</span>
+      <span>Chapters 2 &middot; 3 &middot; 4 &rarr; 5 &middot; 7</span>
+      <span>Fully worked step-by-step</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Section navigation">
+  <div class="wrap">
+    <a href="#start">How to use</a>
+    <a href="#p1">1 · Four-bar</a>
+    <a href="#p2">2 · Slider-crank</a>
+    <a href="#p3">3 · Gear train</a>
+    <a href="#p4">4 · Coefficients</a>
+    <a href="#p5">5 · Inverted</a>
+    <a href="#p6">6 · Geared press</a>
+    <a href="#reference">Method card</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#resources">Resources</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<section id="start" aria-labelledby="start-h">
+  <h2 id="start-h">How these problems work</h2>
+  <div class="card lede">
+    <p>Each problem below has two phases that mirror the two halves of ENGI&nbsp;216:</p>
+    <p><span class="phase-pill a">Phase A · Kinematics</span> &nbsp; Close the vector loop, then differentiate it once for velocity and twice for acceleration &mdash; or, for the gear train, chase the train value. This tells us <em>how every part moves</em>: the angular velocities, angular accelerations, and the acceleration of every mass center.</p>
+    <p><span class="phase-pill b">Phase B · Kinetics (inverse dynamics)</span> &nbsp; With the motion known, we draw free-body diagrams and apply Newton&ndash;Euler (&Sigma;<span class="vec">F</span>&nbsp;=&nbsp;m&#8201;<span class="vec">a</span><sub>G</sub> and &Sigma;M<sub>G</sub>&nbsp;=&nbsp;I<sub>G</sub>&#945;) to <em>every</em> moving link. That yields the pin/tooth forces and the input torque needed to produce exactly that motion.</p>
+    <div class="callout">
+      <span class="h">The one discipline that saves you</span>
+      <p><strong>Keep every quantity in one consistent unit system before you multiply anything.</strong> Every problem here is worked in strict SI (metres, kilograms, newtons, radians). The single most common error on this material is a silent unit slip &mdash; the classic <span style="font-family:var(--mono)">in&middot;lbf</span> vs. <span style="font-family:var(--mono)">ft&middot;lbf</span> mistake &mdash; that changes an answer by a factor of twelve and passes every &ldquo;does the algebra look right&rdquo; check. When in doubt, write the units next to the number.</p>
+    </div>
+    <p class="note"><strong>Sign convention:</strong> angles measured CCW from the +x axis; &omega; and &alpha; positive CCW; forces resolved into (x, y) components. Gravity is neglected in the high-speed problems (inertia dominates) and that assumption is stated where it is used.</p>
+    <div class="toolbar">
+      <button id="printBtn" class="secondary" type="button">Print / Save as PDF</button>
+      <button id="revealAllBtn" class="secondary" type="button">Reveal every solution</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROBLEM 1 ============================ -->
+<section id="p1" aria-labelledby="p1-h">
+  <h2 id="p1-h">Problem 1 &middot; Four-bar linkage &mdash; vector loop &rarr; force analysis</h2>
+  <div class="prob card">
+    <p>A planar four-bar linkage drives an oscillating output arm. The crank turns at a steady speed. Find the complete state of motion at the instant shown, then the pin forces and the motor torque required to sustain that motion against a resisting load on the output.</p>
+    <div class="diagram"><svg viewBox="0 0 640 400" role="img" class="mech" aria-label="Four-bar linkage: ground pivots O2 and O4 on a horizontal frame line r1; crank r2 at 60 degrees from O2 to pin A; coupler r3 from A to B; rocker r4 from O4 to B. Input angular velocity omega-2 CCW at the crank; resisting load torque T4 on the rocker." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill"/></marker><marker id="ahr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill2"/></marker></defs>
+<line class="gline" x1="174.0" y1="287.6" x2="466.0" y2="287.6" />
+<line class="lk" x1="174.0" y1="287.6" x2="222.7" y2="203.3" stroke-width="5" />
+<line class="lk2" x1="222.7" y1="203.3" x2="458.9" y2="112.5" stroke-width="5" />
+<line class="lk" x1="466.0" y1="287.6" x2="458.9" y2="112.5" stroke-width="5" />
+<circle class="jt" cx="174.0" cy="287.6" r="6.0" />
+<text class="lbl" x="152.0" y="291.6">O&#8322;</text>
+<circle class="jt" cx="466.0" cy="287.6" r="6.0" />
+<text class="lbl" x="474.0" y="305.6">O&#8324;</text>
+<circle class="jt" cx="222.7" cy="203.3" r="6.0" />
+<text class="lbl" x="218.7" y="191.3">A</text>
+<circle class="jt" cx="458.9" cy="112.5" r="6.0" />
+<text class="lbl" x="466.9" y="106.5">B</text>
+<polygon class="gnd" points="174.0,287.6 189.0,302.6 159.0,302.6"/>
+<line class="gnd-h" x1="189.0" y1="302.6" x2="159.0" y2="302.6"/>
+<polygon class="gnd" points="466.0,287.6 481.0,302.6 451.0,302.6"/>
+<line class="gnd-h" x1="481.0" y1="302.6" x2="451.0" y2="302.6"/>
+<text class="dim" x="178.3" y="243.5">r&#8322;</text>
+<text class="dim" x="342.8" y="149.9">r&#8323;</text>
+<text class="dim" x="472.4" y="200.1">r&#8324;</text>
+<text class="dim" x="314.0" y="307.6">r&#8321;</text>
+<path class="inp" d="M 208.0 287.6 A 34 34 0 0 0 191.0 258.2" marker-end="url(#ahr)" fill="none"/>
+<text class="ang" x="214.0" y="269.6">&#952;&#8322;=60&#176;</text>
+<text class="ome" x="236.7" y="213.3">&#969;&#8322;</text>
+<path class="load" d="M 478.9 108.5 A 20 20 0 1 1 456.9 90.5" marker-end="url(#ahr)" fill="none"/>
+<text class="loadl" x="482.9" y="130.5">T&#8324;</text>
+</svg><p class="cap">Figure 1 &mdash; Four-bar linkage, drawn to scale at &#952;&#8322;&nbsp;=&nbsp;60&deg;.</p></div>
+    <h4>Given</h4>
+    <div class="knowns">
+      <span class="kchip g">r&#8321; = 0.30 m (ground O&#8322;O&#8324;)</span>
+      <span class="kchip g">r&#8322; = 0.10 m (crank)</span>
+      <span class="kchip g">r&#8323; = 0.26 m (coupler)</span>
+      <span class="kchip g">r&#8324; = 0.18 m (rocker)</span>
+      <span class="kchip g">&#952;&#8322; = 60&deg;</span>
+      <span class="kchip g">&#969;&#8322; = 20 rad/s CCW</span>
+      <span class="kchip g">&#945;&#8322; = 0</span>
+      <span class="kchip g">m&#8322;,m&#8323;,m&#8324; = 0.8, 1.5, 1.1 kg</span>
+      <span class="kchip g">uniform slender links (G at midpoints)</span>
+      <span class="kchip g">T&#8324; = 20 N&middot;m resisting on rocker</span>
+      <span class="kchip u">find &#952;&#8323;,&#952;&#8324;, &#969;'s, &#945;'s, pin forces, T&#8322;</span>
+    </div>
+    <div class="analogy"><span class="h">Analogy &mdash; four people holding hands in a ring</span><p>Four people stand in a loop holding hands and nobody lets go. Move one person&rsquo;s arm (the crank) and everyone else must shift to keep the ring closed. You command exactly one arm; the other three positions follow automatically. That single command is the one degree of freedom, and &ldquo;keep the ring closed&rdquo; is precisely the vector-loop equation.</p></div>
+    <div class="realworld"><span class="h">Real-world &mdash; where this exact linkage shows up</span><p>Windshield-wiper drives, oscillating desk fans, the bucket-leveling linkage on a front loader, and locomotive coupling rods are all four-bars. The crank is a steady motor input; the rocker is the useful oscillating output; the coupler ties them together and traces the rich curves that make four-bars so useful.</p></div>
+  </div>
+
+  <div class="stepper" data-key="p1">
+    <div class="step-track">
+      <div class="step" data-i="0">
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Close the loop (position)</div>
+        <p>Write the loop <span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> = <span class="vec">r</span><sub>1</sub> + <span class="vec">r</span><sub>4</sub> and split into components:</p>
+        <div class="vle">r&#8322;cos&#952;&#8322; + r&#8323;cos&#952;&#8323; = r&#8321; + r&#8324;cos&#952;&#8324; &nbsp;&nbsp;&nbsp; r&#8322;sin&#952;&#8322; + r&#8323;sin&#952;&#8323; = r&#8324;sin&#952;&#8324;</div>
+        <p>Two equations, two unknowns (&#952;&#8323;, &#952;&#8324;). Solving by Newton&ndash;Raphson from an open-configuration guess:</p>
+        <div class="answer"><span class="ans-h">Position</span><span class="mini-eq">&#952;&#8323; = 21.02&deg; &nbsp;&nbsp; &#952;&#8324; = 92.32&deg;</span></div>
+      </div>
+      <div class="step" data-i="1" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Differentiate once (velocity)</div>
+        <p>Differentiating the loop with respect to time gives a linear system in (&#969;&#8323;, &#969;&#8324;). The coefficient matrix is the <strong>Jacobian J</strong>:</p>
+        <div class="eqn">J = [ -r&#8323; sin&#952;&#8323;   +r&#8324; sin&#952;&#8324; ]      J&middot;[&#969;&#8323;; &#969;&#8324;] = [ r&#8322;&#969;&#8322; sin&#952;&#8322; ]
+    [ +r&#8323; cos&#952;&#8323;   -r&#8324; cos&#952;&#8324; ]                    [ -r&#8322;&#969;&#8322; cos&#952;&#8322; ]</div>
+        <div class="answer"><span class="ans-h">Angular velocities</span><span class="mini-eq">&#969;&#8323; = &minus;4.342 rad/s &nbsp;&nbsp; &#969;&#8324; = +7.379 rad/s</span></div>
+        <p class="note">The rocker turns CCW; the coupler turns CW at this instant.</p>
+      </div>
+      <div class="step" data-i="2" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 3 &mdash; Differentiate twice (acceleration)</div>
+        <p>Differentiate again. Here is the payoff you learned in Chapter&nbsp;2: <strong>the matrix on the left is the same J</strong> &mdash; only the right-hand side changes, now carrying the &omega;&sup2; centripetal terms (with &alpha;&#8322;&nbsp;=&nbsp;0):</p>
+        <div class="eqn">J&middot;[&#945;&#8323;; &#945;&#8324;] = [ r&#8322;&#969;&#8322;&sup2;cos&#952;&#8322; + r&#8323;&#969;&#8323;&sup2;cos&#952;&#8323; &minus; r&#8324;&#969;&#8324;&sup2;cos&#952;&#8324; ]
+          [ r&#8322;&#969;&#8322;&sup2;sin&#952;&#8322; + r&#8323;&#969;&#8323;&sup2;sin&#952;&#8323; &minus; r&#8324;&#969;&#8324;&sup2;sin&#952;&#8324; ]</div>
+        <div class="answer"><span class="ans-h">Angular accelerations</span><span class="mini-eq">&#945;&#8323; = +103.8 rad/s&sup2; &nbsp;&nbsp; &#945;&#8324; = +192.7 rad/s&sup2;</span></div>
+        <div class="analogy"><span class="h">Analogy &mdash; the slope stays put, only the terrain shifts</span><p>Reusing J is like keeping the same map of the hillside for both the &ldquo;which way is downhill&rdquo; question and the &ldquo;how fast does the slope change&rdquo; question. The geometry of the linkage sets J; velocity and acceleration are just two different loads applied to that same geometry. Factor J once, reuse it &mdash; exactly what a numerical solver does.</p></div>
+      </div>
+      <div class="step" data-i="3" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 4 &mdash; Acceleration of each mass center</div>
+        <p>With every &omega; and &alpha; known, rigid-body kinematics gives the acceleration of each link&rsquo;s center of mass (G at the midpoints). These are what the inertia forces will act on:</p>
+        <table class="tbl"><thead><tr><th>Link</th><th>a<sub>Gx</sub> (m/s&sup2;)</th><th>a<sub>Gy</sub> (m/s&sup2;)</th><th>|a<sub>G</sub>| (m/s&sup2;)</th></tr></thead>
+        <tbody>
+        <tr><td>2 crank</td><td>&minus;10.00</td><td>&minus;17.32</td><td>20.0</td></tr>
+        <tr><td>3 coupler</td><td>&minus;27.13</td><td>&minus;22.92</td><td>35.5</td></tr>
+        <tr><td>4 rocker</td><td>&minus;17.13</td><td>&minus;5.60</td><td>18.0</td></tr>
+        </tbody></table>
+      </div>
+      <div class="step" data-i="4" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Count equations vs. unknowns</div>
+        <p>Three moving links &times; three planar equations each = <strong>9 equations</strong>. Unknowns: the pin forces <span class="vec">F</span><sub>12</sub>, <span class="vec">F</span><sub>32</sub>, <span class="vec">F</span><sub>43</sub>, <span class="vec">F</span><sub>14</sub> (8 scalar components) plus the drive torque T&#8322; = <strong>9 unknowns</strong>. Determinate &mdash; solvable exactly.</p>
+        <div class="realworld"><span class="h">Real-world &mdash; the count is the go/no-go gate</span><p>Before any solver (MATLAB, ANSYS) will invert a matrix, it checks that the equation count matches the unknown count. Get it wrong and you either have no solution or infinitely many &mdash; both useless for choosing a real motor. Counting first is the same discipline a structural engineer runs before trusting a truss.</p></div>
+      </div>
+      <div class="step" data-i="5" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 6 &mdash; Newton&ndash;Euler on every link</div>
+        <p>For each link i: &Sigma;F<sub>x</sub> = m&#8201;a<sub>Gx</sub>, &Sigma;F<sub>y</sub> = m&#8201;a<sub>Gy</sub>, and moments about G<sub>i</sub>: &Sigma;M<sub>Gi</sub> = I<sub>Gi</sub>&#945;<sub>i</sub>. Newton&rsquo;s third law couples adjacent links (<span class="vec">F</span><sub>23</sub> = &minus;<span class="vec">F</span><sub>32</sub>, etc.). The 20&nbsp;N&middot;m load enters link&nbsp;4&rsquo;s moment equation opposing &#969;&#8324;. Assemble the 9&times;9 system and solve.</p>
+        <p class="note">Slender-rod inertias: I<sub>G2</sub>=6.67&times;10&#8315;&#8308;, I<sub>G3</sub>=8.45&times;10&#8315;&sup3;, I<sub>G4</sub>=2.97&times;10&#8315;&sup3; kg&middot;m&sup2;.</p>
+      </div>
+      <div class="step" data-i="6" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 7 &mdash; Results</div>
+        <div class="answer"><span class="ans-h">Pin forces &amp; drive torque</span>
+          <div class="resgrid">
+            <div class="rc"><b>|F&#8321;&#8322;|</b> = 192.9 N<br>(&minus;171.0, &minus;89.5)</div>
+            <div class="rc"><b>|F&#8323;&#8322;|</b> = 179.6 N<br>(163.0, 75.6)</div>
+            <div class="rc"><b>|F&#8324;&#8323;|</b> = 129.0 N<br>(122.3, 41.2)</div>
+            <div class="rc"><b>|F&#8321;&#8324;|</b> = 109.2 N<br>(103.4, 35.1)</div>
+            <div class="rc"><b>T&#8322;</b> = +10.33 N&middot;m</div>
+          </div>
+        </div>
+        <p><strong>Interpretation.</strong> T&#8322; is positive, so the motor must <em>drive</em> the crank with 10.33&nbsp;N&middot;m to push the 20&nbsp;N&middot;m load and accelerate the links. Notice the bearing at O&#8322; carries ~193&nbsp;N even though the mechanism weighs only a few newtons &mdash; at 20&nbsp;rad/s the loads are pure inertia, not gravity. That is exactly why we neglected weight here.</p>
+      </div>
+    </div>
+    <div class="step-controls">
+      <button class="btn prev" type="button">&#8249; Prev</button>
+      <button class="btn next" type="button">Next &#8250;</button>
+      <button class="btn secondary reveal" type="button">Reveal all</button>
+      <button class="btn secondary reset" type="button">Reset</button>
+      <span class="step-count"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROBLEM 2 ============================ -->
+<section id="p2" aria-labelledby="p2-h">
+  <h2 id="p2-h">Problem 2 &middot; Offset slider-crank engine &mdash; vector loop &rarr; gas-force analysis</h2>
+  <div class="prob card">
+    <p>A single-cylinder engine runs at roughly 1910&nbsp;rpm. At the crank angle shown, combustion pressure pushes on the piston. Find the piston motion, then the bearing forces and the crank torque produced &mdash; the numbers a designer needs to size the crankshaft bearings and read the torque curve.</p>
+    <div class="diagram"><svg viewBox="0 0 680 340" role="img" class="mech" aria-label="Offset slider-crank engine: crank r2 at 45 degrees from O2 to pin A, connecting rod r3 from A to piston pin B; piston slides in a horizontal cylinder whose centerline is offset a distance e above O2. Combustion gas force pushes the piston toward the crank." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill"/></marker><marker id="ahr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill2"/></marker></defs>
+<line class="wall" x1="74.4" y1="102.6" x2="615.8" y2="102.6" />
+<line class="wall" x1="74.4" y1="176.1" x2="615.8" y2="176.1" />
+<line class="cl" x1="135.7" y1="139.4" x2="585.1" y2="139.4" />
+<line class="lk" x1="94.9" y1="180.2" x2="167.1" y2="108.0" stroke-width="5" />
+<line class="lk2" x1="167.1" y1="108.0" x2="533.5" y2="139.4" stroke-width="5" />
+<rect class="piston" x="527.5" y="122.4" width="30" height="34" rx="3"/>
+<circle class="jt" cx="94.9" cy="180.2" r="6.0" />
+<text class="lbl" x="72.9" y="184.2">O&#8322;</text>
+<circle class="jt" cx="167.1" cy="108.0" r="6.0" />
+<text class="lbl" x="161.1" y="96.0">A</text>
+<circle class="jt" cx="533.5" cy="139.4" r="6.0" />
+<text class="lbl" x="517.5" y="119.4">B</text>
+<polygon class="gnd" points="94.9,180.2 109.9,195.2 79.9,195.2"/>
+<line class="gnd-h" x1="109.9" y1="195.2" x2="79.9" y2="195.2"/>
+<text class="dim" x="113.0" y="140.1">r&#8322;</text>
+<text class="dim" x="350.3" y="113.7">r&#8323;</text>
+<text class="dim" x="78.9" y="137.4">e</text>
+<line class="dimline" x1="82.6" y1="180.2" x2="82.6" y2="139.4" />
+<path class="inp" d="M 124.9 180.2 A 30 30 0 0 0 116.1 159.0" marker-end="url(#ahr)" fill="none"/>
+<text class="ang" x="128.9" y="164.2">&#952;&#8322;=45&#176;</text>
+<text class="ome" x="179.1" y="118.0">&#969;&#8322;</text>
+<line class="frc" x1="645.8" y1="139.4" x2="558.0" y2="139.4" marker-end="url(#ah)"/>
+<text class="frcl" x="651.8" y="131.4">F&#7503;&#8323;&#8347;</text>
+</svg><p class="cap">Figure 2 &mdash; Offset slider-crank at &#952;&#8322;&nbsp;=&nbsp;45&deg;; cylinder centreline offset e above the crank axis.</p></div>
+    <h4>Given</h4>
+    <div class="knowns">
+      <span class="kchip g">r&#8322; = 0.05 m (crank)</span>
+      <span class="kchip g">r&#8323; = 0.18 m (rod)</span>
+      <span class="kchip g">e = 0.02 m (offset)</span>
+      <span class="kchip g">&#952;&#8322; = 45&deg;</span>
+      <span class="kchip g">&#969;&#8322; = 200 rad/s (&asymp;1910 rpm)</span>
+      <span class="kchip g">&#945;&#8322; = 0</span>
+      <span class="kchip g">m&#8322;,m&#8323;,m&#8324; = 0.9, 0.6, 0.5 kg</span>
+      <span class="kchip g">F<sub>gas</sub> = 8000 N (pushes piston toward crank)</span>
+      <span class="kchip u">find piston x,v,a; bearing forces; T&#8322;</span>
+    </div>
+    <div class="analogy"><span class="h">Analogy &mdash; a bicycle pump turned by a wheel</span><p>Circle the crank and the piston shuttles in and out of the cylinder; the connecting rod converts &ldquo;going around&rdquo; into &ldquo;going in and out.&rdquo; The <em>offset</em> just mounts the cylinder slightly off the crank centreline &mdash; real engines do this to tune the side-thrust the piston presses into the cylinder wall.</p></div>
+    <div class="realworld"><span class="h">Real-world &mdash; why the acceleration is enormous</span><p>At 200&nbsp;rad/s the piston sees roughly 1600&nbsp;m/s&sup2; &mdash; about 160&nbsp;g. That inertia is why engine parts are made light and why balancing matters: the shaking forces grow with the square of rpm. The wall force we compute is the source of piston-slap noise.</p></div>
+  </div>
+
+  <div class="stepper" data-key="p2">
+    <div class="step-track">
+      <div class="step" data-i="0">
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Position from the loop</div>
+        <p>Loop <span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> = x&#8201;<span class="vec">i</span> + e&#8201;<span class="vec">j</span>. The y-component alone fixes the rod angle:</p>
+        <div class="vle">sin&#952;&#8323; = (e &minus; r&#8322;sin&#952;&#8322;) / r&#8323; &nbsp;&rarr;&nbsp; x = r&#8322;cos&#952;&#8322; + r&#8323;cos&#952;&#8323;</div>
+        <div class="answer"><span class="ans-h">Position</span><span class="mini-eq">&#952;&#8323; = &minus;4.89&deg; &nbsp;&nbsp; x = 0.2147 m (214.7 mm)</span></div>
+      </div>
+      <div class="step" data-i="1" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Velocity</div>
+        <p>Differentiate: the y-equation gives &#969;&#8323; directly, then the x-equation gives the piston velocity.</p>
+        <div class="mini-eq">&#969;&#8323; = &minus;(r&#8322;cos&#952;&#8322;&#8201;&#969;&#8322;)&#8202;/&#8202;(r&#8323;cos&#952;&#8323;) &nbsp;&nbsp; <span class="dot">x</span> = &minus;r&#8322;&#969;&#8322;sin&#952;&#8322; &minus; r&#8323;&#969;&#8323;sin&#952;&#8323;</div>
+        <div class="answer"><span class="ans-h">Velocity</span><span class="mini-eq">&#969;&#8323; = &minus;39.43 rad/s &nbsp;&nbsp; piston <span class="dot">x</span> = &minus;7.68 m/s</span></div>
+      </div>
+      <div class="step" data-i="2" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 3 &mdash; Acceleration</div>
+        <p>Differentiate once more (with &#945;&#8322;&nbsp;=&nbsp;0):</p>
+        <div class="answer"><span class="ans-h">Acceleration</span><span class="mini-eq">&#945;&#8323; = +7752 rad/s&sup2; &nbsp;&nbsp; piston <span class="ddot">x</span> = &minus;1574 m/s&sup2;</span></div>
+        <p>Mass-center accelerations: a<sub>G2</sub>&nbsp;=&nbsp;(&minus;707, &minus;707), a<sub>G3</sub>&nbsp;=&nbsp;(&minus;1494, &minus;707), a<sub>G4</sub>&nbsp;=&nbsp;(&minus;1574, 0) m/s&sup2;. The piston&rsquo;s inertia force alone is m&#8324;|a|&nbsp;&asymp;&nbsp;787&nbsp;N &mdash; before the gas even acts.</p>
+      </div>
+      <div class="step" data-i="3" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Free bodies &amp; the wall force</div>
+        <p>Unknowns: pin forces <span class="vec">F</span><sub>12</sub>, <span class="vec">F</span><sub>32</sub>, <span class="vec">F</span><sub>43</sub> (6 components), the cylinder-wall normal N on the piston (1, perpendicular to the bore), and T&#8322; = <strong>8 unknowns</strong>. Equations: crank (3) + rod (3) + piston (2 force equations) = <strong>8</strong>. The known 8000&nbsp;N gas force moves to the right-hand side of the piston equations.</p>
+      </div>
+      <div class="step" data-i="4" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Solve &amp; interpret the sign</div>
+        <div class="answer neg"><span class="ans-h">Bearing forces &amp; crank torque</span>
+          <div class="resgrid">
+            <div class="rc"><b>|F&#8321;&#8322;|</b> = 5874 N</div>
+            <div class="rc"><b>|F&#8323;&#8322;|</b> = 6375 N</div>
+            <div class="rc"><b>|F&#8324;&#8323;|</b> = 7226 N</div>
+            <div class="rc"><b>wall N</b> = 437 N</div>
+            <div class="rc"><b>T&#8322;</b> = &minus;253.8 N&middot;m</div>
+          </div>
+        </div>
+        <p><strong>Read the negative torque carefully.</strong> T&#8322; being negative means the crank does <em>not</em> need driving here &mdash; the gas force is doing work <em>on</em> the shaft. This is the power stroke: the engine is delivering 253.8&nbsp;N&middot;m to the flywheel/load at this instant. A positive result would have meant the shaft must be pushed (compression or exhaust stroke). The 6&ndash;7&nbsp;kN pin forces combine gas load and inertia &mdash; that is what the big-end bearing must survive.</p>
+        <div class="realworld"><span class="h">Real-world &mdash; the torque curve</span><p>Sweep &#952;&#8322; through a full turn and this T&#8322; traces the engine&rsquo;s instantaneous torque curve. Its average over the cycle, times rpm, is the shaft power. The wildly varying instantaneous value is exactly why engines need a flywheel to smooth delivery.</p></div>
+      </div>
+    </div>
+    <div class="step-controls">
+      <button class="btn prev" type="button">&#8249; Prev</button>
+      <button class="btn next" type="button">Next &#8250;</button>
+      <button class="btn secondary reveal" type="button">Reveal all</button>
+      <button class="btn secondary reset" type="button">Reset</button>
+      <span class="step-count"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROBLEM 3 ============================ -->
+<section id="p3" aria-labelledby="p3-h">
+  <h2 id="p3-h">Problem 3 &middot; Compound gear train &mdash; rolling contact &rarr; torque &amp; tooth loads</h2>
+  <div class="prob card">
+    <p>A motor accelerates a heavy load through a two-stage compound gear train. This is the &ldquo;rolling contact&rdquo; front half (Chapter&nbsp;3) meeting inverse dynamics: the mesh replaces the pin joint, and the tangential tooth load replaces the bearing force. Find the required motor torque and the load carried by each mesh.</p>
+    <div class="diagram"><svg viewBox="0 0 660 360" role="img" class="sch" xmlns="http://www.w3.org/2000/svg" aria-label="Compound gear train, exploded schematic: input gear 2 with 20 teeth meshes gear 3 with 60 teeth; gear 3 and gear 4 with 18 teeth are rigidly fixed on a common intermediate shaft shown as a horizontal bar; gear 4 meshes output gear 5 with 54 teeth carrying the load. Input torque and angular acceleration act on gear 2; the resisting load torque acts on gear 5.">
+<defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill2"/></marker><marker id="ah3l" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill"/></marker></defs>
+<line class="shaftline" x1="155.0" y1="180.0" x2="276.4" y2="180.0" stroke-width="6" stroke-linecap="round"/>
+<circle class="gear" cx="155.0" cy="180.0" r="67.2" stroke-dasharray="4 3"/>
+<circle class="gearfill" cx="155.0" cy="180.0" r="10.1"/>
+<line class="gear" x1="219.2" y1="180.0" x2="225.2" y2="180.0" stroke-width="1.3"/>
+<line class="gear" x1="217.8" y1="193.3" x2="223.7" y2="194.6" stroke-width="1.3"/>
+<line class="gear" x1="213.6" y1="206.1" x2="219.1" y2="208.6" stroke-width="1.3"/>
+<line class="gear" x1="206.9" y1="217.7" x2="211.8" y2="221.3" stroke-width="1.3"/>
+<line class="gear" x1="198.0" y1="227.7" x2="202.0" y2="232.2" stroke-width="1.3"/>
+<line class="gear" x1="187.1" y1="235.6" x2="190.1" y2="240.8" stroke-width="1.3"/>
+<line class="gear" x1="174.8" y1="241.1" x2="176.7" y2="246.8" stroke-width="1.3"/>
+<line class="gear" x1="161.7" y1="243.8" x2="162.3" y2="249.8" stroke-width="1.3"/>
+<line class="gear" x1="148.3" y1="243.8" x2="147.7" y2="249.8" stroke-width="1.3"/>
+<line class="gear" x1="135.2" y1="241.1" x2="133.3" y2="246.8" stroke-width="1.3"/>
+<line class="gear" x1="122.9" y1="235.6" x2="119.9" y2="240.8" stroke-width="1.3"/>
+<line class="gear" x1="112.0" y1="227.7" x2="108.0" y2="232.2" stroke-width="1.3"/>
+<line class="gear" x1="103.1" y1="217.7" x2="98.2" y2="221.3" stroke-width="1.3"/>
+<line class="gear" x1="96.4" y1="206.1" x2="90.9" y2="208.6" stroke-width="1.3"/>
+<line class="gear" x1="92.2" y1="193.3" x2="86.3" y2="194.6" stroke-width="1.3"/>
+<line class="gear" x1="90.8" y1="180.0" x2="84.8" y2="180.0" stroke-width="1.3"/>
+<line class="gear" x1="92.2" y1="166.7" x2="86.3" y2="165.4" stroke-width="1.3"/>
+<line class="gear" x1="96.4" y1="153.9" x2="90.9" y2="151.4" stroke-width="1.3"/>
+<line class="gear" x1="103.1" y1="142.3" x2="98.2" y2="138.7" stroke-width="1.3"/>
+<line class="gear" x1="112.0" y1="132.3" x2="108.0" y2="127.8" stroke-width="1.3"/>
+<line class="gear" x1="122.9" y1="124.4" x2="119.9" y2="119.2" stroke-width="1.3"/>
+<line class="gear" x1="135.2" y1="118.9" x2="133.3" y2="113.2" stroke-width="1.3"/>
+<line class="gear" x1="148.3" y1="116.2" x2="147.7" y2="110.2" stroke-width="1.3"/>
+<line class="gear" x1="161.7" y1="116.2" x2="162.3" y2="110.2" stroke-width="1.3"/>
+<line class="gear" x1="174.8" y1="118.9" x2="176.7" y2="113.2" stroke-width="1.3"/>
+<line class="gear" x1="187.1" y1="124.4" x2="190.1" y2="119.2" stroke-width="1.3"/>
+<line class="gear" x1="198.0" y1="132.3" x2="202.0" y2="127.8" stroke-width="1.3"/>
+<line class="gear" x1="206.9" y1="142.3" x2="211.8" y2="138.7" stroke-width="1.3"/>
+<line class="gear" x1="213.6" y1="153.9" x2="219.1" y2="151.4" stroke-width="1.3"/>
+<line class="gear" x1="217.8" y1="166.7" x2="223.7" y2="165.4" stroke-width="1.3"/>
+<circle class="gear" cx="155.0" cy="90.4" r="22.4" stroke-dasharray="4 3"/>
+<circle class="gearfill" cx="155.0" cy="90.4" r="6.0"/>
+<line class="gear" x1="174.4" y1="90.4" x2="180.4" y2="90.4" stroke-width="1.3"/>
+<line class="gear" x1="173.5" y1="96.4" x2="179.2" y2="98.2" stroke-width="1.3"/>
+<line class="gear" x1="170.7" y1="101.8" x2="175.5" y2="105.3" stroke-width="1.3"/>
+<line class="gear" x1="166.4" y1="106.1" x2="169.9" y2="110.9" stroke-width="1.3"/>
+<line class="gear" x1="161.0" y1="108.9" x2="162.8" y2="114.6" stroke-width="1.3"/>
+<line class="gear" x1="155.0" y1="109.8" x2="155.0" y2="115.8" stroke-width="1.3"/>
+<line class="gear" x1="149.0" y1="108.9" x2="147.2" y2="114.6" stroke-width="1.3"/>
+<line class="gear" x1="143.6" y1="106.1" x2="140.1" y2="110.9" stroke-width="1.3"/>
+<line class="gear" x1="139.3" y1="101.8" x2="134.5" y2="105.3" stroke-width="1.3"/>
+<line class="gear" x1="136.5" y1="96.4" x2="130.8" y2="98.2" stroke-width="1.3"/>
+<line class="gear" x1="135.6" y1="90.4" x2="129.6" y2="90.4" stroke-width="1.3"/>
+<line class="gear" x1="136.5" y1="84.4" x2="130.8" y2="82.6" stroke-width="1.3"/>
+<line class="gear" x1="139.3" y1="79.0" x2="134.5" y2="75.5" stroke-width="1.3"/>
+<line class="gear" x1="143.6" y1="74.7" x2="140.1" y2="69.9" stroke-width="1.3"/>
+<line class="gear" x1="149.0" y1="71.9" x2="147.2" y2="66.2" stroke-width="1.3"/>
+<line class="gear" x1="155.0" y1="71.0" x2="155.0" y2="65.0" stroke-width="1.3"/>
+<line class="gear" x1="161.0" y1="71.9" x2="162.8" y2="66.2" stroke-width="1.3"/>
+<line class="gear" x1="166.4" y1="74.7" x2="169.9" y2="69.9" stroke-width="1.3"/>
+<line class="gear" x1="170.7" y1="79.0" x2="175.5" y2="75.5" stroke-width="1.3"/>
+<line class="gear" x1="173.5" y1="84.4" x2="179.2" y2="82.6" stroke-width="1.3"/>
+<circle class="gear2" cx="276.4" cy="180.0" r="20.2" stroke-dasharray="4 3"/>
+<circle class="gearfill" cx="276.4" cy="180.0" r="6.0"/>
+<line class="gear2" x1="293.5" y1="180.0" x2="299.5" y2="180.0" stroke-width="1.3"/>
+<line class="gear2" x1="292.5" y1="185.9" x2="298.1" y2="187.9" stroke-width="1.3"/>
+<line class="gear2" x1="289.5" y1="191.0" x2="294.1" y2="194.9" stroke-width="1.3"/>
+<line class="gear2" x1="284.9" y1="194.9" x2="287.9" y2="200.1" stroke-width="1.3"/>
+<line class="gear2" x1="279.3" y1="196.9" x2="280.4" y2="202.8" stroke-width="1.3"/>
+<line class="gear2" x1="273.4" y1="196.9" x2="272.3" y2="202.8" stroke-width="1.3"/>
+<line class="gear2" x1="267.8" y1="194.9" x2="264.8" y2="200.1" stroke-width="1.3"/>
+<line class="gear2" x1="263.2" y1="191.0" x2="258.6" y2="194.9" stroke-width="1.3"/>
+<line class="gear2" x1="260.2" y1="185.9" x2="254.6" y2="187.9" stroke-width="1.3"/>
+<line class="gear2" x1="259.2" y1="180.0" x2="253.2" y2="180.0" stroke-width="1.3"/>
+<line class="gear2" x1="260.2" y1="174.1" x2="254.6" y2="172.1" stroke-width="1.3"/>
+<line class="gear2" x1="263.2" y1="169.0" x2="258.6" y2="165.1" stroke-width="1.3"/>
+<line class="gear2" x1="267.8" y1="165.1" x2="264.8" y2="159.9" stroke-width="1.3"/>
+<line class="gear2" x1="273.4" y1="163.1" x2="272.3" y2="157.2" stroke-width="1.3"/>
+<line class="gear2" x1="279.3" y1="163.1" x2="280.4" y2="157.2" stroke-width="1.3"/>
+<line class="gear2" x1="284.9" y1="165.1" x2="287.9" y2="159.9" stroke-width="1.3"/>
+<line class="gear2" x1="289.5" y1="169.0" x2="294.1" y2="165.1" stroke-width="1.3"/>
+<line class="gear2" x1="292.5" y1="174.1" x2="298.1" y2="172.1" stroke-width="1.3"/>
+<circle class="gear2" cx="276.4" cy="260.6" r="60.5" stroke-dasharray="4 3"/>
+<circle class="gearfill" cx="276.4" cy="260.6" r="9.1"/>
+<line class="gear2" x1="333.8" y1="260.6" x2="339.8" y2="260.6" stroke-width="1.3"/>
+<line class="gear2" x1="332.6" y1="272.6" x2="338.5" y2="273.8" stroke-width="1.3"/>
+<line class="gear2" x1="328.9" y1="284.0" x2="334.4" y2="286.5" stroke-width="1.3"/>
+<line class="gear2" x1="322.9" y1="294.4" x2="327.7" y2="298.0" stroke-width="1.3"/>
+<line class="gear2" x1="314.8" y1="303.4" x2="318.8" y2="307.8" stroke-width="1.3"/>
+<line class="gear2" x1="305.1" y1="310.4" x2="308.1" y2="315.6" stroke-width="1.3"/>
+<line class="gear2" x1="294.1" y1="315.3" x2="296.0" y2="321.0" stroke-width="1.3"/>
+<line class="gear2" x1="282.4" y1="317.8" x2="283.0" y2="323.8" stroke-width="1.3"/>
+<line class="gear2" x1="270.4" y1="317.8" x2="269.7" y2="323.8" stroke-width="1.3"/>
+<line class="gear2" x1="258.6" y1="315.3" x2="256.7" y2="321.0" stroke-width="1.3"/>
+<line class="gear2" x1="247.6" y1="310.4" x2="244.6" y2="315.6" stroke-width="1.3"/>
+<line class="gear2" x1="237.9" y1="303.4" x2="233.9" y2="307.8" stroke-width="1.3"/>
+<line class="gear2" x1="229.9" y1="294.4" x2="225.0" y2="298.0" stroke-width="1.3"/>
+<line class="gear2" x1="223.8" y1="284.0" x2="218.4" y2="286.5" stroke-width="1.3"/>
+<line class="gear2" x1="220.1" y1="272.6" x2="214.3" y2="273.8" stroke-width="1.3"/>
+<line class="gear2" x1="218.9" y1="260.6" x2="212.9" y2="260.6" stroke-width="1.3"/>
+<line class="gear2" x1="220.1" y1="248.7" x2="214.3" y2="247.4" stroke-width="1.3"/>
+<line class="gear2" x1="223.8" y1="237.3" x2="218.4" y2="234.8" stroke-width="1.3"/>
+<line class="gear2" x1="229.9" y1="226.9" x2="225.0" y2="223.3" stroke-width="1.3"/>
+<line class="gear2" x1="237.9" y1="217.9" x2="233.9" y2="213.5" stroke-width="1.3"/>
+<line class="gear2" x1="247.6" y1="210.9" x2="244.6" y2="205.7" stroke-width="1.3"/>
+<line class="gear2" x1="258.6" y1="206.0" x2="256.7" y2="200.3" stroke-width="1.3"/>
+<line class="gear2" x1="270.4" y1="203.5" x2="269.7" y2="197.5" stroke-width="1.3"/>
+<line class="gear2" x1="282.4" y1="203.5" x2="283.0" y2="197.5" stroke-width="1.3"/>
+<line class="gear2" x1="294.1" y1="206.0" x2="296.0" y2="200.3" stroke-width="1.3"/>
+<line class="gear2" x1="305.1" y1="210.9" x2="308.1" y2="205.7" stroke-width="1.3"/>
+<line class="gear2" x1="314.8" y1="217.9" x2="318.8" y2="213.5" stroke-width="1.3"/>
+<line class="gear2" x1="322.9" y1="226.9" x2="327.7" y2="223.3" stroke-width="1.3"/>
+<line class="gear2" x1="328.9" y1="237.3" x2="334.4" y2="234.8" stroke-width="1.3"/>
+<line class="gear2" x1="332.6" y1="248.7" x2="338.5" y2="247.4" stroke-width="1.3"/>
+<circle cx="155.0" cy="112.8" r="3.4" fill="#c2541d"/>
+<circle cx="276.4" cy="200.2" r="3.4" fill="#c2541d"/>
+<text class="lbl" x="155.0" y="94.4" text-anchor="middle">gear 2</text>
+<text class="dim" x="155.0" y="108.4" text-anchor="middle">N = 20</text>
+<text class="lbl" x="151.0" y="184.0" text-anchor="middle">gear 3</text>
+<text class="dim" x="151.0" y="198.0" text-anchor="middle">N = 60</text>
+<text class="lbl" x="276.4" y="184.0" text-anchor="middle">gear 4</text>
+<text class="dim" x="276.4" y="197.0" text-anchor="middle">N = 18</text>
+<text class="lbl" x="276.4" y="264.6" text-anchor="middle">gear 5</text>
+<text class="dim" x="276.4" y="278.6" text-anchor="middle">N = 54</text>
+<text class="ang" x="215.7" y="168.0" text-anchor="middle">common shaft</text>
+<path class="inp" d="M 181.0 87.4 A 26 26 0 1 1 152.0 64.4" marker-end="url(#ah3)" fill="none"/>
+<text class="ang" x="119.0" y="64.4" text-anchor="middle">T&#8322;, &#945;&#8322;</text>
+<path class="load" d="M 302.4 257.6 A 26 26 0 1 1 273.4 234.6" marker-end="url(#ah3l)" fill="none"/>
+<text class="loadl" x="330.4" y="236.6" text-anchor="start">T&#8348; (load)</text>
+</svg><p class="cap">Figure 3 &mdash; Compound train: gear&nbsp;2 drives gear&nbsp;3; gears&nbsp;3 and&nbsp;4 share the intermediate shaft; gear&nbsp;4 drives gear&nbsp;5 on the load shaft.</p></div>
+    <h4>Given</h4>
+    <div class="knowns">
+      <span class="kchip g">N&#8322;,N&#8323;,N&#8324;,N&#8325; = 20, 60, 18, 54 teeth</span>
+      <span class="kchip g">module = 2 mm</span>
+      <span class="kchip g">&#945;&#8322; = 150 rad/s&sup2; (input)</span>
+      <span class="kchip g">T<sub>L</sub> = 40 N&middot;m (load torque)</span>
+      <span class="kchip g">J&#8322; = 0.004, J&#8323;&#8324; = 0.012, J&#8325; = 0.006 kg&middot;m&sup2;</span>
+      <span class="kchip g">J<sub>load</sub> = 0.500 kg&middot;m&sup2;</span>
+      <span class="kchip u">find e, output &#945;, motor T&#8322;, tooth loads</span>
+    </div>
+    <div class="analogy"><span class="h">Analogy &mdash; bicycle gears</span><p>Shift to a low gear and your legs spin fast while the wheel turns slowly &mdash; but with much more turning force. A compound train stacks two such reductions on one intermediate shaft, so the ratios <em>multiply</em>: two 3:1 stages give 9:1, trading nine turns of the motor for one turn of the load and multiplying torque nine-fold.</p></div>
+    <div class="realworld"><span class="h">Real-world &mdash; the reflected-inertia trick</span><p>Robot-joint reducers and machine-tool spindles are sized this way. A big load inertia seen through a 9:1 reduction feels 81&times; smaller at the motor (the square of the ratio). That is why a small servo can whip a heavy arm around &mdash; the gearbox hides the inertia.</p></div>
+  </div>
+
+  <div class="stepper" data-key="p3">
+    <div class="step-track">
+      <div class="step" data-i="0">
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Train value</div>
+        <p>For meshing gears the pitch-line speeds match, so each mesh ratio is (driver teeth)/(driven teeth). Two external meshes, so the output turns the <em>same</em> way as the input:</p>
+        <div class="mini-eq">e = &#969;&#8325;/&#969;&#8322; = (N&#8322;&#8201;N&#8324;)/(N&#8323;&#8201;N&#8325;) = (20&middot;18)/(60&middot;54) = 1/9</div>
+        <div class="answer"><span class="ans-h">Kinematics</span><span class="mini-eq">&#969;&#8325; = &#969;&#8322;/9 &nbsp;&nbsp; &#945;&#8323; = &#945;&#8322;(N&#8322;/N&#8323;) = 50 rad/s&sup2; &nbsp;&nbsp; &#945;&#8325; = 150/9 = 16.67 rad/s&sup2;</span></div>
+      </div>
+      <div class="step" data-i="1" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 2 &mdash; Effective inertia at the motor</div>
+        <p>The clean way to get motor torque is to refer everything to the input shaft. Each downstream inertia is multiplied by the <em>square</em> of its speed ratio:</p>
+        <div class="eqn">J_eff = J&#8322; + J&#8323;&#8324;(N&#8322;/N&#8323;)&sup2; + (J&#8325;+J_load)(1/9)&sup2;
+      = 0.004 + 0.012/9 + 0.506/81 = 0.011580 kg&middot;m&sup2;</div>
+      </div>
+      <div class="step" data-i="2" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 3 &mdash; Required motor torque</div>
+        <p>Motor torque = (torque to accelerate the reflected inertia) + (load torque reflected through the ratio):</p>
+        <div class="mini-eq">T&#8322; = J_eff&#8201;&#945;&#8322; + T<sub>L</sub>&#8201;e = (0.011580)(150) + (40)(1/9) = 1.737 + 4.444</div>
+        <div class="answer"><span class="ans-h">Motor torque</span><span class="mini-eq">T&#8322; = 6.18 N&middot;m</span></div>
+        <p class="note">Only ~28% of the motor&rsquo;s effort accelerates the drivetrain; ~72% overcomes the steady load. That split changes with how hard you accelerate.</p>
+      </div>
+      <div class="step" data-i="3" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Tooth (tangential) loads</div>
+        <p>Take each shaft as a free body in rotation (&Sigma;M = J&#945;). Pitch radii: r = module&middot;N/2, so r&#8322;=20, r&#8323;=60, r&#8324;=18, r&#8325;=54&nbsp;mm.</p>
+        <div class="eqn">W&#8322;&#8323; = (T&#8322; &minus; J&#8322;&#945;&#8322;)/r&#8322; = (6.181 &minus; 0.600)/0.020 = 279.1 N
+W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;&#8323;)/r&#8324; = (16.744 &minus; 0.600)/0.018 = 896.9 N</div>
+        <div class="answer"><span class="ans-h">Contact forces</span><span class="mini-eq">W&#8322;&#8323; = 279 N &nbsp;&nbsp; W&#8324;&#8325; = 897 N</span></div>
+        <p><strong>Check.</strong> On the output shaft: W&#8324;&#8325;&middot;r&#8325; &minus; T<sub>L</sub> = 897&middot;0.054 &minus; 40 = 8.43&nbsp;N&middot;m, and (J&#8325;+J_load)&#945;&#8325; = 0.506&middot;16.67 = 8.43&nbsp;N&middot;m. They match &mdash; the analysis is self-consistent. The second mesh carries 3.2&times; the first mesh&rsquo;s load, which is why the low-speed stage of a gearbox uses the wider, stronger gears.</p>
+      </div>
+    </div>
+    <div class="step-controls">
+      <button class="btn prev" type="button">&#8249; Prev</button>
+      <button class="btn next" type="button">Next &#8250;</button>
+      <button class="btn secondary reveal" type="button">Reveal all</button>
+      <button class="btn secondary reset" type="button">Reset</button>
+      <span class="step-count"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROBLEM 4 ============================ -->
+<section id="p4" aria-labelledby="p4-h">
+  <h2 id="p4-h">Problem 4 &middot; The same four-bar &mdash; kinematic coefficients &rarr; power equation</h2>
+  <div class="prob card">
+    <p>Now solve Problem&nbsp;1&rsquo;s mechanism a completely different way. Instead of chasing forces link-by-link, we use <strong>kinematic coefficients</strong> (Chapter&nbsp;4) and the <strong>power equation</strong> (Chapter&nbsp;7) to get the input torque in one shot &mdash; and it must land on the same 10.33&nbsp;N&middot;m. Two independent roads to one answer is the best error-check you have.</p>
+    <div class="diagram"><svg viewBox="0 0 640 400" role="img" class="mech" aria-label="Four-bar linkage: ground pivots O2 and O4 on a horizontal frame line r1; crank r2 at 60 degrees from O2 to pin A; coupler r3 from A to B; rocker r4 from O4 to B. Input angular velocity omega-2 CCW at the crank; resisting load torque T4 on the rocker." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill"/></marker><marker id="ahr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill2"/></marker></defs>
+<line class="gline" x1="174.0" y1="287.6" x2="466.0" y2="287.6" />
+<line class="lk" x1="174.0" y1="287.6" x2="222.7" y2="203.3" stroke-width="5" />
+<line class="lk2" x1="222.7" y1="203.3" x2="458.9" y2="112.5" stroke-width="5" />
+<line class="lk" x1="466.0" y1="287.6" x2="458.9" y2="112.5" stroke-width="5" />
+<circle class="jt" cx="174.0" cy="287.6" r="6.0" />
+<text class="lbl" x="152.0" y="291.6">O&#8322;</text>
+<circle class="jt" cx="466.0" cy="287.6" r="6.0" />
+<text class="lbl" x="474.0" y="305.6">O&#8324;</text>
+<circle class="jt" cx="222.7" cy="203.3" r="6.0" />
+<text class="lbl" x="218.7" y="191.3">A</text>
+<circle class="jt" cx="458.9" cy="112.5" r="6.0" />
+<text class="lbl" x="466.9" y="106.5">B</text>
+<polygon class="gnd" points="174.0,287.6 189.0,302.6 159.0,302.6"/>
+<line class="gnd-h" x1="189.0" y1="302.6" x2="159.0" y2="302.6"/>
+<polygon class="gnd" points="466.0,287.6 481.0,302.6 451.0,302.6"/>
+<line class="gnd-h" x1="481.0" y1="302.6" x2="451.0" y2="302.6"/>
+<text class="dim" x="178.3" y="243.5">r&#8322;</text>
+<text class="dim" x="342.8" y="149.9">r&#8323;</text>
+<text class="dim" x="472.4" y="200.1">r&#8324;</text>
+<text class="dim" x="314.0" y="307.6">r&#8321;</text>
+<path class="inp" d="M 208.0 287.6 A 34 34 0 0 0 191.0 258.2" marker-end="url(#ahr)" fill="none"/>
+<text class="ang" x="214.0" y="269.6">&#952;&#8322;=60&#176;</text>
+<text class="ome" x="236.7" y="213.3">&#969;&#8322;</text>
+<path class="load" d="M 478.9 108.5 A 20 20 0 1 1 456.9 90.5" marker-end="url(#ahr)" fill="none"/>
+<text class="loadl" x="482.9" y="130.5">T&#8324;</text>
+</svg><p class="cap">Figure 4 &mdash; Same four-bar as Problem&nbsp;1; here we track the geometry-only coefficients rather than the forces.</p></div>
+    <h4>Given</h4>
+    <div class="knowns">
+      <span class="kchip g">geometry &amp; masses identical to Problem 1</span>
+      <span class="kchip g">&#969;&#8322; = 20 rad/s, &#945;&#8322; = 0</span>
+      <span class="kchip g">T&#8324; = 20 N&middot;m resisting</span>
+      <span class="kchip u">find h&#8323;,h&#8324;, h&#8323;&#8242;,h&#8324;&#8242;, then T&#8322;</span>
+    </div>
+    <div class="analogy"><span class="h">Analogy &mdash; two trails to the same summit</span><p>Newton&ndash;Euler is the switchback trail: safe, explicit, one force at a time. The power method is the ridge line: faster, fewer steps, but you must trust your footing. Both reach the same peak. Climbing one and checking against the other is how you know you didn&rsquo;t wander off a cliff in the algebra.</p></div>
+  </div>
+
+  <div class="stepper" data-key="p4">
+    <div class="step-track">
+      <div class="step" data-i="0">
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; First-order kinematic coefficients</div>
+        <p>A kinematic coefficient is a <em>geometry-only</em> velocity ratio: h<sub>i</sub> = &#969;<sub>i</sub>/&#969;&#8322; = d&#952;<sub>i</sub>/d&#952;&#8322;. It carries no time in it &mdash; it depends only on the configuration. From Problem&nbsp;1&rsquo;s velocities:</p>
+        <div class="answer"><span class="ans-h">First-order coefficients</span><span class="mini-eq">h&#8323; = &#969;&#8323;/&#969;&#8322; = &minus;0.2171 &nbsp;&nbsp; h&#8324; = &#969;&#8324;/&#969;&#8322; = +0.3690</span></div>
+      </div>
+      <div class="step" data-i="1" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Second-order coefficients</div>
+        <p>The second-order coefficient h<sub>i</sub>&#8242; = d&sup2;&#952;<sub>i</sub>/d&#952;&#8322;&sup2; captures how the ratio itself changes. In general &#945;<sub>i</sub> = h<sub>i</sub>&#945;&#8322; + h<sub>i</sub>&#8242;&#969;&#8322;&sup2;; with &#945;&#8322;&nbsp;=&nbsp;0 that reduces to &#945;<sub>i</sub> = h<sub>i</sub>&#8242;&#969;&#8322;&sup2;, so:</p>
+        <div class="mini-eq">h&#8323;&#8242; = &#945;&#8323;/&#969;&#8322;&sup2; = 103.8/400 = 0.2596 &nbsp;&nbsp; h&#8324;&#8242; = &#945;&#8324;/&#969;&#8322;&sup2; = 192.7/400 = 0.4817</div>
+        <p class="note">These reproduce Problem&nbsp;1&rsquo;s &#945;&#8323;, &#945;&#8324; exactly &mdash; the coefficients <em>are</em> the acceleration analysis, repackaged so the input speed factors out.</p>
+      </div>
+      <div class="step" data-i="2" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 3 &mdash; The power equation</div>
+        <p>Energy in = energy stored + energy out. For a one-DOF system with no gravity, the instantaneous power balance is:</p>
+        <div class="eqn">T&#8322;&#969;&#8322; + T<sub>L</sub>&#969;&#8324; = &Sigma;<sub>i</sub> ( m<sub>i</sub> <span class="vec">a</span><sub>Gi</sub>&middot;<span class="vec">v</span><sub>Gi</sub> + I<sub>Gi</sub>&#945;<sub>i</sub>&#969;<sub>i</sub> )</div>
+        <p>Every term on the right is already known from Phase&nbsp;A. Solve for the one unknown, T&#8322;:</p>
+        <div class="mini-eq">T&#8322; = [ &Sigma;(m&#8201;<span class="vec">a</span><sub>G</sub>&middot;<span class="vec">v</span><sub>G</sub> + I&#945;&#969;) &minus; T<sub>L</sub>&#969;&#8324; ] / &#969;&#8322;</div>
+      </div>
+      <div class="step" data-i="3" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; The cross-check lands</div>
+        <div class="answer"><span class="ans-h">Input torque (power method)</span><span class="mini-eq">T&#8322; = 10.33 N&middot;m &nbsp;&#10003;&nbsp; identical to Problem 1&rsquo;s Newton&ndash;Euler result</span></div>
+        <p>The two methods agree to the last digit. The power route never computed a single pin force, yet it produced the same torque &mdash; because internal pin forces do no net work (they act on equal-and-opposite velocities) and drop out of an energy balance. This is the whole point of the coefficient/power machinery: when you only need the driving torque, skip the forces entirely.</p>
+        <div class="realworld"><span class="h">Real-world &mdash; why simulators love this form</span><p>Packaging the geometry into coefficients gives a one-line equation of motion, I<sub>eff</sub>(&#952;&#8322;)&#8201;&#945;&#8322; + &frac12;(dI<sub>eff</sub>/d&#952;&#8322;)&#969;&#8322;&sup2; = T&#8322; + Q<sub>load</sub>, with an effective inertia here of I<sub>eff</sub>&nbsp;&asymp;&nbsp;0.0143&nbsp;kg&middot;m&sup2;. That is the Lagrangian form multibody solvers integrate &mdash; far cheaper than re-solving a force system at every time step.</p></div>
+      </div>
+    </div>
+    <div class="step-controls">
+      <button class="btn prev" type="button">&#8249; Prev</button>
+      <button class="btn next" type="button">Next &#8250;</button>
+      <button class="btn secondary reveal" type="button">Reveal all</button>
+      <button class="btn secondary reset" type="button">Reset</button>
+      <span class="step-count"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROBLEM 5 ============================ -->
+<section id="p5" aria-labelledby="p5-h">
+  <h2 id="p5-h">Problem 5 &middot; Inverted slider-crank (quick-return) &mdash; vector loop &rarr; force analysis</h2>
+  <div class="prob card">
+    <p>A crank carries a sliding block that runs in a slotted rocker &mdash; the heart of a shaper&rsquo;s quick-return drive. The sliding-inside-a-rotating-link joint brings in a term the other problems didn&rsquo;t have: <strong>Coriolis acceleration</strong>. Find the motion, then the crank torque needed against a load on the rocker.</p>
+    <div class="diagram"><svg viewBox="0 0 560 440" role="img" class="mech" aria-label="Inverted slider-crank quick-return: crank r2 pivots at O2 and carries a slider block at pin P; the block slides inside a slotted rocker r4 that pivots at ground O4 below O2. Variable length r3 is measured from O4 to the block. Resisting load torque T4 acts on the rocker." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill"/></marker><marker id="ahr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill2"/></marker></defs>
+<line class="gline" x1="290.0" y1="186.9" x2="290.0" y2="386.0" />
+<line class="lk" x1="290.0" y1="386.0" x2="224.4" y2="54.0" stroke-width="5" />
+<line class="lk2" x1="290.0" y1="186.9" x2="230.2" y2="83.5" stroke-width="5" />
+<g transform="translate(230.2,83.5) rotate(-101.2)"><rect class="piston" x="-16" y="-11" width="32" height="22" rx="3"/></g>
+<circle class="jt" cx="290.0" cy="186.9" r="6.0" />
+<text class="lbl" x="266.0" y="190.9">O&#8322;</text>
+<circle class="jt" cx="290.0" cy="386.0" r="6.0" />
+<text class="lbl" x="266.0" y="390.0">O&#8324;</text>
+<circle class="jt" cx="230.2" cy="83.5" r="6.0" />
+<text class="lbl" x="242.2" y="73.5">P (slider)</text>
+<polygon class="gnd" points="290.0,186.9 305.0,201.9 275.0,201.9"/>
+<line class="gnd-h" x1="305.0" y1="201.9" x2="275.0" y2="201.9"/>
+<polygon class="gnd" points="290.0,386.0 305.0,401.0 275.0,401.0"/>
+<line class="gnd-h" x1="305.0" y1="401.0" x2="275.0" y2="401.0"/>
+<text class="dim" x="240.1" y="135.2">r&#8322;</text>
+<text class="dim" x="267.1" y="223.6">r&#8323;</text>
+<text class="dim" x="270.0" y="286.5">r&#8321;</text>
+<path class="inp" d="M 320.0 186.9 A 30 30 0 0 0 275.0 161.0" marker-end="url(#ahr)" fill="none"/>
+<text class="ang" x="310.0" y="162.9">&#952;&#8322;=120&#176;</text>
+<text class="ome" x="200.2" y="103.5">&#969;&#8322;</text>
+<path class="load" d="M 242.4 52.0 A 18 18 0 1 1 222.4 35.0" marker-end="url(#ahr)" fill="none"/>
+<text class="loadl" x="244.4" y="70.0">T&#8324;</text>
+</svg><p class="cap">Figure 5 &mdash; Inverted slider-crank at &#952;&#8322;&nbsp;=&nbsp;120&deg;; block slides in the slotted rocker, variable length r&#8323; measured from O&#8324;.</p></div>
+    <h4>Given</h4>
+    <div class="knowns">
+      <span class="kchip g">r&#8322; = 0.12 m (crank)</span>
+      <span class="kchip g">r&#8321; = 0.20 m (O&#8322;O&#8324;, O&#8324; below O&#8322;)</span>
+      <span class="kchip g">&#952;&#8322; = 120&deg;</span>
+      <span class="kchip g">&#969;&#8322; = 10 rad/s CCW</span>
+      <span class="kchip g">&#945;&#8322; = 0</span>
+      <span class="kchip g">rocker: L&#8324; = 0.34 m, m&#8324; = 1.2 kg</span>
+      <span class="kchip g">block m&#8323; = 0.25 kg</span>
+      <span class="kchip g">T&#8324; = 15 N&middot;m resisting on rocker</span>
+      <span class="kchip u">find r&#8323;, &#969;&#8324;, accelerations, crank T&#8322;</span>
+    </div>
+    <div class="analogy"><span class="h">Analogy &mdash; walking outward on a spinning merry-go-round</span><p>Step outward while the platform turns and you feel shoved sideways &mdash; that sideways push is Coriolis. The block does exactly this: it slides <em>along</em> the rocker (r&#8323; changes) <em>while</em> the rocker rotates. Ignore the 2&#8201;<span class="dot">r</span>&#8323;&#969;&#8324; Coriolis term and your acceleration &mdash; and every force after it &mdash; is simply wrong.</p></div>
+    <div class="realworld"><span class="h">Real-world &mdash; the quick-return machine tool</span><p>Shapers and slotting machines use this exact linkage so the cutting stroke is slow and powerful while the return stroke is fast, saving cycle time. The Whitworth quick-return is a close cousin. The oscillating rocker converts steady crank rotation into a stroke that&rsquo;s deliberately asymmetric in time.</p></div>
+  </div>
+
+  <div class="stepper" data-key="p5">
+    <div class="step-track">
+      <div class="step" data-i="0">
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Position (closed form)</div>
+        <p>The loop <span class="vec">r</span><sub>2</sub> = <span class="vec">r</span><sub>1</sub> + <span class="vec">r</span><sub>3</sub> has the variable-length vector r&#8323; pointing from O&#8324; to the block P. So r&#8323; is simply the vector from O&#8324; to the crank tip:</p>
+        <div class="mini-eq">r&#8323;cos&#952;&#8323; = r&#8322;cos&#952;&#8322; &minus; r&#8321;cos&#952;&#8321; &nbsp;&nbsp; r&#8323;sin&#952;&#8323; = r&#8322;sin&#952;&#8322; &minus; r&#8321;sin&#952;&#8321;</div>
+        <div class="answer"><span class="ans-h">Position</span><span class="mini-eq">r&#8323; = 0.3098 m &nbsp;&nbsp; &#952;&#8323; = &#952;&#8324; = 101.17&deg;</span></div>
+      </div>
+      <div class="step" data-i="1" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Velocity (two unknowns: <span class="dot">r</span>&#8323; and &#969;&#8324;)</div>
+        <p>Differentiating gives a 2&times;2 system whose determinant is r&#8323;. The unknowns are the <em>slide rate</em> <span class="dot">r</span>&#8323; and the rocker speed &#969;&#8324;:</p>
+        <div class="answer"><span class="ans-h">Velocity</span><span class="mini-eq"><span class="dot">r</span>&#8323; = &minus;0.387 m/s (sliding inward) &nbsp;&nbsp; &#969;&#8324; = +3.666 rad/s</span></div>
+      </div>
+      <div class="step" data-i="2" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 3 &mdash; Acceleration (Coriolis appears)</div>
+        <p>Differentiating again brings out the Coriolis coupling 2&#8201;<span class="dot">r</span>&#8323;&#969;&#8324; and the centripetal r&#8323;&#969;&#8324;&sup2;. Same coefficient matrix, new right-hand side:</p>
+        <div class="answer"><span class="ans-h">Acceleration</span><span class="mini-eq"><span class="ddot">r</span>&#8323; = &minus;7.19 m/s&sup2; &nbsp;&nbsp; &#945;&#8324; = &minus;3.336 rad/s&sup2;</span></div>
+        <p class="note">The crank-pin (block) acceleration is <span class="vec">a</span><sub>P</sub> = (6.00, &minus;10.39) m/s&sup2;; the rocker&rsquo;s mass-center acceleration is (1.00, &minus;2.13) m/s&sup2;.</p>
+      </div>
+      <div class="step" data-i="3" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Free bodies with a sliding joint</div>
+        <p>The block&ndash;rocker contact is frictionless sliding, so that force is a single <strong>normal N perpendicular to the rocker</strong> (no component along the slot). Unknowns: crank pin <span class="vec">F</span><sub>12</sub>, <span class="vec">F</span><sub>23</sub> (4), the slot normal N (1), rocker pin <span class="vec">F</span><sub>14</sub> (2), and T&#8322; = <strong>8</strong>. Equations: crank (3) + block (2) + rocker (3) = <strong>8</strong>.</p>
+      </div>
+      <div class="step" data-i="4" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Solve, then verify by power</div>
+        <div class="answer"><span class="ans-h">Forces &amp; crank torque</span>
+          <div class="resgrid">
+            <div class="rc"><b>|F&#8321;&#8322;|</b> = 46.1 N</div>
+            <div class="rc"><b>|F&#8322;&#8323;|</b> = 47.0 N</div>
+            <div class="rc"><b>slot N</b> = 47.9 N</div>
+            <div class="rc"><b>|F&#8321;&#8324;|</b> = 48.7 N</div>
+            <div class="rc"><b>T&#8322;</b> = +5.44 N&middot;m</div>
+          </div>
+        </div>
+        <p><strong>Independent check.</strong> The power equation T&#8322; = [&Sigma;(m&#8201;<span class="vec">a</span><sub>G</sub>&middot;<span class="vec">v</span><sub>G</sub> + I&#945;&#969;) &minus; T&#8324;&#969;&#8324;]/&#969;&#8322; returns 5.44&nbsp;N&middot;m as well &mdash; confirming both the Coriolis-laden kinematics and the force solution. The slot normal (47.9&nbsp;N) is the force trying to bend the rocker sideways; it is what the slot walls must bear.</p>
+      </div>
+    </div>
+    <div class="step-controls">
+      <button class="btn prev" type="button">&#8249; Prev</button>
+      <button class="btn next" type="button">Next &#8250;</button>
+      <button class="btn secondary reveal" type="button">Reveal all</button>
+      <button class="btn secondary reset" type="button">Reset</button>
+      <span class="step-count"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROBLEM 6 ============================ -->
+<section id="p6" aria-labelledby="p6-h">
+  <h2 id="p6-h">Problem 6 &middot; Capstone &mdash; motor + gear reduction + slider-crank press</h2>
+  <div class="prob card">
+    <p>The whole course in one problem. A motor drives a 5:1 reduction, whose output shaft is the crank of a stamping-press slider-crank. At the working instant the ram meets a forming load. Chain it together: gear train (Ch&nbsp;3) &rarr; vector-loop kinematics (Ch&nbsp;2) &rarr; inverse dynamics (Ch&nbsp;5) &rarr; reflect back to the motor. The deliverable is the motor torque a designer would spec.</p>
+    <div class="diagram"><svg viewBox="0 0 680 150" role="img" class="sch" xmlns="http://www.w3.org/2000/svg" aria-label="Power-flow block diagram: a motor at 60 radians per second feeds a 5 to 1 gear reduction, whose output crankshaft turns at 12 radians per second and drives the slider-crank ram against the forming load.">
+<defs><marker id="ahf" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto"><path d="M0,0 L11,4 L0,8 Z" class="ahfill2"/></marker></defs>
+<rect class="blk" x="20" y="45" width="110" height="58" rx="8"/>
+<text class="blkt" x="75" y="69" text-anchor="middle">Motor</text>
+<text class="dim" x="75" y="89" text-anchor="middle">&#969; = 60 rad/s</text>
+<rect class="blk" x="200" y="45" width="110" height="58" rx="8"/>
+<text class="blkt" x="255" y="69" text-anchor="middle">5 : 1 reduction</text>
+<text class="dim" x="255" y="89" text-anchor="middle">gear stage</text>
+<rect class="blk" x="390" y="45" width="110" height="58" rx="8"/>
+<text class="blkt" x="445" y="69" text-anchor="middle">Crankshaft</text>
+<text class="dim" x="445" y="89" text-anchor="middle">&#969;&#8322; = 12 rad/s</text>
+<rect class="blk" x="560" y="45" width="110" height="58" rx="8"/>
+<text class="blkt" x="615" y="69" text-anchor="middle">Slider-crank</text>
+<text class="dim" x="615" y="89" text-anchor="middle">ram &rarr; F&#8493;</text>
+<line class="flow" x1="130" y1="74" x2="196" y2="74" marker-end="url(#ahf)"/>
+<line class="flow" x1="310" y1="74" x2="386" y2="74" marker-end="url(#ahf)"/>
+<line class="flow" x1="500" y1="74" x2="556" y2="74" marker-end="url(#ahf)"/>
+<text class="dim" x="350" y="39" text-anchor="middle">torque &times;5</text>
+</svg><p class="cap">Figure 6a &mdash; Power flow: motor &rarr; 5:1 reduction &rarr; crankshaft &rarr; slider-crank ram.</p></div>
+    <div class="diagram"><svg viewBox="0 0 680 320" role="img" class="mech" aria-label="Slider-crank press stage driven by the geared crankshaft: crank r2 at 60 degrees to pin A, connecting rod r3 to the ram B sliding in a horizontal guide. The forming (working) force resists the ram at this instant." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill"/></marker><marker id="ahr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" class="ahfill2"/></marker></defs>
+<line class="wall" x1="135.6" y1="129.7" x2="536.9" y2="129.7" />
+<line class="wall" x1="135.6" y1="190.3" x2="536.9" y2="190.3" />
+<line class="cl" x1="181.0" y1="160.0" x2="514.1" y2="160.0" />
+<line class="lk" x1="150.7" y1="160.0" x2="196.1" y2="81.3" stroke-width="5" />
+<line class="lk2" x1="196.1" y1="81.3" x2="488.6" y2="160.0" stroke-width="5" />
+<rect class="piston" x="484.6" y="140.0" width="34" height="40" rx="3"/>
+<circle class="jt" cx="150.7" cy="160.0" r="6.0" />
+<text class="lbl" x="128.7" y="164.0">O&#8322;</text>
+<circle class="jt" cx="196.1" cy="81.3" r="6.0" />
+<text class="lbl" x="190.1" y="69.3">A</text>
+<circle class="jt" cx="488.6" cy="160.0" r="6.0" />
+<text class="lbl" x="504.6" y="144.0">B (ram)</text>
+<polygon class="gnd" points="150.7,160.0 165.7,175.0 135.7,175.0"/>
+<line class="gnd-h" x1="165.7" y1="175.0" x2="135.7" y2="175.0"/>
+<text class="dim" x="155.4" y="116.7">r&#8322;</text>
+<text class="dim" x="342.4" y="108.7">r&#8323;</text>
+<path class="inp" d="M 176.7 160.0 A 26 26 0 0 0 163.7 137.5" marker-end="url(#ahr)" fill="none"/>
+<text class="ang" x="180.7" y="146.0">&#952;&#8322;=60&#176;</text>
+<text class="ome" x="208.1" y="93.3">&#969;&#8322;</text>
+<line class="frc" x1="571.9" y1="160.0" x2="509.8" y2="160.0" marker-end="url(#ah)"/>
+<text class="frcl" x="579.9" y="152.0">F&#7480;</text>
+</svg><p class="cap">Figure 6b &mdash; The press slider-crank at crank angle &#952;&#8322;&nbsp;=&nbsp;60&deg;; forming force resists the ram.</p></div>
+    <h4>Given</h4>
+    <div class="knowns">
+      <span class="kchip g">motor &#969; = 60 rad/s (constant)</span>
+      <span class="kchip g">reduction 5:1 &rarr; crank &#969;&#8322; = 12 rad/s</span>
+      <span class="kchip g">&#945;&#8322; = 0</span>
+      <span class="kchip g">r&#8322; = 0.06 m, r&#8323; = 0.20 m (in-line)</span>
+      <span class="kchip g">&#952;&#8322; = 60&deg;</span>
+      <span class="kchip g">m&#8322;,m&#8323;,m<sub>ram</sub> = 1.2, 0.8, 2.5 kg</span>
+      <span class="kchip g">F<sub>work</sub> = 5000 N resisting ram</span>
+      <span class="kchip u">find crank torque, then motor torque</span>
+    </div>
+    <div class="analogy"><span class="h">Analogy &mdash; a nutcracker near the squeeze</span><p>A press is a toggle: as the crank swings the ram toward the end of its travel, a small crank torque produces an enormous ram force &mdash; the same way a nutcracker&rsquo;s force skyrockets as the jaws close. The gearbox multiplies torque; the slider-crank geometry multiplies it again near the bottom of the stroke.</p></div>
+    <div class="realworld"><span class="h">Real-world &mdash; mechanical stamping presses</span><p>Sheet-metal presses, can seamers, and coining presses are built exactly like this: a modest motor spins a flywheel-and-crank through a reduction, and the slider-crank converts that into tonnes of forming force for a fraction of a second per stroke. Sizing the motor means doing precisely this chain of calculations.</p></div>
+  </div>
+
+  <div class="stepper" data-key="p6">
+    <div class="step-track">
+      <div class="step" data-i="0">
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Gear stage sets the crank speed</div>
+        <p>The 5:1 reduction slows the motor to the crank:</p>
+        <div class="mini-eq">&#969;&#8322; = &#969;<sub>motor</sub>/5 = 60/5 = 12 rad/s (&asymp; 114.6 rpm), &nbsp; &#945;&#8322; = 0</div>
+      </div>
+      <div class="step" data-i="1" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Slider-crank kinematics</div>
+        <p>In-line (offset&nbsp;=&nbsp;0), so sin&#952;&#8323; = &minus;(r&#8322;/r&#8323;)sin&#952;&#8322;. Then the ram position, speed and acceleration:</p>
+        <div class="answer"><span class="ans-h">Ram motion</span><span class="mini-eq">&#952;&#8323; = &minus;15.06&deg; &nbsp; x = 0.2231 m &nbsp; <span class="dot">x</span> = &minus;0.720 m/s &nbsp; <span class="ddot">x</span> = &minus;3.03 m/s&sup2;</span></div>
+        <p class="note">The ram moves toward the crank (&minus;x) &mdash; this is the working stroke &mdash; so the 5000&nbsp;N forming force acts in the +x direction, resisting it.</p>
+      </div>
+      <div class="step" data-i="2" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 3 &mdash; Inverse dynamics on the slider-crank</div>
+        <p>Same 8&times;8 free-body system as an engine, but the piston&rsquo;s external load is now the 5000&nbsp;N forming force instead of gas. Even at constant crank speed the links still accelerate, so inertia terms remain. Solving:</p>
+        <div class="answer"><span class="ans-h">Crank-shaft results</span>
+          <div class="resgrid">
+            <div class="rc"><b>|F&#8321;&#8322;|</b> = 5189 N</div>
+            <div class="rc"><b>|F&#8323;&#8322;|</b> = 5188 N</div>
+            <div class="rc"><b>|F&#8324;&#8323;|</b> = 5186 N</div>
+            <div class="rc"><b>guide N</b> = 1349 N</div>
+            <div class="rc"><b>T<sub>crank</sub></b> = 300.7 N&middot;m</div>
+          </div>
+        </div>
+      </div>
+      <div class="step" data-i="3" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Reflect back to the motor</div>
+        <p>At constant speed the drivetrain needs no torque to accelerate itself, so the crank torque simply divides by the ratio (ideal gears):</p>
+        <div class="mini-eq">T<sub>motor</sub> = T<sub>crank</sub> / 5 = 300.7 / 5</div>
+        <div class="answer"><span class="ans-h">Motor torque required</span><span class="mini-eq">T<sub>motor</sub> = 60.1 N&middot;m</span></div>
+        <p><strong>Power sanity check.</strong> T<sub>motor</sub>&#969;<sub>motor</sub> = 60.1&times;60 = 3609&nbsp;W, and T<sub>crank</sub>&#969;&#8322; = 300.7&times;12 = 3609&nbsp;W. Power is conserved across the ideal gearbox &mdash; torque goes up 5&times;, speed goes down 5&times;, product unchanged. A 60&nbsp;N&middot;m motor delivers a 5000&nbsp;N forming punch: the gearbox and the crank geometry did the multiplying.</p>
+      </div>
+    </div>
+    <div class="step-controls">
+      <button class="btn prev" type="button">&#8249; Prev</button>
+      <button class="btn next" type="button">Next &#8250;</button>
+      <button class="btn secondary reveal" type="button">Reveal all</button>
+      <button class="btn secondary reset" type="button">Reset</button>
+      <span class="step-count"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ METHOD CARD ============================ -->
+<section id="reference" aria-labelledby="ref-h">
+  <h2 id="ref-h">Method reference card</h2>
+  <div class="refcard">
+    <div class="rc-head"><span>The two-phase recipe</span><span style="font-family:var(--mono);font-size:.8rem;">print-friendly</span></div>
+    <div class="rc-body">
+      <h4>Phase A &mdash; kinematics</h4>
+      <p class="rc-eq">Close the loop &nbsp;&rarr;&nbsp; differentiate once (velocity) &nbsp;&rarr;&nbsp; differentiate twice (acceleration)</p>
+      <p>Velocity and acceleration share the <strong>same Jacobian J</strong>; only the right-hand side changes (accel adds the &omega;&sup2; terms). Factor J once, reuse it. For a Newton position solve, that same J is the iteration matrix &mdash; three uses, one matrix.</p>
+      <h4>Phase B &mdash; inverse dynamics (Newton&ndash;Euler)</h4>
+      <p class="rc-eq">&Sigma;<span class="vec">F</span> = m&#8201;<span class="vec">a</span><sub>G</sub> &nbsp;&nbsp; &Sigma;M<sub>G</sub> = I<sub>G</sub>&#945;</p>
+      <p>Count first: 3 equations per moving link vs. (2 per pin joint) + (1 per sliding joint) + (1 input torque). Equal counts &rArr; determinate. Adjacent links share equal-and-opposite joint forces (Newton&rsquo;s third law).</p>
+      <h4>Shortcut &mdash; the power equation (one-DOF)</h4>
+      <p class="rc-eq">T<sub>in</sub>&#969;<sub>in</sub> + &Sigma;(load powers) = &Sigma;<sub>i</sub>( m<sub>i</sub><span class="vec">a</span><sub>Gi</sub>&middot;<span class="vec">v</span><sub>Gi</sub> + I<sub>Gi</sub>&#945;<sub>i</sub>&#969;<sub>i</sub> )</p>
+      <p>Gives the driving torque without any pin forces &mdash; ideal as an independent check. Uses kinematic coefficients h<sub>i</sub>=&#969;<sub>i</sub>/&#969;<sub>in</sub> and h<sub>i</sub>&#8242; via &#945;<sub>i</sub>=h<sub>i</sub>&#945;<sub>in</sub>+h<sub>i</sub>&#8242;&#969;<sub>in</sub>&sup2;.</p>
+      <h4>Gear trains</h4>
+      <p class="rc-eq">e = &prod;(driver teeth)/(driven teeth) &nbsp;&middot;&nbsp; J<sub>eff</sub> = &Sigma; J<sub>k</sub>(ratio<sub>k</sub>)&sup2; &nbsp;&middot;&nbsp; T<sub>in</sub> = J<sub>eff</sub>&#945;<sub>in</sub> + T<sub>load</sub>&#8201;e</p>
+      <p>Tooth load at a mesh = (net shaft torque)/(pitch radius). Reflected inertia scales with the <em>square</em> of the speed ratio.</p>
+      <h4>Sign &amp; unit discipline</h4>
+      <p>Angles CCW from +x; &omega;, &alpha; positive CCW. One unit system throughout &mdash; SI here. A positive input torque means the source drives the mechanism; a negative one means the mechanism drives the source (e.g., an engine power stroke).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GLOSSARY ============================ -->
+<section id="glossary" aria-labelledby="gl-h">
+  <h2 id="gl-h">Glossary</h2>
+  <label for="glossSearch" class="note">Filter terms:</label><br>
+  <input type="text" id="glossSearch" class="gloss-search" placeholder="Type to filter, e.g. Coriolis, Jacobian, train value&hellip;" aria-label="Filter glossary terms">
+  <dl class="gloss" id="glossList">
+    <div><dt>Vector loop equation</dt><dd>A statement that the position vectors around a closed kinematic chain sum to zero. Splitting it into x- and y-components yields the scalar equations solved for the unknown positions.</dd></div>
+    <div><dt>Jacobian (J)</dt><dd>The matrix of partial derivatives of the loop equations. It is the coefficient matrix for both the velocity and the acceleration solve, and the iteration matrix for a Newton position solve &mdash; unchanged across all three; only the right-hand side differs.</dd></div>
+    <div><dt>Kinematic coefficient (first order, h)</dt><dd>A geometry-only velocity ratio h<sub>i</sub> = d&#952;<sub>i</sub>/d&#952;<sub>in</sub> = &#969;<sub>i</sub>/&#969;<sub>in</sub>. Time-independent; depends only on configuration.</dd></div>
+    <div><dt>Kinematic coefficient (second order, h&#8242;)</dt><dd>h<sub>i</sub>&#8242; = d&sup2;&#952;<sub>i</sub>/d&#952;<sub>in</sub>&sup2;. Relates accelerations by &#945;<sub>i</sub> = h<sub>i</sub>&#945;<sub>in</sub> + h<sub>i</sub>&#8242;&#969;<sub>in</sub>&sup2;.</dd></div>
+    <div><dt>Inverse dynamics</dt><dd>Given the motion, find the forces and torques that produce it. The opposite of forward dynamics (given forces, find the motion).</dd></div>
+    <div><dt>Newton&ndash;Euler equations</dt><dd>The rigid-body laws &Sigma;<span class="vec">F</span> = m&#8201;<span class="vec">a</span><sub>G</sub> and &Sigma;M<sub>G</sub> = I<sub>G</sub>&#945;, written for each moving link.</dd></div>
+    <div><dt>Free-body diagram (FBD)</dt><dd>A sketch of one link showing every external force and torque acting on it. The starting point of any force analysis.</dd></div>
+    <div><dt>Two-force member</dt><dd>A massless link loaded only at two pins; its force must lie along the line joining them. A common simplification that reduces unknowns.</dd></div>
+    <div><dt>Coriolis acceleration</dt><dd>The 2&#8201;<span class="dot">r</span>&#969; term that arises when a point slides <em>along</em> a link that is simultaneously rotating. Present in the inverted slider-crank; omitting it corrupts every downstream force.</dd></div>
+    <div><dt>Train value (e)</dt><dd>The overall speed ratio of a gear train, &#969;<sub>out</sub>/&#969;<sub>in</sub> = &prod;(driver teeth)/(driven teeth), with a sign set by the number of external meshes.</dd></div>
+    <div><dt>Reflected (effective) inertia</dt><dd>An inertia referred to another shaft, scaled by the square of the speed ratio between them. Lets a whole drivetrain be replaced by one equivalent inertia at the input.</dd></div>
+    <div><dt>Power equation</dt><dd>An instantaneous energy balance: input power + load power = rate of change of kinetic energy. Yields the driving torque without computing internal pin forces.</dd></div>
+    <div><dt>Pitch radius</dt><dd>Half the pitch diameter of a gear, r = module &times; N / 2. The tangential tooth force acts at this radius; ratios are set by pitch diameters, not outside diameters.</dd></div>
+    <div><dt>Mass moment of inertia (I<sub>G</sub>)</dt><dd>A body&rsquo;s resistance to angular acceleration about its mass center. For a uniform slender rod, I<sub>G</sub> = (1/12)mL&sup2;.</dd></div>
+    <div><dt>Dead (limit) position</dt><dd>A configuration where the mechanism momentarily loses the ability to transmit motion or force in the usual way &mdash; the Jacobian becomes singular. Presses exploit the huge force multiplication near these points.</dd></div>
+  </dl>
+</section>
+
+<!-- ============================ RESOURCES ============================ -->
+<section id="resources" aria-labelledby="res-h">
+  <h2 id="res-h">External resources</h2>
+  <p class="note">Foundational refreshers and supplementary material. Links open in a new tab (indicated by &#8599;).</p>
+
+  <p class="res-cat">Foundational &mdash; rigid-body kinematics &amp; dynamics</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://ocw.mit.edu/courses/mechanical-engineering/2-003sc-engineering-dynamics-fall-2011/" target="_blank" rel="noopener">MIT OCW 2.003SC &mdash; Engineering Dynamics</a><span class="desc">Full course on rotating/translating frames, rigid-body acceleration, and the Newton&ndash;Euler equations that underpin Phase B. Free video lectures and problem sets.</span></li>
+    <li><a class="ext" href="https://en.wikipedia.org/wiki/Four-bar_linkage" target="_blank" rel="noopener">Four-bar linkage (overview)</a><span class="desc">Clear reference on grounded links, coupler, Grashof condition, and configuration branches &mdash; useful background for Problems 1 and 4.</span></li>
+  </ul>
+
+  <p class="res-cat">Supplementary &mdash; worked kinematics of the slider-crank</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://alistairstutorials.co.uk/tutorial13.html" target="_blank" rel="noopener">Slider-crank kinematics by differentiation</a><span class="desc">Step-by-step displacement&rarr;velocity&rarr;acceleration derivation for the slider, in the same analytical spirit as Problem 2.</span></li>
+    <li><a class="ext" href="https://alistairstutorials.co.uk/tutorial14.html" target="_blank" rel="noopener">Velocity &amp; acceleration diagrams (graphical)</a><span class="desc">The graphical companion method &mdash; a good cross-check on the connecting-rod motion you compute analytically.</span></li>
+  </ul>
+
+  <p class="res-cat">Supplementary &mdash; gear trains</p>
+  <ul class="res-list">
+    <li><a class="ext" href="https://ocw.mit.edu/courses/2-017j-design-of-electromechanical-robotic-systems-fall-2009/16cb0f850752422026a85d838f30e340_MIT2_017JF09_machines.pdf" target="_blank" rel="noopener">MIT OCW 2.017J &mdash; Machine elements &amp; linkages (PDF)</a><span class="desc">Concise notes on linkages, Grashof&rsquo;s law, and gearing fundamentals to reinforce Problems 1&ndash;3.</span></li>
+    <li><a class="ext" href="https://livephysics.com/tools/gear-train-calculator/" target="_blank" rel="noopener">Interactive gear-train / compound-train calculator</a><span class="desc">Enter tooth counts to see ratios, output rpm, and torque &mdash; handy for sanity-checking the train value in Problem 3.</span></li>
+  </ul>
+</section>
+
+<!-- ============================ RECAP ============================ -->
+<section id="recap" aria-labelledby="recap-h">
+  <h2 id="recap-h">What you should now be able to do</h2>
+  <ul class="obj">
+    <li>Close a vector loop and differentiate it for velocity and acceleration, reusing one Jacobian throughout.</li>
+    <li>Compute a gear train&rsquo;s value and its reflected inertia, and size the driving torque and tooth loads.</li>
+    <li>Translate a velocity/acceleration solution into kinematic coefficients and use the power equation for a fast torque answer.</li>
+    <li>Set up and solve a determinate Newton&ndash;Euler force system for every pin, tooth, and slot force in a mechanism.</li>
+    <li>Recognise where Coriolis acceleration enters and why omitting it invalidates the force analysis.</li>
+    <li>Chain a full drivetrain &mdash; gears, linkage, and load &mdash; to spec a real motor, and check the result by conservation of power.</li>
+  </ul>
+  <div class="callout"><span class="h">The habit that matters most</span><p>Solve every torque two ways when you can &mdash; forces one way, energy the other. Problems&nbsp;1 and&nbsp;4 are the same mechanism reaching 10.33&nbsp;N&middot;m by different roads. When your two roads disagree, you have found a bug; when they agree, you can trust the number.</p></div>
+</section>
+
+<section aria-label="References">
+  <hr class="soft">
+  <p class="note"><strong>References &amp; attribution.</strong> Problems, numerical values, and diagrams are original, authored for ENGI&nbsp;216 and consistent with the vector-loop and kinematic-coefficient framework of M.&nbsp;Stani&#353;i&#263;, <em>Mechanisms and Machines: Kinematics, Dynamics, and Synthesis</em> (Cengage, 2015). All figures are drawn to scale from the solved joint coordinates. External links are the property of their respective owners and are provided for educational reference only.</p>
+</section>
+
+</main>
+
+<div class="progress-dock" aria-hidden="false">
+  <div class="wrap">
+    <label for="readbar">Reading progress</label>
+    <progress id="readbar" value="0" max="100"></progress>
+    <span id="readpct">0%</span>
+  </div>
+</div>
+
+<footer>
+  <p>Built for <span class="program">ENGI 216 &middot; Dynamics &amp; Kinematics of Machines and Mechanisms</span> &middot; Brookdale Community College &middot; <span class="year">2026</span></p>
+  <p class="note" style="color:#9fb6c8;">Single-file, offline-capable, WCAG&nbsp;2.1&nbsp;AA. Use the Print button to export a full solutions PDF for distribution.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  function $(id){ return document.getElementById(id); }
+  function qsa(root,sel){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+
+  /* ---------- steppers ---------- */
+  qsa(document,".stepper").forEach(function(sp){
+    var steps = qsa(sp,".step");
+    var prev = sp.querySelector(".prev");
+    var next = sp.querySelector(".next");
+    var reveal = sp.querySelector(".reveal");
+    var reset = sp.querySelector(".reset");
+    var count = sp.querySelector(".step-count");
+    var cur = 0, all = false;
+
+    function render(){
+      for(var i=0;i<steps.length;i++){
+        if(all){ steps[i].hidden = false; }
+        else { steps[i].hidden = (i !== cur); }
+      }
+      if(all){ count.textContent = "Showing all " + steps.length + " steps"; }
+      else { count.textContent = "Step " + (cur+1) + " of " + steps.length; }
+      prev.disabled = all || cur===0;
+      next.disabled = all || cur===steps.length-1;
+      reveal.setAttribute("aria-pressed", all ? "true":"false");
+      reveal.textContent = all ? "Step mode" : "Reveal all";
+    }
+    prev.addEventListener("click",function(){ if(cur>0){ cur--; render(); }});
+    next.addEventListener("click",function(){ if(cur<steps.length-1){ cur++; render(); }});
+    reveal.addEventListener("click",function(){ all = !all; render(); });
+    reset.addEventListener("click",function(){ all=false; cur=0; render();
+      if(sp.scrollIntoView){ sp.scrollIntoView({behavior:"smooth",block:"nearest"}); } });
+    render();
+  });
+
+  /* ---------- reveal-every-solution ---------- */
+  var revAll = $("revealAllBtn");
+  if(revAll){
+    revAll.addEventListener("click",function(){
+      qsa(document,".stepper .reveal").forEach(function(btn){
+        if(btn.getAttribute("aria-pressed")!=="true"){ btn.click(); }
+      });
+      revAll.textContent = "All solutions revealed \u2713";
+    });
+  }
+
+  /* ---------- print ---------- */
+  var pb = $("printBtn");
+  if(pb){ pb.addEventListener("click",function(){ window.print(); }); }
+
+  /* ---------- glossary filter ---------- */
+  var gs = $("glossSearch"), gl = $("glossList");
+  if(gs && gl){
+    var rows = qsa(gl,"div");
+    var none = document.createElement("p");
+    none.className="gloss-none"; none.textContent="No matching terms."; none.hidden=true;
+    gl.parentNode.insertBefore(none, gl.nextSibling);
+    gs.addEventListener("input",function(){
+      var q = gs.value.toLowerCase().trim(); var shown=0;
+      rows.forEach(function(r){
+        var hit = r.textContent.toLowerCase().indexOf(q) !== -1;
+        r.hidden = !hit; if(hit) shown++;
+      });
+      none.hidden = shown!==0;
+    });
+  }
+
+  /* ---------- reading progress + active nav ---------- */
+  var bar = $("readbar"), pct = $("readpct");
+  var links = qsa(document,"nav.toc a");
+  var secs = links.map(function(a){ return $(a.getAttribute("href").slice(1)); }).filter(Boolean);
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    var p = max>0 ? Math.round((h.scrollTop || document.body.scrollTop)/max*100) : 0;
+    if(p<0)p=0; if(p>100)p=100;
+    if(bar){ bar.value = p; } if(pct){ pct.textContent = p + "%"; }
+    var idx=-1, y = (h.scrollTop||document.body.scrollTop) + 90;
+    for(var i=0;i<secs.length;i++){ if(secs[i].offsetTop <= y) idx=i; }
+    links.forEach(function(a,i){ if(i===idx){ a.classList.add("active"); } else { a.classList.remove("active"); } });
+  }
+  window.addEventListener("scroll",onScroll,{passive:true});
+  window.addEventListener("resize",onScroll);
+  onScroll();
+})();
+</script>
+</body>
+</html>
