@@ -320,50 +320,87 @@
   <div class="stepper" data-key="p1">
     <div class="step-track">
       <div class="step" data-i="0">
-        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Close the loop (position)</div>
-        <p>Write the loop <span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> = <span class="vec">r</span><sub>1</sub> + <span class="vec">r</span><sub>4</sub> and split into components:</p>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Write the loop and substitute the knowns</div>
+        <p>Walk the pins O&#8322; &rarr; A &rarr; B &rarr; O&#8324; &rarr; O&#8322; and add the link vectors head-to-tail. Because you return to the start, they must sum to zero &mdash; that is the loop-closure condition:</p>
+        <div class="vle"><span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> = <span class="vec">r</span><sub>1</sub> + <span class="vec">r</span><sub>4</sub></div>
+        <p>Project onto the x- and y-axes to get two scalar equations:</p>
         <div class="vle">r&#8322;cos&#952;&#8322; + r&#8323;cos&#952;&#8323; = r&#8321; + r&#8324;cos&#952;&#8324; &nbsp;&nbsp;&nbsp; r&#8322;sin&#952;&#8322; + r&#8323;sin&#952;&#8323; = r&#8324;sin&#952;&#8324;</div>
-        <p>Two equations, two unknowns (&#952;&#8323;, &#952;&#8324;). Solving by Newton&ndash;Raphson from an open-configuration guess:</p>
-        <div class="answer"><span class="ans-h">Position</span><span class="mini-eq">&#952;&#8323; = 21.02&deg; &nbsp;&nbsp; &#952;&#8324; = 92.32&deg;</span></div>
+        <p>Now put in the numbers (lengths in metres, &#952;&#8322; = 60&deg;). Everything except &#952;&#8323; and &#952;&#8324; is known:</p>
+        <div class="eqn">x:  0.10&middot;cos60&deg; + 0.26&middot;cos&#952;&#8323; = 0.30 + 0.18&middot;cos&#952;&#8324;   &rarr;   0.0500 + 0.26 cos&#952;&#8323; = 0.30 + 0.18 cos&#952;&#8324;
+y:  0.10&middot;sin60&deg; + 0.26&middot;sin&#952;&#8323; =        0.18&middot;sin&#952;&#8324;   &rarr;   0.0866 + 0.26 sin&#952;&#8323; =        0.18 sin&#952;&#8324;</div>
+        <p>Two equations, two unknowns &mdash; but &#952;&#8323; and &#952;&#8324; sit inside cosines and sines, so this pair is <em>nonlinear</em>. There is no one-line algebra solution; we iterate.</p>
       </div>
       <div class="step" data-i="1" hidden>
-        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Differentiate once (velocity)</div>
-        <p>Differentiating the loop with respect to time gives a linear system in (&#969;&#8323;, &#969;&#8324;). The coefficient matrix is the <strong>Jacobian J</strong>:</p>
-        <div class="eqn">J = [ -r&#8323; sin&#952;&#8323;   +r&#8324; sin&#952;&#8324; ]      J&middot;[&#969;&#8323;; &#969;&#8324;] = [ r&#8322;&#969;&#8322; sin&#952;&#8322; ]
-    [ +r&#8323; cos&#952;&#8323;   -r&#8324; cos&#952;&#8324; ]                    [ -r&#8322;&#969;&#8322; cos&#952;&#8322; ]</div>
-        <div class="answer"><span class="ans-h">Angular velocities</span><span class="mini-eq">&#969;&#8323; = &minus;4.342 rad/s &nbsp;&nbsp; &#969;&#8324; = +7.379 rad/s</span></div>
-        <p class="note">The rocker turns CCW; the coupler turns CW at this instant.</p>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Solve the position by Newton&ndash;Raphson</div>
+        <p>Sketch the linkage to read off a sensible starting guess &mdash; open configuration, &#952;&#8323; &asymp; 20&deg;, &#952;&#8324; &asymp; 90&deg;. Measure how far the loop fails to close by evaluating the two <em>residuals</em> (left side minus right side):</p>
+        <div class="eqn">f&#8321; = 0.0500 + 0.26 cos20&deg; &minus; 0.30 &minus; 0.18 cos90&deg; = &minus;0.00568 m
+f&#8322; = 0.0866 + 0.26 sin20&deg; &minus;        0.18 sin90&deg; = &minus;0.00447 m</div>
+        <p>Both are a few millimetres from zero, so the guess isn&rsquo;t quite closed. Correct it in one Newton step by solving <span class="vec">J</span>&middot;&Delta; = &minus;<span class="vec">f</span> for the angle corrections:</p>
+        <div class="mini-eq">&Delta;&#952;&#8323; = +1.05&deg; &nbsp; &Delta;&#952;&#8324; = +2.33&deg; &nbsp; &rArr; &nbsp; &#952;&#8323; &asymp; 21.05&deg;, &#952;&#8324; &asymp; 92.33&deg;</div>
+        <p>Re-evaluate the residuals at the updated angles; one more pass drives them below 10&#8315;&#185;&#178; m &mdash; converged:</p>
+        <div class="answer"><span class="ans-h">Position</span><span class="mini-eq">&#952;&#8323; = 21.02&deg; &nbsp;&nbsp; &#952;&#8324; = 92.32&deg;</span></div>
+        <p class="note">Check the x-loop: r&#8322;cos&#952;&#8322; + r&#8323;cos&#952;&#8323; = 0.0500 + 0.2427 = 0.2927 m, and r&#8321; + r&#8324;cos&#952;&#8324; = 0.30 + (&minus;0.0073) = 0.2927 m. They match. &#10003;</p>
       </div>
       <div class="step" data-i="2" hidden>
-        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 3 &mdash; Differentiate twice (acceleration)</div>
-        <p>Differentiate again. Here is the payoff you learned in Chapter&nbsp;2: <strong>the matrix on the left is the same J</strong> &mdash; only the right-hand side changes, now carrying the &omega;&sup2; centripetal terms (with &alpha;&#8322;&nbsp;=&nbsp;0):</p>
-        <div class="eqn">J&middot;[&#945;&#8323;; &#945;&#8324;] = [ r&#8322;&#969;&#8322;&sup2;cos&#952;&#8322; + r&#8323;&#969;&#8323;&sup2;cos&#952;&#8323; &minus; r&#8324;&#969;&#8324;&sup2;cos&#952;&#8324; ]
-          [ r&#8322;&#969;&#8322;&sup2;sin&#952;&#8322; + r&#8323;&#969;&#8323;&sup2;sin&#952;&#8323; &minus; r&#8324;&#969;&#8324;&sup2;sin&#952;&#8324; ]</div>
-        <div class="answer"><span class="ans-h">Angular accelerations</span><span class="mini-eq">&#945;&#8323; = +103.8 rad/s&sup2; &nbsp;&nbsp; &#945;&#8324; = +192.7 rad/s&sup2;</span></div>
-        <div class="analogy"><span class="h">Analogy &mdash; the slope stays put, only the terrain shifts</span><p>Reusing J is like keeping the same map of the hillside for both the &ldquo;which way is downhill&rdquo; question and the &ldquo;how fast does the slope change&rdquo; question. The geometry of the linkage sets J; velocity and acceleration are just two different loads applied to that same geometry. Factor J once, reuse it &mdash; exactly what a numerical solver does.</p></div>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 3 &mdash; Differentiate once (velocity)</div>
+        <p>Differentiate the loop with respect to time. &#952;&#8322;, &#952;&#8323;, &#952;&#8324; become rates &#969;&#8322;, &#969;&#8323;, &#969;&#8324;; &#969;&#8322; = 20 rad/s is known, so &#969;&#8323; and &#969;&#8324; are the two unknowns. Collect them on the left &mdash; the coefficient matrix is the <strong>Jacobian J</strong>:</p>
+        <div class="eqn">      [ &minus;r&#8323;sin&#952;&#8323;   +r&#8324;sin&#952;&#8324; ]   [ &minus;0.0932   +0.1799 ]
+J  =  [ +r&#8323;cos&#952;&#8323;   &minus;r&#8324;cos&#952;&#8324; ] = [ +0.2427   +0.0073 ]
+
+J&middot;[&#969;&#8323;; &#969;&#8324;] = [ r&#8322;&#969;&#8322; sin&#952;&#8322; ; &minus;r&#8322;&#969;&#8322; cos&#952;&#8322; ] = [ 0.10&middot;20&middot;sin60&deg; ; &minus;0.10&middot;20&middot;cos60&deg; ] = [ +1.732 ; &minus;1.000 ]</div>
+        <p>Solve the 2&times;2 system (determinant det J = &minus;0.04433):</p>
+        <div class="answer"><span class="ans-h">Angular velocities</span><span class="mini-eq">&#969;&#8323; = &minus;4.342 rad/s &nbsp;&nbsp; &#969;&#8324; = +7.379 rad/s</span></div>
+        <p class="note">The rocker turns CCW (&#969;&#8324; &gt; 0); the coupler turns CW (&#969;&#8323; &lt; 0) at this instant.</p>
       </div>
       <div class="step" data-i="3" hidden>
-        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 4 &mdash; Acceleration of each mass center</div>
-        <p>With every &omega; and &alpha; known, rigid-body kinematics gives the acceleration of each link&rsquo;s center of mass (G at the midpoints). These are what the inertia forces will act on:</p>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 4 &mdash; Differentiate twice (acceleration)</div>
+        <p>Differentiate again. Here is the Chapter&nbsp;2 payoff: <strong>the matrix on the left is the same J</strong> &mdash; only the right-hand side changes, now carrying the &omega;&sup2; centripetal terms (with &#945;&#8322; = 0):</p>
+        <div class="eqn">J&middot;[&#945;&#8323;; &#945;&#8324;] = [ r&#8322;&#969;&#8322;&sup2;cos&#952;&#8322; + r&#8323;&#969;&#8323;&sup2;cos&#952;&#8323; &minus; r&#8324;&#969;&#8324;&sup2;cos&#952;&#8324; ]
+             [ r&#8322;&#969;&#8322;&sup2;sin&#952;&#8322; + r&#8323;&#969;&#8323;&sup2;sin&#952;&#8323; &minus; r&#8324;&#969;&#8324;&sup2;sin&#952;&#8324; ]
+
+r&#8322;&#969;&#8322;&sup2; = 0.10&middot;20&sup2; = 40.0     r&#8323;&#969;&#8323;&sup2; = 0.26&middot;4.342&sup2; = 4.90     r&#8324;&#969;&#8324;&sup2; = 0.18&middot;7.379&sup2; = 9.80
+RHS = [ +24.97 ;  +26.61 ]</div>
+        <p>Same factored J, new load &mdash; back-substitute:</p>
+        <div class="answer"><span class="ans-h">Angular accelerations</span><span class="mini-eq">&#945;&#8323; = +103.8 rad/s&sup2; &nbsp;&nbsp; &#945;&#8324; = +192.7 rad/s&sup2;</span></div>
+        <div class="analogy"><span class="h">Analogy &mdash; the slope stays put, only the terrain shifts</span><p>Reusing J is like keeping the same map of the hillside for both the &ldquo;which way is downhill&rdquo; question and the &ldquo;how fast does the slope change&rdquo; question. The geometry sets J; velocity and acceleration are just two different loads applied to it. Factor J once, reuse it &mdash; exactly what a numerical solver does.</p></div>
+      </div>
+      <div class="step" data-i="4" hidden>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 5 &mdash; Acceleration of each mass center</div>
+        <p>Work outward from the fixed pivot. The crank tip A has only centripetal acceleration (&#945;&#8322; = 0):</p>
+        <div class="mini-eq"><span class="vec">a</span><sub>A</sub> = &minus;&#969;&#8322;&sup2; <span class="vec">r</span><sub>2</sub> = &minus;400&middot;(0.05, 0.0866) = (&minus;10.0, &minus;17.32) m/s&sup2;</div>
+        <p>March across the coupler to B with the rigid-body rule <span class="vec">a</span><sub>B</sub> = <span class="vec">a</span><sub>A</sub> + <span class="vec">&#945;</span><sub>3</sub>&times;<span class="vec">r</span><sub>3</sub> &minus; &#969;&#8323;&sup2;<span class="vec">r</span><sub>3</sub>. Each link&rsquo;s center G sits at its midpoint, so a<sub>G</sub> is the average of its two end accelerations:</p>
         <table class="tbl"><thead><tr><th>Link</th><th>a<sub>Gx</sub> (m/s&sup2;)</th><th>a<sub>Gy</sub> (m/s&sup2;)</th><th>|a<sub>G</sub>| (m/s&sup2;)</th></tr></thead>
         <tbody>
         <tr><td>2 crank</td><td>&minus;10.00</td><td>&minus;17.32</td><td>20.0</td></tr>
         <tr><td>3 coupler</td><td>&minus;27.13</td><td>&minus;22.92</td><td>35.5</td></tr>
         <tr><td>4 rocker</td><td>&minus;17.13</td><td>&minus;5.60</td><td>18.0</td></tr>
         </tbody></table>
+        <p class="note">These a<sub>G</sub> values are the whole reason we did Phase&nbsp;A: they set the inertia (mass&times;acceleration) each link fights in Phase&nbsp;B.</p>
       </div>
-      <div class="step" data-i="4" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Count equations vs. unknowns</div>
+      <div class="step" data-i="5" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 6 &mdash; Count equations vs. unknowns</div>
         <p>Three moving links &times; three planar equations each = <strong>9 equations</strong>. Unknowns: the pin forces <span class="vec">F</span><sub>12</sub>, <span class="vec">F</span><sub>32</sub>, <span class="vec">F</span><sub>43</sub>, <span class="vec">F</span><sub>14</sub> (8 scalar components) plus the drive torque T&#8322; = <strong>9 unknowns</strong>. Determinate &mdash; solvable exactly.</p>
         <div class="realworld"><span class="h">Real-world &mdash; the count is the go/no-go gate</span><p>Before any solver (MATLAB, ANSYS) will invert a matrix, it checks that the equation count matches the unknown count. Get it wrong and you either have no solution or infinitely many &mdash; both useless for choosing a real motor. Counting first is the same discipline a structural engineer runs before trusting a truss.</p></div>
       </div>
-      <div class="step" data-i="5" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 6 &mdash; Newton&ndash;Euler on every link</div>
-        <p>For each link i: &Sigma;F<sub>x</sub> = m&#8201;a<sub>Gx</sub>, &Sigma;F<sub>y</sub> = m&#8201;a<sub>Gy</sub>, and moments about G<sub>i</sub>: &Sigma;M<sub>Gi</sub> = I<sub>Gi</sub>&#945;<sub>i</sub>. Newton&rsquo;s third law couples adjacent links (<span class="vec">F</span><sub>23</sub> = &minus;<span class="vec">F</span><sub>32</sub>, etc.). The 20&nbsp;N&middot;m load enters link&nbsp;4&rsquo;s moment equation opposing &#969;&#8324;. Assemble the 9&times;9 system and solve.</p>
-        <p class="note">Slender-rod inertias: I<sub>G2</sub>=6.67&times;10&#8315;&#8308;, I<sub>G3</sub>=8.45&times;10&#8315;&sup3;, I<sub>G4</sub>=2.97&times;10&#8315;&sup3; kg&middot;m&sup2;.</p>
-      </div>
       <div class="step" data-i="6" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 7 &mdash; Results</div>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 7 &mdash; Build each link&rsquo;s inertia force and torque</div>
+        <p>Before writing the pin-force equations, compute the <em>known</em> right-hand sides they must equal. For every link the net force equals m&middot;a<sub>G</sub> and the net moment about G equals I<sub>G</sub>&middot;&#945;. Slender-rod inertias I<sub>G</sub> = mL&sup2;/12:</p>
+        <p class="note">I<sub>G2</sub> = 0.8&middot;0.10&sup2;/12 = 6.67&times;10&#8315;&#8308;, &nbsp; I<sub>G3</sub> = 1.5&middot;0.26&sup2;/12 = 8.45&times;10&#8315;&sup3;, &nbsp; I<sub>G4</sub> = 1.1&middot;0.18&sup2;/12 = 2.97&times;10&#8315;&sup3; kg&middot;m&sup2;.</p>
+        <table class="tbl"><thead><tr><th>Link</th><th>m&middot;a<sub>Gx</sub> (N)</th><th>m&middot;a<sub>Gy</sub> (N)</th><th>I<sub>G</sub>&middot;&#945; (N&middot;m)</th></tr></thead>
+        <tbody>
+        <tr><td>2 crank</td><td>&minus;8.00</td><td>&minus;13.86</td><td>0 (&#945;&#8322;=0)</td></tr>
+        <tr><td>3 coupler</td><td>&minus;40.69</td><td>&minus;34.38</td><td>+0.877</td></tr>
+        <tr><td>4 rocker</td><td>&minus;18.84</td><td>&minus;6.16</td><td>+0.572</td></tr>
+        </tbody></table>
+        <p>These nine numbers are the targets. Phase&nbsp;B now finds the pin forces that produce exactly them.</p>
+      </div>
+      <div class="step" data-i="7" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 8 &mdash; Newton&ndash;Euler on every link</div>
+        <p>For each link i write &Sigma;F<sub>x</sub> = m&#8201;a<sub>Gx</sub>, &Sigma;F<sub>y</sub> = m&#8201;a<sub>Gy</sub>, and moments about G<sub>i</sub>: &Sigma;M<sub>Gi</sub> = I<sub>Gi</sub>&#945;<sub>i</sub>. Newton&rsquo;s third law couples adjacent links (<span class="vec">F</span><sub>23</sub> = &minus;<span class="vec">F</span><sub>32</sub>, etc.). The 20&nbsp;N&middot;m load enters link&nbsp;4&rsquo;s moment equation opposing &#969;&#8324;. Assemble the 9&times;9 system and solve it in one matrix inversion.</p>
+        <p class="note">By hand you would solve link&nbsp;4 first (it touches the known load), then link&nbsp;3, then link&nbsp;2 &mdash; each link passes its pin reaction to the next. A solver does all nine at once.</p>
+      </div>
+      <div class="step" data-i="8" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 9 &mdash; Results</div>
         <div class="answer"><span class="ans-h">Pin forces &amp; drive torque</span>
           <div class="resgrid">
             <div class="rc"><b>|F&#8321;&#8322;|</b> = 192.9 N<br>(&minus;171.0, &minus;89.5)</div>
@@ -374,6 +411,7 @@
           </div>
         </div>
         <p><strong>Interpretation.</strong> T&#8322; is positive, so the motor must <em>drive</em> the crank with 10.33&nbsp;N&middot;m to push the 20&nbsp;N&middot;m load and accelerate the links. Notice the bearing at O&#8322; carries ~193&nbsp;N even though the mechanism weighs only a few newtons &mdash; at 20&nbsp;rad/s the loads are pure inertia, not gravity. That is exactly why we neglected weight here.</p>
+        <div class="callout"><span class="h">Cross-check ahead</span><p>Problem&nbsp;4 solves this identical mechanism by the energy/power route and lands on the same 10.33&nbsp;N&middot;m without ever computing a pin force. Two independent roads to one number is the strongest check you have.</p></div>
       </div>
     </div>
     <div class="step-controls">
@@ -437,28 +475,53 @@
     <div class="step-track">
       <div class="step" data-i="0">
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Position from the loop</div>
-        <p>Loop <span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> = x&#8201;<span class="vec">i</span> + e&#8201;<span class="vec">j</span>. The y-component alone fixes the rod angle:</p>
-        <div class="vle">sin&#952;&#8323; = (e &minus; r&#8322;sin&#952;&#8322;) / r&#8323; &nbsp;&rarr;&nbsp; x = r&#8322;cos&#952;&#8322; + r&#8323;cos&#952;&#8323;</div>
+        <p>Close the loop O&#8322; &rarr; A &rarr; B along the crank and rod; the piston pin B lands on the cylinder centreline, a height e above O&#8322;. So <span class="vec">r</span><sub>2</sub> + <span class="vec">r</span><sub>3</sub> = x&#8201;<span class="vec">i</span> + e&#8201;<span class="vec">j</span>. The y-component contains only &#952;&#8323;, so solve it first:</p>
+        <div class="vle">sin&#952;&#8323; = (e &minus; r&#8322;sin&#952;&#8322;) / r&#8323;</div>
+        <p>Substitute (&#952;&#8322; = 45&deg;):</p>
+        <div class="eqn">sin&#952;&#8323; = (0.02 &minus; 0.05&middot;sin45&deg;) / 0.18 = (0.02 &minus; 0.03536) / 0.18 = &minus;0.0853   &rarr;   &#952;&#8323; = &minus;4.89&deg;</div>
+        <p>With &#952;&#8323; known, the x-component gives the piston position directly:</p>
+        <div class="eqn">x = r&#8322;cos&#952;&#8322; + r&#8323;cos&#952;&#8323; = 0.05&middot;cos45&deg; + 0.18&middot;cos(&minus;4.89&deg;) = 0.0354 + 0.1793 = 0.2147 m</div>
         <div class="answer"><span class="ans-h">Position</span><span class="mini-eq">&#952;&#8323; = &minus;4.89&deg; &nbsp;&nbsp; x = 0.2147 m (214.7 mm)</span></div>
       </div>
       <div class="step" data-i="1" hidden>
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Velocity</div>
-        <p>Differentiate: the y-equation gives &#969;&#8323; directly, then the x-equation gives the piston velocity.</p>
-        <div class="mini-eq">&#969;&#8323; = &minus;(r&#8322;cos&#952;&#8322;&#8201;&#969;&#8322;)&#8202;/&#8202;(r&#8323;cos&#952;&#8323;) &nbsp;&nbsp; <span class="dot">x</span> = &minus;r&#8322;&#969;&#8322;sin&#952;&#8322; &minus; r&#8323;&#969;&#8323;sin&#952;&#8323;</div>
+        <p>Differentiate the loop once. The y-equation carries only &#969;&#8323;, so it hands over the rod rate directly:</p>
+        <div class="eqn">&#969;&#8323; = &minus;(r&#8322;cos&#952;&#8322;&middot;&#969;&#8322;)/(r&#8323;cos&#952;&#8323;) = &minus;(0.05&middot;cos45&deg;&middot;200)/(0.18&middot;cos(&minus;4.89&deg;)) = &minus;7.071 / 0.1793 = &minus;39.43 rad/s</div>
+        <p>The x-equation then gives the piston velocity:</p>
+        <div class="mini-eq"><span class="dot">x</span> = &minus;r&#8322;&#969;&#8322;sin&#952;&#8322; &minus; r&#8323;&#969;&#8323;sin&#952;&#8323; = &minus;7.071 &minus; 0.605 = &minus;7.68 m/s</div>
         <div class="answer"><span class="ans-h">Velocity</span><span class="mini-eq">&#969;&#8323; = &minus;39.43 rad/s &nbsp;&nbsp; piston <span class="dot">x</span> = &minus;7.68 m/s</span></div>
       </div>
       <div class="step" data-i="2" hidden>
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 3 &mdash; Acceleration</div>
-        <p>Differentiate once more (with &#945;&#8322;&nbsp;=&nbsp;0):</p>
+        <p>Differentiate once more (&#945;&#8322; = 0). The y-equation returns &#945;&#8323;; the x-equation returns the piston acceleration:</p>
+        <div class="eqn">&#945;&#8323; = [ r&#8322;&#969;&#8322;&sup2;sin&#952;&#8322; + r&#8323;&#969;&#8323;&sup2;sin&#952;&#8323; ] / (r&#8323;cos&#952;&#8323;) = +7752 rad/s&sup2;</div>
+        <div class="mini-eq"><span class="ddot">x</span> = &minus;r&#8322;&#969;&#8322;&sup2;cos&#952;&#8322; &minus; r&#8323;(&#945;&#8323;sin&#952;&#8323; + &#969;&#8323;&sup2;cos&#952;&#8323;) = &minus;1574 m/s&sup2;</div>
         <div class="answer"><span class="ans-h">Acceleration</span><span class="mini-eq">&#945;&#8323; = +7752 rad/s&sup2; &nbsp;&nbsp; piston <span class="ddot">x</span> = &minus;1574 m/s&sup2;</span></div>
-        <p>Mass-center accelerations: a<sub>G2</sub>&nbsp;=&nbsp;(&minus;707, &minus;707), a<sub>G3</sub>&nbsp;=&nbsp;(&minus;1494, &minus;707), a<sub>G4</sub>&nbsp;=&nbsp;(&minus;1574, 0) m/s&sup2;. The piston&rsquo;s inertia force alone is m&#8324;|a|&nbsp;&asymp;&nbsp;787&nbsp;N &mdash; before the gas even acts.</p>
+        <p class="note">Note the scale: r&#8322;&#969;&#8322;&sup2; = 0.05&middot;200&sup2; = 2000 m/s&sup2; of centripetal acceleration at the crank pin alone. At 200 rad/s the mechanism lives in a world of thousands of m/s&sup2;.</p>
       </div>
       <div class="step" data-i="3" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Free bodies &amp; the wall force</div>
-        <p>Unknowns: pin forces <span class="vec">F</span><sub>12</sub>, <span class="vec">F</span><sub>32</sub>, <span class="vec">F</span><sub>43</sub> (6 components), the cylinder-wall normal N on the piston (1, perpendicular to the bore), and T&#8322; = <strong>8 unknowns</strong>. Equations: crank (3) + rod (3) + piston (2 force equations) = <strong>8</strong>. The known 8000&nbsp;N gas force moves to the right-hand side of the piston equations.</p>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 4 &mdash; Mass-center accelerations</div>
+        <p>With every &#969; and &#945; known, average the end accelerations of each link to get its center G:</p>
+        <div class="mini-eq">a<sub>G2</sub> = (&minus;707, &minus;707) &nbsp; a<sub>G3</sub> = (&minus;1494, &minus;707) &nbsp; a<sub>G4</sub> = (&minus;1574, 0) m/s&sup2;</div>
+        <p>The piston (link&nbsp;4) rides the full <span class="ddot">x</span>, so its inertia force alone is m&#8324;|a| = 0.5&middot;1574 &asymp; <strong>787&nbsp;N</strong> &mdash; and that is <em>before</em> the 8000&nbsp;N gas load is applied.</p>
       </div>
       <div class="step" data-i="4" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Solve &amp; interpret the sign</div>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Free bodies &amp; the wall force</div>
+        <p>Unknowns: pin forces <span class="vec">F</span><sub>12</sub>, <span class="vec">F</span><sub>32</sub>, <span class="vec">F</span><sub>43</sub> (6 components), the cylinder-wall normal N on the piston (1, perpendicular to the bore), and T&#8322; = <strong>8 unknowns</strong>. Equations: crank (3) + rod (3) + piston (2 force equations) = <strong>8</strong>. The known 8000&nbsp;N gas force moves to the right-hand side of the piston equations.</p>
+      </div>
+      <div class="step" data-i="5" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 6 &mdash; Inertia forces on each link</div>
+        <p>Form the known m&middot;a<sub>G</sub> vector for each link &mdash; these are the loads the pin forces plus the 8000&nbsp;N gas force must balance:</p>
+        <table class="tbl"><thead><tr><th>Link</th><th>m&middot;a<sub>Gx</sub> (N)</th><th>m&middot;a<sub>Gy</sub> (N)</th></tr></thead>
+        <tbody>
+        <tr><td>2 crank (0.9 kg)</td><td>&minus;636</td><td>&minus;636</td></tr>
+        <tr><td>3 rod (0.6 kg)</td><td>&minus;896</td><td>&minus;424</td></tr>
+        <tr><td>4 piston (0.5 kg)</td><td>&minus;787</td><td>0</td></tr>
+        </tbody></table>
+        <p class="note">The gas force (8000&nbsp;N, pushing the piston toward the crank) enters the piston&rsquo;s x-equation on the known side. The piston does not rotate, so it contributes force equations only.</p>
+      </div>
+      <div class="step" data-i="6" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 7 &mdash; Solve &amp; interpret the sign</div>
         <div class="answer neg"><span class="ans-h">Bearing forces &amp; crank torque</span>
           <div class="resgrid">
             <div class="rc"><b>|F&#8321;&#8322;|</b> = 5874 N</div>
@@ -468,7 +531,7 @@
             <div class="rc"><b>T&#8322;</b> = &minus;253.8 N&middot;m</div>
           </div>
         </div>
-        <p><strong>Read the negative torque carefully.</strong> T&#8322; being negative means the crank does <em>not</em> need driving here &mdash; the gas force is doing work <em>on</em> the shaft. This is the power stroke: the engine is delivering 253.8&nbsp;N&middot;m to the flywheel/load at this instant. A positive result would have meant the shaft must be pushed (compression or exhaust stroke). The 6&ndash;7&nbsp;kN pin forces combine gas load and inertia &mdash; that is what the big-end bearing must survive.</p>
+        <p><strong>Read the negative torque carefully.</strong> T&#8322; being negative means the crank does <em>not</em> need driving here &mdash; the gas force is doing work <em>on</em> the shaft. This is the power stroke: the engine delivers 253.8&nbsp;N&middot;m to the flywheel/load at this instant. A positive result would have meant the shaft must be pushed (compression or exhaust stroke). The 6&ndash;7&nbsp;kN pin forces combine gas load and inertia &mdash; that is what the big-end bearing must survive.</p>
         <div class="realworld"><span class="h">Real-world &mdash; the torque curve</span><p>Sweep &#952;&#8322; through a full turn and this T&#8322; traces the engine&rsquo;s instantaneous torque curve. Its average over the cycle, times rpm, is the shaft power. The wildly varying instantaneous value is exactly why engines need a flywheel to smooth delivery.</p></div>
       </div>
     </div>
@@ -629,31 +692,45 @@
   <div class="stepper" data-key="p3">
     <div class="step-track">
       <div class="step" data-i="0">
-        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Train value</div>
-        <p>For meshing gears the pitch-line speeds match, so each mesh ratio is (driver teeth)/(driven teeth). Two external meshes, so the output turns the <em>same</em> way as the input:</p>
-        <div class="mini-eq">e = &#969;&#8325;/&#969;&#8322; = (N&#8322;&#8201;N&#8324;)/(N&#8323;&#8201;N&#8325;) = (20&middot;18)/(60&middot;54) = 1/9</div>
-        <div class="answer"><span class="ans-h">Kinematics</span><span class="mini-eq">&#969;&#8325; = &#969;&#8322;/9 &nbsp;&nbsp; &#945;&#8323; = &#945;&#8322;(N&#8322;/N&#8323;) = 50 rad/s&sup2; &nbsp;&nbsp; &#945;&#8325; = 150/9 = 16.67 rad/s&sup2;</span></div>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Mesh ratios and train value</div>
+        <p>At each mesh the two pitch circles roll without slipping, so their pitch-line speeds match and the speed ratio is (driver teeth)/(driven teeth). Take the two meshes in turn:</p>
+        <div class="eqn">gear 2 &rarr; gear 3:  &#969;&#8323;/&#969;&#8322; = N&#8322;/N&#8323; = 20/60 = 1/3
+gear 4 &rarr; gear 5:  &#969;&#8325;/&#969;&#8324; = N&#8324;/N&#8325; = 18/54 = 1/3</div>
+        <p>Gears 3 and 4 are keyed to one shaft, so &#969;&#8324; = &#969;&#8323;. Multiply the two stages for the overall train value e. Both meshes are external, so the sign is positive (output turns the same way as input):</p>
+        <div class="mini-eq">e = &#969;&#8325;/&#969;&#8322; = (N&#8322;&middot;N&#8324;)/(N&#8323;&middot;N&#8325;) = (20&middot;18)/(60&middot;54) = 360/3240 = 1/9</div>
+        <div class="answer"><span class="ans-h">Train value</span><span class="mini-eq">e = 1/9 &nbsp; (9 : 1 reduction, same sense)</span></div>
       </div>
       <div class="step" data-i="1" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 2 &mdash; Effective inertia at the motor</div>
-        <p>The clean way to get motor torque is to refer everything to the input shaft. Each downstream inertia is multiplied by the <em>square</em> of its speed ratio:</p>
-        <div class="eqn">J_eff = J&#8322; + J&#8323;&#8324;(N&#8322;/N&#8323;)&sup2; + (J&#8325;+J_load)(1/9)&sup2;
-      = 0.004 + 0.012/9 + 0.506/81 = 0.011580 kg&middot;m&sup2;</div>
+        <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Angular acceleration of every gear</div>
+        <p>Ratios apply to acceleration just as to speed. With input &#945;&#8322; = 150 rad/s&sup2;:</p>
+        <div class="eqn">&#945;&#8323; = &#945;&#8324; = &#945;&#8322;&middot;(N&#8322;/N&#8323;) = 150&middot;(1/3) = 50 rad/s&sup2;
+&#945;&#8325;      = &#945;&#8322;&middot;e         = 150&middot;(1/9) = 16.67 rad/s&sup2;</div>
+        <p class="note">The output shaft accelerates nine times slower than the motor &mdash; the same 9&times; the ratio trades away in speed it will pay back in torque.</p>
       </div>
       <div class="step" data-i="2" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 3 &mdash; Required motor torque</div>
-        <p>Motor torque = (torque to accelerate the reflected inertia) + (load torque reflected through the ratio):</p>
-        <div class="mini-eq">T&#8322; = J_eff&#8201;&#945;&#8322; + T<sub>L</sub>&#8201;e = (0.011580)(150) + (40)(1/9) = 1.737 + 4.444</div>
-        <div class="answer"><span class="ans-h">Motor torque</span><span class="mini-eq">T&#8322; = 6.18 N&middot;m</span></div>
-        <p class="note">Only ~28% of the motor&rsquo;s effort accelerates the drivetrain; ~72% overcomes the steady load. That split changes with how hard you accelerate.</p>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 3 &mdash; Effective inertia at the motor</div>
+        <p>Refer every rotating inertia to the input shaft. A downstream inertia seen through a speed ratio n is multiplied by n&sup2; (the reflected-inertia rule). Gears 3&ndash;4 spin at 1/3 the motor speed; gear 5 and the load spin at 1/9:</p>
+        <div class="eqn">J_eff = J&#8322; + J&#8323;&#8324;&middot;(N&#8322;/N&#8323;)&sup2; + (J&#8325; + J_load)&middot;(1/9)&sup2;
+      = 0.004 + 0.012&middot;(1/9) + 0.506&middot;(1/81)
+      = 0.004 + 0.001333 + 0.006247 = 0.011580 kg&middot;m&sup2;</div>
+        <p class="note">The huge 0.500 kg&middot;m&sup2; load inertia shrinks to 0.00617 kg&middot;m&sup2; at the motor &mdash; divided by 81. That is the reflected-inertia trick doing the heavy lifting.</p>
       </div>
       <div class="step" data-i="3" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Tooth (tangential) loads</div>
-        <p>Take each shaft as a free body in rotation (&Sigma;M = J&#945;). Pitch radii: r = module&middot;N/2, so r&#8322;=20, r&#8323;=60, r&#8324;=18, r&#8325;=54&nbsp;mm.</p>
-        <div class="eqn">W&#8322;&#8323; = (T&#8322; &minus; J&#8322;&#945;&#8322;)/r&#8322; = (6.181 &minus; 0.600)/0.020 = 279.1 N
-W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;&#8323;)/r&#8324; = (16.744 &minus; 0.600)/0.018 = 896.9 N</div>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Required motor torque</div>
+        <p>The motor supplies two things: torque to angularly accelerate the reflected inertia, and torque to overcome the steady load reflected through the ratio:</p>
+        <div class="eqn">T&#8322; = J_eff&middot;&#945;&#8322; + T<sub>L</sub>&middot;e
+   = (0.011580)(150) + (40)(1/9)
+   = 1.737 + 4.444 = 6.18 N&middot;m</div>
+        <div class="answer"><span class="ans-h">Motor torque</span><span class="mini-eq">T&#8322; = 6.18 N&middot;m</span></div>
+        <p class="note">Only ~28% of the effort (1.74&nbsp;N&middot;m) accelerates the drivetrain; ~72% (4.44&nbsp;N&middot;m) holds against the load. That split shifts if you accelerate harder or lighten the load.</p>
+      </div>
+      <div class="step" data-i="4" hidden>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Tooth (tangential) loads</div>
+        <p>Take each shaft as a free body in pure rotation (&Sigma;M = J&#945;) and divide the net torque by the pitch radius r = module&middot;N/2. With module 2&nbsp;mm: r&#8322; = 20, r&#8323; = 60, r&#8324; = 18, r&#8325; = 54&nbsp;mm.</p>
+        <div class="eqn">W&#8322;&#8323; = (T&#8322; &minus; J&#8322;&#945;&#8322;)/r&#8322;       = (6.181 &minus; 0.004&middot;150)/0.020 = (6.181 &minus; 0.600)/0.020 = 279 N
+W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;&#8323;)/r&#8324; = (279&middot;0.060 &minus; 0.012&middot;50)/0.018 = (16.74 &minus; 0.60)/0.018 = 897 N</div>
         <div class="answer"><span class="ans-h">Contact forces</span><span class="mini-eq">W&#8322;&#8323; = 279 N &nbsp;&nbsp; W&#8324;&#8325; = 897 N</span></div>
-        <p><strong>Check.</strong> On the output shaft: W&#8324;&#8325;&middot;r&#8325; &minus; T<sub>L</sub> = 897&middot;0.054 &minus; 40 = 8.43&nbsp;N&middot;m, and (J&#8325;+J_load)&#945;&#8325; = 0.506&middot;16.67 = 8.43&nbsp;N&middot;m. They match &mdash; the analysis is self-consistent. The second mesh carries 3.2&times; the first mesh&rsquo;s load, which is why the low-speed stage of a gearbox uses the wider, stronger gears.</p>
+        <p><strong>Check.</strong> On the output shaft: W&#8324;&#8325;&middot;r&#8325; &minus; T<sub>L</sub> = 897&middot;0.054 &minus; 40 = 8.43&nbsp;N&middot;m, and (J&#8325; + J_load)&#945;&#8325; = 0.506&middot;16.67 = 8.43&nbsp;N&middot;m. They match &mdash; the analysis is self-consistent. The second mesh carries 3.2&times; the first mesh&rsquo;s load, which is why a gearbox&rsquo;s low-speed stage uses the wider, stronger gears.</p>
       </div>
     </div>
     <div class="step-controls">
@@ -713,27 +790,39 @@ W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;
     <div class="step-track">
       <div class="step" data-i="0">
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; First-order kinematic coefficients</div>
-        <p>A kinematic coefficient is a <em>geometry-only</em> velocity ratio: h<sub>i</sub> = &#969;<sub>i</sub>/&#969;&#8322; = d&#952;<sub>i</sub>/d&#952;&#8322;. It carries no time in it &mdash; it depends only on the configuration. From Problem&nbsp;1&rsquo;s velocities:</p>
-        <div class="answer"><span class="ans-h">First-order coefficients</span><span class="mini-eq">h&#8323; = &#969;&#8323;/&#969;&#8322; = &minus;0.2171 &nbsp;&nbsp; h&#8324; = &#969;&#8324;/&#969;&#8322; = +0.3690</span></div>
+        <p>A kinematic coefficient is a <em>geometry-only</em> velocity ratio, h<sub>i</sub> = &#969;<sub>i</sub>/&#969;&#8322; = d&#952;<sub>i</sub>/d&#952;&#8322;. It carries no time &mdash; it depends only on configuration. Divide Problem&nbsp;1&rsquo;s velocities by the input speed &#969;&#8322; = 20 rad/s:</p>
+        <div class="eqn">h&#8323; = &#969;&#8323;/&#969;&#8322; = &minus;4.342 / 20 = &minus;0.2171
+h&#8324; = &#969;&#8324;/&#969;&#8322; = +7.379 / 20 = +0.3690</div>
+        <div class="answer"><span class="ans-h">First-order coefficients</span><span class="mini-eq">h&#8323; = &minus;0.2171 &nbsp;&nbsp; h&#8324; = +0.3690</span></div>
       </div>
       <div class="step" data-i="1" hidden>
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Second-order coefficients</div>
-        <p>The second-order coefficient h<sub>i</sub>&#8242; = d&sup2;&#952;<sub>i</sub>/d&#952;&#8322;&sup2; captures how the ratio itself changes. In general &#945;<sub>i</sub> = h<sub>i</sub>&#945;&#8322; + h<sub>i</sub>&#8242;&#969;&#8322;&sup2;; with &#945;&#8322;&nbsp;=&nbsp;0 that reduces to &#945;<sub>i</sub> = h<sub>i</sub>&#8242;&#969;&#8322;&sup2;, so:</p>
-        <div class="mini-eq">h&#8323;&#8242; = &#945;&#8323;/&#969;&#8322;&sup2; = 103.8/400 = 0.2596 &nbsp;&nbsp; h&#8324;&#8242; = &#945;&#8324;/&#969;&#8322;&sup2; = 192.7/400 = 0.4817</div>
+        <p>The second-order coefficient h<sub>i</sub>&#8242; = d&sup2;&#952;<sub>i</sub>/d&#952;&#8322;&sup2; captures how the ratio itself changes. In general &#945;<sub>i</sub> = h<sub>i</sub>&#945;&#8322; + h<sub>i</sub>&#8242;&#969;&#8322;&sup2;; with &#945;&#8322; = 0 that reduces to &#945;<sub>i</sub> = h<sub>i</sub>&#8242;&#969;&#8322;&sup2;, so divide Problem&nbsp;1&rsquo;s accelerations by &#969;&#8322;&sup2; = 400:</p>
+        <div class="eqn">h&#8323;&#8242; = &#945;&#8323;/&#969;&#8322;&sup2; = 103.8 / 400 = 0.2596
+h&#8324;&#8242; = &#945;&#8324;/&#969;&#8322;&sup2; = 192.7 / 400 = 0.4817</div>
         <p class="note">These reproduce Problem&nbsp;1&rsquo;s &#945;&#8323;, &#945;&#8324; exactly &mdash; the coefficients <em>are</em> the acceleration analysis, repackaged so the input speed factors out.</p>
       </div>
       <div class="step" data-i="2" hidden>
         <div class="st-h"><span class="phase-pill b">Phase B</span> Step 3 &mdash; The power equation</div>
-        <p>Energy in = energy stored + energy out. For a one-DOF system with no gravity, the instantaneous power balance is:</p>
-        <div class="eqn">T&#8322;&#969;&#8322; + T<sub>L</sub>&#969;&#8324; = &Sigma;<sub>i</sub> ( m<sub>i</sub> <span class="vec">a</span><sub>Gi</sub>&middot;<span class="vec">v</span><sub>Gi</sub> + I<sub>Gi</sub>&#945;<sub>i</sub>&#969;<sub>i</sub> )</div>
-        <p>Every term on the right is already known from Phase&nbsp;A. Solve for the one unknown, T&#8322;:</p>
-        <div class="mini-eq">T&#8322; = [ &Sigma;(m&#8201;<span class="vec">a</span><sub>G</sub>&middot;<span class="vec">v</span><sub>G</sub> + I&#945;&#969;) &minus; T<sub>L</sub>&#969;&#8324; ] / &#969;&#8322;</div>
+        <p>Power in = power stored (rate of change of kinetic energy) + power out. For a one-DOF system with no gravity:</p>
+        <div class="eqn">T&#8322;&#969;&#8322; = &Sigma;<sub>i</sub> ( m<sub>i</sub> <span class="vec">a</span><sub>Gi</sub>&middot;<span class="vec">v</span><sub>Gi</sub> + I<sub>Gi</sub>&#945;<sub>i</sub>&#969;<sub>i</sub> ) + T<sub>L</sub>&#969;&#8324;</div>
+        <p>The left side is the motor&rsquo;s power input. On the right, the &Sigma; is the rate the links gain kinetic energy, and T<sub>L</sub>&#969;&#8324; is the power drained by the load. Every quantity on the right is already known from Phase&nbsp;A, so the only unknown is T&#8322;:</p>
+        <div class="mini-eq">T&#8322; = [ &Sigma;(m&#8201;<span class="vec">a</span><sub>G</sub>&middot;<span class="vec">v</span><sub>G</sub> + I&#945;&#969;) + T<sub>L</sub>&#969;&#8324; ] / &#969;&#8322;</div>
       </div>
       <div class="step" data-i="3" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; The cross-check lands</div>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Plug in and cross-check</div>
+        <p>Evaluate the sum term by term (m<sub>i</sub> <span class="vec">a</span><sub>Gi</sub>&middot;<span class="vec">v</span><sub>Gi</sub> + I<sub>Gi</sub>&#945;<sub>i</sub>&#969;<sub>i</sub>). The crank runs at constant speed, so its kinetic energy is unchanging and its term is exactly zero:</p>
+        <div class="eqn">link 2:   0.00 W       (constant-speed crank &rarr; KE unchanging)
+link 3:  +42.17 W
+link 4:  +16.89 W
+  &Sigma;   =  +59.06 W     (rate of KE gain of the moving links)
+
+power drained by the load:  T<sub>L</sub>&middot;&#969;&#8324; = 20&middot;7.379 = 147.58 W</div>
+        <p>The motor must supply both the KE gain and the load power:</p>
+        <div class="mini-eq">T&#8322; = (59.06 + 147.58) / &#969;&#8322; = 206.64 / 20 = 10.33 N&middot;m</div>
         <div class="answer"><span class="ans-h">Input torque (power method)</span><span class="mini-eq">T&#8322; = 10.33 N&middot;m &nbsp;&#10003;&nbsp; identical to Problem 1&rsquo;s Newton&ndash;Euler result</span></div>
-        <p>The two methods agree to the last digit. The power route never computed a single pin force, yet it produced the same torque &mdash; because internal pin forces do no net work (they act on equal-and-opposite velocities) and drop out of an energy balance. This is the whole point of the coefficient/power machinery: when you only need the driving torque, skip the forces entirely.</p>
-        <div class="realworld"><span class="h">Real-world &mdash; why simulators love this form</span><p>Packaging the geometry into coefficients gives a one-line equation of motion, I<sub>eff</sub>(&#952;&#8322;)&#8201;&#945;&#8322; + &frac12;(dI<sub>eff</sub>/d&#952;&#8322;)&#969;&#8322;&sup2; = T&#8322; + Q<sub>load</sub>, with an effective inertia here of I<sub>eff</sub>&nbsp;&asymp;&nbsp;0.0143&nbsp;kg&middot;m&sup2;. That is the Lagrangian form multibody solvers integrate &mdash; far cheaper than re-solving a force system at every time step.</p></div>
+        <p>The two methods agree to the last digit. The power route never computed a single pin force, yet it produced the same torque &mdash; because internal pin forces do no net work (they act on equal-and-opposite velocities) and drop out of an energy balance. That is the whole point of the coefficient/power machinery: when you need only the driving torque, skip the forces entirely.</p>
+        <div class="realworld"><span class="h">Real-world &mdash; why simulators love this form</span><p>Packaging the geometry into coefficients gives a one-line equation of motion, I<sub>eff</sub>(&#952;&#8322;)&#8201;&#945;&#8322; + &frac12;(dI<sub>eff</sub>/d&#952;&#8322;)&#969;&#8322;&sup2; = T&#8322; + Q<sub>load</sub>, with an effective inertia here of I<sub>eff</sub> &asymp; 0.0143&nbsp;kg&middot;m&sup2;. That is the Lagrangian form multibody solvers integrate &mdash; far cheaper than re-solving a force system at every time step.</p></div>
       </div>
     </div>
     <div class="step-controls">
@@ -796,27 +885,44 @@ W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;
     <div class="step-track">
       <div class="step" data-i="0">
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Position (closed form)</div>
-        <p>The loop <span class="vec">r</span><sub>2</sub> = <span class="vec">r</span><sub>1</sub> + <span class="vec">r</span><sub>3</sub> has the variable-length vector r&#8323; pointing from O&#8324; to the block P. So r&#8323; is simply the vector from O&#8324; to the crank tip:</p>
-        <div class="mini-eq">r&#8323;cos&#952;&#8323; = r&#8322;cos&#952;&#8322; &minus; r&#8321;cos&#952;&#8321; &nbsp;&nbsp; r&#8323;sin&#952;&#8323; = r&#8322;sin&#952;&#8322; &minus; r&#8321;sin&#952;&#8321;</div>
+        <p>Place O&#8322; at the origin and O&#8324; directly below it at (0, &minus;0.20). The variable-length vector <span class="vec">r</span><sub>3</sub> runs from O&#8324; to the block P, and the block sits at the crank tip. So <span class="vec">r</span><sub>3</sub> is simply the vector from O&#8324; to the crank tip:</p>
+        <div class="eqn">crank tip P:  P&#8339; = r&#8322;cos&#952;&#8322; = 0.12&middot;cos120&deg; = &minus;0.0600
+              P&#8342; = r&#8322;sin&#952;&#8322; = 0.12&middot;sin120&deg; = +0.1039
+
+<span class="vec">r</span>&#8323; = P &minus; O&#8324; = (&minus;0.0600 &minus; 0,  0.1039 &minus; (&minus;0.20)) = (&minus;0.0600, 0.3039)
+
+r&#8323;  = &#8730;(0.0600&sup2; + 0.3039&sup2;) = 0.3098 m
+&#952;&#8323; = atan2(0.3039, &minus;0.0600) = 101.17&deg;   (&#952;&#8324; = &#952;&#8323;, the block lies on the rocker)</div>
         <div class="answer"><span class="ans-h">Position</span><span class="mini-eq">r&#8323; = 0.3098 m &nbsp;&nbsp; &#952;&#8323; = &#952;&#8324; = 101.17&deg;</span></div>
       </div>
       <div class="step" data-i="1" hidden>
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Velocity (two unknowns: <span class="dot">r</span>&#8323; and &#969;&#8324;)</div>
-        <p>Differentiating gives a 2&times;2 system whose determinant is r&#8323;. The unknowns are the <em>slide rate</em> <span class="dot">r</span>&#8323; and the rocker speed &#969;&#8324;:</p>
+        <p>The block&rsquo;s velocity has two descriptions that must agree: as the crank tip, <span class="vec">v</span><sub>P</sub> = <span class="vec">&#969;</span>&#8322;&times;<span class="vec">r</span><sub>2</sub>; as a point sliding in the rocker, <span class="vec">v</span><sub>P</sub> = <span class="dot">r</span>&#8323;&#8201;<span class="vec">u</span> + <span class="vec">&#969;</span>&#8324;&times;<span class="vec">r</span><sub>3</sub>. The crank-tip velocity is:</p>
+        <div class="eqn">v<sub>Px</sub> = &minus;r&#8322;&#969;&#8322;sin&#952;&#8322; = &minus;0.12&middot;10&middot;sin120&deg; = &minus;1.039 m/s
+v<sub>Py</sub> = +r&#8322;&#969;&#8322;cos&#952;&#8322; = +0.12&middot;10&middot;cos120&deg; = &minus;0.600 m/s</div>
+        <p>Match components &mdash; a 2&times;2 system whose determinant is r&#8323; &mdash; and solve for the slide rate and the rocker speed:</p>
         <div class="answer"><span class="ans-h">Velocity</span><span class="mini-eq"><span class="dot">r</span>&#8323; = &minus;0.387 m/s (sliding inward) &nbsp;&nbsp; &#969;&#8324; = +3.666 rad/s</span></div>
       </div>
       <div class="step" data-i="2" hidden>
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 3 &mdash; Acceleration (Coriolis appears)</div>
-        <p>Differentiating again brings out the Coriolis coupling 2&#8201;<span class="dot">r</span>&#8323;&#969;&#8324; and the centripetal r&#8323;&#969;&#8324;&sup2;. Same coefficient matrix, new right-hand side:</p>
+        <p>Differentiate again. Two extra terms now enter because the block both slides and rotates: the centripetal term r&#8323;&#969;&#8324;&sup2; and the <strong>Coriolis</strong> term 2<span class="dot">r</span>&#8323;&#969;&#8324;. Evaluate them:</p>
+        <div class="eqn">centripetal:  r&#8323;&#969;&#8324;&sup2;   = 0.3098&middot;3.666&sup2; = +4.164 m/s&sup2;
+Coriolis:     2&middot;<span class="dot">r</span>&#8323;&middot;&#969;&#8324; = 2&middot;(&minus;0.387)&middot;3.666 = &minus;2.837 m/s&sup2;</div>
+        <p>Carry these to the right-hand side (same coefficient matrix as the velocity step) and solve for the slide acceleration and the rocker acceleration:</p>
         <div class="answer"><span class="ans-h">Acceleration</span><span class="mini-eq"><span class="ddot">r</span>&#8323; = &minus;7.19 m/s&sup2; &nbsp;&nbsp; &#945;&#8324; = &minus;3.336 rad/s&sup2;</span></div>
-        <p class="note">The crank-pin (block) acceleration is <span class="vec">a</span><sub>P</sub> = (6.00, &minus;10.39) m/s&sup2;; the rocker&rsquo;s mass-center acceleration is (1.00, &minus;2.13) m/s&sup2;.</p>
+        <p class="note">The block acceleration is <span class="vec">a</span><sub>P</sub> = (6.00, &minus;10.39) m/s&sup2;; the rocker&rsquo;s mass-center acceleration is (1.00, &minus;2.13) m/s&sup2;. Drop the Coriolis term and both &mdash; and every force after them &mdash; come out wrong.</p>
       </div>
       <div class="step" data-i="3" hidden>
         <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Free bodies with a sliding joint</div>
         <p>The block&ndash;rocker contact is frictionless sliding, so that force is a single <strong>normal N perpendicular to the rocker</strong> (no component along the slot). Unknowns: crank pin <span class="vec">F</span><sub>12</sub>, <span class="vec">F</span><sub>23</sub> (4), the slot normal N (1), rocker pin <span class="vec">F</span><sub>14</sub> (2), and T&#8322; = <strong>8</strong>. Equations: crank (3) + block (2) + rocker (3) = <strong>8</strong>.</p>
       </div>
       <div class="step" data-i="4" hidden>
-        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Solve, then verify by power</div>
+        <div class="st-h"><span class="phase-pill b">Phase B</span> Step 5 &mdash; Inertia forces, solve, and verify by power</div>
+        <p>The inertia loads are modest here (10 rad/s is gentle). Form them first:</p>
+        <div class="eqn">block:   m&#8323;<span class="vec">a</span><sub>P</sub>  = 0.25&middot;(6.00, &minus;10.39) = (1.50, &minus;2.60) N
+rocker:  m&#8324;<span class="vec">a</span><sub>G4</sub> = 1.20&middot;(1.00, &minus;2.13)  = (1.20, &minus;2.56) N
+rocker:  I<sub>G4</sub>&#945;&#8324;   = 0.0116&middot;(&minus;3.336)      = &minus;0.039 N&middot;m</div>
+        <p>Assemble the 8&times;8 system (with the slot normal N &perp; to the rocker) and solve:</p>
         <div class="answer"><span class="ans-h">Forces &amp; crank torque</span>
           <div class="resgrid">
             <div class="rc"><b>|F&#8321;&#8322;|</b> = 46.1 N</div>
@@ -826,7 +932,7 @@ W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;
             <div class="rc"><b>T&#8322;</b> = +5.44 N&middot;m</div>
           </div>
         </div>
-        <p><strong>Independent check.</strong> The power equation T&#8322; = [&Sigma;(m&#8201;<span class="vec">a</span><sub>G</sub>&middot;<span class="vec">v</span><sub>G</sub> + I&#945;&#969;) &minus; T&#8324;&#969;&#8324;]/&#969;&#8322; returns 5.44&nbsp;N&middot;m as well &mdash; confirming both the Coriolis-laden kinematics and the force solution. The slot normal (47.9&nbsp;N) is the force trying to bend the rocker sideways; it is what the slot walls must bear.</p>
+        <p><strong>Independent check.</strong> The power equation T&#8322; = [&Sigma;(m&#8201;<span class="vec">a</span><sub>G</sub>&middot;<span class="vec">v</span><sub>G</sub> + I&#945;&#969;) + T&#8324;&#969;&#8324;]/&#969;&#8322; returns 5.44&nbsp;N&middot;m as well &mdash; confirming both the Coriolis-laden kinematics and the force solution. The slot normal (47.9&nbsp;N) is the force trying to bend the rocker sideways; it is what the slot walls must bear.</p>
       </div>
     </div>
     <div class="step-controls">
@@ -906,18 +1012,23 @@ W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;
     <div class="step-track">
       <div class="step" data-i="0">
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 1 &mdash; Gear stage sets the crank speed</div>
-        <p>The 5:1 reduction slows the motor to the crank:</p>
+        <p>The 5:1 reduction slows the motor to the crank and leaves it at steady speed:</p>
         <div class="mini-eq">&#969;&#8322; = &#969;<sub>motor</sub>/5 = 60/5 = 12 rad/s (&asymp; 114.6 rpm), &nbsp; &#945;&#8322; = 0</div>
       </div>
       <div class="step" data-i="1" hidden>
         <div class="st-h"><span class="phase-pill a">Phase A</span> Step 2 &mdash; Slider-crank kinematics</div>
-        <p>In-line (offset&nbsp;=&nbsp;0), so sin&#952;&#8323; = &minus;(r&#8322;/r&#8323;)sin&#952;&#8322;. Then the ram position, speed and acceleration:</p>
+        <p>In-line (offset = 0), so the loop&rsquo;s y-component gives the rod angle, and the x-component gives the ram position:</p>
+        <div class="eqn">sin&#952;&#8323; = &minus;(r&#8322;/r&#8323;)sin&#952;&#8322; = &minus;(0.06/0.20)&middot;sin60&deg; = &minus;0.2598   &rarr;   &#952;&#8323; = &minus;15.06&deg;
+
+x = r&#8322;cos&#952;&#8322; + r&#8323;cos&#952;&#8323; = 0.06&middot;cos60&deg; + 0.20&middot;cos(&minus;15.06&deg;) = 0.0300 + 0.1931 = 0.2231 m</div>
+        <p>Differentiating the loop once gives the ram speed, and once more (&#945;&#8322; = 0) the ram acceleration:</p>
+        <div class="mini-eq"><span class="dot">x</span> = &minus;0.720 m/s &nbsp;&nbsp; <span class="ddot">x</span> = &minus;3.03 m/s&sup2;</div>
         <div class="answer"><span class="ans-h">Ram motion</span><span class="mini-eq">&#952;&#8323; = &minus;15.06&deg; &nbsp; x = 0.2231 m &nbsp; <span class="dot">x</span> = &minus;0.720 m/s &nbsp; <span class="ddot">x</span> = &minus;3.03 m/s&sup2;</span></div>
         <p class="note">The ram moves toward the crank (&minus;x) &mdash; this is the working stroke &mdash; so the 5000&nbsp;N forming force acts in the +x direction, resisting it.</p>
       </div>
       <div class="step" data-i="2" hidden>
         <div class="st-h"><span class="phase-pill b">Phase B</span> Step 3 &mdash; Inverse dynamics on the slider-crank</div>
-        <p>Same 8&times;8 free-body system as an engine, but the piston&rsquo;s external load is now the 5000&nbsp;N forming force instead of gas. Even at constant crank speed the links still accelerate, so inertia terms remain. Solving:</p>
+        <p>Same 8&times;8 free-body system as an engine, but the ram&rsquo;s external load is now the 5000&nbsp;N forming force instead of gas. Even at constant crank speed the links still accelerate (<span class="ddot">x</span> = &minus;3.03 m/s&sup2;), so inertia terms remain &mdash; though they are small next to the 5000&nbsp;N load. Solving:</p>
         <div class="answer"><span class="ans-h">Crank-shaft results</span>
           <div class="resgrid">
             <div class="rc"><b>|F&#8321;&#8322;|</b> = 5189 N</div>
@@ -927,13 +1038,14 @@ W&#8324;&#8325; = (W&#8322;&#8323;&middot;r&#8323; &minus; J&#8323;&#8324;&#945;
             <div class="rc"><b>T<sub>crank</sub></b> = 300.7 N&middot;m</div>
           </div>
         </div>
+        <p class="note">All three pin forces sit near 5.19&nbsp;kN &mdash; essentially the 5000&nbsp;N forming load passed hand-to-hand up the linkage, with the guide reaction (1349&nbsp;N) the sideways thrust the ram presses into its ways.</p>
       </div>
       <div class="step" data-i="3" hidden>
         <div class="st-h"><span class="phase-pill b">Phase B</span> Step 4 &mdash; Reflect back to the motor</div>
         <p>At constant speed the drivetrain needs no torque to accelerate itself, so the crank torque simply divides by the ratio (ideal gears):</p>
-        <div class="mini-eq">T<sub>motor</sub> = T<sub>crank</sub> / 5 = 300.7 / 5</div>
+        <div class="mini-eq">T<sub>motor</sub> = T<sub>crank</sub> / 5 = 300.7 / 5 = 60.1 N&middot;m</div>
         <div class="answer"><span class="ans-h">Motor torque required</span><span class="mini-eq">T<sub>motor</sub> = 60.1 N&middot;m</span></div>
-        <p><strong>Power sanity check.</strong> T<sub>motor</sub>&#969;<sub>motor</sub> = 60.1&times;60 = 3609&nbsp;W, and T<sub>crank</sub>&#969;&#8322; = 300.7&times;12 = 3609&nbsp;W. Power is conserved across the ideal gearbox &mdash; torque goes up 5&times;, speed goes down 5&times;, product unchanged. A 60&nbsp;N&middot;m motor delivers a 5000&nbsp;N forming punch: the gearbox and the crank geometry did the multiplying.</p>
+        <p><strong>Power sanity check.</strong> T<sub>motor</sub>&#969;<sub>motor</sub> = 60.1&times;60 = 3609&nbsp;W, and T<sub>crank</sub>&#969;&#8322; = 300.7&times;12 = 3609&nbsp;W. Power is conserved across the ideal gearbox &mdash; torque up 5&times;, speed down 5&times;, product unchanged. A 60&nbsp;N&middot;m motor delivers a 5000&nbsp;N forming punch: the gearbox and the crank geometry did the multiplying.</p>
       </div>
     </div>
     <div class="step-controls">
